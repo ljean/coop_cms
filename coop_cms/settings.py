@@ -88,16 +88,11 @@ def get_article_form():
 
     return article_form
 
-
-
-
-
 def get_newsletter_templates(newsletter, user):
     try:
-        return getattr(django_settings, 'COOP_CMS_NEWSLETTERS_TEMPLATES')
+        return getattr(django_settings, 'COOP_CMS_NEWSLETTER_TEMPLATES')
     except AttributeError:
-        print "# pas de COOP_CMS_NEWSLETTERS_TEMPLATES"
-        return None
+        return ()
 
 def get_newsletter_form():
     try:
