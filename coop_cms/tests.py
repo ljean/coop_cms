@@ -35,8 +35,7 @@ class ArticleTest(TestCase):
         user.user_permissions.add(can_add_article)
         
         user.save()
-        
-        self.client.login(username='toto', password='toto')
+        return self.client.login(username='toto', password='toto')
         
     def _log_as_editor_no_add(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
@@ -49,7 +48,7 @@ class ArticleTest(TestCase):
         
         user.save()
         
-        self.client.login(username='toto', password='toto')
+        return self.client.login(username='toto', password='toto')
 
     def _check_article(self, response, data):
         for (key, value) in data.items():
@@ -192,10 +191,15 @@ class ArticleTest(TestCase):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
         html = '<h1>paul</h1><a href="/" target="_blank">georges</a><p><b>ringo</b></p>'
         html += '<h6>john</h6><img src="/img.jpg"><br><table><tr><th>A</th><td>B</td></tr>'
-        data = {'content': html, 'title': 'ok<br>ok'}
+        data = {'content': html, 'title': 'ok'}
+        
         self._log_as_editor()
-        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        response = self.client.post(article.get_edit_url(), data=data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        
+        response = self.client.get(article.get_absolute_url())
         self.assertEqual(response.status_code, 200)
+        
         #checking html content would not work. Check that the article is updated
         for b in ['paul', 'georges', 'ringo', 'john']:
             self.assertContains(response, b)
@@ -410,11 +414,15 @@ class NavigationTest(TestCase):
         if not self.editor:
             self.editor = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
             self.editor.is_staff = True
-            can_edit_tree = Permission.objects.get(content_type__app_label='coop_cms', codename='change_navtree')
+            tree_class = get_navTree_class()
+            can_edit_tree = Permission.objects.get(
+                content_type__app_label=tree_class._meta.app_label,
+                codename='change_{0}'.format(tree_class._meta.module_name)
+            )
             self.editor.user_permissions.add(can_edit_tree)
             self.editor.save()
         
-        self.client.login(username='toto', password='toto')
+        return self.client.login(username='toto', password='toto')
         
     def _log_as_staff(self):
         if not self.staff:
@@ -426,7 +434,16 @@ class NavigationTest(TestCase):
 
     def test_view_in_admin(self):
         self._log_as_editor()
-        url = reverse("admin:coop_cms_navtree_changelist")
+        tree_class = get_navTree_class()
+        
+        reverse_name = "admin:{0}_{1}_changelist".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        url = reverse(reverse_name)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        
+        reverse_name = "admin:{0}_{1}_change".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        tree = tree_class.objects.create(name='another_tree')
+        url = reverse(reverse_name, args=[tree.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         
@@ -1396,7 +1413,7 @@ class CmsEditTagTest(TestCase):
         
         user.save()
         
-        self.client.login(username='toto', password='toto')
+        return self.client.login(username='toto', password='toto')
         
     def _create_article(self):
         Article = get_article_class()
@@ -1595,7 +1612,7 @@ class NewsletterTest(TestCase):
             self.editor.user_permissions.add(can_edit_newsletter)
             self.editor.save()
         
-        self.client.login(username='toto', password='toto')
+        return self.client.login(username='toto', password='toto')
         
     def test_create_article_for_newsletter(self):
         Article = get_article_class()

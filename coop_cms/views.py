@@ -711,10 +711,12 @@ def process_nav_edition(request, tree_id):
     if request.method == 'POST' and request.is_ajax() and 'msg_id' in request.POST:
         try:
             #Get the current tree
-            tree = get_object_or_404(get_navTree_class(), id=tree_id)
+            tree_class = get_navTree_class()
+            tree = get_object_or_404(tree_class, id=tree_id)
 
             #check permissions
-            if not request.user.has_perm('coop_cms.change_navtree'):
+            perm_name = "{0}.change_{1}".format(tree_class._meta.app_label, tree_class._meta.module_name)
+            if not request.user.has_perm(perm_name):
                 raise PermissionDenied
 
             supported_msg = {}
