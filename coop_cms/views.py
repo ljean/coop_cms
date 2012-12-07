@@ -13,6 +13,7 @@ from django.template.loader import select_template
 from django.db.models.aggregates import Max
 from coop_cms import forms
 from django.contrib.messages.api import success as success_message
+from django.contrib.messages.api import error as error_message
 from coop_cms import models
 from django.contrib.auth.decorators import login_required
 from coop_cms.settings import get_article_class, get_article_form, get_newsletter_form, get_navTree_class
@@ -170,6 +171,9 @@ def edit_article(request, url):
             success_message(request, _(u'The article has been saved properly'))
 
             return HttpResponseRedirect(article.get_absolute_url())
+        else:
+            error_text = u'<br />'.join([unicode(f.errors) for f in [form]+djaloha_forms if f.errors])
+            error_message(request, _(u'An error occured: {0}'.format(error_text)))
     else:
         form = article_form_class(instance=article)
 
