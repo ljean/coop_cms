@@ -26,7 +26,8 @@ from colorbox.decorators import popup_redirect
 from coop_cms.utils import send_newsletter
 from django.utils.log import getLogger
 from datetime import datetime
-
+from django.utils.translation import check_for_language, activate, get_language
+from urlparse import urlparse
 
 def get_article_template(article):
     template = article.template
@@ -900,3 +901,38 @@ def articles_category(request, slug):
         context_instance=RequestContext(request)
     )
 
+def change_language(request):
+    
+    try:
+        from localeurl import utils as localeurl_utils
+    except ImportError:
+        raise Http404
+    
+    next = request.REQUEST.get('next', None)
+    if not next:
+        url = urlparse(request.META.get('HTTP_REFERER'))
+        if url:
+            next = url.path
+    if not next:
+        next = '/'
+    
+    if request.method == 'POST':
+        
+        lang_code = request.POST.get('language', None)
+        if lang_code and check_for_language(lang_code):
+            
+            print 'n:', next
+            
+            locale, path = localeurl_utils.strip_path(next)
+            
+            print 'l:', locale
+            print 'p:', path
+            
+            next = localeurl_utils.locale_path(path, lang_code)
+
+            if hasattr(request, 'session'):
+                request.session['django_language'] = lang_code
+            else:
+                response.set_cookie(settings.LANGUAGE_COOKIE_NAME, lang_code)
+            activate(lang_code)
+    return HttpResponseRedirect(next)
