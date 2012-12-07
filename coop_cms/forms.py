@@ -41,6 +41,9 @@ class ArticleForm(floppyforms.ModelForm):
         super(ArticleForm, self).__init__(*args, **kwargs)
         self.article = kwargs.get('instance', None)
         self.set_logo_size()
+        if getattr(settings, 'COOP_CMS_TITLE_OPTIONAL', False):
+            #Optional title : make possible to remove the title from a template
+            self.fields['title'].required = False
 
     class Meta:
         model = get_article_class()
@@ -66,15 +69,18 @@ class ArticleForm(floppyforms.ModelForm):
         js = ('js/jquery.form.js', 'js/jquery.pageslide.js', 'js/jquery.colorbox-min.js', 'js/colorbox.coop.js')
 
     def clean_title(self):
-        title = self.cleaned_data['title'].strip()
-        if title[-4:].lower() == '<br>':
-            title = title[:-4]
-        if not title:
-            raise ValidationError(_(u"Title can not be empty"))
-
-        #if re.search(u'<(.*)>', title):
-        #    raise ValidationError(_(u'HTML content is not allowed in the title'))
-
+        if getattr(settings, 'COOP_CMS_TITLE_OPTIONAL', False):
+            title = self.cleaned_data['title']
+            if not title and self.article:
+                #if the title is optional and nothing is set
+                #We do not modify it when saving
+                return self.article.title
+        else:
+            title = self.cleaned_data['title'].strip()
+            if title[-4:].lower() == '<br>':
+                title = title[:-4]
+            if not title:
+                raise ValidationError(_(u"Title can not be empty"))
         return title
 
 
