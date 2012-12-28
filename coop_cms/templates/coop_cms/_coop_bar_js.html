@@ -36,6 +36,14 @@ $(document).ready(function(){
 	$("a.update-logo img").change(toggle_save);
 	$(".article select").change(toggle_save);
 	$(".article input").change(toggle_save);
+	
+	$("a.remove-current-image").click(function() {
+		if (confirm("{% trans 'Are you sure to delete the image?' %}")) {
+			$("img.djaloha-current-image").remove();	
+		}
+		return false;
+	});
+	
 {% endif %}
 });
 </script>

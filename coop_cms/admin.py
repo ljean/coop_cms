@@ -9,9 +9,9 @@ from coop_cms.settings import get_article_class, get_navTree_class
 from django.conf import settings
 if 'modeltranslation' in settings.INSTALLED_APPS:
     from modeltranslation.admin import TranslationAdmin
-    ArticleBaseAdminClass = TranslationAdmin
+    BaseAdminClass = TranslationAdmin
 else:
-    ArticleBaseAdminClass = admin.ModelAdmin
+    BaseAdminClass = admin.ModelAdmin
 
 
 class NavNodeAdmin(admin.ModelAdmin):
@@ -54,7 +54,7 @@ class NavTreeAdmin(admin.ModelAdmin):
 admin.site.register(get_navTree_class(), NavTreeAdmin)
 
 
-class ArticleAdmin(ArticleBaseAdminClass):
+class ArticleAdmin(BaseAdminClass):
     form = ArticleAdminForm
     list_display = ['slug', 'title', 'publication', 'is_homepage', 'in_newsletter', 'category', 'modified']
     list_editable = ['publication', 'is_homepage', 'in_newsletter', 'category']

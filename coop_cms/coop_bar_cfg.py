@@ -122,6 +122,13 @@ def cms_save(request, context):
             classes=['show-dirty', 'icon'])
 
 @can_edit_article
+def remove_current_image(request, context):
+    if context.get('edit_mode'):
+        #No link, will be managed by catching the js click event
+        return make_link('', _(u'Delete image'), 'fugue/disk-black.png', id="coopbar_delete_image",
+            classes=['remove-current-image', 'icon'])
+
+@can_edit_article
 def cms_view(request, context):
     if context.get('edit_mode'):
         article = context['article']
@@ -236,6 +243,7 @@ def load_commands(coop_bar):
             change_newsletter_settings,
             schedule_newsletter, test_newsletter],
         [cms_edit, cms_view, cms_save, cms_cancel],
+        [remove_current_image],
         [cms_new_article, cms_article_settings, cms_set_homepage],
         [cms_publish],
         [cms_media_library, cms_upload_image, cms_upload_doc],

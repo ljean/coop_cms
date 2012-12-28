@@ -44,3 +44,7 @@ img.aloha-align-left {
 img.aloha-align-right {
 	float: right;
 }
+
+img.djaloha-current-image {
+	border: solid red 1px;
+}
