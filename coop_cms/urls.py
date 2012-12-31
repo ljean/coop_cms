@@ -1,10 +1,6 @@
 # -*- coding:utf-8 -*-
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
-
 from django.conf.urls.defaults import patterns, include, url
 from django.views.generic.detail import DetailView
 from coop_cms.settings import get_article_class
