@@ -157,11 +157,6 @@ def edit_article(request, url):
         if form.is_valid() and all([f.is_valid() for f in djaloha_forms]):
             article = form.save()
             
-            if settings.DEBUG:
-                print '************************************'
-                print article.content
-                print '************************************'
-
             if article.temp_logo:
                 article.logo = article.temp_logo
                 article.temp_logo = ''
