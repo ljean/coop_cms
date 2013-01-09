@@ -116,7 +116,7 @@ def set_homepage(request, article_id):
 
 
 
-def view_article(request, url):
+def view_article(request, url, extra_context=None, force_template=None):
     """view the article"""
     article = get_object_or_404(get_article_class(), slug=url) #Draft & Published
 
@@ -129,15 +129,18 @@ def view_article(request, url):
         'editable': editable, 'edit_mode': False, 'article': article,
         'draft': article.publication==models.BaseArticle.DRAFT
     }
+    
+    if extra_context:
+        context_dict.update(extra_context)
 
     return render_to_response(
-        get_article_template(article),
+        force_template or get_article_template(article),
         context_dict,
         context_instance=RequestContext(request)
     )
 
 @login_required
-def edit_article(request, url):
+def edit_article(request, url, extra_context=None, force_template=None):
     """edit the article"""
 
     article_class = get_article_class()
@@ -184,9 +187,12 @@ def edit_article(request, url):
         'draft': article.publication==models.BaseArticle.DRAFT,
         'article': article, 'ARTICLE_PUBLISHED': models.BaseArticle.PUBLISHED
     }
+    
+    if extra_context:
+        context_dict.update(extra_context)
 
     return render_to_response(
-        get_article_template(article),
+        force_template or get_article_template(article),
         context_dict,
         context_instance=RequestContext(request)
     )
