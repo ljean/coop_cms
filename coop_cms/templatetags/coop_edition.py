@@ -174,9 +174,12 @@ class CmsEditNode(template.Node):
         else:
             t = template.Template("{{inner|safe}}")
             safe_context[self.var_name] = SafeWrapper(the_object, logo_size=self._logo_size)
+                
         for node in self.nodelist_content:
             if isinstance(node, template.VariableNode) or isinstance(node, template.TextNode):
                 c = node.render(template.Context(safe_context))
+            elif isinstance(node, template.loader_tags.BlockNode):
+                c = node.render(context)
             else:
                 c = node.render(template.Context(inner_context))
             inner_value += c
