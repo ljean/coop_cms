@@ -1,0 +1,20 @@
+{% load coop_edition %}
+{% if COOP_CMS_JQUERY_VERSION %}
+    <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}{{COOP_CMS_JQUERY_VERSION}}"></script>
+{% else %}
+    {% if debug %}
+    <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery-1.8.3.js"></script>
+    {% else %}
+    <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery-1.8.3.min.js"></script>
+    {% endif %}
+{% endif %}
+{% if_cms_edition %}
+{% comment %} This is imported by the form {% endcomment %}
+{% else %}
+    {% if request.user.is_authenticated %}
+        <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery.colorbox-min.js"></script>
+        <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery.form.js"></script>
+        <script type="text/javascript" src="{{ STATIC_URL }}js/colorbox.coop.js"></script>
+        <link rel="stylesheet" href="{{ STATIC_URL }}css/colorbox.css" type="text/css" />
+    {% endif %}
+{% endif %}

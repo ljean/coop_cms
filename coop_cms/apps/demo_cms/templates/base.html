@@ -3,7 +3,7 @@
 <head>
     <title>{% block meta_title %}{% endblock %}{% if settings.SITE_TITLE %} | {{ settings.SITE_TITLE }}{% endif %}</title>
     {% block jquery_declaration %}
-    <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery-1.7.1.min.js"></script>
+    {% include "coop_cms/_js_includes.html" %}
     {% endblock %}
     <link rel="stylesheet" href="{{ STATIC_URL }}css/coop_cms.css" type="text/css" />
     <link rel="stylesheet" href="{{ STATIC_URL }}css/demo-style.css" type="text/css" />

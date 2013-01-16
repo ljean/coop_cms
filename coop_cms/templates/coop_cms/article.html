@@ -9,13 +9,6 @@
     {{ block.super }}
     {% if_cms_edition %}
         {% cms_form_media %}
-    {% else %}
-        {% if request.user.is_authenticated %}
-            <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery.colorbox-min.js"></script>
-            <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery.form.js"></script>
-            <script type="text/javascript" src="{{ STATIC_URL }}js/colorbox.coop.js"></script>
-            <link rel="stylesheet" href="{{ STATIC_URL }}css/colorbox.css" type="text/css" />
-        {% endif %}
     {% endif %}
 {% endblock %}
 
