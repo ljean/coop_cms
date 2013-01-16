@@ -171,9 +171,10 @@ def log_out(request, context):
 @can_add_article
 def cms_new_newsletter(request, context):
     if not context.get('edit_mode'):
-        url = reverse('coop_cms_new_newsletter')
-        return make_link(url, _(u'Create newsletter'), 'fugue/document--plus.png',
-            classes=['alert_on_click', 'colorbox-form', 'icon'])
+        if getattr(settings, 'COOP_CMS_NEWSLETTER_TEMPLATES', None):
+            url = reverse('coop_cms_new_newsletter')
+            return make_link(url, _(u'Create newsletter'), 'fugue/document--plus.png',
+                classes=['alert_on_click', 'colorbox-form', 'icon'])
 
 @can_edit_newsletter
 def edit_newsletter(request, context):
