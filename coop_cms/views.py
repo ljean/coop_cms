@@ -489,8 +489,12 @@ def view_navnode(request, tree):
     object_label = unicode(node.content_object)
     tplt = select_template(["coop_cms/navtree_content/{0}.html".format(node.content_type.name),
                             "coop_cms/navtree_content/default.html"])
-    html = tplt.render(RequestContext(request, {"node": node, "admin_url": admin_url,
-                                                "model_name": model_name, "object_label": object_label}))
+    html = tplt.render(
+        RequestContext(request, {
+            "node": node, "admin_url": admin_url,
+            "model_name": model_name, "object_label": object_label
+        })
+    )
 
     #return data has dictionnary
     response['html'] = html
