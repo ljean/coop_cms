@@ -81,6 +81,8 @@ a.active {
 	box-shadow: #555 0px 2px 8px;
 	margin: 12px;
 	cursor: move;
+	width: 64px;
+	height: 64px;
 }
 
 .library-docs {

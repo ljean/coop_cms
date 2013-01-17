@@ -298,7 +298,10 @@ class BaseArticle(TimeStampedModel):
             file = logo.file
         else:
             file = self._get_default_logo()
-        return sorl_thumbnail.backend.get_thumbnail(file, size, crop='center')
+        try:
+            return sorl_thumbnail.backend.get_thumbnail(file, size, crop='center')
+        except Exception, msg:
+            return file
 
     def _get_default_logo(self):
         #copy from static to media in order to use sorl thumbnail without raising a suspicious operation
@@ -437,7 +440,11 @@ class Image(Media):
     file = models.ImageField(_('file'), upload_to=get_img_folder)
 
     def as_thumbnail(self):
-        return sorl_thumbnail.backend.get_thumbnail(self.file.file, "64x64", crop='center')
+        try:
+            return sorl_thumbnail.backend.get_thumbnail(self.file.file, "64x64", crop='center')
+        except Exception, msg:
+            return self.file
+        
 
     def get_absolute_url(self):
         return self.file.url
