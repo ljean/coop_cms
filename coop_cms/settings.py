@@ -173,3 +173,9 @@ def get_newsletter_item_classes():
 
         setattr(get_newsletter_item_classes, '_cache_class', item_classes)
         return item_classes
+
+def is_localized():
+    if ('localeurl' in django_settings.INSTALLED_APPS) and ('modeltranslation' in django_settings.INSTALLED_APPS):
+        return True
+    return False
+    

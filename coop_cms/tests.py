@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending, BaseArticle
+from coop_cms.settings import is_localized
 import json
 from django.core.exceptions import ValidationError
 from coop_cms.settings import get_article_class, get_article_templates, get_navTree_class
@@ -75,7 +76,11 @@ class ArticleTest(TestCase):
         
     def test_is_navigable(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
-        self.assertEqual('/test/', article.get_absolute_url())
+        if is_localized():
+            lang = settings.LANGUAGES[0][0]
+            self.assertEqual('/{0}/test/'.format(lang), article.get_absolute_url())
+        else:
+            self.assertEqual('/test/', article.get_absolute_url())
 
     def test_create_slug(self):
         article = get_article_class().objects.create(title=u"voici l'été", publication=BaseArticle.PUBLISHED)
@@ -106,7 +111,8 @@ class ArticleTest(TestCase):
         response = self.client.post(article.get_edit_url(), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         next_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')+"?next="+article.get_edit_url()
+        expected_next = article.get_edit_url().replace('/', '%2F')
+        login_url = reverse('django.contrib.auth.views.login')+"?next="+expected_next
         self.assertTrue(login_url in next_url)
         
         article = get_article_class().objects.get(id=article.id)
@@ -137,7 +143,8 @@ class ArticleTest(TestCase):
     def _is_aloha_found(self, response):
         self.assertEqual(200, response.status_code)
         aloha_js = reverse('aloha_init')
-        return (response.content.find(aloha_js)>0)
+        content = unicode(response.content, 'utf-8')
+        return (content.find(aloha_js)>0)
         
     def test_edit_permission(self):
         initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
@@ -148,7 +155,8 @@ class ArticleTest(TestCase):
         response = self.client.get(article.get_edit_url(), follow=True)
         self.assertEqual(200, response.status_code) #if can_edit returns 404 error
         next_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')+"?next="+article.get_edit_url()
+        expected_next = article.get_edit_url().replace('/', '%2F')
+        login_url = reverse('django.contrib.auth.views.login')+"?next="+expected_next
         self.assertTrue(login_url in next_url)
         
         self._log_as_editor()
@@ -156,7 +164,7 @@ class ArticleTest(TestCase):
         self.assertEqual(200, response.status_code)
         
     def test_aloha_loaded(self):
-        initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
+        initial_data = {'title': u"ceci est un test", 'content': u"this is my article content"}
         article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         response = self.client.get(article.get_absolute_url())
         self.assertFalse(self._is_aloha_found(response))
@@ -165,7 +173,7 @@ class ArticleTest(TestCase):
         response = self.client.get(article.get_edit_url())
         self.assertTrue(self._is_aloha_found(response))
         
-    def test_checks_aloah_links(self):
+    def test_aloha_links(self):
         slugs = ("un", "deux", "trois", "quatre")
         for slug in slugs:
             get_article_class().objects.create(publication=BaseArticle.PUBLISHED, title=slug)
@@ -1639,9 +1647,9 @@ class NewsletterTest(TestCase):
     def test_create_article_commands(self):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
-        art1 = Article.objects.create(in_newsletter=True)
-        art2 = Article.objects.create(in_newsletter=True)
-        art3 = Article.objects.create(in_newsletter=False)
+        art1 = mommy.make_one(Article, in_newsletter=True)
+        art2 = mommy.make_one(Article, in_newsletter=True)
+        art3 = mommy.make_one(Article, in_newsletter=False)
         self.assertEqual(2, NewsletterItem.objects.count())
         NewsletterItem.objects.all().delete()
         self.assertEqual(0, NewsletterItem.objects.count())
@@ -1923,6 +1931,10 @@ class NewsletterTest(TestCase):
         
         response = self.client.get(url, follow=False)
         redirect_url = response['Location']
+        print "********************************"
+        print redirect_url
+        print login_url
+        print "********************************"
         self.assertTrue(redirect_url.find(login_url)>0)
         
         sch_dt =datetime.now()+timedelta(1)
@@ -2165,3 +2177,63 @@ class HomepageTest(TestCase):
         self.assertEqual(1, get_article_class().objects.filter(is_homepage=True).count())
         self.assertEqual(a3.title, get_article_class().objects.filter(is_homepage=True)[0].title)
         
+class UrlLocalizationTest(TestCase):
+    
+    def _localized(self):
+        if ('localeurl' in settings.INSTALLED_APPS) and ('modeltranslation' in settings.INSTALLED_APPS):
+            return True
+        return False
+    
+    def test_get_locale_article(self):
+        
+        if self._localized():
+            original_text = '*!-+' * 10
+            translated_text = ':%@/' * 9
+            
+            a1 = get_article_class().objects.create(title="Home", content=original_text)
+            
+            origin_lang = settings.LANGUAGES[0][0]
+            trans_lang = settings.LANGUAGES[1][0]
+            
+            setattr(a1, 'title_'+trans_lang, 'Accueil')
+            setattr(a1, 'content_'+trans_lang, translated_text)
+            a1.save()
+            
+            response = self.client.get('/{0}/home/'.format(origin_lang), follow=True)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, original_text)
+            
+            response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, translated_text)
+
+    def test_change_lang(self):
+        
+        if self._localized():
+            original_text = '*!-+' * 10
+            translated_text = ':%@/' * 9
+            
+            a1 = get_article_class().objects.create(title="Home", content=original_text)
+            
+            origin_lang = settings.LANGUAGES[0][0]
+            trans_lang = settings.LANGUAGES[1][0]
+            
+            setattr(a1, 'title_'+trans_lang, 'Accueil')
+            setattr(a1, 'content_'+trans_lang, translated_text)
+            
+            a1.save()
+            
+            origin_url = '/{0}/home'.format(origin_lang)
+            response = self.client.get(origin_url, follow=True)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, original_text)
+            
+            data = {'language': trans_lang}
+            response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
+                data=data, follow=True)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, translated_text)
+            
+            response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, translated_text)

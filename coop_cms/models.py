@@ -16,10 +16,11 @@ from django.core.exceptions import ValidationError
 # from html_field.db.models import HTMLField
 # from html_field import html_cleaner
 from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes
-from coop_cms.settings import get_navTree_class, COOP_CMS_NAVTREE_CLASS
+from coop_cms.settings import get_navTree_class, COOP_CMS_NAVTREE_CLASS, is_localized
 from django.contrib.staticfiles import finders
 from django.core.files import File
 from django.db.models.signals import pre_delete, post_save
+from django.template.defaultfilters import slugify
 
 from sorl.thumbnail import default
 ADMIN_THUMBS_SIZE = '60x60'
@@ -276,11 +277,12 @@ class BaseArticle(TimeStampedModel):
             img_root = 'cms_logos'
         return u'{0}/{1}/{2}'.format(img_root, self.id, filename)
 
-    slug = AutoSlugField(populate_from='title', max_length=100, unique=True)
+    #slug = AutoSlugField(populate_from='title', max_length=100, unique=True)
+    slug = models.CharField(max_length=100, unique=True, db_index=True)
     #title = HTMLField(title_cleaner, verbose_name=_(u'title'), default=_('Page title'))
     #content = HTMLField(content_cleaner, verbose_name=_(u'content'), default=_('Page content'))
-    title = models.TextField(_(u'title'), default=_('Page title'), blank=True)
-    content = models.TextField(_(u'content'), default=_('Page content'), blank=True)
+    title = models.TextField(_(u'title'), default='', blank=True)
+    content = models.TextField(_(u'content'), default='', blank=True)
     publication = models.IntegerField(_(u'publication'), choices=PUBLICATION_STATUS, default=PUBLISHED)
     template = models.CharField(_(u'template'), max_length=200, default='', blank=True)
     logo = models.ImageField(upload_to=get_logo_folder, blank=True, null=True, default='')
@@ -357,7 +359,24 @@ class BaseArticle(TimeStampedModel):
         doc=_("set the parent in navigation."))
 
     def save(self, *args, **kwargs):
+        #autoslug localized title for creating locale_slugs
+        if is_localized():
+            from modeltranslation.utils import build_localized_fieldname
+            for (lang_code, lang_name) in settings.LANGUAGES:
+                loc_title_var = build_localized_fieldname('title', lang_code)
+                locale_title = getattr(self, 'title_'+lang_code, '')
+            
+                loc_slug_var = build_localized_fieldname('slug', lang_code)
+                locale_slug = getattr(self, 'slug_'+lang_code, '')
+                
+                if locale_title and not locale_slug:
+                    setattr(self, 'slug_'+lang_code, slugify(locale_title))
+        else:
+            if not self.slug:
+                self.slug = slugify(self.title)
+        
         ret = super(BaseArticle, self).save(*args, **kwargs)
+        
         parent_id = getattr(self, '_navigation_parent', None)
         if parent_id != None:
             self.navigation_parent = parent_id

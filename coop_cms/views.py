@@ -920,9 +920,12 @@ def change_language(request):
     
     next = request.REQUEST.get('next', None)
     if not next:
-        url = urlparse(request.META.get('HTTP_REFERER'))
-        if url:
-            next = url.path
+        try:
+            url = urlparse(request.META.get('HTTP_REFERER'))
+            if url:
+                next = url.path
+        except:
+            pass
     if not next:
         next = '/'
     
@@ -931,18 +934,31 @@ def change_language(request):
         lang_code = request.POST.get('language', None)
         if lang_code and check_for_language(lang_code):
             
-            print 'n:', next
-            
+            #locale is the current language
+            #path is the locale-independant url
             locale, path = localeurl_utils.strip_path(next)
             
-            print 'l:', locale
-            print 'p:', path
-            
-            next = localeurl_utils.locale_path(path, lang_code)
-
+            Article = get_article_class()
+            try:
+                #get the translated slug of the current article
+                #If switching from French to English and path is /fr/accueil/
+                #The next should be : /en/home/
+                
+                #Get the article
+                next_article = Article.objects.get(slug=path.strip('/'))
+                
+            except Article.DoesNotExist:
+                next_article = None
+                
             if hasattr(request, 'session'):
                 request.session['django_language'] = lang_code
             else:
                 response.set_cookie(settings.LANGUAGE_COOKIE_NAME, lang_code)
             activate(lang_code)
+                
+            if next_article:
+                next = reverse('coop_cms_view_article', args=[next_article.slug])
+            else:
+                next = localeurl_utils.locale_path(path, lang_code)
+
     return HttpResponseRedirect(next)
