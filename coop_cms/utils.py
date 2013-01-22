@@ -9,6 +9,7 @@ from coop_cms.html2text import html2text
 from django.conf import settings
 from django.template.loader import get_template
 from django.template import Context
+from django.core.urlresolvers import reverse
 
 class _DeHTMLParser(HTMLParser):
     def __init__(self):
@@ -96,3 +97,12 @@ def send_newsletter(newsletter, dests):
         email.attach_alternative(html_text, "text/html")
         emails.append(email)
     return connection.send_messages(emails)
+
+def get_article_slug(*args, **kwargs):
+    slug = reverse(*args, **kwargs)
+    if 'localeurl' in settings.INSTALLED_APPS:
+        #If localeurl is installed reverse is patched
+        #We must remove the lang prefix
+        from localeurl.utils import strip_path
+        lang, slug = strip_path(slug)
+    return slug.strip('/')
