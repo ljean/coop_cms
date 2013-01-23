@@ -2179,14 +2179,9 @@ class HomepageTest(TestCase):
         
 class UrlLocalizationTest(TestCase):
     
-    def _localized(self):
-        if ('localeurl' in settings.INSTALLED_APPS) and ('modeltranslation' in settings.INSTALLED_APPS):
-            return True
-        return False
-    
     def test_get_locale_article(self):
         
-        if self._localized():
+        if is_localized():
             original_text = '*!-+' * 10
             translated_text = ':%@/' * 9
             
@@ -2209,7 +2204,7 @@ class UrlLocalizationTest(TestCase):
 
     def test_change_lang(self):
         
-        if self._localized():
+        if is_localized():
             original_text = '*!-+' * 10
             translated_text = ':%@/' * 9
             
@@ -2237,3 +2232,45 @@ class UrlLocalizationTest(TestCase):
             response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
             self.assertEqual(200, response.status_code)
             self.assertContains(response, translated_text)
+            
+    def test_keep_slug(self):
+        Article = get_article_class()
+        a1 = Article.objects.create(title=u"Home", content="aa")
+        original_slug = a1.slug
+        a1.title = "Title changed"
+        a1.save()
+        a1 = Article.objects.get(id=a1.id)
+        self.assertEqual(original_slug, a1.slug)
+        
+    def test_keep_localized_slug(self):
+        if is_localized():
+            Article = get_article_class()
+            a1 = Article.objects.create(title=u"Home", content="aa")
+            origin_lang = settings.LANGUAGES[0][0]
+            trans_lang = settings.LANGUAGES[1][0]
+            setattr(a1, 'title_'+trans_lang, u'Accueil')
+            a1.save()
+            
+            original_slug = a1.slug
+            original_trans_slug = getattr(a1, 'slug_'+trans_lang, u'**dummy**')
+            
+            a1.title = u"Title changed"
+            setattr(a1, 'title_'+trans_lang, u'Titre change')
+            
+            a1.save()
+            a1 = Article.objects.get(id=a1.id)
+            
+            self.assertEqual(original_slug, a1.slug)
+            self.assertEqual(original_trans_slug, getattr(a1, 'slug_'+trans_lang))
+            
+    def test_no_title(self):
+        Article = get_article_class()
+        
+        try:
+            a1 = Article.objects.create(title=u"", content="a!*%:"*10, publication=BaseArticle.PUBLISHED)
+        except:
+            return #OK
+        
+        self.assertFalse(True) #Force to fail
+        
+            

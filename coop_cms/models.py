@@ -278,7 +278,7 @@ class BaseArticle(TimeStampedModel):
         return u'{0}/{1}/{2}'.format(img_root, self.id, filename)
 
     #slug = AutoSlugField(populate_from='title', max_length=100, unique=True)
-    slug = models.CharField(max_length=100, unique=True, db_index=True)
+    slug = models.CharField(max_length=100, unique=True, db_index=True, blank=False)
     #title = HTMLField(title_cleaner, verbose_name=_(u'title'), default=_('Page title'))
     #content = HTMLField(content_cleaner, verbose_name=_(u'content'), default=_('Page content'))
     title = models.TextField(_(u'title'), default='', blank=True)
@@ -360,6 +360,9 @@ class BaseArticle(TimeStampedModel):
 
     def save(self, *args, **kwargs):
         #autoslug localized title for creating locale_slugs
+        if (not self.title) and (not self.slug):
+            raise Exception(u"coop_cms.Article: slug can not be empty")
+                
         if is_localized():
             from modeltranslation.utils import build_localized_fieldname
             for (lang_code, lang_name) in settings.LANGUAGES:
@@ -380,10 +383,12 @@ class BaseArticle(TimeStampedModel):
         parent_id = getattr(self, '_navigation_parent', None)
         if parent_id != None:
             self.navigation_parent = parent_id
+        
         if self.is_homepage:
             for a in get_article_class().objects.filter(is_homepage=True).exclude(id=self.id):
                 a.is_homepage = False
                 a.save()
+        
         return ret
 
     def get_label(self):
