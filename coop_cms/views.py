@@ -859,7 +859,7 @@ def test_newsletter(request, newsletter_id):
 
             messages.add_message(request, messages.SUCCESS,
                 _(u"The test email has been sent to {0} addresses: {1}").format(nb_sent, u', '.join(dests)))
-            return HttpResponseRedirect(newsletter.get_edit_url())
+            return HttpResponseRedirect(newsletter.get_absolute_url())
 
         except Exception, msg:
             messages.add_message(request, messages.ERROR, _(u"An error occured! Please contact your support."))
@@ -872,7 +872,7 @@ def test_newsletter(request, newsletter_id):
                 }
             )
 
-            return HttpResponseRedirect(newsletter.get_edit_url())
+            return HttpResponseRedirect(newsletter.get_absolute_url())
 
     return render_to_response(
         'coop_cms/popup_test_newsletter.html',
