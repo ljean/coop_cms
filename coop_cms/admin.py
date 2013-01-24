@@ -7,6 +7,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils.translation import ugettext_lazy as _
 from coop_cms.settings import get_article_class, get_navTree_class
 from django.conf import settings
+from settings import is_localized
+
 if 'modeltranslation' in settings.INSTALLED_APPS:
     from modeltranslation.admin import TranslationAdmin
     BaseAdminClass = TranslationAdmin
@@ -58,7 +60,8 @@ class ArticleAdmin(BaseAdminClass):
     form = ArticleAdminForm
     list_display = ['slug', 'title', 'publication', 'is_homepage', 'in_newsletter', 'category', 'modified']
     list_editable = ['publication', 'is_homepage', 'in_newsletter', 'category']
-    readonly_fields = ['slug', 'created', 'modified']
+    #readonly_fields = ['slug', 'created', 'modified']
+    readonly_fields = ['created', 'modified']
     fieldsets = (
         #(_('Navigation'), {'fields': ('navigation_parent',)}),
         (_('General'), {'fields': ('slug', 'title', 'content')}),
@@ -67,6 +70,16 @@ class ArticleAdmin(BaseAdminClass):
         (_('Summary'), {'fields': ('summary',)}),
         (_('Debug'), {'fields': ('temp_logo',)}),
     )
+    
+    def __init__(self, *args, **kwargs):
+        slug_fields = [] 
+        if is_localized():
+            for (lang, _name) in settings.LANGUAGES:
+                slug_fields.append('slug_'+lang)
+        else:
+            slug_fields = ['slug']
+        self.readonly_fields = slug_fields + self.readonly_fields
+        super(ArticleAdmin, self).__init__(*args, **kwargs)
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(ArticleAdmin, self).get_form(request, obj, **kwargs)
