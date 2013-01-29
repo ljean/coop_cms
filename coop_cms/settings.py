@@ -35,12 +35,11 @@ def get_navTree_class():
         navTree_class = None
         try:
             full_class_name = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS')
-            module_name, class_name = full_class_name.rsplit('.', 1)
-            if not module_name.endswith('models'):
-                module_name += '.models'
-            module = import_module(module_name)
-            navTree_class = getattr(module, class_name)
-
+            app_label, model_name = full_class_name.split('.')
+            model_name = model_name.lower()
+            ct = ContentType.objects.get(app_label=app_label, model=model_name)
+            navTree_class = ct.model_class()
+            
         except AttributeError:
             if 'coop_cms.apps.basic_cms' in django_settings.INSTALLED_APPS:
                 from coop_cms.apps.basic_cms.models import NavTree
