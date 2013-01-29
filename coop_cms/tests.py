@@ -9,7 +9,7 @@ from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, Newsle
 from coop_cms.settings import is_localized
 import json
 from django.core.exceptions import ValidationError
-from coop_cms.settings import get_article_class, get_article_templates, get_navTree_class
+from coop_cms.settings import get_article_class, get_article_templates, get_navtree_class
 from model_mommy import mommy
 from django.conf import settings
 import os.path, shutil
@@ -348,7 +348,7 @@ class ArticleTest(TestCase):
     def test_new_article_navigation(self):
         Article = get_article_class()
         
-        tree = get_navTree_class().objects.create()
+        tree = get_navtree_class().objects.create()
         
         self._log_as_editor()
         data = {
@@ -380,7 +380,7 @@ class ArticleTest(TestCase):
         Article = get_article_class()
         art1 = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         
-        tree = get_navTree_class().objects.create()
+        tree = get_navtree_class().objects.create()
         ct = ContentType.objects.get_for_model(Article)
         node1 = NavNode.objects.create(content_type=ct, object_id=art1.id, tree=tree)
         
@@ -415,14 +415,14 @@ class NavigationTest(TestCase):
         NavType.objects.create(content_type=self.url_ct, search_field='url', label_rule=NavType.LABEL_USE_SEARCH_FIELD)
         self.editor = None
         self.staff = None
-        self.tree = get_navTree_class().objects.create()
+        self.tree = get_navtree_class().objects.create()
         self.srv_url = reverse("navigation_tree", args=[self.tree.id])
 
     def _log_as_editor(self):
         if not self.editor:
             self.editor = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
             self.editor.is_staff = True
-            tree_class = get_navTree_class()
+            tree_class = get_navtree_class()
             can_edit_tree = Permission.objects.get(
                 content_type__app_label=tree_class._meta.app_label,
                 codename='change_{0}'.format(tree_class._meta.module_name)
@@ -442,7 +442,7 @@ class NavigationTest(TestCase):
 
     def test_view_in_admin(self):
         self._log_as_editor()
-        tree_class = get_navTree_class()
+        tree_class = get_navtree_class()
         
         reverse_name = "admin:{0}_{1}_changelist".format(tree_class._meta.app_label, tree_class._meta.module_name)
         url = reverse(reverse_name)
@@ -1039,7 +1039,7 @@ class NavigationTest(TestCase):
 #    def setUp(self):
 #        ct = ContentType.objects.get_for_model(get_article_class())
 #        NavType.objects.create(content_type=ct, search_field='title', label_rule=NavType.LABEL_USE_SEARCH_FIELD)
-#        self.tree = get_navTree_class().objects.create()
+#        self.tree = get_navtree_class().objects.create()
 #    
 #    def test_set_himself_as_parent_raise_error(self):
 #        art = get_article_class().objects.create(title='toto', content='oups')
@@ -1129,7 +1129,7 @@ class TemplateTagsTest(TestCase):
         
         self.nodes = []
         
-        self.tree = tree = get_navTree_class().objects.create()
+        self.tree = tree = get_navtree_class().objects.create()
         
         self.nodes.append(NavNode.objects.create(tree=tree, label=link1.url, content_object=link1, ordering=1, parent=None))
         self.nodes.append(NavNode.objects.create(tree=tree, label=link2.url, content_object=link2, ordering=2, parent=None))
@@ -1403,7 +1403,7 @@ class CmsEditTagTest(TestCase):
         
 
         self.link1 = Link.objects.create(url='http://www.google.fr')
-        self.tree = tree = get_navTree_class().objects.create()
+        self.tree = tree = get_navtree_class().objects.create()
         NavNode.objects.create(tree=tree, label=self.link1.url, content_object=self.link1, ordering=1, parent=None)
     
     def _log_as_editor(self):
@@ -1626,7 +1626,8 @@ class NewsletterTest(TestCase):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
         
-        art = Article.objects.create(in_newsletter=True)
+        art = mommy.make_one(Article, in_newsletter=True)
+        
         self.assertEqual(1, NewsletterItem.objects.count())
         item = NewsletterItem.objects.get(content_type=ct, object_id=art.id)
         self.assertEqual(item.content_object, art)
@@ -1638,7 +1639,7 @@ class NewsletterTest(TestCase):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
         
-        art = Article.objects.create(in_newsletter=False)
+        art = mommy.make_one(Article, in_newsletter=False)
         self.assertEqual(0, NewsletterItem.objects.count())
         
         art.delete()
@@ -2066,9 +2067,9 @@ class NavigationTreeTest(TestCase):
         nt_links = NavType.objects.create(content_type=ct, search_field='url',
             label_rule=NavType.LABEL_USE_SEARCH_FIELD)
         
-        self.default_tree = get_navTree_class().objects.create()
-        self.tree1 = get_navTree_class().objects.create(name="tree1")
-        self.tree2 = get_navTree_class().objects.create(name="tree2")
+        self.default_tree = get_navtree_class().objects.create()
+        self.tree1 = get_navtree_class().objects.create(name="tree1")
+        self.tree2 = get_navtree_class().objects.create(name="tree2")
         self.tree2.types.add(nt_links)
         self.tree2.save()
         
@@ -2232,6 +2233,31 @@ class UrlLocalizationTest(TestCase):
             response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
             self.assertEqual(200, response.status_code)
             self.assertContains(response, translated_text)
+            
+    def test_change_lang_no_trans(self):
+        
+        if is_localized():
+            original_text = '*!-+' * 10
+            
+            a1 = get_article_class().objects.create(title="Home", content=original_text)
+            
+            origin_lang = settings.LANGUAGES[0][0]
+            trans_lang = settings.LANGUAGES[1][0]
+            
+            origin_url = '/{0}/home'.format(origin_lang)
+            response = self.client.get(origin_url, follow=True)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, original_text)
+            
+            data = {'language': trans_lang}
+            response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
+                data=data, follow=True)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, original_text)
+            
+            response = self.client.get('/{0}/home/'.format(trans_lang), follow=True)
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, original_text)
             
     def test_keep_slug(self):
         Article = get_article_class()

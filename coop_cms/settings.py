@@ -28,28 +28,28 @@ def get_navigable_content_types():
 
 
 
-def get_navTree_class():
-    if hasattr(get_navTree_class, '_cache_class'):
-        return getattr(get_navTree_class, '_cache_class')
+def get_navtree_class():
+    if hasattr(get_navtree_class, '_cache_class'):
+        return getattr(get_navtree_class, '_cache_class')
     else:
-        navTree_class = None
+        navtree_class = None
         try:
             full_class_name = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS')
             app_label, model_name = full_class_name.split('.')
             model_name = model_name.lower()
             ct = ContentType.objects.get(app_label=app_label, model=model_name)
-            navTree_class = ct.model_class()
+            navtree_class = ct.model_class()
             
         except AttributeError:
             if 'coop_cms.apps.basic_cms' in django_settings.INSTALLED_APPS:
                 from coop_cms.apps.basic_cms.models import NavTree
-                navTree_class = NavTree
+                navtree_class = NavTree
 
-        if not navTree_class:
+        if not navtree_class:
             raise Exception('No NavTree class configured')
 
-        setattr(get_navTree_class, '_cache_class', navTree_class)
-        return navTree_class
+        setattr(get_navtree_class, '_cache_class', navtree_class)
+        return navtree_class
 
 
 def get_article_class():

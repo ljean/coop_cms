@@ -16,14 +16,14 @@ from django.contrib.messages.api import success as success_message
 from django.contrib.messages.api import error as error_message
 from coop_cms import models
 from django.contrib.auth.decorators import login_required
-from coop_cms.settings import get_article_class, get_article_form, get_newsletter_form, get_navTree_class
+from coop_cms.settings import get_article_class, get_article_form, get_newsletter_form, get_navtree_class
 from djaloha import utils as djaloha_utils
 from django.core.servers.basehttp import FileWrapper
 import mimetypes, unicodedata
 from django.conf import settings
 from django.contrib import messages
 from colorbox.decorators import popup_redirect
-from coop_cms.utils import send_newsletter
+from coop_cms.utils import send_newsletter, get_article_or_404
 from django.utils.log import getLogger
 from datetime import datetime
 from django.utils.translation import check_for_language, activate, get_language
@@ -118,7 +118,7 @@ def set_homepage(request, article_id):
 
 def view_article(request, url, extra_context=None, force_template=None):
     """view the article"""
-    article = get_object_or_404(get_article_class(), slug=url) #Draft & Published
+    article = get_article_or_404(slug=url) #Draft & Published
 
     if not request.user.has_perm('can_view_article', article):
         raise Http404
@@ -143,10 +143,9 @@ def view_article(request, url, extra_context=None, force_template=None):
 def edit_article(request, url, extra_context=None, force_template=None):
     """edit the article"""
 
-    article_class = get_article_class()
     article_form_class = get_article_form()
 
-    article = get_object_or_404(article_class, slug=url)
+    article = get_article_or_404(slug=url)
 
     if not request.user.has_perm('can_edit_article', article):
         raise PermissionDenied
@@ -200,7 +199,7 @@ def edit_article(request, url, extra_context=None, force_template=None):
 @login_required
 def cancel_edit_article(request, url):
     """if cancel_edit, delete the preview image"""
-    article = get_object_or_404(get_article_class(), slug=url)
+    article = get_article_or_404(slug=url)
     if article.temp_logo:
         article.temp_logo = ''
         article.save()
@@ -210,7 +209,7 @@ def cancel_edit_article(request, url):
 @popup_redirect
 def publish_article(request, url):
     """change the publication status of an article"""
-    article = get_object_or_404(get_article_class(), slug=url)
+    article = get_article_or_404(slug=url)
 
     if not request.user.has_perm('can_publish_article', article):
         raise PermissionDenied
@@ -726,7 +725,7 @@ def process_nav_edition(request, tree_id):
     if request.method == 'POST' and request.is_ajax() and 'msg_id' in request.POST:
         try:
             #Get the current tree
-            tree_class = get_navTree_class()
+            tree_class = get_navtree_class()
             tree = get_object_or_404(tree_class, id=tree_id)
 
             #check permissions

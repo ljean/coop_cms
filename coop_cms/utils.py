@@ -10,6 +10,9 @@ from django.conf import settings
 from django.template.loader import get_template
 from django.template import Context
 from django.core.urlresolvers import reverse
+from coop_cms.settings import get_article_class
+from django.utils.translation import get_language
+from django.http import Http404
 
 class _DeHTMLParser(HTMLParser):
     def __init__(self):
@@ -106,3 +109,27 @@ def get_article_slug(*args, **kwargs):
         from localeurl.utils import strip_path
         lang, slug = strip_path(slug)
     return slug.strip('/')
+
+def get_article(slug, **kwargs):
+    Article = get_article_class()
+    try:
+        return Article.objects.get(slug=slug, **kwargs)
+    except Article.DoesNotExist:
+        #if modeltranslation is installed,
+        #if no article correspond to the current language article
+        #try to look for slug in default language
+        if 'modeltranslation' in settings.INSTALLED_APPS:
+            from modeltranslation import settings as mt_settings
+            default_lang = mt_settings.DEFAULT_LANGUAGE
+            current_lang = get_language()
+            if current_lang != default_lang:
+                kwargs.update({'slug_{0}'.format(default_lang): slug})
+                return Article.objects.get(**kwargs)
+        raise #re-raise previous error
+
+def get_article_or_404(slug, **kwargs):
+    Article = get_article_class()
+    try:
+        return get_article(slug, **kwargs)
+    except Article.DoesNotExist:
+        raise Http404

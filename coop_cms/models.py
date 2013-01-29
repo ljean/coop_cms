@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 # from html_field.db.models import HTMLField
 # from html_field import html_cleaner
 from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes
-from coop_cms.settings import get_navTree_class, COOP_CMS_NAVTREE_CLASS, is_localized
+from coop_cms.settings import get_navtree_class, is_localized, COOP_CMS_NAVTREE_CLASS
 from django.contrib.staticfiles import finders
 from django.core.files import File
 from django.db.models.signals import pre_delete, post_save
@@ -347,7 +347,7 @@ class BaseArticle(TimeStampedModel):
         if value != None:
             if value < 0:
                 tree_id = -value
-                tree = get_navTree_class().objects.get(id=tree_id)
+                tree = get_navtree_class().objects.get(id=tree_id)
                 parent = None
             else:
                 parent = NavNode.objects.get(id=value)

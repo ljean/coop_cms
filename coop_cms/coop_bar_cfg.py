@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from django.template.loader import get_template
 from django.template import Context
-from coop_cms.settings import get_article_class, get_navTree_class
+from coop_cms.settings import get_article_class, get_navtree_class
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from coop_bar.utils import make_link
@@ -56,7 +56,7 @@ def django_admin_navtree(request, context):
     if request and request.user.is_staff:
         coop_cms_navtrees = context.get('coop_cms_navtrees', None)
         if coop_cms_navtrees:
-            tree_class = get_navTree_class()
+            tree_class = get_navtree_class()
             admin_tree_name = "{0}_{1}".format(tree_class._meta.app_label, tree_class._meta.module_name)
             if len(coop_cms_navtrees) == 1:
                 tree = coop_cms_navtrees[0]
