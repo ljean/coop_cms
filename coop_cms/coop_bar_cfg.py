@@ -108,11 +108,11 @@ def cms_set_homepage(request, context):
 
 @can_edit_article    
 def cms_article_settings(request, context):
-    if context.get('edit_mode'):
-        article = context['article']
-        url = reverse('coop_cms_article_settings', args=[article.id])
-        return make_link(url, _(u'Article settings'), 'fugue/gear.png',
-            classes=['alert_on_click', 'colorbox-form', 'icon'])
+    #if context.get('edit_mode'):
+    article = context['article']
+    url = reverse('coop_cms_article_settings', args=[article.id])
+    return make_link(url, _(u'Article settings'), 'fugue/gear.png',
+        classes=['alert_on_click', 'colorbox-form', 'icon'])
 
 @can_edit_article
 def cms_save(request, context):

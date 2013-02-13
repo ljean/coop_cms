@@ -1932,10 +1932,6 @@ class NewsletterTest(TestCase):
         
         response = self.client.get(url, follow=False)
         redirect_url = response['Location']
-        print "********************************"
-        print redirect_url
-        print login_url
-        print "********************************"
         self.assertTrue(redirect_url.find(login_url)>0)
         
         sch_dt =datetime.now()+timedelta(1)

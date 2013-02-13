@@ -23,11 +23,13 @@ import mimetypes, unicodedata
 from django.conf import settings
 from django.contrib import messages
 from colorbox.decorators import popup_redirect
-from coop_cms.utils import send_newsletter, get_article_or_404
+from coop_cms.utils import send_newsletter, get_article_or_404, get_headlines
 from django.utils.log import getLogger
 from datetime import datetime
 from django.utils.translation import check_for_language, activate, get_language
 from urlparse import urlparse
+import logging
+logger = logging.getLogger("coop_cms")
 
 def get_article_template(article):
     template = article.template
@@ -111,7 +113,7 @@ def set_homepage(request, article_id):
             context_instance=RequestContext(request)
         )
     except Exception, msg:
-        print "## ERR", msg
+        logger.exception("set_homepage")
         raise
 
 
@@ -124,10 +126,10 @@ def view_article(request, url, extra_context=None, force_template=None):
         raise Http404
 
     editable = request.user.has_perm('can_edit_article', article)
-
+    
     context_dict = {
         'editable': editable, 'edit_mode': False, 'article': article,
-        'draft': article.publication==models.BaseArticle.DRAFT
+        'draft': article.publication==models.BaseArticle.DRAFT, 'headlines': get_headlines(article),
     }
     
     if extra_context:
@@ -183,7 +185,7 @@ def edit_article(request, url, extra_context=None, force_template=None):
     context_dict = {
         'form': form,
         'editable': True, 'edit_mode': True, 'title': article.title,
-        'draft': article.publication==models.BaseArticle.DRAFT,
+        'draft': article.publication==models.BaseArticle.DRAFT, 'headlines': get_headlines(article), 
         'article': article, 'ARTICLE_PUBLISHED': models.BaseArticle.PUBLISHED
     }
     
@@ -209,186 +211,213 @@ def cancel_edit_article(request, url):
 @popup_redirect
 def publish_article(request, url):
     """change the publication status of an article"""
-    article = get_article_or_404(slug=url)
-
-    if not request.user.has_perm('can_publish_article', article):
-        raise PermissionDenied
-
-    draft = (article.publication == models.BaseArticle.DRAFT)
-    if draft:
-        article.publication = models.BaseArticle.PUBLISHED
-    else:
-        article.publication = models.BaseArticle.DRAFT
-
-    if request.method == "POST":
-        form = forms.PublishArticleForm(request.POST, instance=article)
-        if form.is_valid():
-            article = form.save()
-            return HttpResponseRedirect(article.get_absolute_url())
-    else:
-        form = forms.PublishArticleForm(instance=article)
-
-    context_dict = {
-        'form': form,
-        'article': article,
-        'draft': draft,
-        'title': _(u"Do you want to publish this article?") if draft else _(u"Make it draft?"),
-    }
-
-    return render_to_response(
-        'coop_cms/popup_publish_article.html',
-        context_dict,
-        context_instance=RequestContext(request)
-    )
+    try:
+        article = get_article_or_404(slug=url)
+    
+        if not request.user.has_perm('can_publish_article', article):
+            raise PermissionDenied
+    
+        draft = (article.publication == models.BaseArticle.DRAFT)
+        if draft:
+            article.publication = models.BaseArticle.PUBLISHED
+        else:
+            article.publication = models.BaseArticle.DRAFT
+    
+        if request.method == "POST":
+            form = forms.PublishArticleForm(request.POST, instance=article)
+            if form.is_valid():
+                article = form.save()
+                return HttpResponseRedirect(article.get_absolute_url())
+        else:
+            form = forms.PublishArticleForm(instance=article)
+    
+        context_dict = {
+            'form': form,
+            'article': article,
+            'draft': draft,
+            'title': _(u"Do you want to publish this article?") if draft else _(u"Make it draft?"),
+        }
+    
+        return render_to_response(
+            'coop_cms/popup_publish_article.html',
+            context_dict,
+            context_instance=RequestContext(request)
+        )
+    except Exception:
+        logger.exception("publish_article")
+        raise
 
 @login_required
 def show_media(request, media_type):
-    is_ajax = request.GET.get('page', 0)
-
-    if request.session.get("coop_cms_media_doc", False):
-        media_type = 'document' #force the doc
-        del request.session["coop_cms_media_doc"]
-
-    if media_type == 'image':
-        context = {
-            'images': models.Image.objects.all().order_by("-created"),
-            'media_url': reverse('coop_cms_media_images'),
-            'media_slide_template': 'coop_cms/slide_images_content.html',
-        }
-    else:
-        context = {
-            'documents': models.Document.objects.all().order_by("-created"),
-            'media_url': reverse('coop_cms_media_documents'),
-            'media_slide_template': 'coop_cms/slide_docs_content.html',
-        }
-    context['is_ajax'] = is_ajax
-    context['media_type'] = media_type
-
-    t = get_template('coop_cms/slide_base.html')
-    html = t.render(RequestContext(request, context))
-
-    if is_ajax:
-        data = {
-            'html': html,
-            'media_type': media_type,
-        }
-        return HttpResponse(json.dumps(data), mimetype="application/json")
-    else:
-        return HttpResponse(html)
+    try:
+        is_ajax = request.GET.get('page', 0)
+    
+        if request.session.get("coop_cms_media_doc", False):
+            media_type = 'document' #force the doc
+            del request.session["coop_cms_media_doc"]
+    
+        if media_type == 'image':
+            context = {
+                'images': models.Image.objects.all().order_by("-created"),
+                'media_url': reverse('coop_cms_media_images'),
+                'media_slide_template': 'coop_cms/slide_images_content.html',
+            }
+        else:
+            context = {
+                'documents': models.Document.objects.all().order_by("-created"),
+                'media_url': reverse('coop_cms_media_documents'),
+                'media_slide_template': 'coop_cms/slide_docs_content.html',
+            }
+        context['is_ajax'] = is_ajax
+        context['media_type'] = media_type
+    
+        t = get_template('coop_cms/slide_base.html')
+        html = t.render(RequestContext(request, context))
+    
+        if is_ajax:
+            data = {
+                'html': html,
+                'media_type': media_type,
+            }
+            return HttpResponse(json.dumps(data), mimetype="application/json")
+        else:
+            return HttpResponse(html)
+    except Exception:
+        logger.exception("show_media")
+        raise
 
 
 @login_required
 def upload_image(request):
-    if request.method == "POST":
-        form = forms.AddImageForm(request.POST, request.FILES)
-        if form.is_valid():
-            src = form.cleaned_data['image']
-            descr = form.cleaned_data['descr']
-            if not descr:
-                descr = os.path.splitext(src.name)[0]
-            image = models.Image(name=descr)
-            image.file.save(src.name, src)
-            image.save()
-            return HttpResponse("close_popup_and_media_slide")
-    else:
-        form = forms.AddImageForm()
-
-    return render_to_response(
-        'coop_cms/popup_upload_image.html',
-        locals(),
-        context_instance=RequestContext(request)
-    )
+    try:
+        if request.method == "POST":
+            form = forms.AddImageForm(request.POST, request.FILES)
+            if form.is_valid():
+                src = form.cleaned_data['image']
+                descr = form.cleaned_data['descr']
+                if not descr:
+                    descr = os.path.splitext(src.name)[0]
+                image = models.Image(name=descr)
+                image.file.save(src.name, src)
+                image.save()
+                return HttpResponse("close_popup_and_media_slide")
+        else:
+            form = forms.AddImageForm()
+    
+        return render_to_response(
+            'coop_cms/popup_upload_image.html',
+            locals(),
+            context_instance=RequestContext(request)
+        )
+    except Exception:
+        logger.exception("upload_image")
+        raise
+        
 
 @login_required
 def upload_doc(request):
-    if request.method == "POST":
-        form = forms.AddDocForm(request.POST, request.FILES)
-        if form.is_valid():
-            src = form.cleaned_data['doc']
-            descr = form.cleaned_data['descr']
-            is_private = form.cleaned_data['is_private']
-            if not descr:
-                descr = os.path.splitext(src.name)[0]
-            doc = models.Document(name=descr, is_private=is_private)
-            doc.file.save(src.name, src)
-            doc.save()
-
-            request.session["coop_cms_media_doc"] = True
-
-            return HttpResponse("close_popup_and_media_slide")
-    else:
-        form = forms.AddDocForm()
-
-    return render_to_response(
-        'coop_cms/popup_upload_doc.html',
-        locals(),
-        context_instance=RequestContext(request)
-    )
-
+    try:
+        if request.method == "POST":
+            form = forms.AddDocForm(request.POST, request.FILES)
+            if form.is_valid():
+                src = form.cleaned_data['doc']
+                descr = form.cleaned_data['descr']
+                is_private = form.cleaned_data['is_private']
+                if not descr:
+                    descr = os.path.splitext(src.name)[0]
+                doc = models.Document(name=descr, is_private=is_private)
+                doc.file.save(src.name, src)
+                doc.save()
+    
+                request.session["coop_cms_media_doc"] = True
+    
+                return HttpResponse("close_popup_and_media_slide")
+        else:
+            form = forms.AddDocForm()
+    
+        return render_to_response(
+            'coop_cms/popup_upload_doc.html',
+            locals(),
+            context_instance=RequestContext(request)
+        )
+    except Exception:
+        logger.exception("upload_doc")
+        raise
 
 @login_required
 @popup_redirect
 def change_template(request, article_id):
-    article = get_object_or_404(get_article_class(), id=article_id)
-    if request.method == "POST":
-        form = forms.ArticleTemplateForm(article, request.user, request.POST, request.FILES)
-        if form.is_valid():
-            article.template = form.cleaned_data['template']
-            article.save()
-            return HttpResponseRedirect(article.get_edit_url())
-    else:
-        form = forms.ArticleTemplateForm(article, request.user)
-
-    return render_to_response(
-        'coop_cms/popup_change_template.html',
-        locals(),
-        context_instance=RequestContext(request)
-    )
-
+    try:
+        article = get_object_or_404(get_article_class(), id=article_id)
+        if request.method == "POST":
+            form = forms.ArticleTemplateForm(article, request.user, request.POST, request.FILES)
+            if form.is_valid():
+                article.template = form.cleaned_data['template']
+                article.save()
+                return HttpResponseRedirect(article.get_edit_url())
+        else:
+            form = forms.ArticleTemplateForm(article, request.user)
+    
+        return render_to_response(
+            'coop_cms/popup_change_template.html',
+            locals(),
+            context_instance=RequestContext(request)
+        )
+    except Exception:
+        logger.exception("change_template")
+        raise
+    
 @login_required
 @popup_redirect
 def article_settings(request, article_id):
-    article = get_object_or_404(get_article_class(), id=article_id)
-    if request.method == "POST":
-        form = forms.ArticleSettingsForm(request.user, request.POST, request.FILES, instance=article)
-        if form.is_valid():
-            #article.template = form.cleaned_data['template']
-            article = form.save()
-            return HttpResponseRedirect(article.get_absolute_url())
-    else:
-        form = forms.ArticleSettingsForm(request.user, instance=article)
-
-    return render_to_response(
-        'coop_cms/popup_article_settings.html',
-        locals(),
-        context_instance=RequestContext(request)
-    )
+    try:
+        article = get_object_or_404(get_article_class(), id=article_id)
+        if request.method == "POST":
+            form = forms.ArticleSettingsForm(request.user, request.POST, request.FILES, instance=article)
+            if form.is_valid():
+                #article.template = form.cleaned_data['template']
+                article = form.save()
+                return HttpResponseRedirect(article.get_absolute_url())
+        else:
+            form = forms.ArticleSettingsForm(request.user, instance=article)
+    
+        return render_to_response(
+            'coop_cms/popup_article_settings.html',
+            locals(),
+            context_instance=RequestContext(request)
+        )
+    except Exception, msg:
+        logger.exception("article_settings")
+        raise
 
 @login_required
 @popup_redirect
 def new_article(request):
-
-    Article = get_article_class()
-    ct = ContentType.objects.get_for_model(Article)
-    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
-
-    if not request.user.has_perm(perm):
-        raise PermissionDenied
-
-    if request.method == "POST":
-        form = forms.NewArticleForm(request.user, request.POST, request.FILES)
-        if form.is_valid():
-            #article.template = form.cleaned_data['template']
-            article = form.save()
-            return HttpResponseRedirect(article.get_edit_url())
-    else:
-        form = forms.NewArticleForm(request.user)
-
-    return render_to_response(
-        'coop_cms/popup_new_article.html',
-        locals(),
-        context_instance=RequestContext(request)
-    )
+    try:
+        Article = get_article_class()
+        ct = ContentType.objects.get_for_model(Article)
+        perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+    
+        if not request.user.has_perm(perm):
+            raise PermissionDenied
+    
+        if request.method == "POST":
+            form = forms.NewArticleForm(request.user, request.POST, request.FILES)
+            if form.is_valid():
+                #article.template = form.cleaned_data['template']
+                article = form.save()
+                return HttpResponseRedirect(article.get_edit_url())
+        else:
+            form = forms.NewArticleForm(request.user)
+    
+        return render_to_response(
+            'coop_cms/popup_new_article.html',
+            locals(),
+            context_instance=RequestContext(request)
+        )
+    except Exception:
+        logger.exception("new_article")
+        raise
 
 @login_required
 @popup_redirect
@@ -399,12 +428,11 @@ def new_newsletter(request, newsletter_id=None):
 
     #if not request.user.has_perm(perm):
     #    raise PermissionDenied
-    
     if newsletter_id:
         newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
     else:
         newsletter = None
-    
+        
     try:
         if request.method == "POST":
             form = forms.NewNewsletterForm(request.user, request.POST, instance=newsletter)
@@ -420,35 +448,39 @@ def new_newsletter(request, newsletter_id=None):
             locals(),
             context_instance=RequestContext(request)
         )
-    except Exception, msg:
-        print "#", msg
+    except Exception:
+        logger.exception("new_newsletter")
         raise
-
 
 @login_required
 def update_logo(request, article_id):
-    article = get_object_or_404(get_article_class(), id=article_id)
-    if request.method == "POST":
-        form = forms.ArticleLogoForm(request.POST, request.FILES)
-        if form.is_valid():
-            article.temp_logo = form.cleaned_data['image']
-            article.save()
-            url = article.logo_thumbnail(True).url
-            data = {'ok': True, 'src': url}
-            return HttpResponse(json.dumps(data), mimetype='application/json')
+    try:
+        article = get_object_or_404(get_article_class(), id=article_id)
+        if request.method == "POST":
+            form = forms.ArticleLogoForm(request.POST, request.FILES)
+            if form.is_valid():
+                article.temp_logo = form.cleaned_data['image']
+                article.save()
+                url = article.logo_thumbnail(True).url
+                data = {'ok': True, 'src': url}
+                return HttpResponse(json.dumps(data), mimetype='application/json')
+            else:
+                t = get_template('coop_cms/popup_update_logo.html')
+                html = t.render(Context(locals()))
+                data = {'ok': False, 'html': html}
+                return HttpResponse(json.dumps(data), mimetype='application/json')
         else:
-            t = get_template('coop_cms/popup_update_logo.html')
-            html = t.render(Context(locals()))
-            data = {'ok': False, 'html': html}
-            return HttpResponse(json.dumps(data), mimetype='application/json')
-    else:
-        form = forms.ArticleLogoForm()
-
-    return render_to_response(
-        'coop_cms/popup_update_logo.html',
-        locals(),
-        context_instance=RequestContext(request)
-    )
+            form = forms.ArticleLogoForm()
+    
+        return render_to_response(
+            'coop_cms/popup_update_logo.html',
+            locals(),
+            context_instance=RequestContext(request)
+        )
+    except Exception:
+        logger.exception("update_logo")
+        raise
+    
 
 @login_required
 def download_doc(request, doc_id):
@@ -473,34 +505,37 @@ def download_doc(request, doc_id):
 
 def view_navnode(request, tree):
     """show info about the node when selected"""
-    response = {}
-
-    node_id = request.POST['node_id']
-    node = models.NavNode.objects.get(tree=tree, id=node_id)
-
-    #get the admin url
-    app, mod = node.content_type.app_label, node.content_type.model
-    admin_url = reverse("admin:{0}_{1}_change".format(app, mod), args=(node.object_id,))
-
-    #load and render template for the object
-    #try to load the corresponding template and if not found use the default one
-    model_name = unicode(node.content_type)
-    object_label = unicode(node.content_object)
-    tplt = select_template(["coop_cms/navtree_content/{0}.html".format(node.content_type.name),
-                            "coop_cms/navtree_content/default.html"])
-    html = tplt.render(
-        RequestContext(request, {
-            "node": node, "admin_url": admin_url,
-            "model_name": model_name, "object_label": object_label
-        })
-    )
-
-    #return data has dictionnary
-    response['html'] = html
-    response['message'] = u"Node content loaded."
-
-    return response
-
+    try:
+        response = {}
+    
+        node_id = request.POST['node_id']
+        node = models.NavNode.objects.get(tree=tree, id=node_id)
+    
+        #get the admin url
+        app, mod = node.content_type.app_label, node.content_type.model
+        admin_url = reverse("admin:{0}_{1}_change".format(app, mod), args=(node.object_id,))
+    
+        #load and render template for the object
+        #try to load the corresponding template and if not found use the default one
+        model_name = unicode(node.content_type)
+        object_label = unicode(node.content_object)
+        tplt = select_template(["coop_cms/navtree_content/{0}.html".format(node.content_type.name),
+                                "coop_cms/navtree_content/default.html"])
+        html = tplt.render(
+            RequestContext(request, {
+                "node": node, "admin_url": admin_url,
+                "model_name": model_name, "object_label": object_label
+            })
+        )
+    
+        #return data has dictionnary
+        response['html'] = html
+        response['message'] = u"Node content loaded."
+    
+        return response
+    except Exception:
+        logger.exception("view_navnode")
+        raise
 
 def rename_navnode(request, tree):
     """change the name of a node when renamed in the tree"""
@@ -754,7 +789,7 @@ def process_nav_edition(request, tree_id):
         except ValidationError, ex:
             response = {'status': 'error', 'message': u' - '.join(ex.messages)}
         except Exception, msg:
-            print msg
+            logger.exception("process_nav_edition")
             response = {'status': 'error', 'message': u"An error occured : %s" % msg }
         # except:
         #     response = {'status': 'error', 'message': u"An error occured"}
@@ -862,15 +897,14 @@ def test_newsletter(request, newsletter_id):
 
         except Exception, msg:
             messages.add_message(request, messages.ERROR, _(u"An error occured! Please contact your support."))
-            logger = getLogger('django.request')
-            logger.error('Internal Server Error: %s' % request.path,
+            django_logger = getLogger('django.request')
+            django_logger.error('Internal Server Error: %s' % request.path,
                 exc_info=sys.exc_info,
                 extra={
                     'status_code': 500,
                     'request': request
                 }
             )
-
             return HttpResponseRedirect(newsletter.get_absolute_url())
 
     return render_to_response(
@@ -878,7 +912,6 @@ def test_newsletter(request, newsletter_id):
         {'newsletter': newsletter, 'dests': dests},
         context_instance=RequestContext(request)
     )
-
 
 @login_required
 @popup_redirect

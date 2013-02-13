@@ -11,6 +11,7 @@ from django.template.loader import get_template
 from django.template import Context
 from django.core.urlresolvers import reverse
 from coop_cms.settings import get_article_class
+from coop_cms.models import BaseArticle
 from django.utils.translation import get_language
 from django.http import Http404
 
@@ -87,7 +88,7 @@ def send_newsletter(newsletter, dests):
     }
     html_text = t.render(Context(context_dict))
     html_text = make_links_absolute(html_text)
-
+    
     emails = []
     connection = get_connection()
     from_email = settings.COOP_CMS_FROM_EMAIL
@@ -133,3 +134,9 @@ def get_article_or_404(slug, **kwargs):
         return get_article(slug, **kwargs)
     except Article.DoesNotExist:
         raise Http404
+
+def get_headlines(article):
+    Article = get_article_class()
+    if article.is_homepage:
+        return Article.objects.filter(headline=True, publication=BaseArticle.PUBLISHED).order_by("-publication_date")
+    return Article.objects.none()

@@ -21,6 +21,7 @@ from django.contrib.staticfiles import finders
 from django.core.files import File
 from django.db.models.signals import pre_delete, post_save
 from django.template.defaultfilters import slugify
+from datetime import datetime
 
 from sorl.thumbnail import default
 ADMIN_THUMBS_SIZE = '60x60'
@@ -292,6 +293,7 @@ class BaseArticle(TimeStampedModel):
     in_newsletter = models.BooleanField(_(u'In newsletter'), default=True, help_text=_(u'Make this article available for newsletters.'))
     is_homepage = models.BooleanField(_(u'Is homepage'), default=False, help_text=_(u'Make this article the website homepage (only one homepage per site)'))
     headline = models.BooleanField(_(u"Headline"), default=False, help_text=_(u'Make this article appear on the home page'))
+    publication_date = models.DateTimeField(_(u"Headline"), default=datetime.now())
 
     def logo_thumbnail(self, temp=False, logo_size=None):
         logo = self.temp_logo if (temp and self.temp_logo) else self.logo
@@ -338,7 +340,11 @@ class BaseArticle(TimeStampedModel):
         ct = ContentType.objects.get_for_model(get_article_class())
         nodes = NavNode.objects.filter(object_id=self.id, content_type=ct)
         if nodes.count():
-            return nodes[0].parent.id if nodes[0].parent else 0
+            node = nodes[0]
+            if node.parent:
+                return node.parent.id
+            else:
+                return -node.tree.id
         else:
             return None
 

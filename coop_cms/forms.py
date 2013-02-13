@@ -125,6 +125,8 @@ class ArticleFormWithNavigation(forms.ModelForm):
         self.fields['navigation_parent'] = forms.ChoiceField(
             choices=get_node_choices(), required=False, help_text=get_navigation_parent_help_text()
         )
+        if self.article:
+            self.fields['navigation_parent'].initial = self.article.navigation_parent
 
     def clean_navigation_parent(self):
         parent_id = self.cleaned_data['navigation_parent']
@@ -195,10 +197,10 @@ class ArticleTemplateForm(forms.Form):
 class ArticleLogoForm(forms.Form):
     image = forms.ImageField(required=True, label = _('Logo'),)
 
-class ArticleSettingsForm(forms.ModelForm):
+class ArticleSettingsForm(ArticleFormWithNavigation):
     class Meta:
         model = get_article_class()
-        fields = ('template', 'category', 'in_newsletter', 'summary')
+        fields = ('template', 'category', 'publication', 'publication_date', 'headline', 'in_newsletter', 'summary',)
 
     def __init__(self, user, *args, **kwargs):
         article = kwargs['instance']
@@ -223,7 +225,7 @@ class ArticleSettingsForm(forms.ModelForm):
 class NewArticleForm(ArticleFormWithNavigation):
     class Meta:
         model = get_article_class()
-        fields = ('title', 'template', 'publication')
+        fields = ('title', 'template', 'category', 'headline', 'publication', 'in_newsletter')
 
     def __init__(self, user, *args, **kwargs):
         super(NewArticleForm, self).__init__(*args, **kwargs)
