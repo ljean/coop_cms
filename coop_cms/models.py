@@ -439,6 +439,7 @@ class Link(TimeStampedModel):
             scheme, netloc, path, params, query, fragment = urlparse.urlparse(self.url)
             if not scheme:
                 #the urls doesn't starts with http://, so it's a url managed by the site
+                from localeurl.utils import locale_path
                 locale = translation.get_language()                
                 return locale_path(self.url, locale)
         return self.url
