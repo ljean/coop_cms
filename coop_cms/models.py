@@ -22,7 +22,8 @@ from django.core.files import File
 from django.db.models.signals import pre_delete, post_save
 from django.template.defaultfilters import slugify
 from datetime import datetime
-
+from django.utils import translation
+import urlparse
 from sorl.thumbnail import default
 ADMIN_THUMBS_SIZE = '60x60'
 
@@ -434,11 +435,18 @@ class Link(TimeStampedModel):
     url = models.CharField(_(u'URL'), max_length=200)
 
     def get_absolute_url(self):
+        if is_localized():
+            scheme, netloc, path, params, query, fragment = urlparse.urlparse(self.url)
+            if not scheme:
+                #the urls doesn't starts with http://, so it's a url managed by the site
+                locale = translation.get_language()                
+                return locale_path(self.url, locale)
         return self.url
 
     def get_label(self):
-        if self.url.find('http://')==0:
-            return self.url[7:]
+        scheme, netloc, path, params, query, fragment = urlparse.urlparse(self.url)
+        if scheme:
+            return u"{0}{1}".format(netloc, path)
         return self.url
 
     def __unicode__(self):
