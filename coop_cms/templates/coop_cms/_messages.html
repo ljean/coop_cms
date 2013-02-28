@@ -1,33 +1,60 @@
 {% load i18n %}
 {% if messages %}
 <style>
-    ul.user-messages {
-        padding: 5px 5px 5px 5px;
-        border: solid thin #ccc;
-        background: #eee;
-        position: absolute;
-        top: 10px;
-        left: 300px;
-        right: 300px;
-    }
-    ul.user-messages li {
-        list-style: none;
-        margin-left: 0;
-    }
-    ul.user-messages a.close-message{
-        float: right;
-    }
-    ul.user-messages .error {
-        color: red;
-        font-weight: bold;
-    }
-    
+ul.user-messages {
+	position: absolute;
+	top: 25px;
+	left: 300px;
+	right: 300px;
+    /*margin: auto 0;*/
+    z-index: 999;
+    background: transparent;
+    border: none;
+    list-style: none;
+}
+
+ul.user-messages li {
+    padding: 5px;
+	border: solid 2px #000;
+    border-radius: 4px;
+	background: #eee;
+	opacity: 0.95;
+	font-weight: bold;
+}
+
+ul.user-messages li, ul.user-messages li a {
+    color: #000;
+}
+
+ul.user-messages li.error {
+	color: #f44;
+}
+
+ul.user-messages li.success {
+	color: #6c3;
+}
+
+ul.user-messages li.warning {
+	color: #da2;
+}
+
+ul.user-messages li a.close-message {
+    float: right;
+    color: #000;
+    text-decoration: none;
+}
+
+ul.user-messages li a.close-message:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
 </style>
 <ul class="user-messages">
-    <a href="" class="close-message">{% trans "close" %}</a>
     {% for m in messages %}
-      <li>
-        <span class="text-message {{m.tags}}">{{m}}</a>
+      <li class="{{m.tags}}">
+        <span class="{{m.tags}}">{{m}}</a>
+        <a href="" class="close-message">{% trans "close" %}</a>
       </li>
     {% endfor %}
 </ul>
