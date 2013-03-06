@@ -261,7 +261,48 @@ class ArticleCategory(models.Model):
         verbose_name_plural = _(u'article categories')
 
 
-class BaseArticle(TimeStampedModel):
+class BaseNavigable(TimeStampedModel):
+
+    class Meta:
+        abstract = True
+
+    def _get_navigation_parent(self):
+        ct = ContentType.objects.get_for_model(self.__class__)
+        nodes = NavNode.objects.filter(object_id=self.id, content_type=ct)
+        if nodes.count():
+            node = nodes[0]
+            if node.parent:
+                return node.parent.id
+            else:
+                return -node.tree.id
+        else:
+            return None
+
+    def _set_navigation_parent(self, value):
+        ct = ContentType.objects.get_for_model(self.__class__)
+        if value != None:
+            if value < 0:
+                tree_id = -value
+                tree = get_navtree_class().objects.get(id=tree_id)
+                parent = None
+            else:
+                parent = NavNode.objects.get(id=value)
+                tree = parent.tree
+
+            create_navigation_node(ct, self, tree, parent)
+
+    navigation_parent = property(_get_navigation_parent, _set_navigation_parent,
+        doc=_("set the parent in navigation."))
+
+    def save(self, *args, **kwargs):
+        ret = super(BaseNavigable, self).save(*args, **kwargs)
+        
+        parent_id = getattr(self, '_navigation_parent', None)
+        if parent_id != None:
+            self.navigation_parent = parent_id
+        return ret
+
+class BaseArticle(BaseNavigable):
     """An article : static page, blog item, ..."""
 
     DRAFT = 0
@@ -337,33 +378,6 @@ class BaseArticle(TimeStampedModel):
     def __unicode__(self):
         return self.title
 
-    def _get_navigation_parent(self):
-        ct = ContentType.objects.get_for_model(get_article_class())
-        nodes = NavNode.objects.filter(object_id=self.id, content_type=ct)
-        if nodes.count():
-            node = nodes[0]
-            if node.parent:
-                return node.parent.id
-            else:
-                return -node.tree.id
-        else:
-            return None
-
-    def _set_navigation_parent(self, value):
-        ct = ContentType.objects.get_for_model(get_article_class())
-        if value != None:
-            if value < 0:
-                tree_id = -value
-                tree = get_navtree_class().objects.get(id=tree_id)
-                parent = None
-            else:
-                parent = NavNode.objects.get(id=value)
-                tree = parent.tree
-
-            create_navigation_node(ct, self, tree, parent)
-
-    navigation_parent = property(_get_navigation_parent, _set_navigation_parent,
-        doc=_("set the parent in navigation."))
 
     def save(self, *args, **kwargs):
         #autoslug localized title for creating locale_slugs
@@ -386,10 +400,6 @@ class BaseArticle(TimeStampedModel):
                 self.slug = slugify(self.title)
         
         ret = super(BaseArticle, self).save(*args, **kwargs)
-        
-        parent_id = getattr(self, '_navigation_parent', None)
-        if parent_id != None:
-            self.navigation_parent = parent_id
         
         if self.is_homepage:
             for a in get_article_class().objects.filter(is_homepage=True).exclude(id=self.id):
@@ -430,8 +440,9 @@ class BaseArticle(TimeStampedModel):
     def can_publish_article(self, user):
         return self._can_change(user)
 
-class Link(TimeStampedModel):
+class Link(BaseNavigable):
     """Link to a given url"""
+    title = models.CharField(_(u'Title'), max_length=200)
     url = models.CharField(_(u'URL'), max_length=200)
 
     def get_absolute_url(self):
@@ -451,7 +462,7 @@ class Link(TimeStampedModel):
         return self.url
 
     def __unicode__(self):
-        return self.url
+        return self.title
 
     class Meta:
         verbose_name = _(u"link")

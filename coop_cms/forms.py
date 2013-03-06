@@ -1,5 +1,5 @@
 from django import forms
-from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending
+from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending, Link
 from django.contrib.contenttypes.models import ContentType
 from settings import get_navigable_content_types
 from django.core.exceptions import ValidationError
@@ -116,42 +116,33 @@ class NewsletterItemAdminForm(forms.ModelForm):
     def clean_content_type(self):
         return ContentType.objects.get_for_model(get_article_class())
 
-class ArticleFormWithNavigation(forms.ModelForm):
+class WithNavigationModelForm(forms.ModelForm):
     navigation_parent = forms.ChoiceField()
-
+    
     def __init__(self, *args, **kwargs):
-        super(ArticleFormWithNavigation, self).__init__(*args, **kwargs)
-        self.article = kwargs.get('instance', None)
+        super(WithNavigationModelForm, self).__init__(*args, **kwargs)
+        #self.instance = kwargs.get('instance', None)
         self.fields['navigation_parent'] = forms.ChoiceField(
             choices=get_node_choices(), required=False, help_text=get_navigation_parent_help_text()
         )
-        if self.article:
-            self.fields['navigation_parent'].initial = self.article.navigation_parent
+        if self.instance:
+            self.fields['navigation_parent'].initial = self.instance.navigation_parent
 
     def clean_navigation_parent(self):
         parent_id = self.cleaned_data['navigation_parent']
         parent_id = int(parent_id) if parent_id != 'None' else None
-        #if self.article:
-        #    ct = ContentType.objects.get_for_model(get_article_class())
-        #    try:
-        #        node = NavNode.objects.get(object_id=self.article.id, content_type=ct)
-        #        #raise ValidationError if own parent or child of its own child
-        #        node.check_new_navigation_parent(parent_id)
-        #    except NavNode.DoesNotExist:
-        #        pass
         return parent_id
 
     def save(self, commit=True):
-        article = super(ArticleFormWithNavigation, self).save(commit=False)
+        instance = super(WithNavigationModelForm, self).save(commit=False)
         parent_id = self.cleaned_data['navigation_parent']
-        if article.id:
-            article.navigation_parent = parent_id
+        if instance.id:
+            instance.navigation_parent = parent_id
         else:
-            setattr(article, '_navigation_parent', parent_id)
+            setattr(instance, '_navigation_parent', parent_id)
         if commit:
-            article.save()
-        return article
-
+            instance.save()
+        return instance
 
 class ArticleAdminForm(forms.ModelForm):
 
@@ -197,7 +188,7 @@ class ArticleTemplateForm(forms.Form):
 class ArticleLogoForm(forms.Form):
     image = forms.ImageField(required=True, label = _('Logo'),)
 
-class ArticleSettingsForm(ArticleFormWithNavigation):
+class ArticleSettingsForm(WithNavigationModelForm):
     class Meta:
         model = get_article_class()
         fields = ('template', 'category', 'publication', 'publication_date', 'headline', 'in_newsletter', 'summary',)
@@ -222,7 +213,7 @@ class ArticleSettingsForm(ArticleFormWithNavigation):
         else:
             self.fields["template"] = forms.CharField()
 
-class NewArticleForm(ArticleFormWithNavigation):
+class NewArticleForm(WithNavigationModelForm):
     class Meta:
         model = get_article_class()
         fields = ('title', 'template', 'category', 'headline', 'publication', 'in_newsletter')
@@ -235,6 +226,14 @@ class NewArticleForm(ArticleFormWithNavigation):
         else:
             self.fields["template"] = forms.CharField()
         self.fields["title"].widget = forms.TextInput(attrs={'size': 30})
+
+
+class NewLinkForm(WithNavigationModelForm):
+    
+    class Meta:
+        model = Link
+        fields = ('title', 'url',)
+    
 
 class NewNewsletterForm(forms.ModelForm):
     class Meta:

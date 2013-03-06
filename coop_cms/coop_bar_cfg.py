@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from django.template.loader import get_template
 from django.template import Context
+from coop_cms.models import Link
 from coop_cms.settings import get_article_class, get_navtree_class
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -33,6 +34,15 @@ def can_add_article(func):
     def wrapper(request, context):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
+        perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+        if request and request.user.has_perm(perm):
+            return func(request, context)
+        return None
+    return wrapper
+
+def can_add_link(func):
+    def wrapper(request, context):
+        ct = ContentType.objects.get_for_model(Link)
         perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
         if request and request.user.has_perm(perm):
             return func(request, context)
@@ -97,6 +107,14 @@ def cms_new_article(request, context):
         url = reverse('coop_cms_new_article')
         return make_link(url, _(u'Add article'), 'fugue/document--plus.png',
             classes=['alert_on_click', 'colorbox-form', 'icon'])
+
+@can_add_link
+def cms_new_link(request, context):
+    if not context.get('edit_mode'):
+        url = reverse('coop_cms_new_link')
+        return make_link(url, _(u'Add link'), 'fugue/document--plus.png',
+            classes=['alert_on_click', 'colorbox-form', 'icon'])
+
 
 @can_add_article
 def cms_set_homepage(request, context):
@@ -237,7 +255,7 @@ def load_commands(coop_bar):
             change_newsletter_settings,
             schedule_newsletter, test_newsletter],
         [cms_edit, cms_view, cms_save, cms_cancel],
-        [cms_new_article, cms_article_settings, cms_set_homepage],
+        [cms_new_article, cms_new_link, cms_article_settings, cms_set_homepage],
         [cms_publish],
         [cms_media_library, cms_upload_image, cms_upload_doc],
         [log_out]

@@ -393,31 +393,59 @@ def article_settings(request, article_id):
 @login_required
 @popup_redirect
 def new_article(request):
-    try:
-        Article = get_article_class()
-        ct = ContentType.objects.get_for_model(Article)
-        perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
-    
-        if not request.user.has_perm(perm):
-            raise PermissionDenied
-    
-        if request.method == "POST":
-            form = forms.NewArticleForm(request.user, request.POST, request.FILES)
-            if form.is_valid():
-                #article.template = form.cleaned_data['template']
-                article = form.save()
-                return HttpResponseRedirect(article.get_edit_url())
-        else:
-            form = forms.NewArticleForm(request.user)
-    
-        return render_to_response(
-            'coop_cms/popup_new_article.html',
-            locals(),
-            context_instance=RequestContext(request)
-        )
-    except Exception:
-        logger.exception("new_article")
-        raise
+    Article = get_article_class()
+    ct = ContentType.objects.get_for_model(Article)
+    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+
+    if not request.user.has_perm(perm):
+        raise PermissionDenied
+
+    if request.method == "POST":
+        form = forms.NewArticleForm(request.user, request.POST, request.FILES)
+        if form.is_valid():
+            #article.template = form.cleaned_data['template']
+            article = form.save()
+            success_message(request, _(u'The article has been created properly'))
+            return HttpResponseRedirect(article.get_edit_url())
+    else:
+        form = forms.NewArticleForm(request.user)
+
+    return render_to_response(
+        'coop_cms/popup_new_article.html',
+        locals(),
+        context_instance=RequestContext(request)
+    )
+
+@login_required
+@popup_redirect
+def new_link(request):
+    ct = ContentType.objects.get_for_model(models.Link)
+    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+
+    if not request.user.has_perm(perm):
+        raise PermissionDenied
+
+    if request.method == "POST":
+        form = forms.NewLinkForm(request.POST)
+        if form.is_valid():
+            link = form.save()
+            
+            homepage_url = reverse('coop_cms_homepage')
+            next = request.META.get('HTTP_REFERER', homepage_url)
+            success_message(request, _(u'The link has been created properly'))
+            return HttpResponseRedirect(next)
+    else:
+        form = forms.NewLinkForm()
+        
+    context = {
+        'form': form,
+    }
+
+    return render_to_response(
+        'coop_cms/popup_new_link.html',
+        context,
+        context_instance=RequestContext(request)
+    )
 
 @login_required
 @popup_redirect
