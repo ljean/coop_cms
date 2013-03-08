@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n %}{% load url from future %}
 {% if not is_ajax %}
 <html>
   <head>
@@ -52,8 +52,8 @@
       <div class="library">
         <div class="close-slider"><a href="" class="pageslide-close"></a></div>
         <div class="media-selector">
-          {% url coop_cms_media_images as images_url %}
-          {% url coop_cms_media_documents as docs_url %}
+          {% url "coop_cms_media_images" as images_url %}
+          {% url "coop_cms_media_documents" as docs_url %}
           <a class="image-sel" href="{{images_url}}?page=1">{% trans "Images" %}</a>
           <a class="document-sel" href="{{docs_url}}?page=1">{% trans "Documents" %}</a>
         </div>
