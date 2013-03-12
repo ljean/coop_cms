@@ -381,9 +381,13 @@ def article_settings(request, article_id):
         else:
             form = forms.ArticleSettingsForm(request.user, instance=article)
     
+        context = {
+            'article': article,
+            'form': form,
+        }
         return render_to_response(
             'coop_cms/popup_article_settings.html',
-            locals(),
+            context,
             context_instance=RequestContext(request)
         )
     except Exception, msg:

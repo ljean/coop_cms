@@ -137,7 +137,8 @@ class WithNavigationModelForm(forms.ModelForm):
         instance = super(WithNavigationModelForm, self).save(commit=False)
         parent_id = self.cleaned_data['navigation_parent']
         if instance.id:
-            instance.navigation_parent = parent_id
+            if instance.navigation_parent != parent_id:
+                instance.navigation_parent = parent_id
         else:
             setattr(instance, '_navigation_parent', parent_id)
         if commit:
