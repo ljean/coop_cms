@@ -91,32 +91,26 @@ def view_all_articles(request):
 @popup_redirect
 def set_homepage(request, article_id):
     """use the article as homepage"""
-    try:
-        article = get_object_or_404(get_article_class(), id=article_id)
+    article = get_object_or_404(get_article_class(), id=article_id)
 
-        if not request.user.has_perm('can_publish_article', article):
-            raise PermissionDenied
+    if not request.user.has_perm('can_publish_article', article):
+        raise PermissionDenied
 
-        if request.method == "POST":
-            article.is_homepage = True
-            article.save()
-            return HttpResponseRedirect(reverse('coop_cms_homepage'))
+    if request.method == "POST":
+        article.is_homepage = True
+        article.save()
+        return HttpResponseRedirect(reverse('coop_cms_homepage'))
 
-        context_dict = {
-            'article': article,
-            'title': _(u"Do you want to use this article as homepage?"),
-        }
+    context_dict = {
+        'article': article,
+        'title': _(u"Do you want to use this article as homepage?"),
+    }
 
-        return render_to_response(
-            'coop_cms/popup_set_homepage.html',
-            context_dict,
-            context_instance=RequestContext(request)
-        )
-    except Exception, msg:
-        logger.exception("set_homepage")
-        raise
-
-
+    return render_to_response(
+        'coop_cms/popup_set_homepage.html',
+        context_dict,
+        context_instance=RequestContext(request)
+    )
 
 def view_article(request, url, extra_context=None, force_template=None):
     """view the article"""
@@ -144,12 +138,14 @@ def view_article(request, url, extra_context=None, force_template=None):
 @login_required
 def edit_article(request, url, extra_context=None, force_template=None):
     """edit the article"""
-
+    
     article_form_class = get_article_form()
 
     article = get_article_or_404(slug=url)
-
+    
     if not request.user.has_perm('can_edit_article', article):
+        logger.error("PermissionDenied")
+        error_message(request, _(u'Permission denied'))
         raise PermissionDenied
 
     if request.method == "POST":
@@ -166,10 +162,6 @@ def edit_article(request, url, extra_context=None, force_template=None):
                 article.temp_logo = ''
                 article.save()
 
-            #logo = form.cleaned_data["logo"]
-            #if logo:
-            #    article.logo.save(logo.name, logo)
-
             if djaloha_forms:
                 [f.save() for f in djaloha_forms]
 
@@ -179,6 +171,7 @@ def edit_article(request, url, extra_context=None, force_template=None):
         else:
             error_text = u'<br />'.join([unicode(f.errors) for f in [form]+djaloha_forms if f.errors])
             error_message(request, _(u'An error occured: {0}'.format(error_text)))
+            logger.debug("error: error_text")
     else:
         form = article_form_class(instance=article)
 
@@ -211,41 +204,37 @@ def cancel_edit_article(request, url):
 @popup_redirect
 def publish_article(request, url):
     """change the publication status of an article"""
-    try:
-        article = get_article_or_404(slug=url)
-    
-        if not request.user.has_perm('can_publish_article', article):
-            raise PermissionDenied
-    
-        draft = (article.publication == models.BaseArticle.DRAFT)
-        if draft:
-            article.publication = models.BaseArticle.PUBLISHED
-        else:
-            article.publication = models.BaseArticle.DRAFT
-    
-        if request.method == "POST":
-            form = forms.PublishArticleForm(request.POST, instance=article)
-            if form.is_valid():
-                article = form.save()
-                return HttpResponseRedirect(article.get_absolute_url())
-        else:
-            form = forms.PublishArticleForm(instance=article)
-    
-        context_dict = {
-            'form': form,
-            'article': article,
-            'draft': draft,
-            'title': _(u"Do you want to publish this article?") if draft else _(u"Make it draft?"),
-        }
-    
-        return render_to_response(
-            'coop_cms/popup_publish_article.html',
-            context_dict,
-            context_instance=RequestContext(request)
-        )
-    except Exception:
-        logger.exception("publish_article")
-        raise
+    article = get_article_or_404(slug=url)
+
+    if not request.user.has_perm('can_publish_article', article):
+        raise PermissionDenied
+
+    draft = (article.publication == models.BaseArticle.DRAFT)
+    if draft:
+        article.publication = models.BaseArticle.PUBLISHED
+    else:
+        article.publication = models.BaseArticle.DRAFT
+
+    if request.method == "POST":
+        form = forms.PublishArticleForm(request.POST, instance=article)
+        if form.is_valid():
+            article = form.save()
+            return HttpResponseRedirect(article.get_absolute_url())
+    else:
+        form = forms.PublishArticleForm(instance=article)
+
+    context_dict = {
+        'form': form,
+        'article': article,
+        'draft': draft,
+        'title': _(u"Do you want to publish this article?") if draft else _(u"Make it draft?"),
+    }
+
+    return render_to_response(
+        'coop_cms/popup_publish_article.html',
+        context_dict,
+        context_instance=RequestContext(request)
+    )
 
 @login_required
 def show_media(request, media_type):
@@ -285,7 +274,6 @@ def show_media(request, media_type):
     except Exception:
         logger.exception("show_media")
         raise
-
 
 @login_required
 def upload_image(request):
@@ -347,48 +335,40 @@ def upload_doc(request):
 @login_required
 @popup_redirect
 def change_template(request, article_id):
-    try:
-        article = get_object_or_404(get_article_class(), id=article_id)
-        if request.method == "POST":
-            form = forms.ArticleTemplateForm(article, request.user, request.POST, request.FILES)
-            if form.is_valid():
-                article.template = form.cleaned_data['template']
-                article.save()
-                return HttpResponseRedirect(article.get_edit_url())
-        else:
-            form = forms.ArticleTemplateForm(article, request.user)
-    
-        return render_to_response(
-            'coop_cms/popup_change_template.html',
-            locals(),
-            context_instance=RequestContext(request)
-        )
-    except Exception:
-        logger.exception("change_template")
-        raise
+    article = get_object_or_404(get_article_class(), id=article_id)
+    if request.method == "POST":
+        form = forms.ArticleTemplateForm(article, request.user, request.POST, request.FILES)
+        if form.is_valid():
+            article.template = form.cleaned_data['template']
+            article.save()
+            return HttpResponseRedirect(article.get_edit_url())
+    else:
+        form = forms.ArticleTemplateForm(article, request.user)
+
+    return render_to_response(
+        'coop_cms/popup_change_template.html',
+        locals(),
+        context_instance=RequestContext(request)
+    )
     
 @login_required
 @popup_redirect
 def article_settings(request, article_id):
-    try:
-        article = get_object_or_404(get_article_class(), id=article_id)
-        if request.method == "POST":
-            form = forms.ArticleSettingsForm(request.user, request.POST, request.FILES, instance=article)
-            if form.is_valid():
-                #article.template = form.cleaned_data['template']
-                article = form.save()
-                return HttpResponseRedirect(article.get_absolute_url())
-        else:
-            form = forms.ArticleSettingsForm(request.user, instance=article)
-    
-        return render_to_response(
-            'coop_cms/popup_article_settings.html',
-            locals(),
-            context_instance=RequestContext(request)
-        )
-    except Exception, msg:
-        logger.exception("article_settings")
-        raise
+    article = get_object_or_404(get_article_class(), id=article_id)
+    if request.method == "POST":
+        form = forms.ArticleSettingsForm(request.user, request.POST, request.FILES, instance=article)
+        if form.is_valid():
+            #article.template = form.cleaned_data['template']
+            article = form.save()
+            return HttpResponseRedirect(article.get_absolute_url())
+    else:
+        form = forms.ArticleSettingsForm(request.user, instance=article)
+
+    return render_to_response(
+        'coop_cms/popup_article_settings.html',
+        locals(),
+        context_instance=RequestContext(request)
+    )
 
 @login_required
 @popup_redirect
@@ -461,25 +441,21 @@ def new_newsletter(request, newsletter_id=None):
     else:
         newsletter = None
         
-    try:
-        if request.method == "POST":
-            form = forms.NewNewsletterForm(request.user, request.POST, instance=newsletter)
-            if form.is_valid():
-                #article.template = form.cleaned_data['template']
-                newsletter = form.save()
-                return HttpResponseRedirect(newsletter.get_edit_url())
-        else:
-            form = forms.NewNewsletterForm(request.user, instance=newsletter)
-    
-        return render_to_response(
-            'coop_cms/popup_new_newsletter.html',
-            locals(),
-            context_instance=RequestContext(request)
-        )
-    except Exception:
-        logger.exception("new_newsletter")
-        raise
+    if request.method == "POST":
+        form = forms.NewNewsletterForm(request.user, request.POST, instance=newsletter)
+        if form.is_valid():
+            #article.template = form.cleaned_data['template']
+            newsletter = form.save()
+            return HttpResponseRedirect(newsletter.get_edit_url())
+    else:
+        form = forms.NewNewsletterForm(request.user, instance=newsletter)
 
+    return render_to_response(
+        'coop_cms/popup_new_newsletter.html',
+        locals(),
+        context_instance=RequestContext(request)
+    )
+    
 @login_required
 def update_logo(request, article_id):
     try:
