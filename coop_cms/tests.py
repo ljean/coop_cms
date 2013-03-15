@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
-from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending, BaseArticle
+from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory
 from coop_cms.settings import is_localized
 import json
 from django.core.exceptions import ValidationError
@@ -22,6 +22,17 @@ from django.core import management
 
 class ArticleTest(TestCase):
     
+    def setUp(self):
+        self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
+        settings.COOP_CMS_ARTICLE_TEMPLATES = (
+            ('test/newsletter_red.html', 'Red'),
+            ('test/newsletter_blue.html', 'Blue'),
+        )
+        
+    def tearDown(self):
+        #restore
+        settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
+        
     def _log_as_editor(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
         
@@ -118,27 +129,6 @@ class ArticleTest(TestCase):
         article = get_article_class().objects.get(id=article.id)
         self.assertEquals(article.title, initial_data['title'])
         self.assertEquals(article.content, initial_data['content'])
-        
-    def test_article_empty_title(self):
-        initial_data = {'title': "test", 'content': "this is my article content"}
-        article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
-        data = {'content': "un nouveau contenu"}
-        
-        self._log_as_editor()
-        data["title"] = ""
-        response = self.client.post(article.get_edit_url(), data=data, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self._check_article_not_changed(article, data, initial_data)
-        
-        data["title"] = "<br>"
-        response = self.client.post(article.get_edit_url(), data=data, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self._check_article_not_changed(article, data, initial_data)
-        
-        data["title"] = " <br> "
-        response = self.client.post(article.get_edit_url(), data=data, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self._check_article_not_changed(article, data, initial_data)
         
     def _is_aloha_found(self, response):
         self.assertEqual(200, response.status_code)
@@ -367,7 +357,7 @@ class ArticleTest(TestCase):
         self.assertEqual(article.title, data['title'])
         self.assertEqual(article.publication, data['publication'])
         self.assertEqual(article.template, data['template'])
-        self.assertEqual(article.navigation_parent, 0)
+        self.assertEqual(article.navigation_parent, -tree.id)
         
         self.assertEqual(NavNode.objects.count(), 1)
         node = NavNode.objects.all()[0]
@@ -407,6 +397,98 @@ class ArticleTest(TestCase):
         node2 = NavNode.objects.exclude(id=node1.id)[0]
         self.assertEqual(node2.content_object, art2)
         self.assertEqual(node2.parent, node1)
+        
+    def test_article_settings(self, move_nav=False):
+        initial_data = {'title': "test", 'content': "this is my article content"}
+        Article = get_article_class()
+        art0 = mommy.make_one(Article)
+        
+        art1 = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+        
+        tree = get_navtree_class().objects.create()
+        ct = ContentType.objects.get_for_model(Article)
+        node1 = NavNode.objects.create(content_type=ct, object_id=art0.id, tree=tree, parent=None)
+        node2 = NavNode.objects.create(content_type=ct, object_id=art0.id, tree=tree, parent=None)
+        
+        category = mommy.make_one(ArticleCategory)
+        
+        self._log_as_editor()
+        data = {
+            'template': get_article_templates(None, self.user)[0][0],
+            'category': category.id,
+            'publication': BaseArticle.PUBLISHED,
+            'publication_date': "2013-01-01 12:00:00",
+            'headline': True,
+            'in_newsletter': True,
+            'summary': 'short summary',
+            'navigation_parent': node1.id,
+        }
+        
+        response = self.client.post(reverse('coop_cms_article_settings', args=[art1.id]), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertEqual(Article.objects.exclude(id__in=(art1.id, art0.id)).count(), 0)
+        art1 = Article.objects.get(id=art1.id)
+        
+        self.assertEqual(art1.title, initial_data['title'])
+        self.assertEqual(art1.publication, data['publication'])
+        self.assertEqual(art1.navigation_parent, node1.id)
+        self.assertEqual(art1.publication_date, datetime(2013, 1, 1, 12, 0, 0))
+        self.assertEqual(art1.headline, data['headline'])
+        self.assertEqual(art1.in_newsletter, data['in_newsletter'])
+        self.assertEqual(art1.summary, data['summary'])
+        self.assertEqual(art1.template, data['template'])
+        
+        self.assertEqual(NavNode.objects.count(), 3)
+        node = NavNode.objects.exclude(id__in=(node1.id, node2.id))[0]
+        self.assertEqual(node.content_object, art1)
+        self.assertEqual(node.parent, node1)
+        
+        #Update the article
+        category2 = mommy.make_one(ArticleCategory)
+        
+        node_id = node2.id if move_nav else node1.id
+        
+        data = {
+            'template': get_article_templates(None, self.user)[1][0],
+            'category': category2.id,
+            'publication': BaseArticle.DRAFT,
+            'publication_date': "2013-01-01 18:00:00",
+            'headline': False,
+            'in_newsletter': False,
+            'summary': 'another summary',
+            'navigation_parent': node_id,
+        }
+        
+        response = self.client.post(reverse('coop_cms_article_settings', args=[art1.id]), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertEqual(Article.objects.exclude(id__in=(art1.id, art0.id)).count(), 0)
+        art1 = Article.objects.get(id=art1.id)
+        
+        self.assertEqual(art1.title, initial_data['title'])
+        self.assertEqual(art1.publication, data['publication'])
+        self.assertEqual(art1.template, data['template'])
+        self.assertEqual(art1.publication_date, datetime(2013, 1, 1, 18, 0, 0))
+        self.assertEqual(art1.headline, data['headline'])
+        self.assertEqual(art1.in_newsletter, data['in_newsletter'])
+        self.assertEqual(art1.summary, data['summary'])
+        #self.assertEqual(art1.navigation_parent, data['navigation_parent'])
+        
+        if move_nav:
+            self.assertEqual(NavNode.objects.count(), 4)
+            node = NavNode.objects.exclude(id__in=(node1.id, node2.id, node.id))[0]
+            self.assertEqual(node.content_object, art1)
+            self.assertEqual(node.parent, node2)
+        else:
+            self.assertEqual(NavNode.objects.count(), 3)
+            node = NavNode.objects.exclude(id__in=(node1.id, node2.id))[0]
+            self.assertEqual(node.content_object, art1)
+            self.assertEqual(node.parent, node1)
+            
+    def test_article_settings_move_nav(self):
+        self.test_article_settings(True)
+
 
 class NavigationTest(TestCase):
 
@@ -763,7 +845,7 @@ class NavigationTest(TestCase):
         
     def _do_test_get_suggest_list(self):
         addrs = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
-        links = [Link.objects.create(url=a) for a in addrs]
+        links = [Link.objects.create(url=a, title=a) for a in addrs]
         
         self._log_as_editor()
         
@@ -798,7 +880,7 @@ class NavigationTest(TestCase):
         
     def test_get_suggest_list_only_not_in_navigation(self):
         addrs = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
-        links = [Link.objects.create(url=a) for a in addrs]
+        links = [Link.objects.create(url=a, title=a) for a in addrs]
         
         link = links[0]
         node = NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=1, parent=None)
@@ -824,7 +906,7 @@ class NavigationTest(TestCase):
         self.assertEqual(self.tree.types.count(), 0)
         
         addrs = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
-        links = [Link.objects.create(url=a) for a in addrs]
+        links = [Link.objects.create(url=a, title=a) for a in addrs]
         
         article = get_article_class().objects.create(title="python", content='nice snake')
         
@@ -851,7 +933,7 @@ class NavigationTest(TestCase):
         self.tree.save()
         
         addrs = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
-        links = [Link.objects.create(url=a) for a in addrs]
+        links = [Link.objects.create(url=a, title=a) for a in addrs]
         
         article = get_article_class().objects.create(title="python", content='nice snake')
         
@@ -2072,8 +2154,8 @@ class NavigationTreeTest(TestCase):
     def test_view_default_navigation(self):
         tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul %}')
         
-        link1 = Link.objects.create(url='http://www.google.fr')
-        link2 = Link.objects.create(url='http://www.apidev.fr')
+        link1 = Link.objects.create(url='http://www.google.fr', title="http://www.google.fr")
+        link2 = Link.objects.create(url='http://www.apidev.fr', title="http://www.apidev.fr")
         art1 = get_article_class().objects.create(title='Article Number One', content='oups')
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
@@ -2098,8 +2180,8 @@ class NavigationTreeTest(TestCase):
     def test_view_alternative_navigation(self):
         tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul tree=tree1 %}')
         
-        link1 = Link.objects.create(url='http://www.google.fr')
-        link2 = Link.objects.create(url='http://www.apidev.fr')
+        link1 = Link.objects.create(url='http://www.google.fr', title="http://www.google.fr")
+        link2 = Link.objects.create(url='http://www.apidev.fr', title="http://www.apidev.fr")
         art1 = get_article_class().objects.create(title='Article Number One', content='oups')
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
@@ -2125,8 +2207,8 @@ class NavigationTreeTest(TestCase):
     def test_view_several_navigation(self):
         tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul tree=tree1 %}{% navigation_as_nested_ul tree=tree2 %}{% navigation_as_nested_ul %}')
         
-        link1 = Link.objects.create(url='http://www.google.fr')
-        link2 = Link.objects.create(url='http://www.apidev.fr')
+        link1 = Link.objects.create(url='http://www.google.fr', title="http://www.google.fr")
+        link2 = Link.objects.create(url='http://www.apidev.fr', title="http://www.apidev.fr")
         art1 = get_article_class().objects.create(title='Article Number One', content='oups')
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
