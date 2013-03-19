@@ -676,21 +676,26 @@ def add_navnode(request, tree):
 
     #get the type of object
     object_type = request.POST['object_type']
-    app_label, model_name = object_type.split('.')
-    ct = ContentType.objects.get(app_label=app_label, model=model_name)
-    model_class = ct.model_class()
-    object_id = request.POST['object_id']
-    model_name = model_class._meta.verbose_name
-    if not object_id:
-        raise ValidationError(_(u"Please choose an existing {0}").format(model_name.lower()))
-    try:
-        object = model_class.objects.get(id=object_id)
-    except model_class.DoesNotExist:
-        raise ValidationError(_(u"{0} {1} not found").format(model_class._meta.verbose_name, object_id))
+    if object_type:
+        app_label, model_name = object_type.split('.')
+        ct = ContentType.objects.get(app_label=app_label, model=model_name)
+        model_class = ct.model_class()
+        object_id = request.POST['object_id']
+        model_name = model_class._meta.verbose_name
+        if not object_id:
+            raise ValidationError(_(u"Please choose an existing {0}").format(model_name.lower()))
+        try:
+            object = model_class.objects.get(id=object_id)
+        except model_class.DoesNotExist:
+            raise ValidationError(_(u"{0} {1} not found").format(model_class._meta.verbose_name, object_id))
+    
+        #objects can not be added twice in the navigation tree
+        if models.NavNode.objects.filter(tree=tree, content_type=ct, object_id=object.id).count() > 0:
+            raise ValidationError(_(u"The {0} is already in navigation").format(model_class._meta.verbose_name))
 
-    #objects can not be added twice in the navigation tree
-    if models.NavNode.objects.filter(tree=tree, content_type=ct, object_id=object.id).count() > 0:
-        raise ValidationError(_(u"The {0} is already in navigation").format(model_class._meta.verbose_name))
+    else:
+        ct = None
+        object = None
 
     #Create the node
     parent_id = request.POST.get('parent_id', 0)
@@ -740,6 +745,13 @@ def get_suggest_list(request, tree):
                     'type': ct.app_label + u'.' + ct.model,
                 })
 
+    #Add suggestion for an empty node
+    suggestions.append({
+        'label': _(u"Node"),
+        'value': 0,
+        'category': _(u"Empty node"),
+        'type': "",
+    })
     response['suggestions'] = suggestions
     return response
 

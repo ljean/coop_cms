@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coop_cms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2013-03-07 10:02+0100\n"
-"PO-Revision-Date: 2013-03-07 10:08+0100\n"
+"POT-Creation-Date: 2013-03-19 22:24+0100\n"
+"PO-Revision-Date: 2013-03-19 22:27+0100\n"
 "Last-Translator: Luc Jean <ljean@apidev.fr>\n"
 "Language-Team: Apidev, Quinode <contact@quinode.fr>\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgid "All"
 msgstr "Tous"
 
 #: .\admin.py:46
-#: .\models.py:90
+#: .\models.py:92
 msgid "navigable types"
 msgstr "types navigables"
 
@@ -39,7 +39,7 @@ msgid "Publication"
 msgstr "Publication"
 
 #: .\admin.py:70
-#: .\models.py:333
+#: .\models.py:343
 msgid "Summary"
 msgstr "Résumé"
 
@@ -56,12 +56,12 @@ msgid "Article admin"
 msgstr "Admin de l'article"
 
 #: .\coop_bar_cfg.py:74
-#: .\models.py:235
+#: .\models.py:245
 msgid "Navigation tree"
 msgstr "Arborescence"
 
 #: .\coop_bar_cfg.py:77
-#: .\models.py:236
+#: .\models.py:246
 msgid "Navigation trees"
 msgstr "Arborescences"
 
@@ -120,13 +120,13 @@ msgid "Edit"
 msgstr "Editer"
 
 #: .\coop_bar_cfg.py:169
-#: .\models.py:312
+#: .\models.py:322
 #: .\templates\coop_cms\popup_publish_article.html.py:36
 msgid "Draft"
 msgstr "Brouillon"
 
 #: .\coop_bar_cfg.py:172
-#: .\models.py:313
+#: .\models.py:323
 msgid "Published"
 msgstr "Publié"
 
@@ -170,368 +170,382 @@ msgstr "< pas dans l'arborescence >"
 msgid "Select an article"
 msgstr "Choisir un article"
 
-#: .\forms.py:163
+#: .\forms.py:164
 msgid "Image"
 msgstr "Image"
 
-#: .\forms.py:165
-#: .\forms.py:172
+#: .\forms.py:166
+#: .\forms.py:173
 msgid "Optional description"
 msgstr "Description optionelle"
 
-#: .\forms.py:166
-#: .\forms.py:173
+#: .\forms.py:167
+#: .\forms.py:174
 msgid "Description"
 msgstr "Description"
 
-#: .\forms.py:170
+#: .\forms.py:171
 msgid "File"
 msgstr "Fichier"
 
-#: .\forms.py:189
+#: .\forms.py:190
 msgid "Logo"
 msgstr "Logo"
 
-#: .\forms.py:308
+#: .\forms.py:309
 msgid "This field is required"
 msgstr "Ce champ est requis"
 
-#: .\forms.py:311
+#: .\forms.py:312
 msgid "The scheduling date must be in future"
 msgstr "La date d'envoi doit être dans le futur"
 
-#: .\models.py:75
+#: .\models.py:36
+#: .\views.py:750
+msgid "Node"
+msgstr "Noeud"
+
+#: .\models.py:77
 msgid "Use object unicode"
 msgstr "Utiliser l'unicode de l'objet"
 
-#: .\models.py:76
+#: .\models.py:78
 msgid "Use search field"
 msgstr "Utiliser le champ search"
 
-#: .\models.py:77
+#: .\models.py:79
 msgid "Use get_label"
 msgstr "Utiliser la méthode get_label"
 
-#: .\models.py:80
+#: .\models.py:82
 msgid "django model"
 msgstr "modèle django"
 
-#: .\models.py:81
+#: .\models.py:83
 msgid "search field"
 msgstr "le champ de recherche"
 
-#: .\models.py:82
+#: .\models.py:84
 msgid "How to generate the label"
 msgstr "Comment générer le label"
 
-#: .\models.py:89
+#: .\models.py:91
 msgid "navigable type"
 msgstr "type navigable"
 
-#: .\models.py:100
+#: .\models.py:102
 msgid "tree"
 msgstr "arbre"
 
-#: .\models.py:101
+#: .\models.py:103
 msgid "label"
 msgstr "libellé"
 
-#: .\models.py:102
+#: .\models.py:104
 msgid "parent"
 msgstr "parent"
 
-#: .\models.py:103
-#: .\models.py:251
+#: .\models.py:105
+#: .\models.py:261
 msgid "ordering"
 msgstr "ordre"
 
-#: .\models.py:106
-#: .\models.py:580
+#: .\models.py:108
+#: .\models.py:590
 msgid "content_type"
 msgstr "type de contenu"
 
-#: .\models.py:107
-#: .\models.py:581
+#: .\models.py:109
+#: .\models.py:591
 msgid "object id"
 msgstr "identifiant de l'objet"
 
-#: .\models.py:109
+#: .\models.py:111
 msgid "in navigation"
 msgstr "visible dans la navigation"
 
-#: .\models.py:123
+#: .\models.py:125
 msgid "navigation node"
 msgstr "noeud de navigation"
 
-#: .\models.py:124
+#: .\models.py:126
 msgid "navigation nodes"
 msgstr "noeuds de navigation"
 
-#: .\models.py:210
+#: .\models.py:220
 msgid "A node can not be its own parent"
 msgstr "Un élément ne peut pas être son propre parent"
 
-#: .\models.py:216
+#: .\models.py:226
 msgid "A node can not be child of its own child"
 msgstr "Un élément ne peut pas être son propre enfant"
 
-#: .\models.py:222
-#: .\models.py:249
-#: .\models.py:481
+#: .\models.py:232
+#: .\models.py:259
+#: .\models.py:491
 msgid "name"
 msgstr "nom"
 
-#: .\models.py:260
+#: .\models.py:270
 msgid "article category"
 msgstr "catégorie d'article"
 
-#: .\models.py:261
+#: .\models.py:271
 msgid "article categories"
 msgstr "catégories d'article"
 
-#: .\models.py:295
+#: .\models.py:305
 msgid "set the parent in navigation."
 msgstr "ajouter l’élément à la navigation."
 
-#: .\models.py:327
+#: .\models.py:337
+#: .\models.py:455
 #: .\apps\rss_sync\models.py:9
 #: .\apps\rss_sync\models.py:28
 msgid "title"
 msgstr "titre"
 
-#: .\models.py:328
-#: .\models.py:559
-#: .\models.py:628
+#: .\models.py:338
+#: .\models.py:569
+#: .\models.py:638
 msgid "content"
 msgstr "contenu"
 
-#: .\models.py:329
+#: .\models.py:339
 msgid "publication"
 msgstr "publication"
 
-#: .\models.py:330
-#: .\models.py:630
+#: .\models.py:340
+#: .\models.py:640
 msgid "template"
 msgstr "modèle"
 
-#: .\models.py:334
+#: .\models.py:344
 msgid "Category"
 msgstr "Catégorie"
 
-#: .\models.py:335
+#: .\models.py:345
 msgid "In newsletter"
 msgstr "Lettre d'info"
 
-#: .\models.py:335
+#: .\models.py:345
 msgid "Make this article available for newsletters."
 msgstr "rendre cet article disponible pour insertion dans une lettre d'information"
 
-#: .\models.py:336
+#: .\models.py:346
 msgid "Is homepage"
 msgstr "Page d'accueil"
 
-#: .\models.py:336
+#: .\models.py:346
 msgid "Make this article the website homepage (only one homepage per site)"
 msgstr "Faire de cet article la page d'accueil du site (une seule page d'accueil par site)"
 
-#: .\models.py:337
-#: .\models.py:338
+#: .\models.py:347
+#: .\models.py:348
 msgid "Headline"
 msgstr "à la une"
 
-#: .\models.py:337
+#: .\models.py:347
 msgid "Make this article appear on the home page"
 msgstr "Faire apparaitre cet article à la une du site"
 
-#: .\models.py:369
+#: .\models.py:379
 msgid "No Image"
 msgstr "Pas d'image"
 
-#: .\models.py:370
+#: .\models.py:380
 msgid "logo"
 msgstr "logo"
 
-#: .\models.py:374
+#: .\models.py:384
 msgid "article"
 msgstr "article"
 
-#: .\models.py:375
+#: .\models.py:385
 msgid "articles"
 msgstr "articles"
 
-#: .\models.py:445
+#: .\models.py:455
 msgid "Title"
 msgstr "Titre"
 
-#: .\models.py:446
+#: .\models.py:456
 msgid "URL"
 msgstr "URL"
 
-#: .\models.py:468
+#: .\models.py:478
 #: .\apps\rss_sync\models.py:27
 msgid "link"
 msgstr "lien"
 
-#: .\models.py:469
+#: .\models.py:479
 msgid "links"
 msgstr "liens"
 
-#: .\models.py:490
-#: .\models.py:524
+#: .\models.py:500
+#: .\models.py:534
 msgid "file"
 msgstr "fichier"
 
-#: .\models.py:503
+#: .\models.py:513
 msgid "image"
 msgstr "image"
 
-#: .\models.py:504
+#: .\models.py:514
 msgid "images"
 msgstr "images"
 
-#: .\models.py:553
+#: .\models.py:563
 msgid "document"
 msgstr "document"
 
-#: .\models.py:554
+#: .\models.py:564
 msgid "documents"
 msgstr "documents"
 
-#: .\models.py:557
+#: .\models.py:567
 msgid "identifier"
 msgstr "identifier"
 
-#: .\models.py:565
+#: .\models.py:575
 msgid "piece of HTML"
 msgstr "bloc HTML"
 
-#: .\models.py:566
+#: .\models.py:576
 msgid "pieces of HTML"
 msgstr "blocs HTML"
 
-#: .\models.py:586
+#: .\models.py:596
 msgid "newsletter item"
 msgstr "élément de lettre d'information"
 
-#: .\models.py:587
+#: .\models.py:597
 msgid "newsletter items"
 msgstr "éléments de lettre d'information"
 
-#: .\models.py:626
+#: .\models.py:636
 msgid "subject"
 msgstr "sujet"
 
-#: .\models.py:665
+#: .\models.py:675
 msgid "newsletter"
 msgstr "lettre d'information"
 
-#: .\models.py:666
+#: .\models.py:676
 msgid "newsletters"
 msgstr "lettres d'information"
 
-#: .\models.py:672
+#: .\models.py:682
 msgid "scheduling date"
 msgstr "date de programmation"
 
-#: .\models.py:673
+#: .\models.py:683
 msgid "sending date"
 msgstr "date d'envoi"
 
-#: .\models.py:679
+#: .\models.py:689
 msgid "newsletter sending"
 msgstr "Envoi de lettre d'information"
 
-#: .\models.py:680
+#: .\models.py:690
 msgid "newsletter sendings"
 msgstr "Envois de lettre d'informations"
 
-#: .\views.py:107
+#: .\views.py:106
 msgid "Do you want to use this article as homepage?"
 msgstr "Voulez-vous utiliser cet article comme page d'accueil ?"
 
-#: .\views.py:176
+#: .\views.py:148
+msgid "Permission denied"
+msgstr "Permission refusée"
+
+#: .\views.py:168
 msgid "The article has been saved properly"
 msgstr "L’article a été enregistré avec succès"
 
-#: .\views.py:181
+#: .\views.py:173
 msgid "An error occured: {0}"
 msgstr "Une erreur est survenue: {0}"
 
-#: .\views.py:238
+#: .\views.py:230
 msgid "Do you want to publish this article?"
 msgstr "Voulez-vous publier cet article ?"
 
-#: .\views.py:238
+#: .\views.py:230
 msgid "Make it draft?"
 msgstr "Voulez-vous passez en mode brouillon?"
 
-#: .\views.py:408
+#: .\views.py:392
 msgid "The article has been created properly"
 msgstr "L’article a été créé avec succès"
 
-#: .\views.py:435
+#: .\views.py:419
 msgid "The link has been created properly"
 msgstr "Le lien a été créé avec succès"
 
-#: .\views.py:577
+#: .\views.py:557
 msgid "The node '{0}' has been renamed into '{1}'."
 msgstr "L’élément '{0}' a été renommé en '{1}'."
 
-#: .\views.py:591
+#: .\views.py:571
 msgid "The node has been removed."
 msgstr "L’élément a été supprimé"
 
-#: .\views.py:593
+#: .\views.py:573
 msgid "{0} nodes has been removed."
 msgstr "{0} éléments ont été supprimés"
 
-#: .\views.py:688
+#: .\views.py:668
 msgid "The node '{0}' has been moved."
 msgstr "L'élément '{0}' a été déplacé"
 
-#: .\views.py:705
+#: .\views.py:686
 msgid "Please choose an existing {0}"
 msgstr "Veuillez choisir un {0} existant"
 
-#: .\views.py:709
+#: .\views.py:690
 msgid "{0} {1} not found"
 msgstr "{0} {1} est introuvable"
 
-#: .\views.py:713
+#: .\views.py:694
 msgid "The {0} is already in navigation"
 msgstr "Le {0} est déjà dans l’arborescence"
 
-#: .\views.py:725
+#: .\views.py:710
 msgid "'{0}' has added to the navigation tree."
 msgstr "'{0}' ajouté à l’arborescence."
 
-#: .\views.py:775
+#: .\views.py:752
+msgid "Empty node"
+msgstr "Noeud vide"
+
+#: .\views.py:767
 msgid "The node is now visible."
 msgstr "l’élément est à présent visible dans l’arborescence."
 
-#: .\views.py:776
+#: .\views.py:768
 #: .\templates\coop_cms\navtree_content\default.html.py:4
 msgid "Hide node in navigation"
 msgstr "Masquer cet élément"
 
-#: .\views.py:779
+#: .\views.py:771
 msgid "The node is now hidden."
 msgstr "Cet élément est maintenant masqué."
 
-#: .\views.py:780
+#: .\views.py:772
 #: .\templates\coop_cms\navtree_content\default.html.py:6
 msgid "Show node in navigation"
 msgstr "Rendre visible cet élément"
 
-#: .\views.py:850
+#: .\views.py:842
 msgid "The newsletter has been saved properly"
 msgstr "La lettre d'information a été enregistré avec succès"
 
-#: .\views.py:923
+#: .\views.py:915
 msgid "The test email has been sent to {0} addresses: {1}"
 msgstr "L'email de test a été envoyé à {0} adresses: {1}"
 
-#: .\views.py:927
+#: .\views.py:919
 msgid "An error occured! Please contact your support."
 msgstr "Une erreur est intervenue, contactez le support technique."
 

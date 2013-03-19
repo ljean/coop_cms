@@ -20,7 +20,7 @@ from coop_cms.settings import get_navtree_class, is_localized, COOP_CMS_NAVTREE_
 from django.contrib.staticfiles import finders
 from django.core.files import File
 from django.db.models.signals import pre_delete, post_save
-from django.template.defaultfilters import slugify
+from django.template.defaultfilters import slugify, escape
 from datetime import datetime
 from django.utils import translation
 import urlparse
@@ -32,6 +32,8 @@ def get_object_label(content_type, object):
     """
     returns the label used in navigation according to the configured rule
     """
+    if not object:
+        return _(u"Node")
     try:
         nt = NavType.objects.get(content_type=content_type)
         if nt.label_rule == NavType.LABEL_USE_SEARCH_FIELD:
@@ -60,7 +62,7 @@ def create_navigation_node(content_type, object, tree, parent):
     set_node_ordering(node, tree, parent)
     #associate with a content object
     node.content_type = content_type
-    node.object_id = object.id
+    node.object_id = object.id if object else 0
     node.save()
     return node
 
@@ -103,15 +105,15 @@ class NavNode(models.Model):
     ordering = models.PositiveIntegerField(_("ordering"), default=0)
 
     #generic relation
-    content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"))
-    object_id = models.PositiveIntegerField(verbose_name=_("object id"))
+    content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"), blank=True, null=True)
+    object_id = models.PositiveIntegerField(verbose_name=_("object id"), blank=True, null=True)
     content_object = generic.GenericForeignKey('content_type', 'object_id')
     in_navigation = models.BooleanField(_("in navigation"), default=True)
 
     def get_absolute_url(self):
         if self.content_object:
             return self.content_object.get_absolute_url()
-        return ""
+        return None
 
     def get_content_name(self):
         return self.content_type.model_class()._meta.verbose_name
@@ -147,7 +149,12 @@ class NavNode(models.Model):
         return progeny
 
     def as_jstree(self):
-        li_content = u'<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.label)
+        url = self.get_absolute_url()
+        label = escape(self.label)
+        if url == None:
+            li_content = u'<a>{0}</a>'.format(label)
+        else:
+            li_content = u'<a href="{0}">{1}</a>'.format(url, label)
 
         children_li = [child.as_jstree() for child in self.get_children()]
 
@@ -160,7 +167,11 @@ class NavNode(models.Model):
             t = li_template if hasattr(li_template, 'render') else get_template(li_template)
             return t.render(Context({'node': self}))
         else:
-            return u'<a href="{0}">{1}</a>'.format(self.get_absolute_url(), self.label)
+            url = self.get_absolute_url()
+            if url == None:
+                return u'<a>{0}</a>'.format(self.label)
+            else:
+                return u'<a href="{0}">{1}</a>'.format(url, self.label)
 
     def _get_ul_format(self, ul_template):
         if ul_template:
@@ -442,7 +453,7 @@ class BaseArticle(BaseNavigable):
 
 class Link(BaseNavigable):
     """Link to a given url"""
-    title = models.CharField(_(u'Title'), max_length=200)
+    title = models.CharField(_(u'Title'), max_length=200, default=_(u"title"))
     url = models.CharField(_(u'URL'), max_length=200)
 
     def get_absolute_url(self):
