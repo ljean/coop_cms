@@ -348,6 +348,22 @@ class BaseArticle(BaseNavigable):
     headline = models.BooleanField(_(u"Headline"), default=False, help_text=_(u'Make this article appear on the home page'))
     publication_date = models.DateTimeField(_(u"Headline"), default=datetime.now())
 
+    def next_in_category(self):
+        if self.category:
+            try:
+                return get_article_class().objects.filter(category=self.category,
+                    publication_date__gt=self.publication_date).order_by('publication_date')[0]
+            except IndexError:
+                pass
+        
+    def previous_in_category(self):
+        if self.category:
+            try:
+                return get_article_class().objects.filter(category=self.category,
+                    publication_date__lt=self.publication_date).order_by('-publication_date')[0]
+            except IndexError:
+                pass
+
     def logo_thumbnail(self, temp=False, logo_size=None):
         logo = self.temp_logo if (temp and self.temp_logo) else self.logo
         size = logo_size or get_article_logo_size(self)
