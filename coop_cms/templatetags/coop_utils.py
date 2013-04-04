@@ -13,11 +13,18 @@ class ArticleLinkNode(template.Node):
 
     def render(self, context):
         Article = get_article_class()
-        slug = slugify(self.title)
+        
+        try:
+            v = template.Variable(self.title)
+            title = v.resolve(context)
+        except template.VariableDoesNotExist:
+            title = self.title.strip("'").strip('"')
+        
+        slug = slugify(title)
         try:
             article = Article.objects.get(slug=slug)
         except Article.DoesNotExist:
-            article = Article.objects.create(slug=slug, title=self.title)
+            article = Article.objects.create(slug=slug, title=title)
         
         return article.get_absolute_url()
 

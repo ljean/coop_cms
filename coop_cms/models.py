@@ -260,6 +260,8 @@ class ArticleCategory(models.Model):
     name = models.CharField(_(u'name'), max_length=100)
     slug = AutoSlugField(populate_from='name', max_length=100, unique=True)
     ordering = models.IntegerField(_(u'ordering'), default=0)
+    in_rss = models.BooleanField(_(u'in rss'), default=False,
+        help_text=_(u"The articles of this category will be listed in the main rss feed"))
 
     def __unicode__(self):
         return self.name
@@ -347,7 +349,7 @@ class BaseArticle(BaseNavigable):
     is_homepage = models.BooleanField(_(u'Is homepage'), default=False, help_text=_(u'Make this article the website homepage (only one homepage per site)'))
     headline = models.BooleanField(_(u"Headline"), default=False, help_text=_(u'Make this article appear on the home page'))
     publication_date = models.DateTimeField(_(u"Headline"), default=datetime.now())
-
+    
     def next_in_category(self):
         if self.category:
             try:

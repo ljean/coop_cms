@@ -117,7 +117,7 @@ def view_article(request, url, extra_context=None, force_template=None):
     article = get_article_or_404(slug=url) #Draft & Published
 
     if not request.user.has_perm('can_view_article', article):
-        raise Http404
+        raise PermissionDenied()
 
     editable = request.user.has_perm('can_edit_article', article)
     

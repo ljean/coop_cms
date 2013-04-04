@@ -95,8 +95,8 @@ admin.site.register(models.NewsletterSending)
 
 
 class ArticleCategoryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'ordering']
-    list_editable = ['ordering']
+    list_display = ['name', 'ordering', 'in_rss']
+    list_editable = ['ordering', 'in_rss']
 admin.site.register(models.ArticleCategory, ArticleCategoryAdmin)
 
 #class NewsletterItemAdmin(admin.ModelAdmin):
