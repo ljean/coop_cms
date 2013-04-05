@@ -174,13 +174,9 @@ def cms_publish(request, context):
         
 
 def cms_extra_js(request, context):
-    try:
-        editable = context['editable']
-        t = get_template("coop_cms/_coop_bar_js.html")
-        return t.render(context)
-    except KeyError:
-        return None
-
+    t = get_template("coop_cms/_coop_bar_js.html")
+    return t.render(context)
+    
 def log_out(request, context):
     if request and request.user.is_authenticated():
         return make_link(reverse("django.contrib.auth.views.logout"), _(u'Log out'), 'fugue/control-power.png',
