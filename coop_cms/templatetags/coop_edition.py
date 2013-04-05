@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.context_processors import csrf
 from django.utils.safestring import mark_safe
 from coop_cms.widgets import ImageEdit
+from coop_cms.settings import get_article_class
 
 ################################################################################
 class PieceOfHtmlEditNode(DjalohaEditNode):
@@ -21,6 +22,20 @@ class PieceOfHtmlEditNode(DjalohaEditNode):
 def coop_piece_of_html(parser, token):
     div_id = token.split_contents()[1]
     return PieceOfHtmlEditNode(PieceOfHtml, {'div_id': div_id}, 'content')
+
+################################################################################
+class ArticleSummaryEditNode(DjalohaEditNode):
+    def render(self, context):
+        if context.get('form', None):
+            context.dicts[0]['djaloha_edit'] = True
+        #context.dicts[0]['can_edit_template'] = True
+        return super(ArticleSummaryEditNode, self).render(context)
+
+@register.tag
+def article_summary_edit(parser, token):
+    Article = get_article_class()
+    id = token.split_contents()[1]
+    return ArticleSummaryEditNode(Article, {'id': id}, 'summary')
 
 ################################################################################
 class ArticleTitleNode(template.Node):
