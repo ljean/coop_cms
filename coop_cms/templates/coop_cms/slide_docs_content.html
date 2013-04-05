@@ -2,10 +2,10 @@
 <div class="library-items library-docs">
   {% autopaginate documents 20 %}  
   {% for doc in documents %}
-  <a class="djaloha-document{% if doc.is_private %} private-doc{% endif %}" rel="{{doc.get_download_url}}" title="{{doc.name}}">
-        <img src="{{ doc.get_block_url }}" class="cms_doc_bloc" rel="{{doc.get_fileicon_url}}"/>
-        <span class="cms_doc_title">{{doc.name}}</span>
-  </a>
+  <div class="library-doc-item">
+    <img src="{{doc.get_fileicon_url}}" class="library-document{% if doc.is_private %} private-doc{% endif %}" rel="{{doc.get_download_url}}" title="{{doc.name}}" />
+    <span class="cms_doc_title">{{doc.name}}</span>
+  </div>
   {% endfor %}
   {% paginate %}  
 </div>

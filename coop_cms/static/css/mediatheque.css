@@ -74,7 +74,7 @@ a.active {
 	padding: 10px;
 }
 
-.library-images img.djaloha-thumbnail {
+.library-images img.library-thumbnail {
 	border: 6px solid white;
 	-webkit-box-shadow: #666 0px 2px 8px;
 	-moz-box-shadow: #666 0px 2px 8px;
@@ -90,6 +90,25 @@ a.active {
 	margin-top: 5px;
 }
 
+.library-docs .library-doc-item {
+	width: 90%;
+	margin: 5px auto;
+	height: 32px;
+	padding: 1px 2px;
+	background: #ccc;
+	border: solid thin #000;
+	display: block;
+	font-size: 1.2em;
+}
+
+.library-docs .library-doc-item img {
+	width: 32px;
+	height: 32px;
+	cursor: move;
+	vertical-align: middle;
+}
+
+/*
 .djaloha-document {
 	position: relative;
 	width: 330px;
@@ -97,11 +116,13 @@ a.active {
 	margin-top: 5px;
 	cursor: move;
 	height: 70px;
-}
+}*/
 
+/*
 .cms_doc_title {
 	z-index: 6;
 	position: absolute;
 	top: 10px;
 	left: 80px;
 }
+*/

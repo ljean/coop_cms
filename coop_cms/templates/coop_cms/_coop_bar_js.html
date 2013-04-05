@@ -36,6 +36,40 @@ $(document).ready(function(){
 	$("a.update-logo img").change(toggle_save);
 	$(".article select").change(toggle_save);
 	$(".article input").change(toggle_save);
+	
+	var resize_thumbnail = function (the_obj) {
+        
+        $(".djaloha-editable img.library-thumbnail").each(function(idx, elt) {
+            $(elt).removeClass("library-thumbnail");
+            $(elt).attr("src", $(this).attr("rel"));
+            $(elt).removeAttr('rel');
+        });
+
+        $(".djaloha-editable img.library-document").each(function(idx, elt) {
+            var doc_url = $(elt).attr('rel');
+            var doc_title = $(elt).attr('title');
+            var icon_url = $(elt).attr('src');
+            
+            var link = '<a href="'+doc_url+'" class="doc-link">'+'<img src="'+icon_url+'" /><span class="doc-title">'+doc_title+'</span></a>'
+            $(link).insertAfter($(elt));
+            $(elt).remove();
+        });
+
+        //force the focus in order to make sure that the editable is activated
+        //this will cause the deactivated event to be triggered, and the content to be saved
+        the_obj.focus();
+    }
+
+    //resize image when dropped in the editor
+    //GENTICS.Aloha.EventRegistry.subscribe(GENTICS.Aloha, 'editableCreated', function(event, editable) {
+    Aloha.bind('aloha-editable-created', function(event, editable){
+        var the_obj = editable.obj;
+        jQuery(editable.obj).bind('drop', function(event){
+            setTimeout(function() {
+                    resize_thumbnail(the_obj);
+            }, 100);
+        });
+    });
 
 {% endif %}
 });
