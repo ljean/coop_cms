@@ -16,7 +16,7 @@ from django.core.exceptions import ValidationError
 # from html_field.db.models import HTMLField
 # from html_field import html_cleaner
 from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes
-from coop_cms.settings import get_navtree_class, is_localized, COOP_CMS_NAVTREE_CLASS
+from coop_cms.settings import get_navtree_class, is_localized, COOP_CMS_NAVTREE_CLASS, get_article_templates
 from django.contrib.staticfiles import finders
 from django.core.files import File
 from django.db.models.signals import pre_delete, post_save
@@ -348,7 +348,7 @@ class BaseArticle(BaseNavigable):
     in_newsletter = models.BooleanField(_(u'In newsletter'), default=True, help_text=_(u'Make this article available for newsletters.'))
     is_homepage = models.BooleanField(_(u'Is homepage'), default=False, help_text=_(u'Make this article the website homepage (only one homepage per site)'))
     headline = models.BooleanField(_(u"Headline"), default=False, help_text=_(u'Make this article appear on the home page'))
-    publication_date = models.DateTimeField(_(u"Headline"), default=datetime.now())
+    publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now())
     
     def next_in_category(self):
         if self.category:
@@ -436,6 +436,13 @@ class BaseArticle(BaseNavigable):
                 a.save()
         
         return ret
+    
+    def template_name(self):
+        possible_templates = get_article_templates(self, None)
+        for (template, name) in possible_templates:
+            if template == self.template:
+                return name
+        return u"?"
 
     def get_label(self):
         return self.title
