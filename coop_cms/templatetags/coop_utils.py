@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from coop_cms.settings import get_article_class
+from coop_cms.utils import get_article
 from django import template
 register = template.Library()
 from django.template.defaultfilters import slugify
@@ -8,8 +9,9 @@ from django.template.defaultfilters import slugify
 ################################################################################
 class ArticleLinkNode(template.Node):
 
-    def __init__(self, title):
+    def __init__(self, title, lang):
         self.title = title
+        self.lang = lang
 
     def render(self, context):
         Article = get_article_class()
@@ -22,7 +24,14 @@ class ArticleLinkNode(template.Node):
         
         slug = slugify(title)
         try:
-            article = Article.objects.get(slug=slug)
+            if self.lang:
+                lang = self.lang
+            else:
+                #If the language is not defined, we need to get it from the context
+                #The get_language api doesn't work in templatetag
+                request = context['request']
+                lang = request.LANGUAGE_CODE
+            article = get_article(slug, current_lang=lang)
         except Article.DoesNotExist:
             article = Article.objects.create(slug=slug, title=title)
         
@@ -30,5 +39,7 @@ class ArticleLinkNode(template.Node):
 
 @register.tag
 def article_link(parser, token):
-    title = token.split_contents()[1]
-    return ArticleLinkNode(title)
+    args = token.split_contents()
+    title = args[1]
+    lang = args[2] if len(args) > 2 else None
+    return ArticleLinkNode(title, lang)

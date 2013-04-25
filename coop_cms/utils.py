@@ -10,7 +10,7 @@ from django.conf import settings
 from django.template.loader import get_template
 from django.template import Context
 from django.core.urlresolvers import reverse
-from coop_cms.settings import get_article_class
+from coop_cms.settings import get_article_class, is_localized
 from coop_cms.models import BaseArticle
 from django.utils.translation import get_language
 from django.http import Http404
@@ -111,7 +111,7 @@ def get_article_slug(*args, **kwargs):
         lang, slug = strip_path(slug)
     return slug.strip('/')
 
-def get_article(slug, **kwargs):
+def get_article(slug, current_lang=None, **kwargs):
     Article = get_article_class()
     try:
         return Article.objects.get(slug=slug, **kwargs)
@@ -119,10 +119,11 @@ def get_article(slug, **kwargs):
         #if modeltranslation is installed,
         #if no article correspond to the current language article
         #try to look for slug in default language
-        if 'modeltranslation' in settings.INSTALLED_APPS:
+        if is_localized():
             from modeltranslation import settings as mt_settings
             default_lang = mt_settings.DEFAULT_LANGUAGE
-            current_lang = get_language()
+            if not current_lang:
+                current_lang = get_language()
             if current_lang != default_lang:
                 kwargs.update({'slug_{0}'.format(default_lang): slug})
                 return Article.objects.get(**kwargs)
