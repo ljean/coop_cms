@@ -25,13 +25,13 @@ class ArticleLinkNode(template.Node):
         slug = slugify(title)
         try:
             if self.lang:
-                lang = self.lang
+                article = get_article(slug, force_lang=self.lang)
             else:
                 #If the language is not defined, we need to get it from the context
                 #The get_language api doesn't work in templatetag
                 request = context['request']
-                lang = request.LANGUAGE_CODE
-            article = get_article(slug, current_lang=lang)
+                article = get_article(slug, current_lang=request.LANGUAGE_CODE)
+            
         except Article.DoesNotExist:
             article = Article.objects.create(slug=slug, title=title)
         

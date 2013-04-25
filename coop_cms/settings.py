@@ -179,4 +179,4 @@ def is_localized():
     return False
     
 def can_rewrite_url():
-    return getattr(django_settings, 'COOP_CMS_CAN_EDIT_ARTICLE_SLUG', True)
+    return getattr(django_settings, 'COOP_CMS_CAN_EDIT_ARTICLE_SLUG', False)

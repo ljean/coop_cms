@@ -111,7 +111,7 @@ def get_article_slug(*args, **kwargs):
         lang, slug = strip_path(slug)
     return slug.strip('/')
 
-def get_article(slug, current_lang=None, **kwargs):
+def get_article(slug, current_lang=None, force_lang=None, **kwargs):
     Article = get_article_class()
     try:
         return Article.objects.get(slug=slug, **kwargs)
@@ -122,10 +122,13 @@ def get_article(slug, current_lang=None, **kwargs):
         if is_localized():
             from modeltranslation import settings as mt_settings
             default_lang = mt_settings.DEFAULT_LANGUAGE
-            if not current_lang:
+            lang = force_lang
+            if not lang:
                 current_lang = get_language()
-            if current_lang != default_lang:
-                kwargs.update({'slug_{0}'.format(default_lang): slug})
+                if current_lang != default_lang:
+                    lang = default_lang
+            if lang:
+                kwargs.update({'slug_{0}'.format(lang): slug})
                 return Article.objects.get(**kwargs)
         raise #re-raise previous error
 

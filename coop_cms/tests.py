@@ -2431,7 +2431,7 @@ class ArticleTemplateTagsTest(TestCase):
             a = Article.objects.all()[0]
             self.assertEqual(a.slug, "test")
             
-    def test_article_existing_link_force_language_(self):
+    def test_article_existing_link_force_language(self):
         if len(settings.LANGUAGES) > 1:
             Article = get_article_class()
             
@@ -2452,4 +2452,25 @@ class ArticleTemplateTagsTest(TestCase):
             a = Article.objects.all()[0]
             self.assertEqual(a.slug, "test")
             self.assertEqual(getattr(article, "slug_"+lang), "test_"+lang)
+            
+    def test_article_existing_link_force_default_language(self):
+        if len(settings.LANGUAGES) > 1:
+            Article = get_article_class()
+            
+            article = Article.objects.create(slug="test", title="Test")
+            
+            request = self._request()
+            def_lang = settings.LANGUAGES[0][0]
+            cur_lang = request.LANGUAGE_CODE = settings.LANGUAGES[1][0]
+            
+            setattr(article, "slug_"+cur_lang, "test_"+cur_lang)
+            article.save()
+            
+            tpl = Template('{% load coop_utils %}{% article_link "test" '+def_lang+' %}')
+            html = tpl.render(Context({'request': request}))
+            
+            self.assertEqual(Article.objects.count(), 1)
+            a = Article.objects.all()[0]
+            self.assertEqual(a.slug, "test")
+            self.assertEqual(getattr(article, "slug_"+cur_lang), "test_"+cur_lang)
 
