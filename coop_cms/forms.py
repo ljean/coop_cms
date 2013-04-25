@@ -203,7 +203,7 @@ class ArticleSettingsForm(WithNavigationModelForm):
             initials = {}
         summary = article.summary
         if not summary:
-            summary = dehtml(article.content)[:250]
+            summary = dehtml(article.content)[:400]
         initials.update({'summary': summary})
         kwargs['initial'] = initials
         super(ArticleSettingsForm, self).__init__(*args, **kwargs)

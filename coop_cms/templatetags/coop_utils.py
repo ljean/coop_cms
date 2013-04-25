@@ -5,6 +5,7 @@ from coop_cms.utils import get_article
 from django import template
 register = template.Library()
 from django.template.defaultfilters import slugify
+from coop_cms.utils import dehtml as do_dehtml
 
 ################################################################################
 class ArticleLinkNode(template.Node):
@@ -43,3 +44,11 @@ def article_link(parser, token):
     title = args[1]
     lang = args[2] if len(args) > 2 else None
     return ArticleLinkNode(title, lang)
+
+@register.filter
+def dehtml(value):
+    return do_dehtml(value)
+    
+@register.filter
+def sp_rt_lb(value):
+    return value.replace("\n", " ").replace("\r", "")
