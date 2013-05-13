@@ -5,7 +5,8 @@ from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
-from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory
+from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem
+from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias
 from coop_cms.settings import is_localized
 import json
 from django.core.exceptions import ValidationError
@@ -180,7 +181,7 @@ class ArticleTest(TestCase):
     def test_view_draft_article(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
         response = self.client.get(article.get_absolute_url())
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(403, response.status_code)
         self._log_as_editor()
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
@@ -306,7 +307,7 @@ class ArticleTest(TestCase):
         self._log_as_editor() #create self.user
         self.client.logout()
         data = {
-            'title': "Un titre",
+            'title': "Ceci est un titre",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': None,
@@ -318,14 +319,14 @@ class ArticleTest(TestCase):
         login_url = reverse('django.contrib.auth.views.login')
         self.assertTrue(login_url in next_url)
         
-        self.assertEqual(Article.objects.count(), 0)
+        self.assertEqual(Article.objects.filter(title=data['title']).count(), 0)
         
     def test_new_article_no_perm(self):
         Article = get_article_class()
         
         self._log_as_editor_no_add()
         data = {
-            'title': "Un titre",
+            'title': "Ceci est un titre",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': None,
@@ -333,7 +334,7 @@ class ArticleTest(TestCase):
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
         self.assertEqual(403, response.status_code)
-        self.assertEqual(Article.objects.count(), 0)
+        self.assertEqual(Article.objects.filter(title=data['title']).count(), 0)
         
     def test_new_article_navigation(self):
         Article = get_article_class()
@@ -857,7 +858,7 @@ class NavigationTest(TestCase):
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
         self.assertEqual(result['status'], 'success')
-        self.assertEqual(len(result['suggestions']), 3)
+        self.assertEqual(len(result['suggestions']), 4) #3 + noeud vide
         
     def test_get_suggest_list(self):
         self._do_test_get_suggest_list()
@@ -895,7 +896,23 @@ class NavigationTest(TestCase):
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
         self.assertEqual(result['status'], 'success')
-        self.assertEqual(len(result['suggestions']), 2)
+        self.assertEqual(len(result['suggestions']), 3) #2 + noeud vide
+        
+    def test_get_suggest_empty_node(self):
+        self._log_as_editor()
+        
+        data = {
+            'msg_id': 'get_suggest_list',
+            'term': 'python'
+        }
+        
+        response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(response.status_code, 200)
+        result = json.loads(response.content)
+        self.assertEqual(result['status'], 'success')
+        self.assertEqual(len(result['suggestions']), 1)
+        self.assertEqual(result['suggestions'][0]['value'], 0)
+        self.assertEqual(result['suggestions'][0]['type'], '')
         
     def test_get_suggest_tree_type_all(self):
         nt_link = NavType.objects.get(content_type=self.url_ct)
@@ -921,7 +938,7 @@ class NavigationTest(TestCase):
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
         self.assertEqual(result['status'], 'success')
-        self.assertEqual(len(result['suggestions']), 2)
+        self.assertEqual(len(result['suggestions']), 3) #2 + noeud vide
 
     def test_get_suggest_tree_type_filter(self):
         nt_link = NavType.objects.get(content_type=self.url_ct)
@@ -948,7 +965,7 @@ class NavigationTest(TestCase):
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
         self.assertEqual(result['status'], 'success')
-        self.assertEqual(len(result['suggestions']), 1)
+        self.assertEqual(len(result['suggestions']), 2) #1 + noeud vide
         self.assertEqual(result['suggestions'][0]['label'], 'python')
         
     def test_unknow_message(self):
@@ -2474,3 +2491,27 @@ class ArticleTemplateTagsTest(TestCase):
             self.assertEqual(a.slug, "test")
             self.assertEqual(getattr(article, "slug_"+cur_lang), "test_"+cur_lang)
 
+
+class AliasTest(TestCase):
+    
+    def test_redirect(self):
+        Article = get_article_class()
+        article = Article.objects.create(slug="test", title="TestAlias", content="TestAlias")
+        alias = Alias.objects.create(path='toto', redirect_url=article.get_absolute_url())
+        
+        response = self.client.get(alias.get_absolute_url())
+        self.assertEqual(response.status_code, 301)
+        
+        response = self.client.get(alias.get_absolute_url(), follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
+        
+        
+    def test_redirect_no_url(self):
+        alias = Alias.objects.create(path='toto', redirect_url='')
+        response = self.client.get(alias.get_absolute_url())
+        self.assertEqual(response.status_code, 404)
+        
+    def test_redirect_no_alias(self):
+        response = self.client.get(reverse('coop_cms_view_article', args=['toto']))
+        self.assertEqual(response.status_code, 404)

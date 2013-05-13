@@ -23,7 +23,7 @@ import mimetypes, unicodedata
 from django.conf import settings
 from django.contrib import messages
 from colorbox.decorators import popup_redirect
-from coop_cms.utils import send_newsletter, get_article_or_404, get_headlines
+from coop_cms.utils import send_newsletter, get_article_or_404, get_headlines, redirect_if_alias
 from django.utils.log import getLogger
 from datetime import datetime
 from django.utils.translation import check_for_language, activate, get_language
@@ -114,7 +114,10 @@ def set_homepage(request, article_id):
 
 def view_article(request, url, extra_context=None, force_template=None):
     """view the article"""
-    article = get_article_or_404(slug=url) #Draft & Published
+    try:
+        article = get_article_or_404(slug=url) #Draft & Published
+    except Http404:
+        return redirect_if_alias(path=url)
 
     if not request.user.has_perm('can_view_article', article):
         raise PermissionDenied()
@@ -365,9 +368,9 @@ def article_settings(request, article_id):
         form = forms.ArticleSettingsForm(request.user, instance=article)
 
     context = {
-            'article': article,
-            'form': form,
-        }
+        'article': article,
+        'form': form,
+    }
     return render_to_response(
         'coop_cms/popup_article_settings.html',
         context,
@@ -1014,3 +1017,5 @@ def change_language(request):
                 next = localeurl_utils.locale_path(path, lang_code)
 
     return HttpResponseRedirect(next)
+    
+

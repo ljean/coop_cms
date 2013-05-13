@@ -715,3 +715,18 @@ class NewsletterSending(models.Model):
         verbose_name = _(u'newsletter sending')
         verbose_name_plural = _(u'newsletter sendings')
 
+class Alias(models.Model):
+    
+    path = models.CharField(max_length=200)
+    redirect_url = models.CharField(max_length=200, default="", blank=True)
+    
+    class Meta:
+        verbose_name = _(u'Alias')
+        verbose_name_plural = _(u'Aliases')
+    
+    def get_absolute_url(self):
+        return reverse('coop_cms_view_article', args=[self.path])
+    
+    def __unicode__(self):
+        return self.path
+    

@@ -11,9 +11,10 @@ from django.template.loader import get_template
 from django.template import Context
 from django.core.urlresolvers import reverse
 from coop_cms.settings import get_article_class, is_localized
-from coop_cms.models import BaseArticle
+from coop_cms.models import BaseArticle, Alias
 from django.utils.translation import get_language
-from django.http import Http404
+from django.http import Http404, HttpResponsePermanentRedirect
+from django.shortcuts import get_object_or_404
 
 class _DeHTMLParser(HTMLParser):
     def __init__(self):
@@ -144,3 +145,10 @@ def get_headlines(article):
     if article.is_homepage:
         return Article.objects.filter(headline=True, publication=BaseArticle.PUBLISHED).order_by("-publication_date")
     return Article.objects.none()
+    
+def redirect_if_alias(path):
+    alias = get_object_or_404(Alias, path=path)
+    if alias.redirect_url:
+        return HttpResponsePermanentRedirect(alias.redirect_url)
+    else:
+        raise Http404
