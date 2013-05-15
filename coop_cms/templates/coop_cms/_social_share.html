@@ -1,0 +1,59 @@
+{% load static from staticfiles %}{% load i18n %}
+	<script>
+		$(function() {
+			var title = escape($(this).attr('title'));
+			var loc = window.location.href;
+ 		
+			$("a.fb-share-me").click(function() {
+				try{
+					window.open(
+						'http://www.facebook.com/sharer/sharer.php?u='+loc+'&t='+title,
+						'facebook_share', 'height=320, width=640, toolbar=no, menubar=no, scrollbars=no, resizable=no, location=no, directories=no, status=no'
+					);
+				} catch (err) {
+					alert(err);
+				}
+				return false;
+			})
+			
+			$("a.tweet-me").click(function() {
+				try{
+					window.open(
+						'http://twitter.com/share?url=' + loc + '&text=' + title + '&', 'twitterwindow',
+						'height=450, width=550, toolbar=0, location=0, menubar=0, directories=0, scrollbars=0'
+					);
+				} catch (err) {
+					alert(err);
+				}
+				return false;
+			})
+			
+			$("a.gplus-share").click(function() {
+				try{
+					window.open(
+						'https://plus.google.com/share?url=' + loc + '&text=' + title + '&', 'twitterwindow',
+						'height=600, width=600, toolbar=0, location=0, menubar=0, directories=0, scrollbars=0'
+					);
+				} catch (err) {
+					alert(err);
+				}
+				return false;
+			})
+			
+		})
+	</script>
+	<div class="social-share">
+		{% spaceless %}
+		<a href="" class="tweet-me">
+			<img src="{% static 'img/twitter.png' %}" alt="{% trans "Share on twitter" %}">
+		</a>
+		
+		<a href="" class="fb-share-me">
+			<img src="{% static 'img/facebook.png' %}" alt="{% trans "Share on Facebook" %}">
+		</a>
+		
+		<a href="" class="gplus-share">
+			<img src="{% static 'img/gplus.png' %}" alt="{% trans "Share on Google+" %}"/>
+		</a>
+		{% endspaceless %}
+	</div>
