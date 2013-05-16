@@ -5,6 +5,12 @@ from django.conf.urls.defaults import patterns, include, url
 from django.views.generic.detail import DetailView
 from coop_cms.settings import get_article_class
 
+if 'localeurl' in settings.INSTALLED_APPS:
+    #If localeurl is installed : need to patch the django reverse
+    #In order to take lang prefix into account
+    from localeurl.models import patch_reverse
+    patch_reverse()
+
 urlpatterns = patterns('coop_cms.views',
     url(r'^cms/tree/(?P<tree_id>\d*)/$', 'process_nav_edition', name='navigation_tree'),
     url(r'^cms/media-images/$', 'show_media', {'media_type': 'image'}, name='coop_cms_media_images'),
