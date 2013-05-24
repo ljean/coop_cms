@@ -74,7 +74,7 @@ def django_admin_edit_object(request, context):
 
 def django_admin_add_object(request, context):
     if request and request.user.is_staff and (('object' in context) or ('model' in context)):
-        object_class = context.get('object', None)
+        object_class = context.get('model', None)
         if not object_class:
             object_class = context['object'].__class__
         view_name = 'admin:%s_%s_add' % (object_class._meta.app_label,  object_class._meta.module_name)
@@ -84,7 +84,7 @@ def django_admin_add_object(request, context):
 
 def django_admin_list_objects(request, context):
     if request and request.user.is_staff and (('object' in context) or ('model' in context)):
-        object_class = context.get('object', None)
+        object_class = context.get('model', None)
         if not object_class:
             object_class = context['object'].__class__
         view_name = 'admin:%s_%s_changelist' % (object_class._meta.app_label,  object_class._meta.module_name)
