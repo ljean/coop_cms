@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from django.views.generic.list import ListView as DjangoListView
 from django.views.generic.base import View
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
@@ -9,6 +10,26 @@ from django.contrib.messages.api import error as error_message
 from django.utils.translation import ugettext as _
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.core.exceptions import ValidationError, PermissionDenied
+import logging
+logger = logging.getLogger("coop_cms")
+
+class ListView(DjangoListView):
+    ordering = ''
+    
+    def get_context_data(self, **kwargs):
+        context = super(ListView, self).get_context_data(**kwargs)
+        context['model'] = self.model
+        return context
+    
+    def get_queryset(self):
+        if self.ordering:
+            if type(self.ordering) in (list, tuple):
+                return self.model.objects.order_by(*self.ordering)
+            else:
+                return self.model.objects.order_by(self.ordering)
+        else:
+            return self.model.objects.all()
+
 
 class EditableObjectView(View):
     model = None
@@ -23,7 +44,7 @@ class EditableObjectView(View):
     
     def can_edit_object(self):
         can_edit_perm = 'can_edit_{0}'.format(self.varname)
-        return self.request.user.has_perm(can_edit_perm, self.object)
+        return self.request.user.is_authenticated() and self.request.user.has_perm(can_edit_perm, self.object)
         
     def can_view_object(self):
         if self.edit_mode:

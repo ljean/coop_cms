@@ -77,6 +77,15 @@ def cms_form_media(parser, token):
 
 ################################################################################
 
+def _extract_if_node_args(parser, token):
+    nodelist_true = parser.parse(('else', 'endif'))
+    token = parser.next_token()
+    if token.contents == 'else':
+        nodelist_false = parser.parse(('endif',))
+        parser.delete_first_token()
+    else:
+        nodelist_false = template.NodeList()
+    return nodelist_true, nodelist_false
 
 class IfCmsEditionNode(template.Node):
     def __init__(self, nodelist_true, nodelist_false):
@@ -89,24 +98,28 @@ class IfCmsEditionNode(template.Node):
         for node in self.nodelist_false:
             yield node
 
+    def _check_condition(self, context):
+        return context.get('form', None)
+
     def render(self, context):
-        form = context.get('form', None)
-        if form:
+        if self._check_condition(context):
             return self.nodelist_true.render(context)
         else:
             return self.nodelist_false.render(context)
 
-
 @register.tag
 def if_cms_edition(parser, token):
-    nodelist_true = parser.parse(('else', 'endif'))
-    token = parser.next_token()
-    if token.contents == 'else':
-        nodelist_false = parser.parse(('endif',))
-        parser.delete_first_token()
-    else:
-        nodelist_false = template.NodeList()
+    nodelist_true, nodelist_false = _extract_if_node_args(parser, token)
     return IfCmsEditionNode(nodelist_true, nodelist_false)
+
+class IfNotCmsEditionNode(IfCmsEditionNode):
+    def _check_condition(self, context):
+        return not super(IfNotCmsEditionNode, self)._check_condition(context)
+        
+@register.tag
+def if_not_cms_edition(parser, token):
+    nodelist_true, nodelist_false = _extract_if_node_args(parser, token)
+    return IfNotCmsEditionNode(nodelist_true, nodelist_false)
 
 
 ################################################################################
@@ -193,8 +206,13 @@ class CmsEditNode(template.Node):
             t = template.Template("{{inner|safe}}")
             safe_context[self.var_name] = SafeWrapper(the_object, logo_size=self._logo_size)
                 
+        managed_node_types = [
+            template.VariableNode, template.TextNode, template.defaulttags.IfNode,
+            IfCmsEditionNode, IfNotCmsEditionNode,
+        ]
+                
         for node in self.nodelist_content:
-            if isinstance(node, template.VariableNode) or isinstance(node, template.TextNode):
+            if any([isinstance(node, node_type) for  node_type in managed_node_types]):
                 c = node.render(template.Context(safe_context))
             elif isinstance(node, template.loader_tags.BlockNode):
                 c = node.render(context)
