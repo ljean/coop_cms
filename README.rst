@@ -185,9 +185,9 @@ You need the following templatetags libs::
 
 In the <head> of the document::
 
-  {% coop_bar_headers %}
-  {% block jquery_declaration %}{% endblock %}
-  {% block extra_head %}{% endblock %}
+    {% coop_bar_headers %}
+    {% block jquery_declaration %}{% endblock %}
+    {% block extra_head %}{% endblock %}
 
 In the <body> of the document::
 
@@ -235,6 +235,19 @@ You can look at the demo_app in apps folder to see how to customize the behavior
  * Custom fields in article
  * Custom admin bar
  * Configuration values
+ 
+Internationalization
+--------------------
+
+If you want to make an international site, coop_cms works well with django-modeltranslation and django-localeurl.
+
+If you use django-localeurl, we recommend to put the reverse patch at the top of your urls.py
+
+    if 'localeurl' in settings.INSTALLED_APPS:
+        #If localeurl is installed : need to patch the django reverse
+        #In order to take lang prefix into account
+        from localeurl.models import patch_reverse
+        patch_reverse()
 
 License
 =======
