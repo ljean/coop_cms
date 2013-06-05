@@ -427,7 +427,7 @@ class BaseArticle(BaseNavigable):
                 
                 if locale_title and not locale_slug:
                     slug = self.get_unique_slug(loc_slug_var, locale_title)
-                    setattr(self, loc_slug_var, slugify(locale_title))
+                    setattr(self, loc_slug_var, slug)
         else:
             if not self.slug:
                 self.slug = self.get_unique_slug('slug', self.title)

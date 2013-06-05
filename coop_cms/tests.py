@@ -2665,3 +2665,68 @@ class GenericViewTestCase(BaseGenericViewTestCase):
         if not ('coop_cms.apps.test_app' in settings.INSTALLED_APPS):
             print self.warning
             raise SkipTest()
+
+class ArticleSlugTestCase(TestCase):
+    
+    def test_create_article_same_title(self):
+        Article = get_article_class()
+        article1 = Article.objects.create(title="Titre de l'article")
+        for x in xrange(12):
+            article2 = Article.objects.create(title=article1.title)
+            self.assertNotEqual(article1.slug, article2.slug)
+            self.assertEqual(article1.title, article2.title)
+        response = self.client.get(article2.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        response = self.client.get(article1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+            
+    def test_create_article_same_different_sites(self):
+        Article = get_article_class()
+        article1 = Article.objects.create(title="Titre de l'article")
+        
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site2.id
+        
+        article2 = Article.objects.create(title=article1.title)
+        self.assertNotEqual(article1.slug, article2.slug)
+        self.assertEqual(article1.title, article2.title)
+        
+        response = self.client.get(article1.get_absolute_url())
+        self.assertEqual(404, response.status_code)
+        
+        response = self.client.get(article2.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+        settings.SITE_ID = site1.id
+        response = self.client.get(article1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+    def test_create_lang(self):
+        if not is_localized():
+            raise SkipTest()
+        
+        Article = get_article_class()
+        a1 = Article.objects.create(title="Titre de l'article")
+        a2 = Article.objects.create(title=a1.title)
+        self.assertNotEqual(a1.slug, a2.slug)
+        self.assertEqual(a1.title, a2.title)
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+            
+        setattr(a1, 'title_'+trans_lang, 'This is the title')
+        a1.save()
+        
+        setattr(a2, 'title_'+trans_lang, getattr(a1, 'title_'+trans_lang))
+        a2.save()
+        
+        a1 = Article.objects.get(id=a1.id)
+        a2 = Article.objects.get(id=a2.id)
+        
+        self.assertEqual(getattr(a1, 'title_'+trans_lang), getattr(a2, 'title_'+trans_lang))
+        self.assertNotEqual(getattr(a1, 'slug_'+trans_lang), getattr(a2, 'slug_'+trans_lang))
+        
+        
+        
+    
