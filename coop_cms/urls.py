@@ -43,6 +43,11 @@ if 'coop_cms.apps.rss_sync' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',
         (r'^rss-sync/', include('coop_cms.apps.rss_sync.urls')),
     )
+    
+if 'coop_cms.apps.test_app' in settings.INSTALLED_APPS:
+    urlpatterns += patterns('',
+        (r'^this-should-be-only-in-test-mode', include('coop_cms.apps.test_app.urls')),
+    )
 
 urlpatterns += patterns('coop_cms.views',
     #keep these at the end
@@ -52,5 +57,3 @@ urlpatterns += patterns('coop_cms.views',
     url(r'^(?P<url>.*)/$', 'view_article', name='coop_cms_view_article'),
     url(r'^$', 'homepage', name='coop_cms_homepage'),
 )
-
-

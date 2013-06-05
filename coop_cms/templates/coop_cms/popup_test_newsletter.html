@@ -1,4 +1,13 @@
 {% extends "colorbox/popup_form_base.html" %}
 {% load i18n %}{% load url from future %}
+
 {% block title %}{% trans "Test newsletter" %}{% endblock %}
+
+{% block form_fields %}
+<div>
+    {{ dests|join:"<br />"|safe }}
+</div>
+{{block.super}}
+{% endblock %}
+
 {% block form_url %}{% url "coop_cms_test_newsletter" newsletter.id %}{% endblock %}

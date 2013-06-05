@@ -47,7 +47,7 @@ def tree_map(request):
 
 def homepage(request):
     try:
-        article = get_article_class().objects.get(is_homepage=True)
+        article = get_article_class().objects.get(is_homepage=True, sites=settings.SITE_ID)
         return HttpResponseRedirect(article.get_absolute_url())
     except get_article_class().DoesNotExist:
         return HttpResponseRedirect(reverse('coop_cms_view_all_articles'))
@@ -115,10 +115,10 @@ def set_homepage(request, article_id):
 def view_article(request, url, extra_context=None, force_template=None):
     """view the article"""
     try:
-        article = get_article_or_404(slug=url) #Draft & Published
+        article = get_article_or_404(slug=url, sites=settings.SITE_ID) #Draft & Published
     except Http404:
         return redirect_if_alias(path=url)
-
+    
     if not request.user.has_perm('can_view_article', article):
         raise PermissionDenied()
 
@@ -144,7 +144,7 @@ def edit_article(request, url, extra_context=None, force_template=None):
     
     article_form_class = get_article_form()
 
-    article = get_article_or_404(slug=url)
+    article = get_article_or_404(slug=url, sites=settings.SITE_ID)
     
     if not request.user.has_perm('can_edit_article', article):
         logger.error("PermissionDenied")
@@ -197,7 +197,7 @@ def edit_article(request, url, extra_context=None, force_template=None):
 @login_required
 def cancel_edit_article(request, url):
     """if cancel_edit, delete the preview image"""
-    article = get_article_or_404(slug=url)
+    article = get_article_or_404(slug=url, sites=settings.SITE_ID)
     if article.temp_logo:
         article.temp_logo = ''
         article.save()
@@ -207,7 +207,7 @@ def cancel_edit_article(request, url):
 @popup_redirect
 def publish_article(request, url):
     """change the publication status of an article"""
-    article = get_article_or_404(slug=url)
+    article = get_article_or_404(slug=url, sites=settings.SITE_ID)
 
     if not request.user.has_perm('can_publish_article', article):
         raise PermissionDenied
@@ -844,7 +844,7 @@ def edit_newsletter(request, newsletter_id):
 
             success_message(request, _(u'The newsletter has been saved properly'))
 
-            return HttpResponseRedirect(reverse('coop_cms_edit_newsletter', args=[newsletter.id]))
+            return HttpResponseRedirect(reverse('coop_cms_view_newsletter', args=[newsletter.id]))
     else:
         form = newsletter_form_class(instance=newsletter)
 
@@ -866,7 +866,7 @@ def view_newsletter(request, newsletter_id):
 
     context_dict = {
         'title': newsletter.subject, 'newsletter': newsletter,
-        'editable': request.user.is_authenticated()
+        'editable': request.user.is_authenticated(), 'by_email': False,
     }
 
     return render_to_response(
@@ -920,8 +920,7 @@ def test_newsletter(request, newsletter_id):
 
         except Exception, msg:
             messages.add_message(request, messages.ERROR, _(u"An error occured! Please contact your support."))
-            django_logger = getLogger('django.request')
-            django_logger.error('Internal Server Error: %s' % request.path,
+            logger.error('Internal Server Error: %s' % request.path,
                 exc_info=sys.exc_info,
                 extra={
                     'status_code': 500,

@@ -6,6 +6,7 @@ from django import template
 register = template.Library()
 from django.template.defaultfilters import slugify
 from coop_cms.utils import dehtml as do_dehtml
+from bs4 import BeautifulSoup
 
 ################################################################################
 class ArticleLinkNode(template.Node):
@@ -52,3 +53,38 @@ def dehtml(value):
 @register.filter
 def sp_rt_lb(value):
     return value.replace("\n", " ").replace("\r", "")
+    
+################################################################################
+class NewsletterFriendlyCssNode(template.Node):
+
+    def __init__(self, nodelist_content, css):
+        self.css = css
+        self.nodelist_content = nodelist_content
+
+    def render(self, context):
+        content = self.nodelist_content.render(context)
+        if context.get('by_email', False):
+            soup = BeautifulSoup(content)
+            for tag, css in self.css.items():
+                for html_tag in soup.select(tag):
+                    html_tag["style"] = css
+            content = soup.prettify(formatter="minimal")
+        else:
+            style = ""
+            for tag, value in self.css.items():
+                style += u"{0} {{ {1} }}\n".format(tag, value)
+            content = u"<style>\n{0}</style>\n".format(style) + content
+        return content
+
+@register.tag
+def nlf_css(parser, token):
+    #Newsletter friendly CSS
+    args = token.split_contents()
+    css = {}
+    for item in args[1:]:
+        tag, value = item.split("=")
+        tag, value = tag.strip('"'), value.strip('"')
+        css[tag] = value
+    nodelist = parser.parse(('end_nlf_css',))
+    token = parser.next_token()
+    return NewsletterFriendlyCssNode(nodelist, css)

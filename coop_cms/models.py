@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
@@ -25,6 +26,7 @@ from datetime import datetime
 from django.utils import translation
 import urlparse
 from sorl.thumbnail import default
+from django.contrib.sites.models import Site
 ADMIN_THUMBS_SIZE = '60x60'
 
 
@@ -307,12 +309,12 @@ class BaseNavigable(TimeStampedModel):
     navigation_parent = property(_get_navigation_parent, _set_navigation_parent,
         doc=_("set the parent in navigation."))
 
-    def save(self, *args, **kwargs):
+    def save(self, do_not_create_nav=False, *args, **kwargs):
         ret = super(BaseNavigable, self).save(*args, **kwargs)
-        
-        parent_id = getattr(self, '_navigation_parent', None)
-        if parent_id != None:
-            self.navigation_parent = parent_id
+        if not do_not_create_nav:
+            parent_id = getattr(self, '_navigation_parent', None)
+            if parent_id != None:
+                self.navigation_parent = parent_id
         return ret
 
 class BaseArticle(BaseNavigable):
@@ -349,6 +351,7 @@ class BaseArticle(BaseNavigable):
     is_homepage = models.BooleanField(_(u'Is homepage'), default=False, help_text=_(u'Make this article the website homepage (only one homepage per site)'))
     headline = models.BooleanField(_(u"Headline"), default=False, help_text=_(u'Make this article appear on the home page'))
     publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now())
+    sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=settings.SITE_ID)
     
     def next_in_category(self):
         if self.category:
@@ -412,23 +415,30 @@ class BaseArticle(BaseNavigable):
         #autoslug localized title for creating locale_slugs
         if (not self.title) and (not self.slug):
             raise Exception(u"coop_cms.Article: slug can not be empty")
-                
+            
         if is_localized():
             from modeltranslation.utils import build_localized_fieldname
             for (lang_code, lang_name) in settings.LANGUAGES:
                 loc_title_var = build_localized_fieldname('title', lang_code)
-                locale_title = getattr(self, 'title_'+lang_code, '')
+                locale_title = getattr(self, loc_title_var, '')
             
                 loc_slug_var = build_localized_fieldname('slug', lang_code)
-                locale_slug = getattr(self, 'slug_'+lang_code, '')
+                locale_slug = getattr(self, loc_slug_var, '')
                 
                 if locale_title and not locale_slug:
-                    setattr(self, 'slug_'+lang_code, slugify(locale_title))
+                    slug = self.get_unique_slug(loc_slug_var, locale_title)
+                    setattr(self, loc_slug_var, slug)
         else:
             if not self.slug:
-                self.slug = slugify(self.title)
+                self.slug = self.get_unique_slug('slug', self.title)
         
+        is_new = not bool(self.id)
         ret = super(BaseArticle, self).save(*args, **kwargs)
+        
+        if is_new:
+            site = Site.objects.get(id=settings.SITE_ID)
+            self.sites.add(site)
+            ret = super(BaseArticle, self).save(do_not_create_nav=True)
         
         if self.is_homepage:
             for a in get_article_class().objects.filter(is_homepage=True).exclude(id=self.id):
@@ -437,6 +447,26 @@ class BaseArticle(BaseNavigable):
         
         return ret
     
+    def get_unique_slug(self, slug_field, title):
+        slug = slugify(title)
+        next, origin_slug = 2, slug
+        while True:
+            #Check that this slug doesn't already exist
+            #The slug must be unique for all sites
+            Article = get_article_class()
+            try:
+                attrs = {slug_field: slug}
+                if self.id:
+                    Article.objects.get(Q(**attrs) & ~Q(id=self.id))
+                else:
+                    Article.objects.get(**attrs)
+                #oups the slug is already used: change it and try again
+                slug = u"{0}{1}".format(origin_slug, next)
+                next += 1
+            except Article.DoesNotExist:
+                break #Ok this slug is not used: break the loop and return
+        return slug
+        
     def template_name(self):
         possible_templates = get_article_templates(self, None)
         for (template, name) in possible_templates:
@@ -664,6 +694,7 @@ class Newsletter(models.Model):
     content = models.TextField(_(u"content"), default="<br>", blank=True)
     items = models.ManyToManyField(NewsletterItem, blank=True)
     template = models.CharField(_(u'template'), max_length=200, default='', blank=True)
+    site = models.ForeignKey(Site, verbose_name=_(u'site'), default=settings.SITE_ID)
 
     def get_items(self):
         return [item.content_object for item in self.items.all()]
@@ -681,6 +712,9 @@ class Newsletter(models.Model):
 
     def can_edit_newsletter(self, user):
         return user.has_perm('coop_cms.change_newsletter')
+        
+    def get_site_prefix(self):
+        return "http://{0}".format(self.site.domain)
 
     def get_absolute_url(self):
         return reverse('coop_cms_view_newsletter', args=[self.id])

@@ -20,6 +20,17 @@ from coop_cms.html2text import html2text
 from coop_cms.utils import make_links_absolute
 from datetime import datetime, timedelta
 from django.core import management
+from django.utils import timezone
+from django.contrib.sites.models import Site
+from django.utils.unittest.case import SkipTest
+from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
+
+def make_dt(dt):
+    if settings.USE_TZ:
+        return timezone.make_aware(dt, timezone.get_default_timezone())
+    else:
+        return dt
+    
 
 class ArticleTest(TestCase):
     
@@ -179,6 +190,7 @@ class ArticleTest(TestCase):
             self.assertTrue(slug in context_slugs)
         
     def test_view_draft_article(self):
+        self.client.logout()
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(403, response.status_code)
@@ -434,7 +446,7 @@ class ArticleTest(TestCase):
         self.assertEqual(art1.title, initial_data['title'])
         self.assertEqual(art1.publication, data['publication'])
         self.assertEqual(art1.navigation_parent, node1.id)
-        self.assertEqual(art1.publication_date, datetime(2013, 1, 1, 12, 0, 0))
+        self.assertEqual(art1.publication_date, make_dt(datetime(2013, 1, 1, 12, 0, 0)))
         self.assertEqual(art1.headline, data['headline'])
         self.assertEqual(art1.in_newsletter, data['in_newsletter'])
         self.assertEqual(art1.summary, data['summary'])
@@ -470,7 +482,7 @@ class ArticleTest(TestCase):
         self.assertEqual(art1.title, initial_data['title'])
         self.assertEqual(art1.publication, data['publication'])
         self.assertEqual(art1.template, data['template'])
-        self.assertEqual(art1.publication_date, datetime(2013, 1, 1, 18, 0, 0))
+        self.assertEqual(art1.publication_date, make_dt(datetime(2013, 1, 1, 18, 0, 0)))
         self.assertEqual(art1.headline, data['headline'])
         self.assertEqual(art1.in_newsletter, data['in_newsletter'])
         self.assertEqual(art1.summary, data['summary'])
@@ -2033,7 +2045,7 @@ class NewsletterTest(TestCase):
         redirect_url = response['Location']
         self.assertTrue(redirect_url.find(login_url)>0)
         
-        sch_dt =datetime.now()+timedelta(1)
+        sch_dt = timezone.now()+timedelta(1)
         response = self.client.post(url, data={'sending_dt': sch_dt})
         redirect_url = response['Location']
         self.assertTrue(redirect_url.find(login_url)>0)
@@ -2047,7 +2059,7 @@ class NewsletterTest(TestCase):
         }
         newsletter = mommy.make_one(Newsletter, **newsletter_data)
         
-        sch_dt = datetime.now() - timedelta(1)
+        sch_dt = timezone.now() - timedelta(1)
         sending = mommy.make_one(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
@@ -2078,7 +2090,7 @@ class NewsletterTest(TestCase):
         }
         newsletter = mommy.make_one(Newsletter, **newsletter_data)
         
-        sch_dt = datetime.now() - timedelta(1)
+        sch_dt = timezone.now() - timedelta(1)
         sending = mommy.make_one(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         addresses = ';'.join(['toto@toto.fr']*5)
@@ -2109,7 +2121,7 @@ class NewsletterTest(TestCase):
         }
         newsletter = mommy.make_one(Newsletter, **newsletter_data)
         
-        sch_dt = datetime.now() + timedelta(1)
+        sch_dt = timezone.now() + timedelta(1)
         sending = mommy.make_one(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
@@ -2277,82 +2289,88 @@ class UrlLocalizationTest(TestCase):
     
     def test_get_locale_article(self):
         
-        if is_localized():
-            original_text = '*!-+' * 10
-            translated_text = ':%@/' * 9
-            
-            a1 = get_article_class().objects.create(title="Home", content=original_text)
-            
-            origin_lang = settings.LANGUAGES[0][0]
-            trans_lang = settings.LANGUAGES[1][0]
-            
-            setattr(a1, 'title_'+trans_lang, 'Accueil')
-            setattr(a1, 'content_'+trans_lang, translated_text)
-            a1.save()
-            
-            response = self.client.get('/{0}/home/'.format(origin_lang), follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
-            
-            response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, translated_text)
+        if not is_localized():
+            raise SkipTest()
+        
+        original_text = '*!-+' * 10
+        translated_text = ':%@/' * 9
+        
+        a1 = get_article_class().objects.create(title="Home", content=original_text)
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        setattr(a1, 'title_'+trans_lang, 'Accueil')
+        setattr(a1, 'content_'+trans_lang, translated_text)
+        a1.save()
+        
+        response = self.client.get('/{0}/home/'.format(origin_lang), follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, translated_text)
 
     def test_change_lang(self):
         
-        if is_localized():
-            original_text = '*!-+' * 10
-            translated_text = ':%@/' * 9
-            
-            a1 = get_article_class().objects.create(title="Home", content=original_text)
-            
-            origin_lang = settings.LANGUAGES[0][0]
-            trans_lang = settings.LANGUAGES[1][0]
-            
-            setattr(a1, 'title_'+trans_lang, 'Accueil')
-            setattr(a1, 'content_'+trans_lang, translated_text)
-            
-            a1.save()
-            
-            origin_url = '/{0}/home'.format(origin_lang)
-            response = self.client.get(origin_url, follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
-            
-            data = {'language': trans_lang}
-            response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
-                data=data, follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, translated_text)
-            
-            response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, translated_text)
+        if not is_localized():
+            raise SkipTest()
+        
+        original_text = '*!-+' * 10
+        translated_text = ':%@/' * 9
+        
+        a1 = get_article_class().objects.create(title="Home", content=original_text)
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        setattr(a1, 'title_'+trans_lang, 'Accueil')
+        setattr(a1, 'content_'+trans_lang, translated_text)
+        
+        a1.save()
+        
+        origin_url = '/{0}/home'.format(origin_lang)
+        response = self.client.get(origin_url, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        data = {'language': trans_lang}
+        response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
+            data=data, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, translated_text)
+        
+        response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, translated_text)
             
     def test_change_lang_no_trans(self):
         
-        if is_localized():
-            original_text = '*!-+' * 10
+        if not is_localized():
+            raise SkipTest()
             
-            a1 = get_article_class().objects.create(title="Home", content=original_text)
-            
-            origin_lang = settings.LANGUAGES[0][0]
-            trans_lang = settings.LANGUAGES[1][0]
-            
-            origin_url = '/{0}/home'.format(origin_lang)
-            response = self.client.get(origin_url, follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
-            
-            data = {'language': trans_lang}
-            response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
-                data=data, follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
-            
-            response = self.client.get('/{0}/home/'.format(trans_lang), follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
+        original_text = '*!-+' * 10
+        
+        a1 = get_article_class().objects.create(title="Home", content=original_text)
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        origin_url = '/{0}/home'.format(origin_lang)
+        response = self.client.get(origin_url, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        data = {'language': trans_lang}
+        response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
+            data=data, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        response = self.client.get('/{0}/home/'.format(trans_lang), follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
             
     def test_keep_slug(self):
         Article = get_article_class()
@@ -2364,25 +2382,27 @@ class UrlLocalizationTest(TestCase):
         self.assertEqual(original_slug, a1.slug)
         
     def test_keep_localized_slug(self):
-        if is_localized():
-            Article = get_article_class()
-            a1 = Article.objects.create(title=u"Home", content="aa")
-            origin_lang = settings.LANGUAGES[0][0]
-            trans_lang = settings.LANGUAGES[1][0]
-            setattr(a1, 'title_'+trans_lang, u'Accueil')
-            a1.save()
-            
-            original_slug = a1.slug
-            original_trans_slug = getattr(a1, 'slug_'+trans_lang, u'**dummy**')
-            
-            a1.title = u"Title changed"
-            setattr(a1, 'title_'+trans_lang, u'Titre change')
-            
-            a1.save()
-            a1 = Article.objects.get(id=a1.id)
-            
-            self.assertEqual(original_slug, a1.slug)
-            self.assertEqual(original_trans_slug, getattr(a1, 'slug_'+trans_lang))
+        if not is_localized():
+            raise SkipTest()
+        
+        Article = get_article_class()
+        a1 = Article.objects.create(title=u"Home", content="aa")
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        setattr(a1, 'title_'+trans_lang, u'Accueil')
+        a1.save()
+        
+        original_slug = a1.slug
+        original_trans_slug = getattr(a1, 'slug_'+trans_lang, u'**dummy**')
+        
+        a1.title = u"Title changed"
+        setattr(a1, 'title_'+trans_lang, u'Titre change')
+        
+        a1.save()
+        a1 = Article.objects.get(id=a1.id)
+        
+        self.assertEqual(original_slug, a1.slug)
+        self.assertEqual(original_trans_slug, getattr(a1, 'slug_'+trans_lang))
             
     def test_no_title(self):
         Article = get_article_class()
@@ -2515,3 +2535,214 @@ class AliasTest(TestCase):
     def test_redirect_no_alias(self):
         response = self.client.get(reverse('coop_cms_view_article', args=['toto']))
         self.assertEqual(response.status_code, 404)
+        
+class MultiSiteTest(TestCase):
+    
+    def tearDown(self):
+        site1 = Site.objects.all()[0]
+        settings.SITE_ID = site1.id
+    
+    def test_view_article(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site1.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+
+    def test_view_article_on_site2(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site2.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+    def test_view_article_on_all_sites(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site1.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        article.sites.add(site2)
+        article.save()
+        
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+        settings.SITE_ID = site2.id
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+
+
+    def test_view_404_site2(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site1.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        
+        settings.SITE_ID = site2.id
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(404, response.status_code)
+        
+    def test_view_only_site2(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site1.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        article.sites.remove(site1)
+        article.sites.add(site2)
+        article.save()
+        
+        settings.SITE_ID = site1.id
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(404, response.status_code)
+        
+        settings.SITE_ID = site2.id
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+
+class NewsletterFriendlyTemplateTagsTest(TestCase):
+    
+    template_content = """
+        {{% load coop_utils %}}
+        {{% nlf_css {0} %}}
+            <a>One</a>
+            <a>Two</a>
+            <a>Three</a>
+            <img />
+            <table><tr><td></td><td></td></table>
+            <table class="this-one"><tr><td></td><td></td></table>
+        {{% end_nlf_css %}}
+    """
+    
+    def test_email_mode_is_inline(self):
+        template = self.template_content.format('a="color: red;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(0, html.count(u'<style>'))
+        self.assertEqual(3, html.count(u'<a style="color: red;">'))
+        
+    def test_edit_mode_is_in_style(self):
+        template = self.template_content.format('a="color: red;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': False}))
+        self.assertEqual(1, html.count(u'<style>'))
+        self.assertEqual(1, html.count(u'a { color: red; }'))
+        self.assertEqual(0, html.count(u'<a style="color: red;">'))
+        
+    def test_several_args_email_mode_is_inline(self):
+        template = self.template_content.format('a="color: red; background: blue;" td="border: none;" img="width: 100px;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(0, html.count(u'<style>'))
+        self.assertEqual(3, html.count(u'<a style="color: red; background: blue;">'))
+        self.assertEqual(1, html.count(u'<img style="width: 100px;"/>'))
+        self.assertEqual(4, html.count(u'<td style="border: none;">'))
+        
+    def test_several_args_edit_mode_is_in_style(self):
+        template = self.template_content.format('a="color: red; background: blue;" td="border: none;" img="width: 100px;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': False}))
+        self.assertEqual(1, html.count(u'<style>'))
+        self.assertEqual(1, html.count(u'a { color: red; background: blue; }'))
+        self.assertEqual(1, html.count(u'img { width: 100px; }'))
+        self.assertEqual(1, html.count(u'td { border: none; }'))
+        self.assertEqual(0, html.count(u'<a style="color: red; background: blue;">'))
+        self.assertEqual(0, html.count(u'<img style="width: 100px;">'))
+        self.assertEqual(0, html.count(u'<td style="border: none;">'))
+        
+    def test_class_selector_email_mode_is_inline(self):
+        template = self.template_content.format('"table.this-one td"="border: none;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(0, html.count(u'<style>'))
+        self.assertEqual(0, html.count(u'<a style="color: red; background: blue;">'))
+        self.assertEqual(0, html.count(u'<img style="width: 100px;"/>'))
+        self.assertEqual(2, html.count(u'<td style="border: none;">'))
+
+class GenericViewTestCase(BaseGenericViewTestCase):
+    warning = """
+    Add this to your settings.py to enable this test:
+    if len(sys.argv)>1 and 'test' == sys.argv[1]:
+        INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app',)
+    """
+    
+    def setUp(self):
+        if not ('coop_cms.apps.test_app' in settings.INSTALLED_APPS):
+            print self.warning
+            raise SkipTest()
+
+class ArticleSlugTestCase(TestCase):
+    
+    def tearDown(self):
+        site1 = Site.objects.all()[0]
+        settings.SITE_ID = site1.id
+    
+    def test_create_article_same_title(self):
+        Article = get_article_class()
+        article1 = Article.objects.create(title="Titre de l'article")
+        for x in xrange(12):
+            article2 = Article.objects.create(title=article1.title)
+            self.assertNotEqual(article1.slug, article2.slug)
+            self.assertEqual(article1.title, article2.title)
+        response = self.client.get(article2.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        response = self.client.get(article1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+            
+    def test_create_article_same_different_sites(self):
+        Article = get_article_class()
+        article1 = Article.objects.create(title="Titre de l'article")
+        
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site2.id
+        
+        article2 = Article.objects.create(title=article1.title)
+        self.assertNotEqual(article1.slug, article2.slug)
+        self.assertEqual(article1.title, article2.title)
+        
+        response = self.client.get(article1.get_absolute_url())
+        self.assertEqual(404, response.status_code)
+        
+        response = self.client.get(article2.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+        settings.SITE_ID = site1.id
+        response = self.client.get(article1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+    def test_create_lang(self):
+        if not is_localized():
+            raise SkipTest()
+        
+        Article = get_article_class()
+        a1 = Article.objects.create(title="Titre de l'article")
+        a2 = Article.objects.create(title=a1.title)
+        self.assertNotEqual(a1.slug, a2.slug)
+        self.assertEqual(a1.title, a2.title)
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+            
+        setattr(a1, 'title_'+trans_lang, 'This is the title')
+        a1.save()
+        
+        setattr(a2, 'title_'+trans_lang, getattr(a1, 'title_'+trans_lang))
+        a2.save()
+        
+        a1 = Article.objects.get(id=a1.id)
+        a2 = Article.objects.get(id=a2.id)
+        
+        self.assertEqual(getattr(a1, 'title_'+trans_lang), getattr(a2, 'title_'+trans_lang))
+        self.assertNotEqual(getattr(a1, 'slug_'+trans_lang), getattr(a2, 'slug_'+trans_lang))
+        
+        
+        
+    
