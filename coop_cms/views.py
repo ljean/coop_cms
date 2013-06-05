@@ -866,7 +866,7 @@ def view_newsletter(request, newsletter_id):
 
     context_dict = {
         'title': newsletter.subject, 'newsletter': newsletter,
-        'editable': request.user.is_authenticated()
+        'editable': request.user.is_authenticated(), 'by_email': False,
     }
 
     return render_to_response(
@@ -920,8 +920,7 @@ def test_newsletter(request, newsletter_id):
 
         except Exception, msg:
             messages.add_message(request, messages.ERROR, _(u"An error occured! Please contact your support."))
-            django_logger = getLogger('django.request')
-            django_logger.error('Internal Server Error: %s' % request.path,
+            logger.error('Internal Server Error: %s' % request.path,
                 exc_info=sys.exc_info,
                 extra={
                     'status_code': 500,

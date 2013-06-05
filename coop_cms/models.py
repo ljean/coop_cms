@@ -25,6 +25,7 @@ from datetime import datetime
 from django.utils import translation
 import urlparse
 from sorl.thumbnail import default
+from django.contrib.sites.models import Site
 ADMIN_THUMBS_SIZE = '60x60'
 
 
@@ -664,6 +665,7 @@ class Newsletter(models.Model):
     content = models.TextField(_(u"content"), default="<br>", blank=True)
     items = models.ManyToManyField(NewsletterItem, blank=True)
     template = models.CharField(_(u'template'), max_length=200, default='', blank=True)
+    site = models.ForeignKey(Site, verbose_name=_(u'site'), default=1)
 
     def get_items(self):
         return [item.content_object for item in self.items.all()]
@@ -681,6 +683,9 @@ class Newsletter(models.Model):
 
     def can_edit_newsletter(self, user):
         return user.has_perm('coop_cms.change_newsletter')
+        
+    def get_site_prefix(self):
+        return "http://{0}".format(self.site.domain)
 
     def get_absolute_url(self):
         return reverse('coop_cms_view_newsletter', args=[self.id])

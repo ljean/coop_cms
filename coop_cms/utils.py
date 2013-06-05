@@ -52,22 +52,25 @@ def dehtml(text):
         print_exc(file=stderr)
         return text
     
-def make_links_absolute(html_content):
+def make_links_absolute(html_content, newsletter=None):
     """replace all local url with absolute url"""
     import re
     #regex = """<.*(?P<tag>href|src)\s*=\s*["'](?P<url>.+?)["'].*>"""
     #regex = """<.*href|src\s*=\s*["'](?P<url>.+?)["'].*>"""
     
+    site_prefix = newsletter.get_site_prefix() if newsletter else settings.COOP_CMS_SITE_PREFIX
+    
     def make_abs(match):
         #Thank you : http://www.gawel.org/howtos/python-re-sub
         start = match.group('start')
         url = match.group('url')
+        
         if url.startswith('..'):
             url = url[2:]
         while url.startswith('/..'):
             url = url[3:]
         if url.startswith('/'):
-            url = '%s%s' % (settings.COOP_CMS_SITE_PREFIX, url)
+            url = '%s%s' % (site_prefix, url)
         end = match.group('end')
         return start + url + end
     
@@ -88,7 +91,7 @@ def send_newsletter(newsletter, dests):
         'MEDIA_URL': settings.MEDIA_URL, 'STATIC_URL': settings.STATIC_URL,
     }
     html_text = t.render(Context(context_dict))
-    html_text = make_links_absolute(html_text)
+    html_text = make_links_absolute(html_text, newsletter)
     
     emails = []
     connection = get_connection()
