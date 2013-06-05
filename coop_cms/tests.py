@@ -20,6 +20,15 @@ from coop_cms.html2text import html2text
 from coop_cms.utils import make_links_absolute
 from datetime import datetime, timedelta
 from django.core import management
+from django.utils import timezone
+from django.contrib.sites.models import Site
+
+def make_dt(dt):
+    if settings.USE_TZ:
+        return timezone.make_aware(dt, timezone.get_default_timezone())
+    else:
+        return dt
+    
 
 class ArticleTest(TestCase):
     
@@ -179,6 +188,7 @@ class ArticleTest(TestCase):
             self.assertTrue(slug in context_slugs)
         
     def test_view_draft_article(self):
+        self.client.logout()
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(403, response.status_code)
@@ -434,7 +444,7 @@ class ArticleTest(TestCase):
         self.assertEqual(art1.title, initial_data['title'])
         self.assertEqual(art1.publication, data['publication'])
         self.assertEqual(art1.navigation_parent, node1.id)
-        self.assertEqual(art1.publication_date, datetime(2013, 1, 1, 12, 0, 0))
+        self.assertEqual(art1.publication_date, make_dt(datetime(2013, 1, 1, 12, 0, 0)))
         self.assertEqual(art1.headline, data['headline'])
         self.assertEqual(art1.in_newsletter, data['in_newsletter'])
         self.assertEqual(art1.summary, data['summary'])
@@ -470,7 +480,7 @@ class ArticleTest(TestCase):
         self.assertEqual(art1.title, initial_data['title'])
         self.assertEqual(art1.publication, data['publication'])
         self.assertEqual(art1.template, data['template'])
-        self.assertEqual(art1.publication_date, datetime(2013, 1, 1, 18, 0, 0))
+        self.assertEqual(art1.publication_date, make_dt(datetime(2013, 1, 1, 18, 0, 0)))
         self.assertEqual(art1.headline, data['headline'])
         self.assertEqual(art1.in_newsletter, data['in_newsletter'])
         self.assertEqual(art1.summary, data['summary'])
@@ -2033,7 +2043,7 @@ class NewsletterTest(TestCase):
         redirect_url = response['Location']
         self.assertTrue(redirect_url.find(login_url)>0)
         
-        sch_dt =datetime.now()+timedelta(1)
+        sch_dt = timezone.now()+timedelta(1)
         response = self.client.post(url, data={'sending_dt': sch_dt})
         redirect_url = response['Location']
         self.assertTrue(redirect_url.find(login_url)>0)
@@ -2047,7 +2057,7 @@ class NewsletterTest(TestCase):
         }
         newsletter = mommy.make_one(Newsletter, **newsletter_data)
         
-        sch_dt = datetime.now() - timedelta(1)
+        sch_dt = timezone.now() - timedelta(1)
         sending = mommy.make_one(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
@@ -2078,7 +2088,7 @@ class NewsletterTest(TestCase):
         }
         newsletter = mommy.make_one(Newsletter, **newsletter_data)
         
-        sch_dt = datetime.now() - timedelta(1)
+        sch_dt = timezone.now() - timedelta(1)
         sending = mommy.make_one(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         addresses = ';'.join(['toto@toto.fr']*5)
@@ -2109,7 +2119,7 @@ class NewsletterTest(TestCase):
         }
         newsletter = mommy.make_one(Newsletter, **newsletter_data)
         
-        sch_dt = datetime.now() + timedelta(1)
+        sch_dt = timezone.now() + timedelta(1)
         sending = mommy.make_one(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
@@ -2515,3 +2525,129 @@ class AliasTest(TestCase):
     def test_redirect_no_alias(self):
         response = self.client.get(reverse('coop_cms_view_article', args=['toto']))
         self.assertEqual(response.status_code, 404)
+        
+class MultiSiteTest(TestCase):
+    
+    def test_view_article(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site1.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+
+    def test_view_article_on_site2(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site2.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+    def test_view_article_on_all_sites(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site1.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        article.sites.add(site2)
+        article.save()
+        
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+        settings.SITE_ID = site2.id
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+
+
+    def test_view_404_site2(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site1.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        
+        settings.SITE_ID = site2.id
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(404, response.status_code)
+        
+    def test_view_only_site2(self):
+        site1 = Site.objects.all()[0]
+        site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
+        settings.SITE_ID = site1.id
+        
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        article.sites.remove(site1)
+        article.sites.add(site2)
+        article.save()
+        
+        settings.SITE_ID = site1.id
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(404, response.status_code)
+        
+        settings.SITE_ID = site2.id
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+
+class NewsletterFriendlyTemplateTagsTest(TestCase):
+    
+    template_content = """
+        {{% load coop_utils %}}
+        {{% nlf_css {0} %}}
+            <a>One</a>
+            <a>Two</a>
+            <a>Three</a>
+            <img />
+            <table><tr><td></td><td></td></table>
+            <table class="this-one"><tr><td></td><td></td></table>
+        {{% end_nlf_css %}}
+    """
+    
+    def test_email_mode_is_inline(self):
+        template = self.template_content.format('a="color: red;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(0, html.count(u'<style>'))
+        self.assertEqual(3, html.count(u'<a style="color: red;">'))
+        
+    def test_edit_mode_is_in_style(self):
+        template = self.template_content.format('a="color: red;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': False}))
+        self.assertEqual(1, html.count(u'<style>'))
+        self.assertEqual(1, html.count(u'a { color: red; }'))
+        self.assertEqual(0, html.count(u'<a style="color: red;">'))
+        
+    def test_several_args_email_mode_is_inline(self):
+        template = self.template_content.format('a="color: red; background: blue;" td="border: none;" img="width: 100px;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(0, html.count(u'<style>'))
+        self.assertEqual(3, html.count(u'<a style="color: red; background: blue;">'))
+        self.assertEqual(1, html.count(u'<img style="width: 100px;"/>'))
+        self.assertEqual(4, html.count(u'<td style="border: none;">'))
+        
+    def test_several_args_edit_mode_is_in_style(self):
+        template = self.template_content.format('a="color: red; background: blue;" td="border: none;" img="width: 100px;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': False}))
+        self.assertEqual(1, html.count(u'<style>'))
+        self.assertEqual(1, html.count(u'a { color: red; background: blue; }'))
+        self.assertEqual(1, html.count(u'img { width: 100px; }'))
+        self.assertEqual(1, html.count(u'td { border: none; }'))
+        self.assertEqual(0, html.count(u'<a style="color: red; background: blue;">'))
+        self.assertEqual(0, html.count(u'<img style="width: 100px;">'))
+        self.assertEqual(0, html.count(u'<td style="border: none;">'))
+        
+    def test_class_selector_email_mode_is_inline(self):
+        template = self.template_content.format('"table.this-one td"="border: none;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(0, html.count(u'<style>'))
+        self.assertEqual(0, html.count(u'<a style="color: red; background: blue;">'))
+        self.assertEqual(0, html.count(u'<img style="width: 100px;"/>'))
+        self.assertEqual(2, html.count(u'<td style="border: none;">'))

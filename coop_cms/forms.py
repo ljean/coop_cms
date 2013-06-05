@@ -13,6 +13,7 @@ from coop_cms.widgets import ImageEdit
 from django.core.urlresolvers import reverse
 from coop_cms.utils import dehtml
 from datetime import datetime
+from django.utils.timezone import now as dt_now
 try:
     from chosen.widgets import ChosenSelectMultiple
 except ImportError:
@@ -308,7 +309,7 @@ class NewsletterSchedulingForm(floppyforms.ModelForm):
         if not sch_dt:
             raise ValidationError(_(u"This field is required"))
 
-        if sch_dt < datetime.now():
+        if sch_dt < dt_now():
             raise ValidationError(_(u"The scheduling date must be in future"))
 
         return sch_dt

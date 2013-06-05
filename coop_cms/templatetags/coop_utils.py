@@ -66,7 +66,7 @@ class NewsletterFriendlyCssNode(template.Node):
         if context.get('by_email', False):
             soup = BeautifulSoup(content)
             for tag, css in self.css.items():
-                for html_tag in soup.find_all(tag):
+                for html_tag in soup.select(tag):
                     html_tag["style"] = css
             content = soup.prettify(formatter="minimal")
         else:
