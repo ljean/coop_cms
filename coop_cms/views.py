@@ -47,7 +47,7 @@ def tree_map(request):
 
 def homepage(request):
     try:
-        article = get_article_class().objects.get(is_homepage=True)
+        article = get_article_class().objects.get(is_homepage=True, sites=settings.SITE_ID)
         return HttpResponseRedirect(article.get_absolute_url())
     except get_article_class().DoesNotExist:
         return HttpResponseRedirect(reverse('coop_cms_view_all_articles'))
