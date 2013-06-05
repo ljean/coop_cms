@@ -2289,82 +2289,88 @@ class UrlLocalizationTest(TestCase):
     
     def test_get_locale_article(self):
         
-        if is_localized():
-            original_text = '*!-+' * 10
-            translated_text = ':%@/' * 9
-            
-            a1 = get_article_class().objects.create(title="Home", content=original_text)
-            
-            origin_lang = settings.LANGUAGES[0][0]
-            trans_lang = settings.LANGUAGES[1][0]
-            
-            setattr(a1, 'title_'+trans_lang, 'Accueil')
-            setattr(a1, 'content_'+trans_lang, translated_text)
-            a1.save()
-            
-            response = self.client.get('/{0}/home/'.format(origin_lang), follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
-            
-            response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, translated_text)
+        if not is_localized():
+            raise SkipTest()
+        
+        original_text = '*!-+' * 10
+        translated_text = ':%@/' * 9
+        
+        a1 = get_article_class().objects.create(title="Home", content=original_text)
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        setattr(a1, 'title_'+trans_lang, 'Accueil')
+        setattr(a1, 'content_'+trans_lang, translated_text)
+        a1.save()
+        
+        response = self.client.get('/{0}/home/'.format(origin_lang), follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, translated_text)
 
     def test_change_lang(self):
         
-        if is_localized():
-            original_text = '*!-+' * 10
-            translated_text = ':%@/' * 9
-            
-            a1 = get_article_class().objects.create(title="Home", content=original_text)
-            
-            origin_lang = settings.LANGUAGES[0][0]
-            trans_lang = settings.LANGUAGES[1][0]
-            
-            setattr(a1, 'title_'+trans_lang, 'Accueil')
-            setattr(a1, 'content_'+trans_lang, translated_text)
-            
-            a1.save()
-            
-            origin_url = '/{0}/home'.format(origin_lang)
-            response = self.client.get(origin_url, follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
-            
-            data = {'language': trans_lang}
-            response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
-                data=data, follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, translated_text)
-            
-            response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, translated_text)
+        if not is_localized():
+            raise SkipTest()
+        
+        original_text = '*!-+' * 10
+        translated_text = ':%@/' * 9
+        
+        a1 = get_article_class().objects.create(title="Home", content=original_text)
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        setattr(a1, 'title_'+trans_lang, 'Accueil')
+        setattr(a1, 'content_'+trans_lang, translated_text)
+        
+        a1.save()
+        
+        origin_url = '/{0}/home'.format(origin_lang)
+        response = self.client.get(origin_url, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        data = {'language': trans_lang}
+        response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
+            data=data, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, translated_text)
+        
+        response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, translated_text)
             
     def test_change_lang_no_trans(self):
         
-        if is_localized():
-            original_text = '*!-+' * 10
+        if not is_localized():
+            raise SkipTest()
             
-            a1 = get_article_class().objects.create(title="Home", content=original_text)
-            
-            origin_lang = settings.LANGUAGES[0][0]
-            trans_lang = settings.LANGUAGES[1][0]
-            
-            origin_url = '/{0}/home'.format(origin_lang)
-            response = self.client.get(origin_url, follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
-            
-            data = {'language': trans_lang}
-            response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
-                data=data, follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
-            
-            response = self.client.get('/{0}/home/'.format(trans_lang), follow=True)
-            self.assertEqual(200, response.status_code)
-            self.assertContains(response, original_text)
+        original_text = '*!-+' * 10
+        
+        a1 = get_article_class().objects.create(title="Home", content=original_text)
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        origin_url = '/{0}/home'.format(origin_lang)
+        response = self.client.get(origin_url, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        data = {'language': trans_lang}
+        response = self.client.post(reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
+            data=data, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        response = self.client.get('/{0}/home/'.format(trans_lang), follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
             
     def test_keep_slug(self):
         Article = get_article_class()
@@ -2376,25 +2382,27 @@ class UrlLocalizationTest(TestCase):
         self.assertEqual(original_slug, a1.slug)
         
     def test_keep_localized_slug(self):
-        if is_localized():
-            Article = get_article_class()
-            a1 = Article.objects.create(title=u"Home", content="aa")
-            origin_lang = settings.LANGUAGES[0][0]
-            trans_lang = settings.LANGUAGES[1][0]
-            setattr(a1, 'title_'+trans_lang, u'Accueil')
-            a1.save()
-            
-            original_slug = a1.slug
-            original_trans_slug = getattr(a1, 'slug_'+trans_lang, u'**dummy**')
-            
-            a1.title = u"Title changed"
-            setattr(a1, 'title_'+trans_lang, u'Titre change')
-            
-            a1.save()
-            a1 = Article.objects.get(id=a1.id)
-            
-            self.assertEqual(original_slug, a1.slug)
-            self.assertEqual(original_trans_slug, getattr(a1, 'slug_'+trans_lang))
+        if not is_localized():
+            raise SkipTest()
+        
+        Article = get_article_class()
+        a1 = Article.objects.create(title=u"Home", content="aa")
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        setattr(a1, 'title_'+trans_lang, u'Accueil')
+        a1.save()
+        
+        original_slug = a1.slug
+        original_trans_slug = getattr(a1, 'slug_'+trans_lang, u'**dummy**')
+        
+        a1.title = u"Title changed"
+        setattr(a1, 'title_'+trans_lang, u'Titre change')
+        
+        a1.save()
+        a1 = Article.objects.get(id=a1.id)
+        
+        self.assertEqual(original_slug, a1.slug)
+        self.assertEqual(original_trans_slug, getattr(a1, 'slug_'+trans_lang))
             
     def test_no_title(self):
         Article = get_article_class()
@@ -2530,6 +2538,10 @@ class AliasTest(TestCase):
         
 class MultiSiteTest(TestCase):
     
+    def tearDown(self):
+        site1 = Site.objects.all()[0]
+        settings.SITE_ID = site1.id
+    
     def test_view_article(self):
         site1 = Site.objects.all()[0]
         site2 = Site.objects.create(domain='hhtp://test2', name="Test2")
@@ -2657,7 +2669,7 @@ class NewsletterFriendlyTemplateTagsTest(TestCase):
 class GenericViewTestCase(BaseGenericViewTestCase):
     warning = """
     Add this to your settings.py to enable this test:
-    if 'test' == sys.argv[1]:
+    if len(sys.argv)>1 and 'test' == sys.argv[1]:
         INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app',)
     """
     
@@ -2667,6 +2679,10 @@ class GenericViewTestCase(BaseGenericViewTestCase):
             raise SkipTest()
 
 class ArticleSlugTestCase(TestCase):
+    
+    def tearDown(self):
+        site1 = Site.objects.all()[0]
+        settings.SITE_ID = site1.id
     
     def test_create_article_same_title(self):
         Article = get_article_class()
