@@ -22,6 +22,8 @@ from datetime import datetime, timedelta
 from django.core import management
 from django.utils import timezone
 from django.contrib.sites.models import Site
+from django.utils.unittest.case import SkipTest
+from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
 
 def make_dt(dt):
     if settings.USE_TZ:
@@ -2651,3 +2653,15 @@ class NewsletterFriendlyTemplateTagsTest(TestCase):
         self.assertEqual(0, html.count(u'<a style="color: red; background: blue;">'))
         self.assertEqual(0, html.count(u'<img style="width: 100px;"/>'))
         self.assertEqual(2, html.count(u'<td style="border: none;">'))
+
+class GenericViewTestCase(BaseGenericViewTestCase):
+    warning = """
+    Add this to your settings.py to enable this test:
+    if 'test' == sys.argv[1]:
+        INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app',)
+    """
+    
+    def setUp(self):
+        if not ('coop_cms.apps.test_app' in settings.INSTALLED_APPS):
+            print self.warning
+            raise SkipTest()

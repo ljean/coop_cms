@@ -1,0 +1,12 @@
+{% extends "coop_cms/test_app/base.html" %}
+{% load i18n coop_edition %}
+
+{% block content %}
+{% cms_edit object %}
+<div id="content" class="article-content object-detail">
+    <h2>{{ object.other_field }}</h2>
+    <div id="field1">{{ object.field1 }}</div>
+    <div id="field2">{{ object.field2 }}</div>
+</div>
+{% end_cms_edit %}
+{% endblock %}

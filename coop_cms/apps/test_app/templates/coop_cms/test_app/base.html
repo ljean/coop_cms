@@ -1,0 +1,24 @@
+<!DOCYTPE html>
+<html>
+<head>
+	{% load i18n static coop_navigation coop_edition coop_utils coop_bar_tags %}{% load url from future %}
+	<meta charset="utf-8"/>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		
+	<title>coop_cms Test App</title>
+	
+    {% block jquery_declaration %}
+	{% include "coop_cms/_js_includes.html" %}
+	{% endblock %}
+	
+	<link rel="stylesheet" href="{{ STATIC_URL }}css/coop_cms.css?v=1.0" type="text/css" />
+
+    {% coop_bar_headers %}
+</head>
+<body>
+{% block content %}
+{% endblock %}
+{% coop_bar %}
+</body>
+</html>
