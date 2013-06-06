@@ -63,9 +63,10 @@ class CmsFormMediaNode(template.Node):
         if form:
             t = template.Template("{{form.media}}")
             html = t.render(template.Context({'form': form}))
+            return html
             #django 1.5 fix : " are escaped as &quot; and cause script tag 
             #for aloha to be broken
-            return html.replace("&quot;", '"') 
+            #return html.replace("&quot;", '"') 
         else:
             return ""
 
@@ -126,7 +127,7 @@ def if_not_cms_edition(parser, token):
 
 
 CMS_FORM_TEMPLATE = """
-    <form id="cms_form" enctype="multipart/form-data"  method="POST" action="{{post_url}}">{% csrf_token %}
+<form id="cms_form" enctype="multipart/form-data"  method="POST" action="{{post_url}}">{% csrf_token %}
     {% include "coop_cms/_form_error.html" with errs=form.non_field_errors %}
     {{inner}} <input type="submit" style="display: none"> </form>
 """
@@ -212,6 +213,7 @@ class CmsEditNode(template.Node):
         ]
                 
         for node in self.nodelist_content:
+            node.is_safe = True
             if any([isinstance(node, node_type) for  node_type in managed_node_types]):
                 c = node.render(template.Context(safe_context))
             elif isinstance(node, template.loader_tags.BlockNode):

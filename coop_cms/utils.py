@@ -15,6 +15,7 @@ from coop_cms.models import BaseArticle, Alias
 from django.utils.translation import get_language
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404
+from bs4 import BeautifulSoup
 
 class _DeHTMLParser(HTMLParser):
     def __init__(self):
@@ -51,36 +52,65 @@ def dehtml(text):
     except:
         print_exc(file=stderr)
         return text
-    
+
 def make_links_absolute(html_content, newsletter=None):
-    """replace all local url with absolute url"""
-    import re
-    #regex = """<.*(?P<tag>href|src)\s*=\s*["'](?P<url>.+?)["'].*>"""
-    #regex = """<.*href|src\s*=\s*["'](?P<url>.+?)["'].*>"""
+    """replace all local url with site_prefixed url"""
     
-    site_prefix = newsletter.get_site_prefix() if newsletter else settings.COOP_CMS_SITE_PREFIX
-    
-    def make_abs(match):
-        #Thank you : http://www.gawel.org/howtos/python-re-sub
-        start = match.group('start')
-        url = match.group('url')
-        
+    def make_abs(url):
         if url.startswith('..'):
             url = url[2:]
         while url.startswith('/..'):
             url = url[3:]
         if url.startswith('/'):
             url = '%s%s' % (site_prefix, url)
-        end = match.group('end')
-        return start + url + end
+        return url
     
-    a_pattern = re.compile(r'(?P<start>.*?href=")(?P<url>\S+)(?P<end>".*?)')
-    html_content = a_pattern.sub(make_abs, html_content)
+    site_prefix = newsletter.get_site_prefix() if newsletter else settings.COOP_CMS_SITE_PREFIX
+    soup = BeautifulSoup(html_content)
+    for a_tag in soup.find_all("a"):
+        if a_tag.get("href", None):
+            a_tag["href"] = make_abs(a_tag["href"])
     
-    img_pattern = re.compile(r'(?P<start>.*?src=")(?P<url>\S+)(?P<end>".*?)')
-    html_content = img_pattern.sub(make_abs, html_content)
-
-    return html_content
+    for img_tag in soup.find_all("img"):
+        if img_tag.get("src", None):
+            img_tag["src"] = make_abs(img_tag["src"])
+    
+    return soup.prettify()
+    
+#def make_links_absolute(html_content, newsletter=None):
+#    """replace all local url with absolute url"""
+#    import re
+#    #regex = """<.*(?P<tag>href|src)\s*=\s*["'](?P<url>.+?)["'].*>"""
+#    #regex = """<.*href|src\s*=\s*["'](?P<url>.+?)["'].*>"""
+#    
+#    site_prefix = newsletter.get_site_prefix() if newsletter else settings.COOP_CMS_SITE_PREFIX
+#    
+#    def make_abs(match):
+#        #Thank you : http://www.gawel.org/howtos/python-re-sub
+#        start = match.group('start')
+#        url = match.group('url')
+#        
+#        if url.startswith('..'):
+#            url = url[2:]
+#        while url.startswith('/..'):
+#            url = url[3:]
+#        if url.startswith('/'):
+#            url = '%s%s' % (site_prefix, url)
+#        end = match.group('end')
+#        
+#        print start, url, end
+#        
+#        return start + url + end
+#    
+#    #a_pattern = re.compile(ur'(?P<start>.*?href=")(?P<url>\S+)(?P<end>".*?)')
+#    a_pattern = re.compile(r"""(?P<start>.*?href=")(?P<url>\S+)(?P<end>".*?)""")
+#    html_content = a_pattern.sub(make_abs, html_content)
+#    #raise
+#    
+#    img_pattern = re.compile(r'(?P<start>.*?src=")(?P<url>\S+)(?P<end>".*?)')
+#    html_content = img_pattern.sub(make_abs, html_content)
+#
+#    return html_content
     
 def send_newsletter(newsletter, dests):
 
@@ -90,6 +120,7 @@ def send_newsletter(newsletter, dests):
         'SITE_PREFIX': settings.COOP_CMS_SITE_PREFIX,
         'MEDIA_URL': settings.MEDIA_URL, 'STATIC_URL': settings.STATIC_URL,
     }
+    
     html_text = t.render(Context(context_dict))
     html_text = make_links_absolute(html_text, newsletter)
     
