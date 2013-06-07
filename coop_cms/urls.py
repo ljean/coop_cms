@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 
 from django.conf import settings
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls import patterns, include, url
 from django.views.generic.detail import DetailView
 from coop_cms.settings import get_article_class
 

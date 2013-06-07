@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-from django.conf.urls.defaults import url
+from django.conf.urls import url
 from django.contrib.sitemaps import Sitemap
 from coop_cms.settings import get_article_class
 from coop_cms.models import BaseArticle

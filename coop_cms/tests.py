@@ -415,7 +415,7 @@ class ArticleTest(TestCase):
     def test_article_settings(self, move_nav=False):
         initial_data = {'title': "test", 'content': "this is my article content"}
         Article = get_article_class()
-        art0 = mommy.make_one(Article)
+        art0 = mommy.make(Article)
         
         art1 = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         
@@ -424,7 +424,7 @@ class ArticleTest(TestCase):
         node1 = NavNode.objects.create(content_type=ct, object_id=art0.id, tree=tree, parent=None)
         node2 = NavNode.objects.create(content_type=ct, object_id=art0.id, tree=tree, parent=None)
         
-        category = mommy.make_one(ArticleCategory)
+        category = mommy.make(ArticleCategory)
         
         self._log_as_editor()
         data = {
@@ -459,7 +459,7 @@ class ArticleTest(TestCase):
         self.assertEqual(node.parent, node1)
         
         #Update the article
-        category2 = mommy.make_one(ArticleCategory)
+        category2 = mommy.make(ArticleCategory)
         
         node_id = node2.id if move_nav else node1.id
         
@@ -1650,9 +1650,9 @@ class DownloadDocTest(TestCase):
     
     def test_view_docs(self):
         file1 = File(self._get_file())
-        doc1 = mommy.make_one(Document, is_private=True, file=file1)
+        doc1 = mommy.make(Document, is_private=True, file=file1)
         file2 = File(self._get_file())
-        doc2 = mommy.make_one(Document, is_private=False, file=file2)
+        doc2 = mommy.make(Document, is_private=False, file=file2)
         
         self.assertTrue(self.client.login(username='toto', password='toto'))
         response = self.client.get(reverse('coop_cms_media_documents'))
@@ -1673,7 +1673,7 @@ class DownloadDocTest(TestCase):
     def test_download_public(self):
         #create a public doc
         file = File(self._get_file())
-        doc = mommy.make_one(Document, is_private=False, file=file)
+        doc = mommy.make(Document, is_private=False, file=file)
         
         #check the url
         private_url = reverse('coop_cms_download_doc', args=[doc.id])
@@ -1696,7 +1696,7 @@ class DownloadDocTest(TestCase):
     def test_download_private(self):
         #create a public doc
         file = File(self._get_file())
-        doc = mommy.make_one(Document, is_private=True, file=file)
+        doc = mommy.make(Document, is_private=True, file=file)
         
         #check the url
         private_url = reverse('coop_cms_download_doc', args=[doc.id])
@@ -1739,7 +1739,7 @@ class NewsletterTest(TestCase):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
         
-        art = mommy.make_one(Article, in_newsletter=True)
+        art = mommy.make(Article, in_newsletter=True)
         
         self.assertEqual(1, NewsletterItem.objects.count())
         item = NewsletterItem.objects.get(content_type=ct, object_id=art.id)
@@ -1752,7 +1752,7 @@ class NewsletterTest(TestCase):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
         
-        art = mommy.make_one(Article, in_newsletter=False)
+        art = mommy.make(Article, in_newsletter=False)
         self.assertEqual(0, NewsletterItem.objects.count())
         
         art.delete()
@@ -1761,9 +1761,9 @@ class NewsletterTest(TestCase):
     def test_create_article_commands(self):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
-        art1 = mommy.make_one(Article, in_newsletter=True)
-        art2 = mommy.make_one(Article, in_newsletter=True)
-        art3 = mommy.make_one(Article, in_newsletter=False)
+        art1 = mommy.make(Article, in_newsletter=True)
+        art2 = mommy.make(Article, in_newsletter=True)
+        art3 = mommy.make(Article, in_newsletter=False)
         self.assertEqual(2, NewsletterItem.objects.count())
         NewsletterItem.objects.all().delete()
         self.assertEqual(0, NewsletterItem.objects.count())
@@ -1776,11 +1776,11 @@ class NewsletterTest(TestCase):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
         
-        art1 = mommy.make_one(Article, title="Art 1", in_newsletter=True)
-        art2 = mommy.make_one(Article, title="Art 2", in_newsletter=True)
-        art3 = mommy.make_one(Article, title="Art 3", in_newsletter=True)
+        art1 = mommy.make(Article, title="Art 1", in_newsletter=True)
+        art2 = mommy.make(Article, title="Art 2", in_newsletter=True)
+        art3 = mommy.make(Article, title="Art 3", in_newsletter=True)
         
-        newsletter = mommy.make_one(Newsletter, content="a little intro for this newsletter",
+        newsletter = mommy.make(Newsletter, content="a little intro for this newsletter",
             template="test/newsletter_blue.html")
         newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art1.id))
         newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art2.id))
@@ -1800,11 +1800,11 @@ class NewsletterTest(TestCase):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
         
-        art1 = mommy.make_one(Article, title="Art 1", in_newsletter=True)
-        art2 = mommy.make_one(Article, title="Art 2", in_newsletter=True)
-        art3 = mommy.make_one(Article, title="Art 3", in_newsletter=True)
+        art1 = mommy.make(Article, title="Art 1", in_newsletter=True)
+        art2 = mommy.make(Article, title="Art 2", in_newsletter=True)
+        art3 = mommy.make(Article, title="Art 3", in_newsletter=True)
         
-        newsletter = mommy.make_one(Newsletter, content="a little intro for this newsletter",
+        newsletter = mommy.make(Newsletter, content="a little intro for this newsletter",
             template="test/newsletter_blue.html")
         newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art1.id))
         newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art2.id))
@@ -1834,7 +1834,7 @@ class NewsletterTest(TestCase):
     def test_edit_newsletter_anonymous(self):
         original_data = {'content': "a little intro for this newsletter",
             'template': "test/newsletter_blue.html"}
-        newsletter = mommy.make_one(Newsletter, **original_data)
+        newsletter = mommy.make(Newsletter, **original_data)
         
         url = reverse('coop_cms_edit_newsletter', args=[newsletter.id])
         response = self.client.get(url)
@@ -1850,7 +1850,7 @@ class NewsletterTest(TestCase):
         self._log_as_editor()
         original_data = {'content': "a little intro for this newsletter",
             'template': "test/newsletter_blue.html"}
-        newsletter = mommy.make_one(Newsletter, **original_data)
+        newsletter = mommy.make(Newsletter, **original_data)
         
         url = reverse('coop_cms_edit_newsletter', args=[newsletter.id])
         
@@ -1868,10 +1868,10 @@ class NewsletterTest(TestCase):
         Article = get_article_class()
         ct = ContentType.objects.get_for_model(Article)
         
-        art1 = mommy.make_one(Article, title="Art 1", in_newsletter=True)
-        poh = mommy.make_one(PieceOfHtml, div_id="newsletter_header", content="HELLO!!!")
+        art1 = mommy.make(Article, title="Art 1", in_newsletter=True)
+        poh = mommy.make(PieceOfHtml, div_id="newsletter_header", content="HELLO!!!")
         
-        newsletter = mommy.make_one(Newsletter, content="a little intro for this newsletter",
+        newsletter = mommy.make(Newsletter, content="a little intro for this newsletter",
             template="test/newsletter_blue.html")
         newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art1.id))
         newsletter.save()
@@ -1910,7 +1910,7 @@ class NewsletterTest(TestCase):
         )
         self._log_as_editor()
         
-        newsletter = mommy.make_one(Newsletter, template='test/newsletter_blue.html')
+        newsletter = mommy.make(Newsletter, template='test/newsletter_blue.html')
         
         url = reverse('coop_cms_change_newsletter_template', args=[newsletter.id])
         response = self.client.get(url)
@@ -1934,7 +1934,7 @@ class NewsletterTest(TestCase):
             ('test/newsletter_blue.html', 'Blue'),
         )
         original_data={'template': 'test/newsletter_blue.html'}
-        newsletter = mommy.make_one(Newsletter, **original_data)
+        newsletter = mommy.make(Newsletter, **original_data)
         
         url = reverse('coop_cms_change_newsletter_template', args=[newsletter.id])
         response = self.client.get(url)
@@ -1953,7 +1953,7 @@ class NewsletterTest(TestCase):
             ('test/newsletter_blue.html', 'Blue'),
         )
         original_data={'template': 'test/newsletter_blue.html'}
-        newsletter = mommy.make_one(Newsletter, **original_data)
+        newsletter = mommy.make(Newsletter, **original_data)
         
         self._log_as_editor()
         url = reverse('coop_cms_change_newsletter_template', args=[newsletter.id])
@@ -1982,7 +1982,7 @@ class NewsletterTest(TestCase):
             'subject': 'test email',
             'content': rel_content.format("")
         }
-        newsletter = mommy.make_one(Newsletter, **original_data)
+        newsletter = mommy.make(Newsletter, **original_data)
         
         self._log_as_editor()
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
@@ -2004,7 +2004,7 @@ class NewsletterTest(TestCase):
                 extra_checker(e)
         
     def test_schedule_newsletter_sending(self):
-        newsletter = mommy.make_one(Newsletter)
+        newsletter = mommy.make(Newsletter)
         
         self._log_as_editor()
         url = reverse('coop_cms_schedule_newsletter_sending', args=[newsletter.id])
@@ -2021,7 +2021,7 @@ class NewsletterTest(TestCase):
         self.assertEqual(2030, NewsletterSending.objects.all()[0].scheduling_dt.year)
         
     def test_schedule_newsletter_sending_invalid_value(self):
-        newsletter = mommy.make_one(Newsletter)
+        newsletter = mommy.make(Newsletter)
         
         self._log_as_editor()
         url = reverse('coop_cms_schedule_newsletter_sending', args=[newsletter.id])
@@ -2045,7 +2045,7 @@ class NewsletterTest(TestCase):
         self.assertEqual(0, NewsletterSending.objects.count())
     
     def test_schedule_anonymous(self):
-        newsletter = mommy.make_one(Newsletter)
+        newsletter = mommy.make(Newsletter)
         
         login_url = reverse('django.contrib.auth.views.login')
         url = reverse('coop_cms_schedule_newsletter_sending', args=[newsletter.id])
@@ -2070,10 +2070,10 @@ class NewsletterTest(TestCase):
             'content': '<h2>Hello guys!</h2><p>Visit <a href="http://toto.fr">us</a></p>',
             'template': 'test/newsletter_blue.html',
         }
-        newsletter = mommy.make_one(Newsletter, **newsletter_data)
+        newsletter = mommy.make(Newsletter, **newsletter_data)
         
         sch_dt = timezone.now() - timedelta(1)
-        sending = mommy.make_one(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
+        sending = mommy.make(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
         
@@ -2101,10 +2101,10 @@ class NewsletterTest(TestCase):
             'content': '<h2>Hello guys!</h2><p>Visit <a href="http://toto.fr">us</a></p>',
             'template': 'test/newsletter_blue.html',
         }
-        newsletter = mommy.make_one(Newsletter, **newsletter_data)
+        newsletter = mommy.make(Newsletter, **newsletter_data)
         
         sch_dt = timezone.now() - timedelta(1)
-        sending = mommy.make_one(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
+        sending = mommy.make(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         addresses = ';'.join(['toto@toto.fr']*5)
         management.call_command('send_newsletter', addresses, verbosity=0, interactive=False)
@@ -2132,10 +2132,10 @@ class NewsletterTest(TestCase):
             'content': '<h2>Hello guys!</h2><p>Visit <a href="http://toto.fr">us</a></p>',
             'template': 'test/newsletter_blue.html',
         }
-        newsletter = mommy.make_one(Newsletter, **newsletter_data)
+        newsletter = mommy.make(Newsletter, **newsletter_data)
         
         sch_dt = timezone.now() + timedelta(1)
-        sending = mommy.make_one(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
+        sending = mommy.make(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
         
