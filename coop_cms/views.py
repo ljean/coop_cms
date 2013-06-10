@@ -28,6 +28,7 @@ from django.utils.log import getLogger
 from datetime import datetime
 from django.utils.translation import check_for_language, activate, get_language
 from urlparse import urlparse
+from django.contrib.sites.models import Site
 import logging
 logger = logging.getLogger("coop_cms")
 
@@ -47,7 +48,7 @@ def tree_map(request):
 
 def homepage(request):
     try:
-        article = get_article_class().objects.get(is_homepage=True, sites=settings.SITE_ID)
+        article = get_article_class().objects.get(homepage_for_site__id=settings.SITE_ID, sites=settings.SITE_ID)
         return HttpResponseRedirect(article.get_absolute_url())
     except get_article_class().DoesNotExist:
         return HttpResponseRedirect(reverse('coop_cms_view_all_articles'))
@@ -93,11 +94,11 @@ def set_homepage(request, article_id):
     """use the article as homepage"""
     article = get_object_or_404(get_article_class(), id=article_id)
 
-    if not request.user.has_perm('can_publish_article', article):
+    if not request.user.has_perm('can_edit_article', article):
         raise PermissionDenied
 
     if request.method == "POST":
-        article.is_homepage = True
+        article.homepage_for_site = Site.objects.get(id=settings.SITE_ID)
         article.save()
         return HttpResponseRedirect(reverse('coop_cms_homepage'))
 

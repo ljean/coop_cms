@@ -61,13 +61,13 @@ class ArticleAdmin(BaseAdminClass):
     list_display = ['slug', 'title', 'category', 'template_name', 'publication', 'headline', 'in_newsletter', 'modified']
     list_editable = ['publication', 'headline', 'in_newsletter', 'category']
     readonly_fields = ['created', 'modified', 'is_homepage']
-    list_filter = ['publication', 'headline', 'in_newsletter', 'sites', 'is_homepage', 'category', 'template']
+    list_filter = ['publication', 'headline', 'in_newsletter', 'sites', 'homepage_for_site', 'category', 'template']
     date_hierarchy = 'publication_date'
     fieldsets = (
         #(_('Navigation'), {'fields': ('navigation_parent',)}),
         (_('General'), {'fields': ('slug', 'title', 'content')}),
         (_('Advanced'), {'fields': ('sites', 'template', 'category', 'logo', 'in_newsletter')}),
-        (_('Publication'), {'fields': ('publication', 'publication_date', 'headline', 'is_homepage', 'created', 'modified')}),
+        (_('Publication'), {'fields': ('publication', 'publication_date', 'headline', 'is_homepage', 'homepage_for_site', 'created', 'modified')}),
         (_('Summary'), {'fields': ('summary',)}),
         (_('Debug'), {'fields': ('temp_logo',)}),
     )
