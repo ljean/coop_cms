@@ -12,8 +12,8 @@ class Migration(DataMigration):
         Article = orm['basic_cms.Article']
         Site = orm['sites.Site']
         for article in Article.objects.filter(is_homepage=True):
-            a.homepage_for_site = Site.objects.get(id=settings.SITE_ID)
-            a.save()
+            article.homepage_for_site = Site.objects.get(id=settings.SITE_ID)
+            article.save()
             
         # Note: Remember to use orm['appname.ModelName'] rather than "from appname.models..."
 
@@ -22,8 +22,8 @@ class Migration(DataMigration):
         Article = orm['basic_cms.Article']
         Site = orm['sites.Site']
         for article in Article.objects.filter(homepage_for_site__id=settings.SITE_ID):
-            a.is_homepage = True
-            a.save()
+            article.is_homepage = True
+            article.save()
 
     models = {
         u'basic_cms.article': {

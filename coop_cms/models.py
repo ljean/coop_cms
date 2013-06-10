@@ -348,7 +348,6 @@ class BaseArticle(BaseNavigable):
     summary = models.TextField(_(u'Summary'), blank=True, default='')
     category = models.ForeignKey(ArticleCategory, verbose_name=_(u'Category'), blank=True, null=True, default=None, related_name="%(app_label)s_%(class)s_rel")
     in_newsletter = models.BooleanField(_(u'In newsletter'), default=True, help_text=_(u'Make this article available for newsletters.'))
-    #is_homepage = models.BooleanField(_(u'Is homepage'), default=False, help_text=_(u'Make this article the website homepage (only one homepage per site)'))
     homepage_for_site = models.ForeignKey(Site, verbose_name=_(u'Homepage for site'), blank=True, null=True, default=None, related_name="homepage_article")
     headline = models.BooleanField(_(u"Headline"), default=False, help_text=_(u'Make this article appear on the home page'))
     publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now())
