@@ -63,7 +63,7 @@ class EditableObjectView(View):
             'editable': self.can_edit_object(),
             'edit_mode': self.edit_mode,
             'title': getattr(self.object, 'title', unicode(self.object)),
-            'object': self.object,
+            self.varname: self.object,
         }
         
     def get_template(self):

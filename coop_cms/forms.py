@@ -36,7 +36,22 @@ class NavTypeForm(forms.ModelForm):
     class Meta:
         model = NavType
 
-class ArticleForm(floppyforms.ModelForm):
+class AlohaEditableModelForm(floppyforms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(AlohaEditableModelForm, self).__init__(*args, **kwargs)
+        for field_name in self.Meta.fields:
+            no_aloha_widgets = getattr(self.Meta, 'no_aloha_widgets', ())
+            if not field_name in no_aloha_widgets: 
+                self.fields[field_name].widget = AlohaInput()
+
+    class Media:
+        css = {
+            'all': ('css/colorbox.css', ),
+        }
+        js = ('js/jquery.form.js', 'js/jquery.pageslide.js', 'js/jquery.colorbox-min.js', 'js/colorbox.coop.js')
+
+class ArticleForm(AlohaEditableModelForm):
 
     def __init__(self, *args, **kwargs):
         super(ArticleForm, self).__init__(*args, **kwargs)
@@ -49,10 +64,7 @@ class ArticleForm(floppyforms.ModelForm):
     class Meta:
         model = get_article_class()
         fields = ('title', 'content', 'logo')
-        widgets = {
-            'title': AlohaInput(text_color_plugin=False),
-            'content': AlohaInput(text_color_plugin=False),
-        }
+        no_aloha_widgets = ('logo',)
 
     def set_logo_size(self, logo_size=None):
         thumbnail_src = self.logo_thumbnail(logo_size)
@@ -62,12 +74,6 @@ class ArticleForm(floppyforms.ModelForm):
     def logo_thumbnail(self, logo_size=None):
         if self.article:
             return self.article.logo_thumbnail(True, logo_size=logo_size)
-
-    class Media:
-        css = {
-            'all': ('css/colorbox.css', ),
-        }
-        js = ('js/jquery.form.js', 'js/jquery.pageslide.js', 'js/jquery.colorbox-min.js', 'js/colorbox.coop.js')
 
     def clean_title(self):
         if getattr(settings, 'COOP_CMS_TITLE_OPTIONAL', False):
@@ -281,22 +287,26 @@ class PublishArticleForm(forms.ModelForm):
     #    kwargs['initial'] = initials
     #    super(PublishArticleForm, self).__init__(*args, **kwargs)
 
-
-class NewsletterForm(floppyforms.ModelForm):
-
+class NewsletterForm(AlohaEditableModelForm):
     class Meta:
         model = Newsletter
         fields = ('content',)
-        widgets = {
-            'content': AlohaInput(text_color_plugin=False),
-        }
-
-    class Media:
-        css = {
-            'all': ('css/colorbox.css', ),
-        }
-        js = ('js/jquery.form.js', 'js/jquery.pageslide.js', 'js/jquery.colorbox-min.js', 'js/colorbox.coop.js')
-
+    
+#class NewsletterForm(floppyforms.ModelForm):
+#
+#    class Meta:
+#        model = Newsletter
+#        fields = ('content',)
+#        widgets = {
+#            'content': AlohaInput(text_color_plugin=False),
+#        }
+#
+#    class Media:
+#        css = {
+#            'all': ('css/colorbox.css', ),
+#        }
+#        js = ('js/jquery.form.js', 'js/jquery.pageslide.js', 'js/jquery.colorbox-min.js', 'js/colorbox.coop.js')
+#
 
 class NewsletterSchedulingForm(floppyforms.ModelForm):
     class Meta:

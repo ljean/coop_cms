@@ -63,10 +63,9 @@ class CmsFormMediaNode(template.Node):
         if form:
             t = template.Template("{{form.media}}")
             html = t.render(template.Context({'form': form}))
-            return html
             #django 1.5 fix : " are escaped as &quot; and cause script tag 
             #for aloha to be broken
-            #return html.replace("&quot;", '"') 
+            return html.replace("&quot;", '"') 
         else:
             return ""
 

@@ -29,7 +29,7 @@ can_edit_article = can_do('can_edit', ['article'])
 can_edit_object = can_do('can_edit', ['article', 'object'])
 can_publish_article = can_do('can_publish', ['article'])
 can_edit_newsletter = can_do('can_edit', ['newsletter'])
-can_edit = can_do('can_edit', ['article', 'newsletter'])
+can_edit = can_do('can_edit', ['article', 'newsletter', 'object'])
 
 def can_add_article(func):
     def wrapper(request, context):
@@ -145,7 +145,6 @@ def cms_new_link(request, context):
         url = reverse('coop_cms_new_link')
         return make_link(url, _(u'Add link'), 'fugue/document--plus.png',
             classes=['alert_on_click', 'colorbox-form', 'icon'])
-
 
 @can_add_article
 def cms_set_homepage(request, context):

@@ -31,13 +31,7 @@ urlpatterns = patterns('coop_cms.views',
     url(r'sitemap/$', 'tree_map', name="default_site_map"),
     url(r'articles/(?P<slug>[-\w]+)/$', 'articles_category', name="coop_cms_articles_category"),
     url(r'cms/change-language/$', 'change_language', name='coop_cms_change_language'),
-
-    # url(r'^articles/(?P<slug>\w+)/$', DetailView.as_view(   model=get_article_class(),
-    #                                                         context_object_name="category",
-    #                                                         template_name="coop_cms/articles_category.html"
-    #                                                         ),
-    #                                                         name="articles_category"),
-    )
+)
 
 if 'coop_cms.apps.rss_sync' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',
