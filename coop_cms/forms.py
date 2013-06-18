@@ -1,5 +1,5 @@
 from django import forms
-from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending, Link
+from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending, Link, Document
 from django.contrib.contenttypes.models import ContentType
 from settings import get_navigable_content_types
 from django.core.exceptions import ValidationError
@@ -174,13 +174,10 @@ class AddImageForm(forms.Form):
         label = _('Description'),
     )
 
-class AddDocForm(forms.Form):
-    doc = forms.FileField(required=True, label = _('File'),)
-    descr = forms.CharField(required=False, widget=forms.TextInput(
-        attrs={'size': '35', 'placeholder': _(u'Optional description'),}),
-        label = _('Description'),
-    )
-    is_private = forms.BooleanField(required=False)
+class AddDocForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = ('file', 'name', 'is_private', 'category')
 
 class ArticleTemplateForm(forms.Form):
     def __init__(self, article, user, *args, **kwargs):

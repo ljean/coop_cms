@@ -312,14 +312,10 @@ def upload_doc(request):
         if request.method == "POST":
             form = forms.AddDocForm(request.POST, request.FILES)
             if form.is_valid():
-                src = form.cleaned_data['doc']
-                descr = form.cleaned_data['descr']
-                is_private = form.cleaned_data['is_private']
-                if not descr:
-                    descr = os.path.splitext(src.name)[0]
-                doc = models.Document(name=descr, is_private=is_private)
-                doc.file.save(src.name, src)
-                doc.save()
+                doc = form.save()
+                if not doc.name:
+                    doc.name = os.path.splitext(os.path.basename(doc.file.name))[0]
+                    doc.save()
     
                 request.session["coop_cms_media_doc"] = True
     
@@ -499,18 +495,25 @@ def download_doc(request, doc_id):
     doc = get_object_or_404(models.Document, id=doc_id)
     if not request.user.has_perm('can_download_doc', doc):
         raise PermissionDenied
-    file = doc.file
-    file.open('rb')
-    wrapper = FileWrapper(file)
-    mime_type = mimetypes.guess_type(file.name)[0]
-    if not mime_type:
-        mime_type = u'application/octet-stream'
-    response = HttpResponse(wrapper, mimetype=mime_type)
-    response['Content-Length'] = file.size
-    filename = unicodedata.normalize('NFKD', os.path.split(file.name)[1]).encode("utf8", 'ignore')
-    filename = filename.replace(' ', '-')
-    response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
-    return response
+    
+    if 'filetransfers' in settings.INSTALLED_APPS:
+        from filetransfers.api import serve_file
+        return serve_file(request, doc.file)
+    else:
+        #legacy version just kept for compatibility if filetransfers is not installed
+        logger.warning("install django-filetransfers for better download support")
+        file = doc.file
+        file.open('rb')
+        wrapper = FileWrapper(file)
+        mime_type = mimetypes.guess_type(file.name)[0]
+        if not mime_type:
+            mime_type = u'application/octet-stream'
+        response = HttpResponse(wrapper, mimetype=mime_type)
+        response['Content-Length'] = file.size
+        filename = unicodedata.normalize('NFKD', os.path.split(file.name)[1]).encode("utf8", 'ignore')
+        filename = filename.replace(' ', '-')
+        response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
+        return response
 
 #navigation tree --------------------------------------------------------------
 

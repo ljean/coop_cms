@@ -48,6 +48,7 @@ setup(
                         'djaloha',
                         'django-pagination',
                         'feedparser',
+                        #'django-filetransfers', #need to be installed manually from https://bitbucket.org/wkornewald/django-filetransfers
                         #'model_mommy', #---> ramène django 1.5 dans ses dépendances quand installé via coop_cms
                         ],
     long_description = open('README.rst').read(),

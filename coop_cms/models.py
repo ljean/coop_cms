@@ -577,16 +577,16 @@ class Image(Media):
 
 class Document(Media):
     def get_doc_folder(self, filename):
-        if self.is_private:
+        if not self.is_private:
             try:
                 doc_root = settings.DOCUMENT_FOLDER
             except AttributeError:
-                doc_root = 'docs'
+                doc_root = 'documents/public'
         else:
             try:
                 doc_root = settings.PRIVATE_DOCUMENT_FOLDER
             except AttributeError:
-                doc_root = 'private_docs'
+                doc_root = 'documents/private'
 
         filename = os.path.basename(filename)
 
@@ -594,7 +594,9 @@ class Document(Media):
             self.created.strftime('%Y%d%m%H%M%S'), filename)
 
     file = models.FileField(_('file'), upload_to=get_doc_folder)
-    is_private = models.BooleanField(default=False)
+    is_private = models.BooleanField(_('is private'), default=False,
+        help_text=_(u"Check this if you do not want to publish this document to all users"))
+    category = models.ForeignKey(ArticleCategory, blank=True, null=True, default=None)
 
     def can_download_doc(self, user):
         return user.is_authenticated()
