@@ -1593,9 +1593,9 @@ class DownloadDocTest(TestCase):
     
     def test_upload_public_doc(self):
         data = {
-            'doc': self._get_file(),
+            'file': self._get_file(),
             'is_private': False,
-            'descr': 'a test file',
+            'name': 'a test file',
         }
         self.assertTrue(self.client.login(username='toto', password='toto'))
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
@@ -1603,7 +1603,28 @@ class DownloadDocTest(TestCase):
         self.assertEqual(response.content, 'close_popup_and_media_slide')
         public_docs = Document.objects.filter(is_private=False)
         self.assertEquals(1, public_docs.count())
-        self.assertEqual(public_docs[0].name, data['descr'])
+        self.assertEqual(public_docs[0].name, data['name'])
+        self.assertEqual(public_docs[0].category, None)
+        f = public_docs[0].file
+        f.open('rb')
+        self.assertEqual(f.read(), self._get_file().read())
+        
+    def test_upload_public_doc_category(self):
+        cat = mommy.make(ArticleCategory, name="my cat")
+        data = {
+            'file': self._get_file(),
+            'is_private': False,
+            'name': 'a test file',
+            'category': cat.id,
+        }
+        self.assertTrue(self.client.login(username='toto', password='toto'))
+        response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        public_docs = Document.objects.filter(is_private=False)
+        self.assertEquals(1, public_docs.count())
+        self.assertEqual(public_docs[0].name, data['name'])
+        self.assertEqual(public_docs[0].category, cat)
         f = public_docs[0].file
         f.open('rb')
         self.assertEqual(f.read(), self._get_file().read())
@@ -1620,7 +1641,7 @@ class DownloadDocTest(TestCase):
 
     def test_upload_doc_anonymous_user(self):
         data = {
-            'doc': self._get_file(),
+            'file': self._get_file(),
             'is_private': False,
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
@@ -1634,7 +1655,7 @@ class DownloadDocTest(TestCase):
         
     def test_upload_private_doc(self):
         data = {
-            'doc': self._get_file(),
+            'file': self._get_file(),
             'is_private': True,
         }
         self.assertTrue(self.client.login(username='toto', password='toto'))
@@ -1644,6 +1665,7 @@ class DownloadDocTest(TestCase):
         private_docs = Document.objects.filter(is_private=True)
         self.assertEquals(1, private_docs.count())
         self.assertEqual(private_docs[0].name, 'unittest1')
+        self.assertEqual(private_docs[0].category, None)
         f = private_docs[0].file
         f.open('rb')
         self.assertEqual(f.read(), self._get_file().read())
@@ -1694,9 +1716,14 @@ class DownloadDocTest(TestCase):
         
     
     def test_download_private(self):
+        if 'sanza.Profile' in settings.INSTALLED_APPS:
+            raise SkipTest()
+            
         #create a public doc
         file = File(self._get_file())
-        doc = mommy.make(Document, is_private=True, file=file)
+        cat = mommy.make(ArticleCategory, name="private-doc")
+        doc = mommy.make(Document, is_private=True, file=file, category=cat)
+            
         
         #check the url
         private_url = reverse('coop_cms_download_doc', args=[doc.id])
