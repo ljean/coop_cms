@@ -589,7 +589,10 @@ class Document(Media):
                 doc_root = 'documents/private'
 
         filename = os.path.basename(filename)
-
+        #This is required for x-sendfile
+        name, ext = os.path.splitext(filename)
+        filename = slugify(name) + ext
+        
         return u'{0}/{1}/{2}'.format(doc_root,
             self.created.strftime('%Y%d%m%H%M%S'), filename)
 
