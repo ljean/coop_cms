@@ -29,6 +29,7 @@ from datetime import datetime
 from django.utils.translation import check_for_language, activate, get_language
 from urlparse import urlparse
 from django.contrib.sites.models import Site
+from generic_views import EditableObjectView
 import logging
 logger = logging.getLogger("coop_cms")
 
@@ -57,7 +58,6 @@ def homepage(request):
 def view_all_articles(request):
 
     articles_admin_url = newsletters_admin_url = add_article_url = add_newsletter_url = None
-
 
     if request.user.is_staff:
         article_class = get_article_class()
@@ -1021,4 +1021,29 @@ def change_language(request):
 
     return HttpResponseRedirect(next)
     
-
+class ArticleView(EditableObjectView):
+    model = get_article_class()
+    form_class = get_article_form()
+    field_lookup = "slug"
+    varname = "article"
+    
+    def get_object(self):
+        return get_article_or_404(slug=self.kwargs['slug'], sites=settings.SITE_ID) 
+    
+    def handle_object_not_found(self):
+        return redirect_if_alias(path=self.kwargs['slug'])
+    
+    def get_context_data(self):
+        context_data = super(ArticleView, self).get_context_data()
+        context_data.update({
+            'draft': self.object.publication==models.BaseArticle.DRAFT,
+            'headlines': get_headlines(self.object), 
+            'ARTICLE_PUBLISHED': models.BaseArticle.PUBLISHED
+        })
+        return context_data
+    
+    def get_template(self):
+        return get_article_template(self.object)
+    
+class EditArticleView(ArticleView):
+    edit_mode = True

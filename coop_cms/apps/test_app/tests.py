@@ -7,9 +7,16 @@ from django.template import Template, Context
 from model_mommy import mommy
 from django.conf import settings
 from models import TestClass
+import logging
 
 class GenericViewTestCase(TestCase):
     
+    def setUp(self):
+        logging.disable(logging.CRITICAL)
+        
+    def tearDown(self):
+        logging.disable(logging.NOTSET)
+
     def _log_as_viewer(self):
         self.viewer = user = User.objects.create_user('viewer', 'viewer@toto.fr', 'viewer')
         return self.client.login(username='viewer', password='viewer')

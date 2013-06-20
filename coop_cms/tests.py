@@ -25,6 +25,14 @@ from django.contrib.sites.models import Site
 from django.utils.unittest.case import SkipTest
 from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
 from bs4 import BeautifulSoup
+import logging
+
+class BaseTestCase(TestCase):
+    def setUp(self):
+        logging.disable(logging.CRITICAL)
+        
+    def tearDown(self):
+        logging.disable(logging.NOTSET)
 
 def make_dt(dt):
     if settings.USE_TZ:
@@ -33,9 +41,10 @@ def make_dt(dt):
         return dt
     
 
-class ArticleTest(TestCase):
+class ArticleTest(BaseTestCase):
     
     def setUp(self):
+        super(ArticleTest, self).setUp()
         self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
         settings.COOP_CMS_ARTICLE_TEMPLATES = (
             ('test/newsletter_red.html', 'Red'),
@@ -43,6 +52,7 @@ class ArticleTest(TestCase):
         )
         
     def tearDown(self):
+        super(ArticleTest, self).tearDown()
         #restore
         settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
         
@@ -133,11 +143,7 @@ class ArticleTest(TestCase):
         
         data = {"title": 'salut', "content": 'oups'}
         response = self.client.post(article.get_edit_url(), data=data, follow=True)
-        self.assertEqual(response.status_code, 200)
-        next_url = response.redirect_chain[-1][0]
-        expected_next = article.get_edit_url().replace('/', '%2F')
-        login_url = reverse('django.contrib.auth.views.login')+"?next="+expected_next
-        self.assertTrue(login_url in next_url)
+        self.assertEqual(response.status_code, 403)
         
         article = get_article_class().objects.get(id=article.id)
         self.assertEquals(article.title, initial_data['title'])
@@ -156,11 +162,12 @@ class ArticleTest(TestCase):
         self.assertEqual(200, response.status_code)
         
         response = self.client.get(article.get_edit_url(), follow=True)
-        self.assertEqual(200, response.status_code) #if can_edit returns 404 error
-        next_url = response.redirect_chain[-1][0]
-        expected_next = article.get_edit_url().replace('/', '%2F')
-        login_url = reverse('django.contrib.auth.views.login')+"?next="+expected_next
-        self.assertTrue(login_url in next_url)
+        self.assertEqual(403, response.status_code)
+        #self.assertEqual(200, response.status_code) #if can_edit returns 404 error
+        #next_url = response.redirect_chain[-1][0]
+        #expected_next = article.get_edit_url().replace('/', '%2F')
+        #login_url = reverse('django.contrib.auth.views.login')+"?next="+expected_next
+        #self.assertTrue(login_url in next_url)
         
         self._log_as_editor()
         response = self.client.get(article.get_edit_url(), follow=True)
@@ -504,9 +511,10 @@ class ArticleTest(TestCase):
         self.test_article_settings(True)
 
 
-class NavigationTest(TestCase):
+class NavigationTest(BaseTestCase):
 
     def setUp(self):
+        super(NavigationTest, self).setUp()
         self.url_ct = ContentType.objects.get(app_label='coop_cms', model='link')
         NavType.objects.create(content_type=self.url_ct, search_field='url', label_rule=NavType.LABEL_USE_SEARCH_FIELD)
         self.editor = None
@@ -1146,92 +1154,10 @@ class NavigationTest(TestCase):
         node = nodes[0]
         self.assertEqual(addrs[0], node.content_object.url)
 
-#class NavigationParentTest(TestCase):
-#    
-#    def setUp(self):
-#        ct = ContentType.objects.get_for_model(get_article_class())
-#        NavType.objects.create(content_type=ct, search_field='title', label_rule=NavType.LABEL_USE_SEARCH_FIELD)
-#        self.tree = get_navtree_class().objects.create()
-#    
-#    def test_set_himself_as_parent_raise_error(self):
-#        art = get_article_class().objects.create(title='toto', content='oups')
-#        node = NavNode.objects.create(tree=self.tree, label=art.title, content_object=art, ordering=1, parent=None)
-#        self.assertRaises(ValidationError, art._set_navigation_parent, node.id)
-#        
-#    def test_set_child_as_parent_raise_error(self):
-#        art1 = get_article_class().objects.create(title='toto', content='oups')
-#        node1 = NavNode.objects.create(tree=self.tree, label=art1.title, content_object=art1, ordering=1, parent=None)
-#        
-#        art2 = get_article_class().objects.create(title='titi', content='oups')
-#        node2 = NavNode.objects.create(tree=self.tree, label=art2.title, content_object=art2, ordering=1, parent=node1)
-#        
-#        self.assertRaises(ValidationError, art1._set_navigation_parent, node2.id)
-#    
-#    def test_add_to_navigation_as_root(self):
-#        art1 = get_article_class().objects.create(title='toto', content='oups')
-#        art1.navigation_parent = 0
-#        ct = ContentType.objects.get_for_model(get_article_class())
-#        node = NavNode.objects.get(content_type=ct, object_id=art1.id)
-#        
-#    def test_add_to_navigation_as_child(self):
-#        art1 = get_article_class().objects.create(title='toto', content='oups')
-#        node1 = NavNode.objects.create(tree=self.tree, label=art1.title, content_object=art1, ordering=1, parent=None)
-#        art2 = get_article_class().objects.create(title='titi', content='oups')
-#        art2.navigation_parent = node1.id
-#        ct = ContentType.objects.get_for_model(get_article_class())
-#        node = NavNode.objects.get(content_type=ct, object_id=art2.id)
-#        self.assertEqual(node.parent.id, node1.id)
-#        
-#    def test_move_in_navigation_to_root(self):
-#        art1 = get_article_class().objects.create(title='toto', content='oups')
-#        node1 = NavNode.objects.create(tree=self.tree, label=art1.title, content_object=art1, ordering=1, parent=None)
-#        art2 = get_article_class().objects.create(title='titi', content='oups')
-#        node2 = NavNode.objects.create(tree=self.tree, label=art2.title, content_object=art2, ordering=1, parent=node1)
-#        art2.navigation_parent = 0
-#        ct = ContentType.objects.get_for_model(get_article_class())
-#        node = NavNode.objects.get(content_type=ct, object_id=art2.id)
-#        self.assertEqual(node.parent, None)
-#        
-#    def test_move_in_navigation_to_child(self):
-#        art1 = get_article_class().objects.create(title='toto', content='oups')
-#        node1 = NavNode.objects.create(tree=self.tree, label=art1.title, content_object=art1, ordering=1, parent=None)
-#        art2 = get_article_class().objects.create(title='titi', content='oups')
-#        node2 = NavNode.objects.create(tree=self.tree, label=art2.title, content_object=art2, ordering=1, parent=None)
-#        art2.navigation_parent = node1.id
-#        ct = ContentType.objects.get_for_model(get_article_class())
-#        node = NavNode.objects.get(content_type=ct, object_id=art2.id)
-#        self.assertEqual(node.parent.id, node1.id)
-#        
-#    def test_remove_from_navigation(self):
-#        art1 = get_article_class().objects.create(title='toto', content='oups')
-#        node1 = NavNode.objects.create(tree=self.tree, label=art1.title, content_object=art1, ordering=1, parent=None)
-#        art1.navigation_parent = None
-#        ct = ContentType.objects.get_for_model(get_article_class())
-#        self.assertRaises(NavNode.DoesNotExist, NavNode.objects.get, content_type=ct, object_id=art1.id)
-#        
-#    def test_remove_from_navigation_twice(self):
-#        art1 = get_article_class().objects.create(title='toto', content='oups')
-#        node1 = NavNode.objects.create(tree=self.tree, label=art1.title, content_object=art1, ordering=1, parent=None)
-#        art1.navigation_parent = None
-#        ct = ContentType.objects.get_for_model(get_article_class())
-#        self.assertRaises(NavNode.DoesNotExist, NavNode.objects.get, content_type=ct, object_id=art1.id)
-#        art1.navigation_parent = None
-#        ct = ContentType.objects.get_for_model(get_article_class())
-#        self.assertRaises(NavNode.DoesNotExist, NavNode.objects.get, content_type=ct, object_id=art1.id)
-#        
-#    def test_get_navigation_parent(self):
-#        art1 = get_article_class().objects.create(title='toto', content='oups')
-#        node1 = NavNode.objects.create(tree=self.tree, label=art1.title, content_object=art1, ordering=1, parent=None)
-#        art2 = get_article_class().objects.create(title='titi', content='oups')
-#        node2 = NavNode.objects.create(tree=self.tree, label=art2.title, content_object=art2, ordering=1, parent=node1)
-#        art3 = get_article_class().objects.create(title='tutu', content='oups')
-#        self.assertEqual(art1.navigation_parent, 0)
-#        self.assertEqual(art2.navigation_parent, art1.id)
-#        self.assertEqual(art3.navigation_parent, None)
-
-class TemplateTagsTest(TestCase):
+class TemplateTagsTest(BaseTestCase):
     
     def setUp(self):
+        super(TemplateTagsTest, self).setUp()
         link1 = Link.objects.create(url='http://www.google.fr')
         link2 = Link.objects.create(url='http://www.python.org')
         link3 = Link.objects.create(url='http://www.quinode.fr')
@@ -1509,10 +1435,10 @@ class TemplateTagsTest(TestCase):
         self.assertEqual(html, '')
                
         
-class CmsEditTagTest(TestCase):
+class CmsEditTagTest(BaseTestCase):
     
     def setUp(self):
-        
+        super(CmsEditTagTest, self).setUp()
 
         self.link1 = Link.objects.create(url='http://www.google.fr')
         self.tree = tree = get_navtree_class().objects.create()
@@ -1564,7 +1490,7 @@ class CmsEditTagTest(TestCase):
         self.assertContains(response, article.content)
         self.assertContains(response, self.link1.url)
         
-class DownloadDocTest(TestCase):
+class DownloadDocTest(BaseTestCase):
 
     def _clean_files(self):
         dirs = (settings.DOCUMENT_FOLDER, settings.PRIVATE_DOCUMENT_FOLDER)
@@ -1576,6 +1502,7 @@ class DownloadDocTest(TestCase):
                 pass
     
     def setUp(self):
+        super(DownloadDocTest, self).setUp()
         settings.DOCUMENT_FOLDER = '_unittest_docs'
         settings.PRIVATE_DOCUMENT_FOLDER = '_unittest_private_docs'
         self._clean_files()
@@ -1585,6 +1512,7 @@ class DownloadDocTest(TestCase):
         u.save()
 
     def tearDown(self):
+        super(DownloadDocTest, self).tearDown()
         self._clean_files()
         
     def _get_file(self, file_name='unittest1.txt'):
@@ -1747,9 +1675,10 @@ class DownloadDocTest(TestCase):
         self.assertTrue(redirect_url.find(login_url)>0)
         
 
-class BaseTestCase(TestCase):
+class UserBaseTestCase(BaseTestCase):
 
     def setUp(self):
+        super(UserBaseTestCase, self).setUp()
         self.editor = None
         self.viewer = None
 
@@ -1779,7 +1708,7 @@ class BaseTestCase(TestCase):
 
     
     
-class NewsletterTest(BaseTestCase):
+class NewsletterTest(UserBaseTestCase):
 
     def test_create_article_for_newsletter(self):
         Article = get_article_class()
@@ -2190,9 +2119,10 @@ class NewsletterTest(BaseTestCase):
         
         self.assertEqual(len(mail.outbox), 0)
         
-class AbsUrlTest(TestCase):
+class AbsUrlTest(UserBaseTestCase):
     
     def setUp(self):
+        super(AbsUrlTest, self).setUp()
         settings.SITE_ID = 1
         self.site = Site.objects.get(id=settings.SITE_ID)
         self.site.domain = "toto.fr"
@@ -2250,9 +2180,10 @@ class AbsUrlTest(TestCase):
         abs_html = BeautifulSoup(test_html).prettify()
         self.assertEqual(abs_html, make_links_absolute(test_html, self.newsletter))
         
-class NavigationTreeTest(TestCase):
+class NavigationTreeTest(BaseTestCase):
     
     def setUp(self):
+        super(NavigationTreeTest, self).setUp()
         ct = ContentType.objects.get_for_model(get_article_class())
         nt_articles = NavType.objects.create(content_type=ct, search_field='title',
             label_rule=NavType.LABEL_USE_SEARCH_FIELD)
@@ -2343,13 +2274,15 @@ class NavigationTreeTest(TestCase):
         for n in nodes_in:
             self.assertTrue(html.find(unicode(n))>=0)
             
-class HomepageTest(BaseTestCase):
+class HomepageTest(UserBaseTestCase):
     
     def setUp(self):
+        super(HomepageTest, self).setUp()
         super(HomepageTest, self).setUp()
         self.site_id = settings.SITE_ID
     
     def tearDown(self):
+        super(HomepageTest, self).tearDown()
         settings.SITE_ID = self.site_id
     
     def test_only_one_homepage(self):
@@ -2510,7 +2443,7 @@ class HomepageTest(BaseTestCase):
         
         
         
-class UrlLocalizationTest(TestCase):
+class UrlLocalizationTest(BaseTestCase):
     
     def test_get_locale_article(self):
         
@@ -2639,7 +2572,7 @@ class UrlLocalizationTest(TestCase):
         
         self.assertFalse(True) #Force to fail
         
-class ArticleTemplateTagsTest(TestCase):
+class ArticleTemplateTagsTest(BaseTestCase):
     
     def _request(self):
         class DummyRequest:
@@ -2737,7 +2670,7 @@ class ArticleTemplateTagsTest(TestCase):
             self.assertEqual(getattr(article, "slug_"+cur_lang), "test_"+cur_lang)
 
 
-class AliasTest(TestCase):
+class AliasTest(BaseTestCase):
     
     def test_redirect(self):
         Article = get_article_class()
@@ -2761,9 +2694,10 @@ class AliasTest(TestCase):
         response = self.client.get(reverse('coop_cms_view_article', args=['toto']))
         self.assertEqual(response.status_code, 404)
         
-class MultiSiteTest(TestCase):
+class MultiSiteTest(BaseTestCase):
     
     def tearDown(self):
+        super(MultiSiteTest, self).tearDown()
         site1 = Site.objects.all()[0]
         settings.SITE_ID = site1.id
     
@@ -2832,7 +2766,7 @@ class MultiSiteTest(TestCase):
         self.assertEqual(200, response.status_code)
         
 
-class NewsletterFriendlyTemplateTagsTest(TestCase):
+class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
     
     template_content = """
         {{% load coop_utils %}}
@@ -2899,13 +2833,16 @@ class GenericViewTestCase(BaseGenericViewTestCase):
     """
     
     def setUp(self):
+        super(GenericViewTestCase, self).setUp()
         if not ('coop_cms.apps.test_app' in settings.INSTALLED_APPS):
             print self.warning
             raise SkipTest()
 
-class ArticleSlugTestCase(TestCase):
+
+class ArticleSlugTestCase(BaseTestCase):
     
     def tearDown(self):
+        super(ArticleSlugTestCase, self).tearDown()
         site1 = Site.objects.all()[0]
         settings.SITE_ID = site1.id
     

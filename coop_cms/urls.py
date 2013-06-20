@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.views.generic.detail import DetailView
-from coop_cms.settings import get_article_class
+from coop_cms.settings import get_article_class, get_article_views, keep_deprecated_func_views_for_article
 
 urlpatterns = patterns('coop_cms.views',
     url(r'^cms/tree/(?P<tree_id>\d*)/$', 'process_nav_edition', name='navigation_tree'),
@@ -45,9 +45,30 @@ if 'coop_cms.apps.test_app' in settings.INSTALLED_APPS:
 
 urlpatterns += patterns('coop_cms.views',
     #keep these at the end
-    url(r'^(?P<url>.*)/cms_publish/$', 'publish_article', name='coop_cms_publish_article'),
-    url(r'^(?P<url>.*)/cms_edit/$', 'edit_article', name='coop_cms_edit_article'),
-    url(r'^(?P<url>.*)/cms_cancel/$', 'cancel_edit_article', name='coop_cms_cancel_edit_article'),
-    url(r'^(?P<url>.*)/$', 'view_article', name='coop_cms_view_article'),
+    url(r'^(?P<url>.+)/cms_publish/$', 'publish_article', name='coop_cms_publish_article'),
+    url(r'^(?P<url>.+)/cms_cancel/$', 'cancel_edit_article', name='coop_cms_cancel_edit_article'),
     url(r'^$', 'homepage', name='coop_cms_homepage'),
 )
+
+if keep_deprecated_func_views_for_article():
+    urlpatterns += patterns('coop_cms.views',
+        url(r'^(?P<url>.+)/cms_edit/$', 'edit_article', name='coop_cms_edit_article'),
+        url(r'^(?P<url>.+)/$', 'view_article', name='coop_cms_view_article'),
+    )
+else:
+    article_views = get_article_views()    
+    ArticleView = article_views['article_view']
+    EditArticleView = article_views['edit_article_view']
+    urlpatterns += patterns('',
+        url(r'^(?P<slug>.+)/cms_edit/$', EditArticleView.as_view(), name='coop_cms_edit_article'),
+        url(r'^(?P<slug>.+)/$', ArticleView.as_view(), name='coop_cms_view_article'),
+    )
+
+#urlpatterns += patterns('coop_cms.views',
+#    #keep these at the end
+#    url(r'^(?P<url>.+)/cms_publish/$', 'publish_article', name='coop_cms_publish_article'),
+#    url(r'^(?P<url>.+)/cms_edit/$', 'edit_article', name='coop_cms_edit_article'),
+#    url(r'^(?P<url>.+)/cms_cancel/$', 'cancel_edit_article', name='coop_cms_cancel_edit_article'),
+#    url(r'^(?P<url>.+)/$', 'view_article', name='coop_cms_view_article'),
+#    url(r'^$', 'homepage', name='coop_cms_homepage'),
+#)

@@ -69,8 +69,18 @@ class EditableObjectView(View):
     def get_template(self):
         return self.template_name
     
+    def handle_object_not_found(self):
+        pass
+    
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        try:
+            self.object = self.get_object()
+        except Http404:
+            return_this = self.handle_object_not_found()
+            if return_this:
+                return return_this
+            else:
+                raise
         
         if not self.can_view_object():
             logger.error("PermissionDenied")
@@ -117,3 +127,4 @@ class EditableObjectView(View):
             self.get_context_data(),
             context_instance=RequestContext(request)
         )
+

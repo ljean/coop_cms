@@ -180,3 +180,28 @@ def is_localized():
     
 def can_rewrite_url():
     return getattr(django_settings, 'COOP_CMS_CAN_EDIT_ARTICLE_SLUG', False)
+    
+def keep_deprecated_func_views_for_article():
+    return getattr(django_settings, 'COOP_CMS_KEEP_DEPRECATED_ARTICLE_VIEWS', False)
+    
+def get_article_views():
+    if keep_deprecated_func_views_for_article():
+        raise Exception("coop_cms is configured with COOP_CMS_KEEP_DEPRECATED_ARTICLE_VIEWS=True")
+    try:
+        article_views = getattr(django_settings, 'COOP_CMS_ARTICLE_VIEWS')
+    except AttributeError:
+        from coop_cms.views import ArticleView, EditArticleView
+        return {
+            'article_view': ArticleView,
+            'edit_article_view': EditArticleView,
+        }
+    else:
+        expected_views = ('article_view', 'edit_article_view')
+        imported_class_views = {}
+        for view_name in expected_views:
+            full_class_name = article_views[view_name]
+            module_name, class_name = full_class_name.rsplit('.', 1)
+            module = import_module(module_name)
+            imported_class_views[view_name] = getattr(module, class_name)
+        return imported_class_views
+    return newsletter_form
