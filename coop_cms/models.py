@@ -599,9 +599,9 @@ class Document(Media):
     file = models.FileField(_('file'), upload_to=get_doc_folder)
     is_private = models.BooleanField(_('is private'), default=False,
         help_text=_(u"Check this if you do not want to publish this document to all users"))
-    category = models.ForeignKey(ArticleCategory, blank=True, null=True, default=None)
+    category = models.ForeignKey(ArticleCategory, blank=True, null=True, default=None, verbose_name=_(u'category'))
 
-    def can_download_doc(self, user):
+    def can_download_file(self, user):
         return user.is_authenticated()
 
     def get_download_url(self):
@@ -612,7 +612,7 @@ class Document(Media):
 
     def get_ico_url(self, icotype):
         root, ext = os.path.splitext(self.file.name)
-        ext = ext[1:]  # remove leading dot
+        ext = ext[1:].lower()  # remove leading dot
         if ext in ('pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'png', 'jpg', 'gif', \
                     'ppt', 'pps', 'mp3', 'ogg', 'html', 'rtf', 'zip', 'avi', \
                     'mov', 'mp4', ):

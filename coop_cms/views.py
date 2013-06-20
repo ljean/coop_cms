@@ -493,7 +493,7 @@ def update_logo(request, article_id):
 @login_required
 def download_doc(request, doc_id):
     doc = get_object_or_404(models.Document, id=doc_id)
-    if not request.user.has_perm('can_download_doc', doc):
+    if not request.user.has_perm('can_download_file', doc):
         raise PermissionDenied
     
     if 'filetransfers' in settings.INSTALLED_APPS:
