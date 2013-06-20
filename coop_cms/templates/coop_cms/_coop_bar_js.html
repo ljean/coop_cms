@@ -52,8 +52,8 @@ $(document).ready(function(){
             var doc_url = $(elt).attr('rel');
             var doc_title = $(elt).attr('title');
             var icon_url = $(elt).attr('src');
-            
-            var link = '<a href="'+doc_url+'" target="_blank" class="doc-link">'+'<img src="'+icon_url+'" /><span class="doc-title">'+doc_title+'</span></a>'
+			var doc_ext = icon_url.replace(/\\/g,'/').replace( /.*\//, '').replace('.png', '');
+            var link = '<a href="'+doc_url+'" target="_blank" class="doc-link" rel="'+doc_ext+'">'+'<img src="'+icon_url+'" /><span class="doc-title">'+doc_title+'</span></a>'
             $(link).insertAfter($(elt));
             $(elt).remove();
         });
