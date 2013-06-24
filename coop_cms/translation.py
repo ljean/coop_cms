@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from modeltranslation.translator import translator, TranslationOptions
-from coop_cms.models import NavNode, ArticleCategory, PieceOfHtml
+from coop_cms.models import NavNode, ArticleCategory, PieceOfHtml, Article
 
 class PieceOfHtmlTranslationOptions(TranslationOptions):
     fields = ('content',)
@@ -20,3 +20,7 @@ class ArticleCategoryTranslationOptions(TranslationOptions):
 
 translator.register(ArticleCategory, ArticleCategoryTranslationOptions)
 
+class ArticleTranslationOptions(TranslationOptions):
+    fields = ('slug', 'title', 'content', 'summary')
+
+translator.register(Article, ArticleTranslationOptions)

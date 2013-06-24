@@ -775,3 +775,8 @@ class Alias(models.Model):
     def __unicode__(self):
         return self.path
     
+class Article(BaseArticle): pass
+
+class NavTree(BaseNavTree): pass
+
+    
