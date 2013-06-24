@@ -92,4 +92,8 @@ def nlf_css(parser, token):
 
 @register.filter
 def normalize_utf8_to_ascii(ustr):
-    return unicodedata.normalize('NFKD', ustr).encode('ascii','ignore')
+    try:
+        return unicodedata.normalize('NFKD', ustr).encode('ascii','ignore')
+    except TypeError:
+        return ustr
+    
