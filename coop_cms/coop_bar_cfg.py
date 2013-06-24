@@ -68,9 +68,12 @@ def django_admin_edit_object(request, context):
         object = context['object']
         object_class = object.__class__
         view_name = 'admin:%s_%s_change' % (object_class._meta.app_label,  object_class._meta.module_name)
-        return make_link(reverse(view_name, args=[object.id]),
-            _(u'Edit {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
-            classes=['icon', 'alert_on_click'])
+        try:
+            return make_link(reverse(view_name, args=[object.id]),
+                _(u'Edit {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+                classes=['icon', 'alert_on_click'])
+        except:
+            pass
 
 def django_admin_add_object(request, context):
     if request and request.user.is_staff and (('object' in context) or ('model' in context)):
@@ -78,19 +81,25 @@ def django_admin_add_object(request, context):
         if not object_class:
             object_class = context['object'].__class__
         view_name = 'admin:%s_%s_add' % (object_class._meta.app_label,  object_class._meta.module_name)
-        return make_link(reverse(view_name),
-            _(u'Add {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
-            classes=['icon', 'alert_on_click'])
+        try:
+            return make_link(reverse(view_name),
+                _(u'Add {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+                classes=['icon', 'alert_on_click'])
+        except:
+            pass
 
 def django_admin_list_objects(request, context):
     if request and request.user.is_staff and (('object' in context) or ('model' in context)):
         object_class = context.get('model', None)
         if not object_class:
             object_class = context['object'].__class__
-        view_name = 'admin:%s_%s_changelist' % (object_class._meta.app_label,  object_class._meta.module_name)
-        return make_link(reverse(view_name),
-            _(u'List {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
-            classes=['icon', 'alert_on_click'])
+        try:
+            view_name = 'admin:%s_%s_changelist' % (object_class._meta.app_label,  object_class._meta.module_name)
+            return make_link(reverse(view_name),
+                _(u'List {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+                classes=['icon', 'alert_on_click'])
+        except:
+            pass
 
 
 def django_admin_navtree(request, context):
