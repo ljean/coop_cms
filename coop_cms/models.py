@@ -18,6 +18,7 @@ from django.core.exceptions import ValidationError
 # from html_field import html_cleaner
 from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes
 from coop_cms.settings import get_navtree_class, is_localized, COOP_CMS_NAVTREE_CLASS, get_article_templates
+from coop_cms.settings import get_default_logo
 from django.contrib.staticfiles import finders
 from django.core.files import File
 from django.db.models.signals import pre_delete, post_save
@@ -389,7 +390,7 @@ class BaseArticle(BaseNavigable):
 
     def _get_default_logo(self):
         #copy from static to media in order to use sorl thumbnail without raising a suspicious operation
-        filename = 'img/default-logo.png'
+        filename = get_default_logo()
         media_filename = os.path.normpath(settings.MEDIA_ROOT + '/coop_cms/' + filename)
         if not os.path.exists(media_filename):
             dir = os.path.dirname(media_filename)

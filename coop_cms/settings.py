@@ -74,6 +74,10 @@ def get_article_class():
         setattr(get_article_class, '_cache_class', article_class)
         return article_class
 
+
+def get_default_logo():
+    return getattr(django_settings, 'COOP_CMS_DEFAULT_ARTICLE_LOGO', 'img/default-logo.png')
+
 def get_article_form():
     try:
         full_class_name = getattr(django_settings, 'COOP_CMS_ARTICLE_FORM')
