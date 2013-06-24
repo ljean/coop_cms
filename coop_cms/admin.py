@@ -101,18 +101,19 @@ class ArticleCategoryAdmin(admin.ModelAdmin):
     list_editable = ['ordering', 'in_rss']
 admin.site.register(models.ArticleCategory, ArticleCategoryAdmin)
 
-#class NewsletterItemAdmin(admin.ModelAdmin):
-#    form = NewsletterItemAdminForm
-#    list_display = ['content_object']
-#    fieldsets = (
-#        (_('Article'), {'fields': ('object_id', 'content_type')}),
-#    )
-#
-#admin.site.register(models.NewsletterItem, NewsletterItemAdmin)
+class NewsletterItemAdmin(admin.ModelAdmin):
+    form = NewsletterItemAdminForm
+    list_display = ['content_object']
+    fieldsets = (
+        (_('Article'), {'fields': ('object_id', 'content_type')}),
+    )
+
+admin.site.register(models.NewsletterItem, NewsletterItemAdmin)
 
 
 class NewsletterAdmin(admin.ModelAdmin):
     form = NewsletterAdminForm
+    raw_id_fields = ['items']
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(NewsletterAdmin, self).get_form(request, obj, **kwargs)

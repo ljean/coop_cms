@@ -239,6 +239,18 @@ def edit_newsletter(request, context):
         return make_link(newsletter.get_edit_url(), _(u'Edit'), 'fugue/document--pencil.png', classes=['icon'])
 
 @can_edit_newsletter
+def newsletter_admin(request, context):
+    newsletter = context.get('newsletter')
+    object_class = newsletter.__class__
+    view_name = 'admin:%s_%s_change' % (object_class._meta.app_label,  object_class._meta.module_name)
+    try:
+        return make_link(reverse(view_name, args=[newsletter.id]),
+            _(u'Edit {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+            classes=['icon', 'alert_on_click'])
+    except:
+        pass
+
+@can_edit_newsletter
 def cancel_edit_newsletter(request, context):
     if context.get('edit_mode'):
         newsletter = context.get('newsletter')
