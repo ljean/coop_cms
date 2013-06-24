@@ -742,7 +742,7 @@ msgstr ""
 
 #: .\templates\coop_cms\newsletter.html.py:86
 msgid "If you can't view this email, "
-msgstr "SI vous ne pouvez lire cet e-mail"
+msgstr "Si vous ne pouvez lire cet e-mail"
 
 #: .\templates\coop_cms\newsletter.html.py:88
 msgid "read the online version"
