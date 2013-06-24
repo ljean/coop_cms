@@ -7,7 +7,8 @@ register = template.Library()
 from django.template.defaultfilters import slugify
 from coop_cms.utils import dehtml as do_dehtml
 from bs4 import BeautifulSoup
-
+import unicodedata
+    
 ################################################################################
 class ArticleLinkNode(template.Node):
 
@@ -88,3 +89,7 @@ def nlf_css(parser, token):
     nodelist = parser.parse(('end_nlf_css',))
     token = parser.next_token()
     return NewsletterFriendlyCssNode(nodelist, css)
+
+@register.filter
+def normalize_utf8_to_ascii(ustr):
+    return unicodedata.normalize('NFKD', ustr).encode('ascii','ignore')
