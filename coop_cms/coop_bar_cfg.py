@@ -70,7 +70,7 @@ def django_admin_edit_object(request, context):
         view_name = 'admin:%s_%s_change' % (object_class._meta.app_label,  object_class._meta.module_name)
         try:
             return make_link(reverse(view_name, args=[object.id]),
-                _(u'Edit {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+                _(u'Admin {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
                 classes=['icon', 'alert_on_click'])
         except:
             pass
@@ -245,7 +245,7 @@ def newsletter_admin(request, context):
     view_name = 'admin:%s_%s_change' % (object_class._meta.app_label,  object_class._meta.module_name)
     try:
         return make_link(reverse(view_name, args=[newsletter.id]),
-            _(u'Edit {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+            _(u'Admin {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
             classes=['icon', 'alert_on_click'])
     except:
         pass
