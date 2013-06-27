@@ -95,6 +95,9 @@ class EditableObjectView(View):
             context_instance=RequestContext(request)
         )
     
+    def after_save(self, object):
+        pass
+    
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         
@@ -110,6 +113,8 @@ class EditableObjectView(View):
 
         if self.form.is_valid() and all([f.is_valid() for f in djaloha_forms]):
             self.object = self.form.save()
+            
+            self.after_save(self.object)
             
             if djaloha_forms:
                 [f.save() for f in djaloha_forms]

@@ -1042,6 +1042,13 @@ class ArticleView(EditableObjectView):
         })
         return context_data
     
+    def after_save(self, article):
+        if article.temp_logo:
+            article.logo = article.temp_logo
+            article.temp_logo = ''
+            article.save()
+    
+    
     def get_template(self):
         return get_article_template(self.object)
     
