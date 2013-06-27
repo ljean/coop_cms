@@ -207,16 +207,21 @@ class CmsEditNode(template.Node):
             safe_context[self.var_name] = SafeWrapper(the_object, logo_size=self._logo_size)
                 
         managed_node_types = [
-            template.VariableNode, template.TextNode, template.defaulttags.IfNode,
+            template.TextNode, template.defaulttags.IfNode,
             IfCmsEditionNode, IfNotCmsEditionNode,
         ]
                 
         for node in self.nodelist_content:
-            node.is_safe = True
+            #node.is_safe = True
             if any([isinstance(node, node_type) for  node_type in managed_node_types]):
                 c = node.render(template.Context(safe_context))
             elif isinstance(node, template.loader_tags.BlockNode):
                 c = node.render(context)
+            elif isinstance(node, template.VariableNode):
+                if node.filter_expression.filters:
+                    c = node.render(context)
+                else:
+                    c = node.render(template.Context(safe_context))   
             else:
                 c = node.render(template.Context(inner_context))
             inner_value += c
