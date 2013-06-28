@@ -175,7 +175,6 @@
 
           post_msg('view_navnode', {node_id: get_node_id(data.rslt.obj)},
             function(data) {
-              //admin_printMessage(data.message, data.status);
               if (data.status === "success") {
                 $("#aside #object-links").html(data.html);
               } else {

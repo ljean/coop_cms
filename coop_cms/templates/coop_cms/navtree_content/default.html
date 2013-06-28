@@ -7,13 +7,24 @@ $("#navnode_in_navigation").html('{% trans "Show node in navigation" %}');
 {% endif %}
 </script>
 
-<h3>{% block navtree_content_title %}{{model_name|capfirst}}: {{object_label}}{% endblock %}</h3>
+<h3>{% block navtree_content_title %}
+    {% if model_name %}
+        {{model_name|capfirst}}: {{object_label}}
+    {% else %}
+        {% trans "Empty node" %}
+    {% endif %}    
+{% endblock %}</h3>
 
 {% block navtree_content_command%}
 <ul class="content-links">
+    {% if admin_url %}
     <li><a href="{{admin_url}}">{% trans "Edit in admin"%}</a></li>
+    {% endif %}
+    
+    {% if node.content_object %}
     <li><a href="{{node.content_object.get_absolute_url}}">{% trans "View on site"%}</a></li>
-
+    {% endif %}
+    
     {% block navtree_content_extracommand%}
     {% endblock %}
 
