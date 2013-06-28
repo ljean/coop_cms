@@ -251,6 +251,16 @@ def newsletter_admin(request, context):
         pass
 
 @can_edit_newsletter
+def newsletter_articles(request, context):
+    view_name = 'admin:coop_cms_newsletteritem_changelist'
+    try:
+        return make_link(reverse(view_name),
+            _(u'Articles ordering'), 'fugue/table.png',
+            classes=['icon', 'alert_on_click'])
+    except:
+        pass
+    
+@can_edit_newsletter
 def cancel_edit_newsletter(request, context):
     if context.get('edit_mode'):
         newsletter = context.get('newsletter')
@@ -304,7 +314,7 @@ def load_commands(coop_bar):
         [django_admin, django_admin_edit_article, django_admin_navtree, view_all_articles],
         [cms_media_library, cms_upload_image, cms_upload_doc],
         [cms_new_newsletter, edit_newsletter, cancel_edit_newsletter, save_newsletter,
-            change_newsletter_settings,
+            change_newsletter_settings, newsletter_admin, newsletter_articles, 
             schedule_newsletter, test_newsletter],
         [cms_edit, cms_save, cms_cancel],
         [cms_new_article, cms_new_link, cms_article_settings, cms_set_homepage],

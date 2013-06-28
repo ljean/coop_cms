@@ -658,11 +658,13 @@ class NewsletterItem(models.Model):
     content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"))
     object_id = models.PositiveIntegerField(verbose_name=_("object id"))
     content_object = generic.GenericForeignKey('content_type', 'object_id')
+    ordering = models.IntegerField(verbose_name=_("ordering"), default=0)
 
     class Meta:
         unique_together = (("content_type", "object_id"),)
         verbose_name = _(u'newsletter item')
         verbose_name_plural = _(u'newsletter items')
+        ordering = ['ordering']
 
     def __unicode__(self):
         return u'{0}: {1}'.format(self.content_type, self.content_object)
