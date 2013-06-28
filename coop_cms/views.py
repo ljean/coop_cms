@@ -1039,11 +1039,14 @@ class ArticleView(EditableObjectView):
     def handle_object_not_found(self):
         return redirect_if_alias(path=self.kwargs['slug'])
     
+    def get_headlines(self):
+        return get_headlines(self.object)
+    
     def get_context_data(self):
         context_data = super(ArticleView, self).get_context_data()
         context_data.update({
             'draft': self.object.publication==models.BaseArticle.DRAFT,
-            'headlines': get_headlines(self.object), 
+            'headlines': self.get_headlines(), 
             'ARTICLE_PUBLISHED': models.BaseArticle.PUBLISHED
         })
         return context_data
