@@ -10,7 +10,7 @@ from django.conf import settings
 from django.template.loader import get_template
 from django.template import Context
 from django.core.urlresolvers import reverse
-from coop_cms.settings import get_article_class, is_localized
+from coop_cms.settings import get_article_class, is_localized, get_newsletter_context_callbacks
 from coop_cms.models import BaseArticle, Alias
 from django.utils.translation import get_language
 from django.http import Http404, HttpResponsePermanentRedirect
@@ -121,6 +121,11 @@ def send_newsletter(newsletter, dests):
         'MEDIA_URL': settings.MEDIA_URL, 'STATIC_URL': settings.STATIC_URL,
     }
     
+    for callback in get_newsletter_context_callbacks():
+        d = callback(newsletter)
+        if d:
+            context_dict.update(d)
+
     html_text = t.render(Context(context_dict))
     html_text = make_links_absolute(html_text, newsletter)
     

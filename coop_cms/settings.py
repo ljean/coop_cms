@@ -176,6 +176,25 @@ def get_newsletter_item_classes():
 
         setattr(get_newsletter_item_classes, '_cache_class', item_classes)
         return item_classes
+    
+def get_newsletter_context_callbacks():
+    if hasattr(get_newsletter_context_callbacks, '_cache_func'):
+        return getattr(get_newsletter_context_callbacks, '_cache_func')
+    else:
+        try:
+            callback_names = getattr(django_settings, 'COOP_CMS_NEWSLETTER_CONTEXT')
+        except AttributeError:
+            return ()
+        else:
+            callbacks = []
+            for callback_name in callback_names:
+                module_name, func_name = callback_name.rsplit('.', 1)
+                module = import_module(module_name)
+                callbacks.append(getattr(module, func_name))
+            callbacks = tuple(callbacks)
+
+        setattr(get_newsletter_context_callbacks, '_cache_func', callbacks)
+        return callbacks
 
 def is_localized():
     if ('localeurl' in django_settings.INSTALLED_APPS) and ('modeltranslation' in django_settings.INSTALLED_APPS):
