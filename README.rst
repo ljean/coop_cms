@@ -18,16 +18,16 @@ Yet another CMS ?
 
 Coop-cms has some sister apps to make it more usable:
 
-* `coop_bar <https://github.com/quinode/coop-bar/>`_, an extensible toolbar (same concept : any app you create can add links in the toolbar)
-* `djaloha <https://github.com/quinode/djaloha/>`_, a great in-site editor based on `Aloha Editor <http://aloha-editor.org/>`_
-* `colorbox <https://github.com/quinode/coop-colorbox/>`_, make easy integration of jquery colorbox library.
+* `coop_bar <https://github.com/ljean/coop-bar/>`_, an extensible toolbar (same concept : any app you create can add links in the toolbar)
+* `djaloha <https://github.com/ljean/djaloha/>`_, a great in-site editor based on `Aloha Editor <http://aloha-editor.org/>`_
+* `colorbox <https://github.com/ljean/coop-colorbox/>`_, make easy integration of jquery colorbox library.
 
 .. _quick-start:
 
 Quick start
 -----------
 
-Python 2.6+, Django 1.3+ required
+Python 2.6+, Django 1.4+ required
 
 Install it with ``pip install coop-cms``
 
@@ -252,6 +252,6 @@ If you use django-localeurl, we recommend to put the reverse patch at the top of
 License
 =======
 
-coop-cms uses the same license as Django (BSD).
+apidev-coop-cms is a fork of credis/coop_cms and uses BSD license see license.txt.
 
 coop-cms development was funded by `CREDIS <http://credis.org/>`_, FSE (European Social Fund) and Conseil Regional d'Auvergne.

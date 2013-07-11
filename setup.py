@@ -17,7 +17,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name = 'coop-cms',
+    name = 'apidev-coop_cms',
     version = VERSION,
     description = 'Small CMS built around a tree navigation open to any django models',
     packages = ['coop_cms',
@@ -43,17 +43,17 @@ setup(
     install_requires = ['django-floppyforms==0.4.7',
                         'django-extensions==0.9',
                         'sorl-thumbnail==11.09',
-                        'coop-colorbox',
-                        'coop-bar',
-                        'djaloha',
+                        'apidev-coop_colorbox==0.9.0',
+                        'apidev-coop_bar==0.9.0',
+                        'apidev-djaloha==0.9.0',
                         'django-pagination',
                         'feedparser',
                         #'django-filetransfers', #need to be installed manually from https://bitbucket.org/wkornewald/django-filetransfers
                         #'model_mommy', #---> ramène django 1.5 dans ses dépendances quand installé via coop_cms
                         ],
     long_description = open('README.rst').read(),
-    url = 'https://github.com/quinode/coop_cms/',
-    download_url = 'https://github.com/quinode/coop_cms/tarball/master',
+    url = 'https://github.com/ljean/coop_cms/',
+    download_url = 'https://github.com/ljean/coop_cms/tarball/master',
     classifiers = [
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
