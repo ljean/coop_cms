@@ -34,6 +34,7 @@ setup(
                 'coop_cms.apps.rss_sync.migrations',
                 'coop_cms.apps.rss_sync.management',
                 'coop_cms.apps.rss_sync.management.commands',
+                'coop_cms.apps.test_app',
                 ],
     include_package_data = True,
     author = 'Luc Jean',
