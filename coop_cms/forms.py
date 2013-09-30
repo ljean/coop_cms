@@ -345,7 +345,7 @@ class NewsletterAdminForm(forms.ModelForm):
 
     class Meta:
         model = Newsletter
-        fields = ('subject', 'content', 'template', 'items')
+        fields = ('subject', 'content', 'template', 'source_url', 'items')
         widgets = {}
         try:
             widgets.update({

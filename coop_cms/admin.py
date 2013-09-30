@@ -115,6 +115,7 @@ admin.site.register(models.NewsletterItem, NewsletterItemAdmin)
 class NewsletterAdmin(admin.ModelAdmin):
     form = NewsletterAdminForm
     raw_id_fields = ['items']
+    list_display = ['subject', 'template', 'source_url']
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(NewsletterAdmin, self).get_form(request, obj, **kwargs)

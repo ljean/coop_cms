@@ -709,6 +709,7 @@ class Newsletter(models.Model):
     items = models.ManyToManyField(NewsletterItem, blank=True)
     template = models.CharField(_(u'template'), max_length=200, default='', blank=True)
     site = models.ForeignKey(Site, verbose_name=_(u'site'), default=settings.SITE_ID)
+    source_url = models.URLField(verbose_name=_(u'source url'), default="", blank=True)
 
     def get_items(self):
         return [item.content_object for item in self.items.all()]
