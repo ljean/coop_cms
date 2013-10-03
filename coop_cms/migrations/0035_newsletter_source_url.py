@@ -9,8 +9,6 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
 
-        # Changing field 'NavNode.tree'
-        db.alter_column(u'coop_cms_navnode', 'tree_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['basic_cms.NavTree']))
         # Adding field 'Newsletter.source_url'
         db.add_column(u'coop_cms_newsletter', 'source_url',
                       self.gf('django.db.models.fields.URLField')(default='', max_length=200, blank=True),
@@ -19,14 +17,12 @@ class Migration(SchemaMigration):
 
     def backwards(self, orm):
 
-        # Changing field 'NavNode.tree'
-        db.alter_column(u'coop_cms_navnode', 'tree_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['content.NavTree']))
         # Deleting field 'Newsletter.source_url'
         db.delete_column(u'coop_cms_newsletter', 'source_url')
 
 
     models = {
-        u'basic_cms.navtree': {
+        u'content.navtree': {
             'Meta': {'object_name': 'NavTree'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_update': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
