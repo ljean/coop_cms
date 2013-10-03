@@ -89,7 +89,7 @@ class Migration(SchemaMigration):
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'ordering': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'parent': ('django.db.models.fields.related.ForeignKey', [], {'default': '0', 'to': u"orm['coop_cms.NavNode']", 'null': 'True', 'blank': 'True'}),
-            'tree': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['basic_cms.NavTree']"})
+            'tree': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['content.NavTree']"})
         },
         u'coop_cms.navtype': {
             'Meta': {'object_name': 'NavType'},
