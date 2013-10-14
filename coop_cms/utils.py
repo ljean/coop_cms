@@ -18,14 +18,16 @@ from django.shortcuts import get_object_or_404
 from bs4 import BeautifulSoup
 
 class _DeHTMLParser(HTMLParser):
-    def __init__(self):
+    def __init__(self, allow_spaces=False):
         HTMLParser.__init__(self)
         self.__text = []
+        self._allow_spaces = allow_spaces
 
     def handle_data(self, data):
         text = data.strip()
         if len(text) > 0:
-            text = sub('[ \t\r\n]+', ' ', text)
+            if not self._allow_spaces:
+                text = sub('[ \t\r\n]+', ' ', text)
             self.__text.append(text + ' ')
 
     def handle_starttag(self, tag, attrs):
@@ -43,9 +45,9 @@ class _DeHTMLParser(HTMLParser):
 
 
 # copied from http://stackoverflow.com/a/3987802/117092
-def dehtml(text):
+def dehtml(text, allow_spaces=False):
     try:
-        parser = _DeHTMLParser()
+        parser = _DeHTMLParser(allow_spaces=allow_spaces)
         parser.feed(text)
         parser.close()
         return parser.text()
