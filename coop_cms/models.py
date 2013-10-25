@@ -379,14 +379,18 @@ class BaseArticle(BaseNavigable):
     def logo_thumbnail(self, temp=False, logo_size=None):
         logo = self.temp_logo if (temp and self.temp_logo) else self.logo
         size = logo_size or get_article_logo_size(self)
+        logo_file = None
         if logo:
-            file = logo.file
-        else:
-            file = self._get_default_logo()
+            try:
+                logo_file = logo.file
+            except IOError:
+                pass
+        if not logo_file:
+            logo_file = self._get_default_logo()
         try:
-            return sorl_thumbnail.backend.get_thumbnail(file, size, crop='center')
+            return sorl_thumbnail.backend.get_thumbnail(logo_file, size, crop='center')
         except Exception, msg:
-            return file
+            return logo_file
 
     def _get_default_logo(self):
         #copy from static to media in order to use sorl thumbnail without raising a suspicious operation
