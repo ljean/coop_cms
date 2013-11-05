@@ -47,9 +47,9 @@ class AlohaEditableModelForm(floppyforms.ModelForm):
 
     class Media:
         css = {
-            'all': ('css/colorbox.css', ),
+            'all': ('css/colorbox.css?v=2', ),
         }
-        js = ('js/jquery.form.js', 'js/jquery.pageslide.js', 'js/jquery.colorbox-min.js', 'js/colorbox.coop.js')
+        js = ('js/jquery.form.js', 'js/jquery.pageslide.js', 'js/jquery.colorbox-min.js?v=2', 'js/colorbox.coop.js?v=2')
 
 class ArticleForm(AlohaEditableModelForm):
 
@@ -69,7 +69,9 @@ class ArticleForm(AlohaEditableModelForm):
     def set_logo_size(self, logo_size=None):
         thumbnail_src = self.logo_thumbnail(logo_size)
         update_url = reverse('coop_cms_update_logo', args=[self.article.id])
-        self.fields['logo'].widget = ImageEdit(update_url, thumbnail_src.url if thumbnail_src else '')
+        self.fields['logo'].widget = ImageEdit(update_url,
+            thumbnail_src.url if thumbnail_src else '',
+            attrs={"class": "resiazable"})
 
     def logo_thumbnail(self, logo_size=None):
         if self.article:

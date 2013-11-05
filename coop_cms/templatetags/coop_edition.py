@@ -9,6 +9,9 @@ from django.core.context_processors import csrf
 from django.utils.safestring import mark_safe
 from coop_cms.widgets import ImageEdit
 from coop_cms.settings import get_article_class
+from django.template.loader import find_template, TemplateDoesNotExist
+import logging
+logger = logging.getLogger("coop_cms")
 
 ################################################################################
 class PieceOfHtmlEditNode(DjalohaEditNode):
@@ -142,7 +145,13 @@ class SafeWrapper:
         if field=='logo':
             src = getattr(self._wrapped, 'logo_thumbnail')(False, self._logo_size)
             if src:
-                value = u'<img class="logo" src="{0}">'.format(src.url)
+                try:
+                    t, _o = find_template("coop_cms/widgets/_img_logo.html")
+                    value = t.render(template.Context({'url': src.url}))
+                except TemplateDoesNotExist:
+                    value = u'<img class="logo" src="{0}" />'.format(src.url)
+                except Exception, msg:
+                        logger.exception("coop_edition:SafeWrapper")
             else:
                 value = u''
         elif callable(value):
