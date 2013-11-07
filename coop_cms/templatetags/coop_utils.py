@@ -8,6 +8,7 @@ from django.template.defaultfilters import slugify
 from coop_cms.utils import dehtml as do_dehtml
 from bs4 import BeautifulSoup
 import unicodedata
+from django.conf import settings
     
 ################################################################################
 class ArticleLinkNode(template.Node):
@@ -32,12 +33,20 @@ class ArticleLinkNode(template.Node):
             else:
                 #If the language is not defined, we need to get it from the context
                 #The get_language api doesn't work in templatetag
-                request = context['request']
-                article = get_article(slug, current_lang=request.LANGUAGE_CODE)
-            
+                request = context.get('request', None)
+                lang = "en"
+                if request:
+                    lang = request.LANGUAGE_CODE
+                elif hasattr(settings, 'LANGUAGES'):
+                    lang = settings.LANGUAGES[0][0]
+                elif hasattr(settings, 'LANGUAGE_CODE'):
+                    lang = settings.LANGUAGE_CODE[:2]
+                article = get_article(slug, current_lang=lang)
         except Article.DoesNotExist:
-            article = Article.objects.create(slug=slug, title=title)
-        
+            try:
+                article = get_article(slug, all_langs=True)
+            except Article.DoesNotExist:
+                article = Article.objects.create(slug=slug, title=title)
         return article.get_absolute_url()
 
 @register.tag

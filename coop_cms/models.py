@@ -423,6 +423,8 @@ class BaseArticle(BaseNavigable):
 
 
     def save(self, *args, **kwargs):
+        if hasattr(self, "_cache_slug"): delattr(self, "_cache_slug")
+        
         #autoslug localized title for creating locale_slugs
         if (not self.title) and (not self.slug):
             raise Exception(u"coop_cms.Article: slug can not be empty")
@@ -488,17 +490,31 @@ class BaseArticle(BaseNavigable):
     def get_label(self):
         return self.title
 
+    def _get_slug(self):
+        slug = getattr(self, '_cache_slug', None)
+        if slug:
+            return slug
+        slug = self.slug
+        if not slug:
+            for (l, n) in settings.LANGUAGES:
+                key = 'slug_{0}'.format(l)
+                slug = getattr(self, key)
+                if slug:
+                    break
+        setattr(self, '_cache_slug', slug)
+        return slug
+
     def get_absolute_url(self):
-        return reverse('coop_cms_view_article', args=[self.slug])
+        return reverse('coop_cms_view_article', args=[self._get_slug()])
 
     def get_edit_url(self):
-        return reverse('coop_cms_edit_article', args=[self.slug])
+        return reverse('coop_cms_edit_article', args=[self._get_slug()])
 
     def get_cancel_url(self):
-        return reverse('coop_cms_cancel_edit_article', args=[self.slug])
+        return reverse('coop_cms_cancel_edit_article', args=[self._get_slug()])
 
     def get_publish_url(self):
-        return reverse('coop_cms_publish_article', args=[self.slug])
+        return reverse('coop_cms_publish_article', args=[self._get_slug()])
 
     def _can_change(self, user):
         ct = ContentType.objects.get_for_model(get_article_class())

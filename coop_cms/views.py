@@ -1021,7 +1021,7 @@ def change_language(request):
             activate(lang_code)
                 
             if next_article:
-                next = reverse('coop_cms_view_article', args=[next_article.slug])
+                next = next_article.get_absolute_url()
             else:
                 next = localeurl_utils.locale_path(path, lang_code)
 

@@ -3,10 +3,10 @@
 from django.contrib.contenttypes.models import ContentType
 from django.conf import settings as django_settings
 from django.utils.importlib import import_module
-
+import logging
+logger = logging.getLogger("coop_cms")
 
 COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'basic_cms.NavTree')
-
 
 def get_navigable_content_types():
     ct_choices = []
@@ -228,3 +228,11 @@ def get_article_views():
             imported_class_views[view_name] = getattr(module, class_name)
         return imported_class_views
     return newsletter_form
+
+if is_localized():
+    if django_settings.LANGUAGE_CODE[:2] != django_settings.LANGUAGES[0][0]:
+        logger.warning(
+            "coop_cms settings error: LANGUAGE_CODE ({0}) should be first in LANGUAGES (currently first is {1})".format(
+                django_settings.LANGUAGE_CODE[:2], django_settings.LANGUAGES[0][0]
+            )
+        )

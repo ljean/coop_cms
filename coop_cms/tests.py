@@ -26,6 +26,7 @@ from django.utils.unittest.case import SkipTest
 from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
 from bs4 import BeautifulSoup
 import logging
+from django.utils.translation import activate
 
 class BaseTestCase(TestCase):
     def setUp(self):
@@ -2447,7 +2448,7 @@ class UrlLocalizationTest(BaseTestCase):
     
     def test_get_locale_article(self):
         
-        if not is_localized():
+        if not is_localized() and len(settings.LANGUAGES)<2:
             raise SkipTest()
         
         original_text = '*!-+' * 10
@@ -2472,7 +2473,7 @@ class UrlLocalizationTest(BaseTestCase):
 
     def test_change_lang(self):
         
-        if not is_localized():
+        if not is_localized() and len(settings.LANGUAGES)<2:
             raise SkipTest()
         
         original_text = '*!-+' * 10
@@ -2505,7 +2506,7 @@ class UrlLocalizationTest(BaseTestCase):
             
     def test_change_lang_no_trans(self):
         
-        if not is_localized():
+        if not is_localized() and len(settings.LANGUAGES)<2:
             raise SkipTest()
             
         original_text = '*!-+' * 10
@@ -2540,7 +2541,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(original_slug, a1.slug)
         
     def test_keep_localized_slug(self):
-        if not is_localized():
+        if not is_localized() and len(settings.LANGUAGES)<2:
             raise SkipTest()
         
         Article = get_article_class()
@@ -2572,6 +2573,32 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertFalse(True) #Force to fail
         
+    def test_create_article_in_additional_lang(self):
+        
+        if not is_localized() and len(settings.LANGUAGES)<2:
+            raise SkipTest()
+        
+        Article = get_article_class()
+        
+        default_lang = settings.LANGUAGES[0][0]
+        other_lang = settings.LANGUAGES[1][0]
+        
+        activate(other_lang)
+        
+        a1 = Article.objects.create(title=u"abcd", content="a!*%:"*10, publication=BaseArticle.PUBLISHED)
+        
+        response = self.client.get(a1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, a1.content)
+        
+        activate(default_lang)
+        
+        response = self.client.get(a1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, a1.content)
+        
+        
+        
 class ArticleTemplateTagsTest(BaseTestCase):
     
     def _request(self):
@@ -2602,6 +2629,9 @@ class ArticleTemplateTagsTest(BaseTestCase):
         self.assertEqual(a.slug, "test")
         
     def test_article_link_language(self):
+        if len(settings.LANGUAGES)==0:
+            raise SkipTest()
+        
         lang = settings.LANGUAGES[0][0]
         
         tpl = Template('{% load coop_utils %}{% article_link "test" '+lang+' %}')
@@ -2613,61 +2643,70 @@ class ArticleTemplateTagsTest(BaseTestCase):
         self.assertEqual(a.slug, "test")
             
     def test_article_link_force_language(self):
-        if len(settings.LANGUAGES) > 1:
-            lang = settings.LANGUAGES[0][0]
-            
-            tpl = Template('{% load coop_utils %}{% article_link "test" '+lang+' %}')
-            request = self._request()
-            request.LANGUAGE_CODE = settings.LANGUAGES[1][0]
-            html = tpl.render(Context({'request': request}))
-            
-            Article = get_article_class()
-            self.assertEqual(Article.objects.count(), 1)
-            a = Article.objects.all()[0]
-            self.assertEqual(a.slug, "test")
+        if not is_localized() and len(settings.LANGUAGES)<2:
+            raise SkipTest()
+        
+        lang = settings.LANGUAGES[0][0]
+        
+        tpl = Template('{% load coop_utils %}{% article_link "test" '+lang+' %}')
+        request = self._request()
+        request.LANGUAGE_CODE = settings.LANGUAGES[1][0]
+        html = tpl.render(Context({'request': request}))
+        
+        Article = get_article_class()
+        self.assertEqual(Article.objects.count(), 1)
+        a = Article.objects.all()[0]
+        self.assertEqual(a.slug, "test")
             
     def test_article_existing_link_force_language(self):
-        if len(settings.LANGUAGES) > 1:
-            Article = get_article_class()
-            
-            lang = settings.LANGUAGES[0][0]
-            
-            article = Article.objects.create(slug="test", title="Test")
-            
-            request = self._request()
-            lang = request.LANGUAGE_CODE = settings.LANGUAGES[1][0]
-            
-            setattr(article, "slug_"+lang, "test_"+lang)
-            article.save()
-            
-            tpl = Template('{% load coop_utils %}{% article_link "test" '+lang+' %}')
-            html = tpl.render(Context({'request': request}))
-            
-            self.assertEqual(Article.objects.count(), 1)
-            a = Article.objects.all()[0]
-            self.assertEqual(a.slug, "test")
-            self.assertEqual(getattr(article, "slug_"+lang), "test_"+lang)
+        if not is_localized() and len(settings.LANGUAGES)<2:
+            raise SkipTest()
+        
+        Article = get_article_class()
+        
+        lang = settings.LANGUAGES[0][0]
+        
+        article = Article.objects.create(slug="test", title="Test")
+        
+        request = self._request()
+        lang = request.LANGUAGE_CODE = settings.LANGUAGES[1][0]
+        
+        setattr(article, "slug_"+lang, "test_"+lang)
+        article.save()
+        
+        tpl = Template('{% load coop_utils %}{% article_link "test" '+lang+' %}')
+        html = tpl.render(Context({'request': request}))
+        
+        self.assertEqual(Article.objects.count(), 1)
+        a = Article.objects.all()[0]
+        self.assertEqual(a.slug, "test")
+        self.assertEqual(getattr(article, "slug_"+lang), "test_"+lang)
             
     def test_article_existing_link_force_default_language(self):
-        if len(settings.LANGUAGES) > 1:
-            Article = get_article_class()
-            
-            article = Article.objects.create(slug="test", title="Test")
-            
-            request = self._request()
-            def_lang = settings.LANGUAGES[0][0]
-            cur_lang = request.LANGUAGE_CODE = settings.LANGUAGES[1][0]
-            
-            setattr(article, "slug_"+cur_lang, "test_"+cur_lang)
-            article.save()
-            
-            tpl = Template('{% load coop_utils %}{% article_link "test" '+def_lang+' %}')
-            html = tpl.render(Context({'request': request}))
-            
-            self.assertEqual(Article.objects.count(), 1)
-            a = Article.objects.all()[0]
-            self.assertEqual(a.slug, "test")
-            self.assertEqual(getattr(article, "slug_"+cur_lang), "test_"+cur_lang)
+        if not is_localized() and len(settings.LANGUAGES)<2:
+            raise SkipTest()
+        
+        Article = get_article_class()
+        
+        article = Article.objects.create(title="Test")
+        
+        request = self._request()
+        def_lang = settings.LANGUAGES[0][0]
+        cur_lang = request.LANGUAGE_CODE = settings.LANGUAGES[1][0]
+        
+        #activate(cur_lang)
+        setattr(article, "slug_"+cur_lang, "test_"+cur_lang)
+        article.save()
+        
+        count = Article.objects.count()
+        
+        tpl = Template('{% load coop_utils %}{% article_link "test" '+def_lang+' %}')
+        html = tpl.render(Context({'request': request}))
+        
+        self.assertEqual(Article.objects.count(), count)
+        a = Article.objects.get(id=article.id)
+        self.assertEqual(a.slug, "test")
+        self.assertEqual(getattr(a, "slug_"+cur_lang), "test_"+cur_lang)
 
 
 class AliasTest(BaseTestCase):
