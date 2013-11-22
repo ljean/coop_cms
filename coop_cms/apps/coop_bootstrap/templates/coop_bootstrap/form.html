@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load i18n coop_bs %}
+
+{% block extra_head %}
+{{block.super}}
+<style>
+input[type="checkbox"].form-control {
+    width: auto;
+    height: auto;
+    display: inline-block;
+}
+select.form-control {
+    width: auto;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% block form_header %}
+<div class="row">
+    <div class="col-md-12 lead">{% block form_title %}{% endblock %}</div>
+</div>
+{% endblock %}
+
+{% if form.non_field_errors %}
+<div class="row">
+    <div class="col-md-12"><div class="has-error">
+        {{ form.non_field_errors }}
+        <input type="hidden" name="non_field_errors" value="" />
+    </div></div>
+</div>
+{% endif %}
+
+<div class="row"><div class="col-md-12">
+<form role="form" class="form-horizontal" enctype="multipart/form-data" action="{% block form_action %}{% endblock %}" method="post">
+{% csrf_token %}
+
+{% for field in form %}
+<div class="form-group{% if field.errors %} has-error{% endif %}">
+{% if field|is_checkbox %}
+    <div class="col-sm-12">
+        <label class="checkbox">{{ field }}{{field.label}}</label>
+        {{ field.errors }}
+    </div>
+    {% if field.help_text %}<p class="help-block">{{ field.help_text }}</p>{% endif %}
+</div>
+{% else %}
+    <div class="col-sm-12">
+        {% if field.label %}<label class="control-label" for="{{ field.name }}">{{field.label}}</label>{% endif %}
+        {{ field }}
+        {{ field.errors }}
+        {% if field.help_text %}<p class="help-block">{{ field.help_text }}</p>{% endif %}
+    </div>
+{% endif %}
+</div>
+{% endfor %}
+
+<div class="col-sm-12">
+{% block form_cancel_button %}
+    <a href="{% block form_cancel_url %}{% endblock %}" class="btn btn-default">{% trans "Cancel" %}</a>
+{% endblock %}
+<button type="submit" class="btn btn-primary">{% block form_submit_name %}{% trans "Save" %}{% endblock %}</button>
+</div>
+
+</form>
+
+</div></div>
+
+{% endblock %}

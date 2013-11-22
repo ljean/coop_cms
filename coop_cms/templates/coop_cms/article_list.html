@@ -1,5 +1,4 @@
 {% load i18n %}
-{% load article_tags %}
-<ul class="last_articles">
-    {% last_articles 10 "coop_cms/article_list_item.html" %}
-</ul>
+{% for article in articles %}
+    {% include "coop_cms/article_list_item.html" %}
+{% endfor %}

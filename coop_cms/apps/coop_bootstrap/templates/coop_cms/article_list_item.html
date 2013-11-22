@@ -1,0 +1,22 @@
+{% load i18n coop_utils thumbnail %}
+<div class="row cat-{{category.slug}}">
+    <div class="col-md-2 text-center">
+        <div class="small">{{ item.created|date }}</div>
+        {% spaceless %}<a href="{{ item.get_absolute_url }}">
+            {% if item.logo %}
+            {% thumbnail item.logo "100x100" crop="center" as im %}
+                <img src="{{ im.url }}" class="img-responsive" style="margin: auto;">
+            {% endthumbnail %}
+            {% endif %}
+           </a>{% endspaceless %}
+           
+    </div>
+    <div class="col-md-10">
+        <h3 style="margin-top: 0;">
+            <a href="{{ item.get_absolute_url }}">{{ item.title|dehtml }}</a>
+            <a href="{{ item.get_absolute_url }}"><span class="glyphicon glyphicon-link"></span></a>
+        </h3>
+        {{ item.summary|linebreaksbr }}
+    </div>
+    
+</div>
