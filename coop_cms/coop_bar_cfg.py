@@ -299,13 +299,13 @@ def test_newsletter(request, context):
     return make_link(url, _(u'Send test'), 'fugue/mail-at-sign.png',
         classes=['alert_on_click', 'colorbox-form', 'icon'])
 
-@can_edit_newsletter
-def schedule_newsletter(request, context):
-    if not context.get('edit_mode'):
-        newsletter = context.get('newsletter')
-        url = reverse('coop_cms_schedule_newsletter_sending', args=[newsletter.id])
-        return make_link(url, _(u'Schedule sending'), 'fugue/alarm-clock--arrow.png',
-            classes=['alert_on_click', 'colorbox-form', 'icon'])
+#@can_edit_newsletter
+#def schedule_newsletter(request, context):
+#    if not context.get('edit_mode'):
+#        newsletter = context.get('newsletter')
+#        url = reverse('coop_cms_schedule_newsletter_sending', args=[newsletter.id])
+#        return make_link(url, _(u'Schedule sending'), 'fugue/alarm-clock--arrow.png',
+#            classes=['alert_on_click', 'colorbox-form', 'icon'])
 
 def load_commands(coop_bar):
     
@@ -315,7 +315,7 @@ def load_commands(coop_bar):
         [cms_media_library, cms_upload_image, cms_upload_doc],
         [cms_new_newsletter, edit_newsletter, cancel_edit_newsletter, save_newsletter,
             change_newsletter_settings, newsletter_admin, newsletter_articles, 
-            schedule_newsletter, test_newsletter],
+            test_newsletter],
         [cms_edit, cms_save, cms_cancel],
         [cms_new_article, cms_new_link, cms_article_settings, cms_set_homepage],
         [cms_publish],
