@@ -32,16 +32,16 @@
   {% endblock %}
 
     {% if by_email %}
-    <div style="font-size: small; background: #000; color: #eee; text-align: center;">
     {% block email_only_header %}
+    <div style="font-size: small; background: #000; color: #eee; text-align: center;">
         <div class="item">
             <span class="text">{% trans "If you can't view this email, " %}</span>
             <a href="{{SITE_PREFIX}}{% url "coop_cms_view_newsletter" newsletter.id %}">
                 {% trans "read the online version" %}
             </a>
         </div>
-    {% endblock %}
     </div>
+    {% endblock %}
     {% endif %}
 
     <div id="newsletter">
@@ -54,11 +54,11 @@
     </div>
 
     {% if by_email %}
-    <div style="font-size: small; background: #000; color: #eee; text-align: center;">
     {% block email_only_footer %}
+      <div style="font-size: small; background: #000; color: #eee; text-align: center;">
         {% comment %}Put unsunbscribe link here{% endcomment %}
+      </div>
     {% endblock %}
-    </div>
     {% endif %}
 
     {% if editable %}
