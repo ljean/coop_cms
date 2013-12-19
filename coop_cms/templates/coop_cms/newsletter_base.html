@@ -60,6 +60,10 @@
       </div>
     {% endblock %}
     {% endif %}
+    
+    {% block email_only_tracking %}
+    {% comment %}Put image tracking image here{% endcomment %}
+    {% endblock %}
 
     {% if editable %}
       {% include "coop_cms/_messages.html" %}
