@@ -352,7 +352,7 @@ class BaseArticle(BaseNavigable):
     homepage_for_site = models.ForeignKey(Site, verbose_name=_(u'Homepage for site'), blank=True, null=True, default=None, related_name="homepage_article")
     headline = models.BooleanField(_(u"Headline"), default=False, help_text=_(u'Make this article appear on the home page'))
     publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now())
-    sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=settings.SITE_ID)
+    sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
     
     @property
     def is_homepage(self):
