@@ -103,7 +103,7 @@ admin.site.register(models.ArticleCategory, ArticleCategoryAdmin)
 
 class NewsletterItemAdmin(admin.ModelAdmin):
     form = NewsletterItemAdminForm
-    list_display = ['content_object', 'ordering']
+    list_display = ['content_type', 'content_object', 'ordering']
     list_editable = ['ordering']
     fieldsets = (
         (_('Article'), {'fields': ('object_id', 'content_type', 'ordering')}),
