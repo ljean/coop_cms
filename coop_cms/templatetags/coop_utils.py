@@ -9,7 +9,8 @@ from coop_cms.utils import dehtml as do_dehtml
 from bs4 import BeautifulSoup
 import unicodedata
 from django.conf import settings
-    
+from floppyforms import CheckboxInput
+
 ################################################################################
 class ArticleLinkNode(template.Node):
 
@@ -105,4 +106,10 @@ def normalize_utf8_to_ascii(ustr):
         return unicodedata.normalize('NFKD', ustr).encode('ascii','ignore')
     except TypeError:
         return ustr
+    
+
+@register.filter(name='is_checkbox')
+def is_checkbox(field):
+    field = getattr(field, 'field', field) # get the field attribute of the field or the field itself
+    return field.widget.__class__.__name__ == CheckboxInput().__class__.__name__
     

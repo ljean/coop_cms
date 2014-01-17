@@ -1,0 +1,19 @@
+{% load coop_utils %}
+
+{% for field in form %}
+<div class="form-group{% if field.errors %} error{% endif %}">
+{% if field|is_checkbox %}
+    <div class="checkbox">
+    {{ field }} {{field.label}}
+    </div>
+    {{ field.errors }}
+    {% if field.help_text %}<p class="help-block">{{ field.help_text }}</p>{% endif %}
+</div>
+{% else %}
+    {% if field.label %}<label class="control-label" for="{{ field.name }}">{{field.label}}</label>{% endif %}
+    {{ field }}
+    {% if field.errors %}<span class="label label-danger">{{field.errors|join:", "}}</span>{% endif %}
+    {% if field.help_text %}<p class="help-block">{{ field.help_text }}</p>{% endif %}
+{% endif %}
+</div>
+{% endfor %}
