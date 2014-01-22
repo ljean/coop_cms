@@ -200,6 +200,9 @@ def is_localized():
     if ('localeurl' in django_settings.INSTALLED_APPS) and ('modeltranslation' in django_settings.INSTALLED_APPS):
         return True
     return False
+
+def is_requestprovider_installed():
+    return ('gadjo.requestprovider.middleware.RequestProvider' in django_settings.MIDDLEWARE_CLASSES)
     
 def can_rewrite_url():
     return getattr(django_settings, 'COOP_CMS_CAN_EDIT_ARTICLE_SLUG', False)

@@ -18,7 +18,7 @@ from django.core.exceptions import ValidationError
 # from html_field import html_cleaner
 from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes
 from coop_cms.settings import get_navtree_class, is_localized, COOP_CMS_NAVTREE_CLASS, get_article_templates
-from coop_cms.settings import get_default_logo
+from coop_cms.settings import get_default_logo, is_requestprovider_installed
 from django.contrib.staticfiles import finders
 from django.core.files import File
 from django.db.models.signals import pre_delete, post_save
@@ -117,6 +117,14 @@ class NavNode(models.Model):
         if self.content_object:
             return self.content_object.get_absolute_url()
         return None
+    
+    def is_active_node(self):
+        url = self.get_absolute_url()
+        if url and is_requestprovider_installed():
+            from gadjo.requestprovider.signals import get_request
+            http_request = get_request()
+            return http_request.path == url
+        return False
 
     def get_content_name(self):
         return self.content_type.model_class()._meta.verbose_name
@@ -203,6 +211,8 @@ class NavNode(models.Model):
         args = self._get_li_args(li_args)
         if args:
             css_class = " "+args
+        if self.is_active_node():
+            css_class += ' class="active-node"'
         return u'<li{0}>{1}{2}</li>'.format(css_class, self._get_li_content(li_template), children_html)
 
     def as_breadcrumb(self, li_template=None, css_class=""):

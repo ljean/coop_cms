@@ -49,6 +49,8 @@ setup(
                         'apidev-djaloha==0.9.0',
                         'django-pagination',
                         'feedparser',
+                        'beautifulsoup4',
+                        "django-contrib-requestprovider",
                         #'django-filetransfers', #need to be installed manually from https://bitbucket.org/wkornewald/django-filetransfers
                         #'model_mommy', #---> ramène django 1.5 dans ses dépendances quand installé via coop_cms
                         ],
