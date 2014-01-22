@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from coop_cms.settings import get_article_class
-from coop_cms.utils import get_article
+from coop_cms.shortcuts import get_article
 from django import template
 register = template.Library()
 from django.template.defaultfilters import slugify

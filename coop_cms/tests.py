@@ -26,7 +26,7 @@ from django.utils.unittest.case import SkipTest
 from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
 from bs4 import BeautifulSoup
 import logging
-from django.utils.translation import activate
+from django.utils.translation import activate, get_language
 
 class BaseTestCase(TestCase):
     def setUp(self):
@@ -2943,4 +2943,28 @@ class ArticleSlugTestCase(BaseTestCase):
         
         self.assertEqual(getattr(a1, 'title_'+trans_lang), getattr(a2, 'title_'+trans_lang))
         self.assertNotEqual(getattr(a1, 'slug_'+trans_lang), getattr(a2, 'slug_'+trans_lang))
+        
+    def _get_localized_slug(self, slug):
+        if is_localized():
+            from localeurl.utils import locale_path
+            locale = get_language()                
+            return locale_path(slug, locale)
+        return slug
+    
+    def test_create_article_html_in_title(self):
+        Article = get_article_class()
+        article1 = Article.objects.create(title="<h1>Titre de l'article</h1>")
+        response = self.client.get(article1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        
+        expected_title = self._get_localized_slug("/titre-de-larticle/")
+        self.assertEqual(article1.get_absolute_url(), expected_title)
+        
+    def test_create_article_complex_html_in_title(self):
+        Article = get_article_class()
+        article1 = Article.objects.create(title="<p><h2>Titre de <b>l'article</b><h2><div></div></p>")
+        response = self.client.get(article1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        expected_title = self._get_localized_slug("/titre-de-larticle/")
+        self.assertEqual(article1.get_absolute_url(), expected_title)
         

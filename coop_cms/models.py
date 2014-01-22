@@ -19,6 +19,7 @@ from django.core.exceptions import ValidationError
 from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes
 from coop_cms.settings import get_navtree_class, is_localized, COOP_CMS_NAVTREE_CLASS, get_article_templates
 from coop_cms.settings import get_default_logo, is_requestprovider_installed
+from coop_cms.utils import dehtml
 from django.contrib.staticfiles import finders
 from django.core.files import File
 from django.db.models.signals import pre_delete, post_save
@@ -471,6 +472,8 @@ class BaseArticle(BaseNavigable):
         return ret
     
     def get_unique_slug(self, slug_field, title):
+        #no html in title
+        title = dehtml(title)
         slug = slugify(title)
         next, origin_slug = 2, slug
         while True:

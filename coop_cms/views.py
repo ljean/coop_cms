@@ -23,7 +23,8 @@ import mimetypes, unicodedata
 from django.conf import settings
 from django.contrib import messages
 from colorbox.decorators import popup_redirect
-from coop_cms.utils import send_newsletter, get_article_or_404, get_headlines, redirect_if_alias
+from coop_cms.utils import send_newsletter
+from coop_cms.shortcuts import get_article_or_404, get_headlines, redirect_if_alias
 from django.utils.log import getLogger
 from datetime import datetime
 from django.utils.translation import check_for_language, activate, get_language
