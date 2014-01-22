@@ -1,0 +1,21 @@
+{% load coop_utils %}
+
+{% for field in form %}
+{% if field|is_checkbox %}
+    <div class="col-sm-10 col-sm-offset-2"><div class="checkbox">
+    {{ field }} {{field.label}}
+    </div>
+    {{ field.errors }}
+    {% if field.help_text %}<p class="help-block">{{ field.help_text }}</p>{% endif %}
+    </div>
+</div>
+{% else %}
+    {% if field.label %}<label class="control-label col-sm-2" for="{{ field.name }}">{{field.label}}</label>{% endif %}
+    <div class="col-sm-10">
+    {{ field }}
+    {% if field.errors %}<span class="label label-danger">{{field.errors|join:", "}}</span>{% endif %}
+    {% if field.help_text %}<p class="help-block">{{ field.help_text }}</p>{% endif %}
+    </div>
+{% endif %}
+</div>
+{% endfor %}

@@ -3,12 +3,11 @@
 import floppyforms as forms
 from coop_cms.templatetags.coop_utils import is_checkbox
 
-class _BootstrapableForm(object):
+class BootstrapableMixin(object):
     
     def _bs_patch_field_class(self):
         for field_name in self.fields:
             field = self.fields[field_name]
-            print field
             if not is_checkbox(field):
                 if field.widget.attrs.has_key('class'):
                     val = field.widget.attrs['class']
@@ -17,13 +16,13 @@ class _BootstrapableForm(object):
                     field.widget.attrs['class'] = "form-control"
     
 
-class Form(forms.Form, _BootstrapableForm):
+class Form(forms.Form, BootstrapableMixin):
     
     def __init__(self, *args, **kwargs):
         super(Form, self).__init__(*args, **kwargs)
         self._bs_patch_field_class()
 
-class ModelForm(forms.ModelForm, _BootstrapableForm):
+class ModelForm(forms.ModelForm, BootstrapableMixin):
     
     def __init__(self, *args, **kwargs):
         super(ModelForm, self).__init__(*args, **kwargs)
