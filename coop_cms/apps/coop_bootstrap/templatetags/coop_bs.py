@@ -1,8 +1,10 @@
 from django import template
 register = template.Library()
 
-from floppyforms import CheckboxInput
+from coop_cms.templatetags.coop_utils import is_checkbox as _is_checkbox
+
+#Just for compatibility
 
 @register.filter(name='is_checkbox')
 def is_checkbox(field):
-  return field.field.widget.__class__.__name__ == CheckboxInput().__class__.__name__
+  return _is_checkbox(field)

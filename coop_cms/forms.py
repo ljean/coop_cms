@@ -14,11 +14,7 @@ from django.core.urlresolvers import reverse
 from coop_cms.utils import dehtml
 from datetime import datetime
 from django.utils.timezone import now as dt_now
-try:
-    from chosen.widgets import ChosenSelectMultiple
-except ImportError:
-    print "chosen missing"
-    pass
+from coop_cms.widgets import ChosenSelectMultiple
 
 class NavTypeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
