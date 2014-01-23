@@ -811,6 +811,42 @@ class Alias(models.Model):
     
     def __unicode__(self):
         return self.path
+    
+class FragmentType(models.Model):
+    name = models.CharField(max_length=100, db_index=True)
+    
+    class Meta:
+        verbose_name = _(u'Fragment type')
+        verbose_name_plural = _(u'Fragment types')
+        
+    def __unicode__(self):
+        return self.name
+
+class Fragment(models.Model):
+    type = models.ForeignKey(FragmentType, verbose_name=_(u'fragment type'))
+    name = models.CharField(max_length=100, db_index=True, verbose_name=_(u'name'))
+    css_class = models.CharField(max_length=100, default=u"", blank=True, verbose_name=_(u'CSS class'))
+    position = models.IntegerField(verbose_name=_("position"), default=0)
+    content = models.TextField(default=u"", blank=True, verbose_name=_(u'content'))
+    
+    class Meta:
+        verbose_name = _(u'Fragment')
+        verbose_name_plural = _(u'Fragment')
+        ordering = ("position", "id")
+        
+    def save(self, *args, **kwargs):
+        if not self.id and not self.position:
+            max_position = Fragment.objects.filter(type=self.type).aggregate(Max('position'))['position__max'] or 0
+            self.position = max_position + 1
+            
+        return super(Fragment, self).save(*args, **kwargs)
+        
+    def __unicode__(self):
+        return u"{0} {1} {2}".format(self.type, self.position, self.name)
+    
+    
+    
+
 
 
     

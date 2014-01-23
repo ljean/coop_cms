@@ -94,6 +94,8 @@ admin.site.register(models.Document)
 admin.site.register(models.Image)
 admin.site.register(models.PieceOfHtml)
 admin.site.register(models.NewsletterSending)
+admin.site.register(models.FragmentType)
+admin.site.register(models.Fragment)
 
 
 class ArticleCategoryAdmin(admin.ModelAdmin):

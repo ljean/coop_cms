@@ -2,8 +2,8 @@
 
 from django import template
 register = template.Library()
-from djaloha.templatetags.djaloha_utils import DjalohaEditNode
-from coop_cms.models import PieceOfHtml, BaseArticle
+from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleEditNode
+from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType
 from django.utils.translation import ugettext_lazy as _
 from django.core.context_processors import csrf
 from django.utils.safestring import mark_safe
@@ -25,6 +25,31 @@ class PieceOfHtmlEditNode(DjalohaEditNode):
 def coop_piece_of_html(parser, token):
     div_id = token.split_contents()[1]
     return PieceOfHtmlEditNode(PieceOfHtml, {'div_id': div_id}, 'content')
+
+################################################################################
+
+class FragmentEditNode(DjalohaMultipleEditNode):
+    
+    def _get_objects(self, lookup):
+        fragment_type, _x = FragmentType.objects.get_or_create(name=lookup['name'])
+        return Fragment.objects.filter(type=fragment_type)
+    
+    def _get_object_lookup(self, obj):
+        return {"id": obj.id}
+
+    def __init__(self, lookup):
+        super(FragmentEditNode, self).__init__(Fragment, lookup, 'content')
+    
+    def render(self, context):
+        if context.get('form', None):
+            context.dicts[0]['djaloha_edit'] = True
+        #context.dicts[0]['can_edit_template'] = True
+        return super(FragmentEditNode, self).render(context)
+
+@register.tag
+def coop_fragments(parser, token):
+    type_name = token.split_contents()[1]
+    return FragmentEditNode({'name': type_name})
 
 ################################################################################
 class ArticleSummaryEditNode(DjalohaEditNode):

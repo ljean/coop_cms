@@ -5,7 +5,7 @@ from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
-from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem
+from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, Fragment, FragmentType
 from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias
 from coop_cms.settings import is_localized
 import json
@@ -2968,3 +2968,245 @@ class ArticleSlugTestCase(BaseTestCase):
         expected_title = self._get_localized_slug("/titre-de-larticle/")
         self.assertEqual(article1.get_absolute_url(), expected_title)
         
+class FragmentsTest(BaseTestCase):
+    
+    editable_field_tpl = '<div class="djaloha-editable" id="djaloha_djaloha__coop_cms__Fragment__id__{0}__content">' + \
+        '{1}</div>\n<input type="hidden" id="djaloha_djaloha__coop_cms__Fragment__id__{0}__content_hidden" ' + \
+        'name="djaloha__coop_cms__Fragment__id__{0}__content" value="{1}">'
+    
+    def setUp(self):
+        super(FragmentsTest, self).setUp()
+        self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
+        settings.COOP_CMS_ARTICLE_TEMPLATES = (
+            ('test/article_with_fragments.html', 'Article with fragments'),
+        )
+        
+    def tearDown(self):
+        super(FragmentsTest, self).tearDown()
+        #restore
+        settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
+
+    def test_fragment_position(self):
+        ft1 = mommy.make(FragmentType)
+        ft2 = mommy.make(FragmentType)
+        
+        f1 = mommy.make(Fragment, type=ft1)
+        f2 = mommy.make(Fragment, type=ft1)
+        f3 = mommy.make(Fragment, type=ft1)
+        f4 = mommy.make(Fragment, type=ft1)
+        
+        g1 = mommy.make(Fragment, type=ft2)
+        g2 = mommy.make(Fragment, type=ft2)
+        g3 = mommy.make(Fragment, type=ft2)
+        
+        f5 = mommy.make(Fragment, type=ft1)
+        
+        for idx, elt in enumerate([f1, f2, f3, f4, f5]):
+            self.assertEqual(idx+1, elt.position)
+        
+        for idx, elt in enumerate([g1, g2, g3]):
+            self.assertEqual(idx+1, elt.position)
+            
+    def test_fragment_position_update(self):
+        ft1 = mommy.make(FragmentType)
+        ft2 = mommy.make(FragmentType)
+        
+        f1 = mommy.make(Fragment, type=ft1)
+        f2 = mommy.make(Fragment, type=ft1)
+        f3 = mommy.make(Fragment, type=ft1)
+        
+        f1.save()
+        f2.save()
+        f3.save()
+        
+        for idx, elt in enumerate([f1, f2, f3]):
+            self.assertEqual(idx+1, elt.position)
+            
+    def test_view_fragments(self):
+        ft_name = u"contacts"
+        ft1 = mommy.make(FragmentType, name=ft_name)
+        
+        f1 = mommy.make(Fragment, type=ft1, content="Azerty")
+        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh")
+        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn")
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+        
+        positions = [html.find('{0}'.format(f.content)) for f in [f1, f2, f3]]
+        for pos in positions:
+            self.assertTrue(pos>=0)
+        sorted_positions = positions[:]
+        sorted_positions.sort()
+        self.assertEqual(positions, sorted_positions)
+        
+    def test_view_fragments_name_as_string(self):
+        ft1 = mommy.make(FragmentType, name="contacts")
+        
+        f1 = mommy.make(Fragment, type=ft1, content="Azerty")
+        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh")
+        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn")
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments "contacts" %}')
+        html = tpl.render(Context({"ft_name": "contacts"}))
+        
+        positions = [html.find('{0}'.format(f.content)) for f in [f1, f2, f3]]
+        for pos in positions:
+            self.assertTrue(pos>=0)
+        sorted_positions = positions[:]
+        sorted_positions.sort()
+        self.assertEqual(positions, sorted_positions)
+        
+    def test_view_fragments_order(self):
+        ft_name = u"contacts"
+        ft1 = mommy.make(FragmentType, name=ft_name)
+        
+        f1 = mommy.make(Fragment, type=ft1, content="Azerty", position=3)
+        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh", position=1)
+        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn", position=2)
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+        
+        positions = [html.find('{0}'.format(f.content)) for f in [f2, f3, f1]]
+        for pos in positions:
+            self.assertTrue(pos>=0)
+        sorted_positions = positions[:]
+        sorted_positions.sort()
+        self.assertEqual(positions, sorted_positions)
+        
+    def test_view_only_specified_fragments(self):
+        ft_name = u"contacts"
+        ft1 = mommy.make(FragmentType, name=ft_name)
+        ft2 = mommy.make(FragmentType, name="AAAA")
+        
+        f1 = mommy.make(Fragment, type=ft1, content="Azerty")
+        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh")
+        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn")
+        
+        g1 = mommy.make(Fragment, type=ft2, content="POIUYT")
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+        
+        positions = [html.find('{0}'.format(f.content)) for f in [f2, f3, f1]]
+        for pos in positions:
+            self.assertTrue(pos>=0)
+        
+        positions = [html.find('{0}'.format(f.content)) for f in [g1]]
+        for pos in positions:
+            self.assertTrue(pos==-1)
+            
+    def test_view_fragments_edit_mode(self):
+        ft_name = u"contacts"
+        ft1 = mommy.make(FragmentType, name=ft_name)
+        ft2 = mommy.make(FragmentType, name="AAAA")
+        
+        f1 = mommy.make(Fragment, type=ft1, content="Azerty")
+        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh")
+        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn")
+        
+        g1 = mommy.make(Fragment, type=ft2, content="POIUYT")
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name %}')
+        html = tpl.render(Context({"ft_name": ft_name, "form": True}))
+        
+        positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [f1, f2, f3]]
+        for pos in positions:
+            self.assertTrue(pos>=0)
+        sorted_positions = positions[:]
+        sorted_positions.sort()
+        self.assertEqual(positions, sorted_positions)
+        
+        positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [g1]]
+        for pos in positions:
+            self.assertTrue(pos==-1)
+    
+    def _log_as_editor(self):
+        self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
+        
+        ct = ContentType.objects.get_for_model(get_article_class())
+        
+        perm = 'change_{0}'.format(ct.model)
+        can_edit_article = Permission.objects.get(content_type=ct, codename=perm)
+        user.user_permissions.add(can_edit_article)
+        
+        perm = 'add_{0}'.format(ct.model)
+        can_add_article = Permission.objects.get(content_type=ct, codename=perm)
+        user.user_permissions.add(can_add_article)
+        
+        user.save()
+        return self.client.login(username='toto', password='toto')
+        
+    
+    def _check_article(self, response, data):
+        for (key, value) in data.items():
+            self.assertContains(response, value)
+    #        
+    #def _check_article_not_changed(self, article, data, initial_data):
+    #    article = get_article_class().objects.get(id=article.id)
+    #
+    #    for (key, value) in data.items():
+    #        self.assertNotEquals(getattr(article, key), value)
+    #        
+    #    for (key, value) in initial_data.items():
+    #        self.assertEquals(getattr(article, key), value)
+
+    def test_view_article_no_fragments(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(1, FragmentType.objects.count())
+        self.assertEqual("parts", FragmentType.objects.all()[0].name)
+        
+    def test_view_article_with_fragments(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        ft = mommy.make(FragmentType, name="parts")
+        f1 = mommy.make(Fragment, type=ft, content="Azertyuiop")
+        
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, f1.content)
+        
+    def test_edit_article_no_fragments(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        data = {"title": 'salut', 'content': 'bonjour!'}
+        
+        self._log_as_editor()
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self._check_article(response, data)
+        
+        data = {"title": 'bye', 'content': 'au revoir'}
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self._check_article(response, data)
+        
+    def test_edit_article_with_fragments(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        ft = mommy.make(FragmentType, name="parts")
+        f1 = mommy.make(Fragment, type=ft, content="Azertyuiop")
+        
+        new_f1_content = u"Qsdfghjklm"
+        data = {
+            "title": 'salut',
+            'content': 'bonjour!',
+            'djaloha__coop_cms__Fragment__id__{0}__content'.format(f1.id): new_f1_content,
+        }
+        
+        self._log_as_editor()
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertContains(response, data['title'])
+        self.assertContains(response, data['content'])
+        self.assertContains(response, new_f1_content)
+        
+    
