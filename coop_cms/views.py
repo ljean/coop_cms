@@ -1016,6 +1016,7 @@ def edit_fragments(request, article_id):
     
     context_dict = {
         'form': formset,
+        'article': article,
         'title': _(u"Edit fragments of this template?"),
     }
 
