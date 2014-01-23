@@ -31,6 +31,7 @@ from django.utils.translation import check_for_language, activate, get_language
 from urlparse import urlparse
 from django.contrib.sites.models import Site
 from generic_views import EditableObjectView
+from django.forms.models import modelformset_factory
 import logging
 logger = logging.getLogger("coop_cms")
 
@@ -1002,17 +1003,19 @@ def edit_fragments(request, article_id):
 
     if not request.user.has_perm('can_edit_article', article):
         raise PermissionDenied
+    
+    EditFragmentFormset = modelformset_factory(models.Fragment, forms.EditFragmentForm, extra=0)
 
     if request.method == "POST":
-        form = forms.EditFragmentForm(request.POST, article=article)
-        if form.is_valid():
-            form.save()
+        formset = EditFragmentFormset(request.POST, queryset=models.Fragment.objects.all())
+        if formset.is_valid():
+            formset.save()
             return HttpResponseRedirect(article.get_edit_url())
     else:
-        form = forms.EditFragmentForm(article=article)
-        
+        formset = EditFragmentFormset(queryset=models.Fragment.objects.all())
+    
     context_dict = {
-        'form': form,
+        'form': formset,
         'title': _(u"Edit fragments of this template?"),
     }
 

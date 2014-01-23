@@ -370,8 +370,19 @@ class AddFragmentForm(forms.ModelForm):
     def __init__(self, data=None, article=None, *args, **kwargs):
         super(AddFragmentForm, self).__init__(data, *args, **kwargs)
         
-    #class Media:
-    #    css = {
-    #        'all': ('css/admin-tricks.css',),
-    #    }
-    #    js = ()
+class EditFragmentForm(forms.ModelForm):
+    delete_me = forms.BooleanField(label=(u"delete"), required=False)
+
+    class Meta:
+        model = Fragment
+        fields = ('type', 'name', 'css_class', 'position')
+        widgets = {
+            "type": forms.HiddenInput()
+        }
+        
+    def save(self, *args, **kwargs):
+        if self.cleaned_data['delete_me']:
+            self.instance.delete()
+            return None
+        return super(EditFragmentForm, self).save(*args, **kwargs)
+    
