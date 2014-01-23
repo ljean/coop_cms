@@ -966,6 +966,61 @@ def schedule_newsletter_sending(request, newsletter_id):
         context_instance=RequestContext(request)
     )
 
+@login_required
+@popup_redirect
+def add_fragment(request, article_id):
+    """add a fragment to the current template"""
+    article = get_object_or_404(get_article_class(), id=article_id)
+
+    if not request.user.has_perm('can_edit_article', article):
+        raise PermissionDenied
+
+    if request.method == "POST":
+        form = forms.AddFragmentForm(request.POST, article=article)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(article.get_edit_url())
+    else:
+        form = forms.AddFragmentForm(article=article)
+        
+    context_dict = {
+        'form': form,
+        'article': article,
+    }
+
+    return render_to_response(
+        'coop_cms/popup_add_fragment.html',
+        context_dict,
+        context_instance=RequestContext(request)
+    )
+
+@login_required
+@popup_redirect
+def edit_fragments(request, article_id):
+    """edit fragments of the current template"""
+    article = get_object_or_404(get_article_class(), id=article_id)
+
+    if not request.user.has_perm('can_edit_article', article):
+        raise PermissionDenied
+
+    if request.method == "POST":
+        form = forms.EditFragmentForm(request.POST, article=article)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(article.get_edit_url())
+    else:
+        form = forms.EditFragmentForm(article=article)
+        
+    context_dict = {
+        'form': form,
+        'title': _(u"Edit fragments of this template?"),
+    }
+
+    return render_to_response(
+        'coop_cms/popup_edit_fragments.html',
+        context_dict,
+        context_instance=RequestContext(request)
+    )
 
 def articles_category(request, slug):
     category = get_object_or_404(models.ArticleCategory, slug=slug)

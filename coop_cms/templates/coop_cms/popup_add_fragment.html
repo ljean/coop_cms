@@ -1,0 +1,4 @@
+{% extends "colorbox/popup_form_base.html" %}
+{% load i18n %}{% load url from future %}
+{% block title %}{% trans "Add fragment" %}{% endblock %}
+{% block form_url %}{% url "coop_cms_add_fragment" article.id %}{% endblock %}

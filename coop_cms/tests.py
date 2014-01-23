@@ -3137,6 +3137,14 @@ class FragmentsTest(BaseTestCase):
         
         user.save()
         return self.client.login(username='toto', password='toto')
+    
+    def _log_as_regular_user(self):
+        user = User.objects.create_user('titi', 'titi@toto.fr', 'titi')
+        
+        ct = ContentType.objects.get_for_model(get_article_class())
+        
+        user.save()
+        return self.client.login(username='titi', password='titi')
         
     
     def _check_article(self, response, data):
@@ -3170,6 +3178,21 @@ class FragmentsTest(BaseTestCase):
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
         self.assertContains(response, f1.content)
+        
+    def test_view_article_with_fragment_with_css(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        ft = mommy.make(FragmentType, name="parts")
+        f1 = mommy.make(Fragment, type=ft, content="Azertyuiop", css_class="this-is-my-fragment")
+        
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, f1.content)
+        
+        soup = BeautifulSoup(response.content)
+        fragment = soup.select("div."+f1.css_class)[0]
+        self.assertEqual(f1.content, fragment.text)
         
     def test_edit_article_no_fragments(self):
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
@@ -3209,4 +3232,113 @@ class FragmentsTest(BaseTestCase):
         self.assertContains(response, data['content'])
         self.assertContains(response, new_f1_content)
         
+    def test_view_add_fragment(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        self._log_as_editor()
+        
+        url = reverse("coop_cms_add_fragment", args=[article.id])
+        response = self.client.get(url)
+        
+        self.assertEqual(200, response.status_code)
+        
+    def test_view_add_fragment_permission_denied(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        url = reverse("coop_cms_add_fragment", args=[article.id])
+        response = self.client.get(url)
+        
+        self.assertEqual(302, response.status_code)
+        
+        self._log_as_regular_user()
+        url = reverse("coop_cms_add_fragment", args=[article.id])
+        response = self.client.get(url)
+        self.assertEqual(403, response.status_code)
+        
+    def _add_fragment(self, data):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        self._log_as_editor()
+        
+        url = reverse("coop_cms_add_fragment", args=[article.id])
+        response = self.client.post(url, data=data, follow=True)
+        
+        self.assertEqual(200, response.status_code)
+        #self.assertEqual(article.get_edit_url(), response['Location'])
+        #print response.content
+        
+        soup = BeautifulSoup(response.content)
+        errs = soup.select("ul.errorlist li")
+        self.assertEqual([], errs)
+        
+        expected = u'<script>$.colorbox.close(); window.location="{0}";</script>'.format(article.get_edit_url())
+        
+        self.assertEqual(response.content, expected)
+        return response        
+        
+    def test_add_fragment(self):
+        ft = mommy.make(FragmentType, name="parts")
+        data = {
+            'type': ft.id,
+            'name': 'abcd',
+            'css_class': 'okidoki',
+            'position': 0,
+        }
+        
+        response = self._add_fragment(data)
+        f = Fragment.objects.all()[0]
+        
+        self.assertEqual(f.type, ft)
+        self.assertEqual(f.name, data['name'])
+        self.assertEqual(f.css_class, data['css_class'])   
+        self.assertEqual(f.position, 1)
+        
+    def test_add_fragment_position(self):
+        ft = mommy.make(FragmentType, name="parts")
+        data = {
+            'type': ft.id,
+            'name': 'abcd',
+            'css_class': 'okidoki',
+            'position': 2,
+        }
+        
+        response = self._add_fragment(data)
+        f = Fragment.objects.all()[0]
+        
+        self.assertEqual(f.type, ft)
+        self.assertEqual(f.name, data['name'])
+        self.assertEqual(f.css_class, data['css_class'])   
+        self.assertEqual(f.position, 2)
+        
+    def test_view_add_fragment_permission_denied(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        ft = mommy.make(FragmentType, name="parts")
+        data = {
+            'type': ft,
+            'name': 'abcd',
+            'css_class': 'okidoki',
+            'position': 0,
+        }
+        
+        url = reverse("coop_cms_add_fragment", args=[article.id])
+        response = self.client.post(url, data=data, follow=False)
+        self.assertEqual(302, response.status_code)
+        next_url = "http://testserver/accounts/login/?next={0}".format(url)
+        self.assertEqual(next_url, response['Location'])
+        
+        self._log_as_regular_user()
+        url = reverse("coop_cms_add_fragment", args=[article.id])
+        response = self.client.post(url, data=data, follow=False)
+        self.assertEqual(403, response.status_code)
+        
+        self.assertEqual(0, Fragment.objects.count())
+        
+        
+        
+    
     

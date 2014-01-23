@@ -40,6 +40,12 @@ class FragmentEditNode(DjalohaMultipleEditNode):
     def __init__(self, lookup):
         super(FragmentEditNode, self).__init__(Fragment, lookup, 'content')
     
+    def _pre_object_render(self, obj):
+        return u'<div class="coop-fragment {0}">'.format(obj.css_class)
+    
+    def _post_object_render(self, obj):
+        return u'</div>'
+    
     def render(self, context):
         if context.get('form', None):
             context.dicts[0]['djaloha_edit'] = True

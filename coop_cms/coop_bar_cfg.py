@@ -307,11 +307,32 @@ def test_newsletter(request, context):
 #        return make_link(url, _(u'Schedule sending'), 'fugue/alarm-clock--arrow.png',
 #            classes=['alert_on_click', 'colorbox-form', 'icon'])
 
+@can_edit_article
+def cms_add_fragment(request, context):
+    if not context.get('fragments'):
+        obj = context.get('article')
+        
+        url = reverse("coop_cms_add_fragment", args=[obj.id])
+        
+        return make_link(url, _(u'Add fragment'), 'fugue/block--plus.png',
+                classes=['alert_on_click', 'colorbox-form', 'icon'])
+
+@can_edit_article
+def cms_edit_fragments(request, context):
+    if not context.get('fragments'):
+        obj = context.get('article')
+        
+        url = reverse("coop_cms_edit_fragments", args=[obj.id])
+        
+        return make_link(url, _(u'Edit fragments'), 'fugue/block--pencil.png',
+                classes=['alert_on_click', 'colorbox-form', 'icon'])
+
 def load_commands(coop_bar):
     
     coop_bar.register([
         [log_out],
         [django_admin, django_admin_edit_article, django_admin_navtree, view_all_articles],
+        [cms_add_fragment, cms_edit_fragments],
         [cms_media_library, cms_upload_image, cms_upload_doc],
         [cms_new_newsletter, edit_newsletter, cancel_edit_newsletter, save_newsletter,
             change_newsletter_settings, newsletter_admin, newsletter_articles, 

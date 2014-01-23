@@ -1,5 +1,5 @@
 from django import forms
-from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending, Link, Document
+from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending, Link, Document, Fragment
 from django.contrib.contenttypes.models import ContentType
 from settings import get_navigable_content_types
 from django.core.exceptions import ValidationError
@@ -329,6 +329,8 @@ class NewsletterTemplateForm(forms.Form):
         else:
             self.fields["template"] = forms.CharField()
         self.fields["template"].initial = newsletter.template
+        
+        
 
 class NewsletterAdminForm(forms.ModelForm):
 
@@ -358,3 +360,18 @@ class NewsletterAdminForm(forms.ModelForm):
             'all': ('css/admin-tricks.css',),
         }
         js = ()
+        
+class AddFragmentForm(forms.ModelForm):
+
+    class Meta:
+        model = Fragment
+        fields = ('type', 'name', 'css_class', 'position')
+        
+    def __init__(self, data=None, article=None, *args, **kwargs):
+        super(AddFragmentForm, self).__init__(data, *args, **kwargs)
+        
+    #class Media:
+    #    css = {
+    #        'all': ('css/admin-tricks.css',),
+    #    }
+    #    js = ()
