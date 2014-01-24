@@ -133,7 +133,7 @@ def cms_media_library(request, context):
 def cms_upload_image(request, context):
     if context.get('edit_mode'):
         return make_link(reverse('coop_cms_upload_image'), _(u'Add image'), 'fugue/image--plus.png',
-        classes=['coopbar_addfile', 'colorbox-form', 'icon'])
+            classes=['coopbar_addfile', 'colorbox-form', 'icon'])
 
 @can_edit
 def cms_upload_doc(request, context):

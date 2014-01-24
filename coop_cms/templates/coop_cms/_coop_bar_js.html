@@ -10,11 +10,11 @@ $(document).ready(function(){
 			}
 		})
 	} catch (err) {
-		
+		alert("err: "+err);	
 	}
 
 {% if edit_mode %}
-	$("#coop-bar a.slide").pageSlide({width:'350px', direction:'right'});
+	$(".coop-bar a.slide").pageSlide({width:'350px', direction:'right'});
 	
 	var toggle_save = function() {
 	    if (!$(".show-dirty").is(":visible")) {

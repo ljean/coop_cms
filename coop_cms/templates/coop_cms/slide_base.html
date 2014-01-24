@@ -20,6 +20,10 @@
         }
         return false;
       });
+      
+      $("img.library-thumbnail").bind('dragstart', function(event) {
+          $("a.pageslide-close").click();
+      });
 
       var active_link = function(media_type) {
         $(".media-selector a." + media_type + "-sel").addClass('active');
