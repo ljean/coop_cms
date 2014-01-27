@@ -124,7 +124,7 @@ class NavNode(models.Model):
         if url and is_requestprovider_installed():
             from gadjo.requestprovider.signals import get_request
             http_request = get_request()
-            return http_request.path == url
+            return http_request and http_request.path == url
         return False
 
     def get_content_name(self):
