@@ -207,6 +207,8 @@ class ArticleSettingsForm(WithNavigationModelForm):
         if not summary:
             summary = dehtml(article.content)[:400]
         initials.update({'summary': summary})
+        initials.update({'publication_date': article.publication_date.strftime("%Y-%m-%d %H:%M:%S")})
+        
         kwargs['initial'] = initials
         super(ArticleSettingsForm, self).__init__(*args, **kwargs)
 
