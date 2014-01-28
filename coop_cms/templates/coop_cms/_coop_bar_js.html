@@ -12,9 +12,19 @@ $(document).ready(function(){
 	} catch (err) {
 		//console.log("err: "+err);	
 	}
+	
+	if ($(".coop-fragment-type").length) {
+		var icon = $(".coop-bar .icon.if-fragments").show();
+		icon.next(".separator").show();
+	} else {
+		var icon = $(".coop-bar .icon.if-fragments").hide();
+		icon.next(".separator").hide();
+	}
 
 {% if edit_mode %}
 	$(".coop-bar a.slide").pageSlide({width:'350px', direction:'right'});
+	
+	
 	
 	var toggle_save = function() {
 	    if (!$(".show-dirty").is(":visible")) {

@@ -309,23 +309,23 @@ def test_newsletter(request, context):
 
 @can_edit_article
 def cms_add_fragment(request, context):
-    if not context.get('fragments'):
+    if context.get('article'):
         obj = context.get('article')
         
         url = reverse("coop_cms_add_fragment", args=[obj.id])
         
         return make_link(url, _(u'Add fragment'), 'fugue/block--plus.png',
-                classes=['alert_on_click', 'colorbox-form', 'icon'])
+                classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments'])
 
 @can_edit_article
 def cms_edit_fragments(request, context):
-    if not context.get('fragments'):
+    if context.get('article'):
         obj = context.get('article')
         
         url = reverse("coop_cms_edit_fragments", args=[obj.id])
         
         return make_link(url, _(u'Edit fragments'), 'fugue/block--pencil.png',
-                classes=['alert_on_click', 'colorbox-form', 'icon'])
+                classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments'])
 
 def load_commands(coop_bar):
     
