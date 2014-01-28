@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coop_cms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-01-28 15:28+0100\n"
+"POT-Creation-Date: 2014-01-28 15:49+0100\n"
 "PO-Revision-Date: 2013-06-28 15:16+0100\n"
 "Last-Translator: Luc Jean <ljean@apidev.fr>\n"
 "Language-Team: Apidev, Quinode <contact@quinode.fr>\n"
@@ -301,7 +301,7 @@ msgstr "Un élément ne peut pas être son propre parent"
 msgid "A node can not be child of its own child"
 msgstr "Un élément ne peut pas être son propre enfant"
 
-#: models.py:247 models.py:274 models.py:591 models.py:831
+#: models.py:247 models.py:274 models.py:591 models.py:820 models.py:833
 msgid "name"
 msgstr "nom"
 
@@ -334,7 +334,7 @@ msgstr "titre"
 msgid "subtitle"
 msgstr "sous-titre"
 
-#: models.py:359 models.py:674 models.py:745 models.py:834
+#: models.py:359 models.py:674 models.py:745 models.py:836
 msgid "content"
 msgstr "contenu"
 
@@ -505,27 +505,37 @@ msgstr "Alias"
 msgid "Aliases"
 msgstr "Alias"
 
-#: models.py:823
+#: models.py:821
+msgid "allowed css classes"
+msgstr "classes CSS autorisées"
+
+#: models.py:822
+msgid ""
+"the css classed proposed when editing a fragment. It must be separated by "
+"comas"
+msgstr "Définit les classes CSS qui sont autorisées pour ce type de fragments. Les valeurs doivent être séparées par des virgules."
+
+#: models.py:825
 msgid "Fragment type"
 msgstr "Type de fragment"
 
-#: models.py:824
+#: models.py:826
 msgid "Fragment types"
 msgstr "types de fragments"
 
-#: models.py:830
+#: models.py:832
 msgid "fragment type"
 msgstr "type de fragment"
 
-#: models.py:832
+#: models.py:834
 msgid "CSS class"
 msgstr "classe CSS"
 
-#: models.py:833
+#: models.py:835
 msgid "position"
 msgstr "position"
 
-#: models.py:837 models.py:838
+#: models.py:839 models.py:840
 msgid "Fragment"
 msgstr "Fragment"
 

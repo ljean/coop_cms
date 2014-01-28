@@ -365,7 +365,7 @@ class AddFragmentForm(forms.ModelForm):
 
     class Meta:
         model = Fragment
-        fields = ('type', 'name', 'css_class', 'position')
+        fields = ('type', 'name', 'position')
         
     def __init__(self, data=None, article=None, *args, **kwargs):
         super(AddFragmentForm, self).__init__(data, *args, **kwargs)
@@ -379,6 +379,11 @@ class EditFragmentForm(forms.ModelForm):
         widgets = {
             "type": forms.HiddenInput()
         }
+        
+    def __init__(self, *args, **kwargs):
+        super(EditFragmentForm, self).__init__(*args, **kwargs)
+        choices = [('', '')]+[(x, x) for x in self.instance.type.allowed_css_classes.split(',')]
+        self.fields['css_class'].widget = forms.Select(choices=choices)
         
     def save(self, *args, **kwargs):
         if self.cleaned_data['delete_me']:

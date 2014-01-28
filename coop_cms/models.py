@@ -817,7 +817,9 @@ class Alias(models.Model):
         return self.path
     
 class FragmentType(models.Model):
-    name = models.CharField(max_length=100, db_index=True)
+    name = models.CharField(max_length=100, db_index=True, verbose_name=_(u"name"))
+    allowed_css_classes = models.CharField(max_length=200, verbose_name=_(u"allowed css classes"), default="",
+        help_text=_(u"the css classed proposed when editing a fragment. It must be separated by comas"))
     
     class Meta:
         verbose_name = _(u'Fragment type')

@@ -8,15 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding field 'Fragment.content'
-        db.add_column(u'coop_cms_fragment', 'content',
-                      self.gf('django.db.models.fields.TextField')(default=u'', blank=True),
+        # Adding field 'FragmentType.allowed_css_classes'
+        db.add_column(u'coop_cms_fragmenttype', 'allowed_css_classes',
+                      self.gf('django.db.models.fields.CharField')(default='', max_length=200),
                       keep_default=False)
 
 
     def backwards(self, orm):
-        # Deleting field 'Fragment.content'
-        db.delete_column(u'coop_cms_fragment', 'content')
+        # Deleting field 'FragmentType.allowed_css_classes'
+        db.delete_column(u'coop_cms_fragmenttype', 'allowed_css_classes')
 
 
     models = {
@@ -64,11 +64,12 @@ class Migration(SchemaMigration):
             'css_class': ('django.db.models.fields.CharField', [], {'default': "u''", 'max_length': '100', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'db_index': 'True'}),
-            'position': ('django.db.models.fields.IntegerField', [], {}),
+            'position': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'type': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['coop_cms.FragmentType']"})
         },
         u'coop_cms.fragmenttype': {
             'Meta': {'object_name': 'FragmentType'},
+            'allowed_css_classes': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '200'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100', 'db_index': 'True'})
         },
