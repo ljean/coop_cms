@@ -1,0 +1,23 @@
+{% extends "coop_cms/base.html" %}
+{% load i18n static pagination_tags coop_edition %}
+
+{% block meta_title %}
+    {{ category.name }}
+{% endblock %}
+
+
+{% block document %}
+    {% block title %}
+        <h2 id="title">{{ category.name }}</h2>
+        Keep this for unit-testing: This comes from custom template
+    {% endblock %}
+    
+    {% autopaginate articles 10 %}
+
+    {% for item in articles %}
+        {% include "coop_cms/article_list_item.html" %}
+    {% endfor %}
+    
+    {% paginate %}
+
+{% endblock %}

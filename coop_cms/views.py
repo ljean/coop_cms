@@ -2,7 +2,7 @@
 
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext, Context, Template
+from django.template import RequestContext, Context, Template, TemplateDoesNotExist
 from django.template.loader import get_template
 from django.core.urlresolvers import reverse
 import sys, json, os.path
@@ -1028,9 +1028,23 @@ def edit_fragments(request, article_id):
 
 def articles_category(request, slug):
     category = get_object_or_404(models.ArticleCategory, slug=slug)
-    articles = get_article_class().objects.filter(category=category).order_by("-created")
+    
+    if not request.user.has_perm('can_view_category', category):
+        raise PermissionDenied()
+    
+    articles = get_article_class().objects.filter(category=category, publication=models.BaseArticle.PUBLISHED).order_by("-created")
+    
+    if articles.count()==0:
+        raise Http404
+    
+    try:
+        category_template = u"coop_cms/categories/{0}.html".format(category.slug)
+        get_template(category_template)
+    except TemplateDoesNotExist:
+        category_template = "coop_cms/articles_category.html"
+    
     return render_to_response(
-        'coop_cms/articles_category.html',
+        category_template,
         {'category': category, "articles": articles},
         context_instance=RequestContext(request)
     )

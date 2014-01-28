@@ -3629,3 +3629,104 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(f2.name, "qwerty")
         self.assertEqual(f2.css_class, "")   
         self.assertEqual(f2.position, 1)
+        
+class ArticlesByCaregoryTest(BaseTestCase):
+
+    def test_view_articles(self):
+        Article = get_article_class()
+        cat = mommy.make(ArticleCategory)
+        art = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, art.title)
+        
+    def test_view_no_articles(self):
+        Article = get_article_class()
+        cat = mommy.make(ArticleCategory)
+        
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+        
+    def test_view_no_published_articles(self):
+        Article = get_article_class()
+        cat = mommy.make(ArticleCategory)
+        art = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.DRAFT)
+        
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+    
+    def test_view_articles_publication(self):
+        Article = get_article_class()
+        cat = mommy.make(ArticleCategory)
+        art1 = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        art2 = mommy.make(Article, category=cat, title=u"QSDFGHJKLM", publication=BaseArticle.DRAFT)
+        
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, art1.title)
+        self.assertNotContains(response, art2.title)
+        
+    def test_view_articles_different_categories(self):
+        Article = get_article_class()
+        cat1 = mommy.make(ArticleCategory)
+        cat2 = mommy.make(ArticleCategory)
+        art1 = mommy.make(Article, category=cat1, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        art2 = mommy.make(Article, category=cat2, title=u"QSDFGHJKLM", publication=BaseArticle.PUBLISHED)
+        
+        url = reverse('coop_cms_articles_category', args=[cat1.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, art1.title)
+        self.assertNotContains(response, art2.title)
+        
+        
+    def test_view_articles_unknwonw_categories(self):
+        Article = get_article_class()
+        cat = mommy.make(ArticleCategory, name="abcd")
+        art = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        
+        url = reverse('coop_cms_articles_category', args=["ghjk"])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+        
+    def test_view_articles_category_template(self):
+        Article = get_article_class()
+        cat = mommy.make(ArticleCategory, name="Only for unit testing")
+        art = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        self.assertEqual(cat.slug, "only-for-unit-testing")
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, art.title)
+        self.assertContains(response, "This comes from custom template")
+        
+    def test_view_articles_category_many(self):
+        Article = get_article_class()
+        cat = mommy.make(ArticleCategory)
+        for i in range(30):
+            art = mommy.make(Article, category=cat, title=u"AZERTY-{0}-UIOP".format(i), publication=BaseArticle.PUBLISHED)
+        
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        ids = list(range(30))
+        ids.reverse()
+        for i in ids[:10]:
+            self.assertContains(response, u"AZERTY-{0}-UIOP".format(i))
+        for i in ids[10:]:
+            self.assertNotContains(response, u"AZERTY-{0}-UIOP".format(i))
+            
+        response = self.client.get(url+"?page=2")
+        self.assertEqual(response.status_code, 200)
+        for i in ids[10:20]:
+            self.assertContains(response, u"AZERTY-{0}-UIOP".format(i))
+        for i in ids[:10]:
+            self.assertNotContains(response, u"AZERTY-{0}-UIOP".format(i))
+        
+        
+        

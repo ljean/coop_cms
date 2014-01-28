@@ -279,6 +279,9 @@ class ArticleCategory(models.Model):
 
     def __unicode__(self):
         return self.name
+    
+    def can_view_category(self, user):
+        return True
 
     def get_absolute_url(self):
         return reverse('coop_cms_articles_category', args=[self.slug])
