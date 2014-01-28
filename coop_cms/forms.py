@@ -59,7 +59,7 @@ class ArticleForm(AlohaEditableModelForm):
 
     class Meta:
         model = get_article_class()
-        fields = ('title', 'content', 'logo')
+        fields = ('title', 'subtitle', 'content', 'logo')
         no_aloha_widgets = ('logo',)
 
     def set_logo_size(self, logo_size=None):

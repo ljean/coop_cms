@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
+from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
@@ -8,15 +8,15 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Deleting field 'Article.is_homepage'
-        db.delete_column(u'basic_cms_article', 'is_homepage')
+        # Adding field 'Article.subtitle'
+        db.add_column(u'basic_cms_article', 'subtitle',
+                      self.gf('django.db.models.fields.TextField')(default='', blank=True),
+                      keep_default=False)
 
 
     def backwards(self, orm):
-        # Adding field 'Article.is_homepage'
-        db.add_column(u'basic_cms_article', 'is_homepage',
-                      self.gf('django.db.models.fields.BooleanField')(default=False),
-                      keep_default=False)
+        # Deleting field 'Article.subtitle'
+        db.delete_column(u'basic_cms_article', 'subtitle')
 
 
     models = {
@@ -32,13 +32,14 @@ class Migration(SchemaMigration):
             'logo': ('django.db.models.fields.files.ImageField', [], {'default': "''", 'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'publication': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'publication_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2013, 6, 10, 0, 0)'}),
-            'sites': ('django.db.models.fields.related.ManyToManyField', [], {'default': '1', 'to': u"orm['sites.Site']", 'symmetrical': 'False'}),
+            'publication_date': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime(2014, 1, 28, 0, 0)'}),
+            'sites': ('django.db.models.fields.related.ManyToManyField', [], {'default': '[1]', 'to': u"orm['sites.Site']", 'symmetrical': 'False'}),
             'slug': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '100', 'db_index': 'True'}),
+            'subtitle': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'summary': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
             'temp_logo': ('django.db.models.fields.files.ImageField', [], {'default': "''", 'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'template': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '200', 'blank': 'True'}),
-            'title': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'}),
+            'title': ('django.db.models.fields.TextField', [], {'default': "''", 'blank': 'True'})
         },
         u'basic_cms.navtree': {
             'Meta': {'object_name': 'NavTree'},

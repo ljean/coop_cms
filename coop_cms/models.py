@@ -355,6 +355,7 @@ class BaseArticle(BaseNavigable):
     #title = HTMLField(title_cleaner, verbose_name=_(u'title'), default=_('Page title'))
     #content = HTMLField(content_cleaner, verbose_name=_(u'content'), default=_('Page content'))
     title = models.TextField(_(u'title'), default='', blank=True)
+    subtitle = models.TextField(_(u'subtitle'), default='', blank=True)
     content = models.TextField(_(u'content'), default='', blank=True)
     publication = models.IntegerField(_(u'publication'), choices=PUBLICATION_STATUS, default=PUBLISHED)
     template = models.CharField(_(u'template'), max_length=200, default='', blank=True)
