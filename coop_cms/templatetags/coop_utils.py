@@ -113,3 +113,9 @@ def is_checkbox(field):
     field = getattr(field, 'field', field) # get the field attribute of the field or the field itself
     return field.widget.__class__.__name__ == CheckboxInput().__class__.__name__
     
+@register.filter
+def index(seq, index):
+    try:
+        return seq[index]
+    except IndexError:
+        return None
