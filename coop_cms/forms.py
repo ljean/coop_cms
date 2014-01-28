@@ -385,6 +385,13 @@ class EditFragmentForm(forms.ModelForm):
         choices = [('', '')]+[(x, x) for x in self.instance.type.allowed_css_classes.split(',')]
         self.fields['css_class'].widget = forms.Select(choices=choices)
         
+    def clean_css_class(self):
+        val = self.cleaned_data['css_class']
+        if val:
+            if not val in self.instance.type.allowed_css_classes.split(','):
+                val = u""
+        return val
+        
     def save(self, *args, **kwargs):
         if self.cleaned_data['delete_me']:
             self.instance.delete()
