@@ -1,13 +1,42 @@
 {% extends "colorbox/popup_form_base.html" %}
-{% load i18n %}{% load url from future %}
+{% load i18n %}
+
 {% block title %}{% trans "Edit fragments" %}{% endblock %}
+
+{% block extra_head %}
+    <script type="text/javascript">
+    $(function() {
+        parent.$(".coop-fragment-type").each(function(idx, elt) {
+            $("select#fragment-types").append('<option value="'+$(elt).attr("rel")+'">'+$(elt).text()+'</option>');;
+        });
+        $("select#fragment-types").change(function() {
+            //$("")
+            var type_id = $(this).val();
+            $("tr").hide();
+            $("tr td.ft-id").each(function(idx, elt) {
+                if ($(elt).find("input").val() == type_id) {
+                    $(elt).closest("tr").show();
+                }
+            })
+            parent.$.colorbox.resize();
+        });
+        $("select#fragment-types").change();
+    });
+    </script>
+{% endblock %}
+
 {% block form_url %}{% url "coop_cms_edit_fragments" article.id %}{% endblock %}
+
+
 {% block form_fields %}
 <table class="popup_form">
+    <select id="fragment-types">
+        
+    </select>
     {% for f in form %}
         <tr>
         {% for field in f %}
-            <td>{{field}}{{ field.errors }}</td>
+            <td class="{% if forloop.counter0 == 0 %}ft-id{% endif %}">{{field}}{{ field.errors }}</td>
         {% endfor %}
         </tr>
     {% endfor %}

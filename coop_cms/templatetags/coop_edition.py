@@ -31,8 +31,8 @@ def coop_piece_of_html(parser, token):
 class FragmentEditNode(DjalohaMultipleEditNode):
     
     def _get_objects(self, lookup):
-        fragment_type, _x = FragmentType.objects.get_or_create(name=lookup['name'])
-        return Fragment.objects.filter(type=fragment_type)
+        self.fragment_type, _x = FragmentType.objects.get_or_create(name=lookup['name'])
+        return Fragment.objects.filter(type=self.fragment_type)
     
     def _get_object_lookup(self, obj):
         return {"id": obj.id}
@@ -41,7 +41,7 @@ class FragmentEditNode(DjalohaMultipleEditNode):
         super(FragmentEditNode, self).__init__(Fragment, lookup, 'content')
     
     def _pre_object_render(self, obj):
-        return u'<div class="coop-fragment {0}">'.format(obj.css_class)
+        return u'<div class="coop-fragment {0}" rel="{1}">'.format(obj.css_class, obj.id)
     
     def _post_object_render(self, obj):
         return u'</div>'
@@ -50,7 +50,10 @@ class FragmentEditNode(DjalohaMultipleEditNode):
         if context.get('form', None):
             context.dicts[0]['djaloha_edit'] = True
         #context.dicts[0]['can_edit_template'] = True
-        return super(FragmentEditNode, self).render(context)
+        html = super(FragmentEditNode, self).render(context)
+        pre_html = u'<div style="display: none" class="coop-fragment-type" rel="{0}">{1}</div>'.format(
+            self.fragment_type.id, self.fragment_type.name)
+        return pre_html+html
 
 @register.tag
 def coop_fragments(parser, token):
