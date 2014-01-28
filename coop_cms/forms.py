@@ -371,7 +371,7 @@ class AddFragmentForm(forms.ModelForm):
         super(AddFragmentForm, self).__init__(data, *args, **kwargs)
         
 class EditFragmentForm(forms.ModelForm):
-    delete_me = forms.BooleanField(label=(u"delete"), required=False)
+    delete_me = forms.BooleanField(label=_(u"delete"), required=False)
 
     class Meta:
         model = Fragment

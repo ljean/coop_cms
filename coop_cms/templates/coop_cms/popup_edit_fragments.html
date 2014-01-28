@@ -12,7 +12,7 @@
         $("select#fragment-types").change(function() {
             //$("")
             var type_id = $(this).val();
-            $("tr").hide();
+            $("tr.field-row").hide();
             $("tr td.ft-id").each(function(idx, elt) {
                 if ($(elt).find("input").val() == type_id) {
                     $(elt).closest("tr").show();
@@ -34,7 +34,14 @@
         
     </select>
     {% for f in form %}
+        {% if forloop.counter0 == 0 %}
         <tr>
+            {% for field in f %}
+                <th>{% if not field.is_hidden %}{{field.label}}{% endif %}</th>
+            {% endfor %}
+        </tr>
+        {% endif %}
+        <tr class="field-row">
         {% for field in f %}
             <td class="{% if forloop.counter0 == 0 %}ft-id{% endif %}">{{field}}{{ field.errors }}</td>
         {% endfor %}
