@@ -24,7 +24,11 @@ $(document).ready(function(){
 {% if edit_mode %}
 	$(".coop-bar a.slide").pageSlide({width:'350px', direction:'right'});
 	
-	
+	$("form#cms_form input[type='submit']").hide();
+    $('#coopbar_save').click(function(event) {
+        $("form#cms_form").submit();    
+        event.preventDefault();
+    });
 	
 	var toggle_save = function() {
 	    if (!$(".show-dirty").is(":visible")) {
