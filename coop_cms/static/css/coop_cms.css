@@ -26,3 +26,63 @@ img.aloha-align-right {
 img.djaloha-current-image {
 	border: solid red 1px;
 }
+
+ul.coop-cms_user-messages a.close-message{
+	text-align: right;
+	display: block;
+	color: #000;
+	background: #fff;
+}
+
+ul.coop-cms_user-messages a.close-message:hover{
+	color: #555;
+}
+
+	
+ul.coop-cms_user-messages {
+	position: absolute;
+	top: 25px;
+	left: 300px;
+	right: 300px;
+    /*margin: auto 0;*/
+    z-index: 999;
+    background: transparent;
+    border: none;
+    list-style: none;
+}
+
+ul.coop-cms_user-messages li {
+    padding: 5px;
+	border: solid 2px #000;
+    border-radius: 4px;
+	background: #eee;
+	opacity: 0.95;
+	font-weight: bold;
+}
+
+ul.coop-cms_user-messages li, ul.coop-cms_user-messages li a {
+    color: #000;
+}
+
+ul.coop-cms_user-messages li.error {
+	color: #f44;
+}
+
+ul.coop-cms_user-messages li.success {
+	color: #6c3;
+}
+
+ul.coop-cms_user-messages li.warning {
+	color: #da2;
+}
+
+ul.coop-cms_user-messages li a.close-message {
+    float: right;
+    color: #000;
+    text-decoration: none;
+}
+
+ul.coop-cms_user-messages li a.close-message:hover {
+    color: #000;
+    text-decoration: underline;
+}
