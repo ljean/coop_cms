@@ -3859,4 +3859,25 @@ class ArticlesByCaregoryTest(BaseTestCase):
             self.assertNotContains(response, u"AZERTY-{0}-UIOP".format(i))
         
         
+class CoopCategoryTemplateTagTest(BaseTestCase):
+    
+    def test_use_template(self):
+        tpl = Template('{% load coop_utils %}{% coop_category "abc" def %}!!{{def}}!!')
+        html = tpl.render(Context({}))
+        self.assertEqual(ArticleCategory.objects.count(), 1)
+        self.assertEqual(html, "!!abc!!")
         
+    def test_use_template_existing_category(self):
+        mommy.make(ArticleCategory, name="abc")
+        tpl = Template('{% load coop_utils %}{% coop_category "abc" def %}!!{{def}}!!')
+        html = tpl.render(Context({}))
+        self.assertEqual(ArticleCategory.objects.count(), 1)
+        self.assertEqual(html, "!!abc!!")
+        
+    def test_use_template_as_variable(self):
+        mommy.make(ArticleCategory, name="abc")
+        tpl = Template('{% load coop_utils %}{% coop_category cat def %}!!{{def}}!!')
+        html = tpl.render(Context({'cat': "abc"}))
+        self.assertEqual(ArticleCategory.objects.count(), 1)
+        self.assertEqual(html, "!!abc!!")
+   

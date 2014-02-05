@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 import unicodedata
 from django.conf import settings
 from floppyforms import CheckboxInput
+from coop_cms.models import ArticleCategory
 
 ################################################################################
 class ArticleLinkNode(template.Node):
@@ -119,3 +120,35 @@ def index(seq, index):
         return seq[index]
     except IndexError:
         return None
+
+################################################################################
+class CoopCategoryNode(template.Node):
+
+    def __init__(self, cat_slug, var_name):
+        cat = cat_slug.strip("'").strip('"')
+        self.cat_var, self.cat = None, None
+        if cat_slug == cat:
+            self.cat_var = template.Variable(cat)
+        else:
+            self.cat = cat
+        self.var_name = var_name
+
+    def render(self, context):
+        if self.cat_var:
+            self.cat = self.cat_var.resolve(context)
+        self.category, is_new = ArticleCategory.objects.get_or_create(slug=self.cat)
+        if is_new:
+            self.category.name = self.cat
+            self.category.save()
+        
+        context.dicts[0][self.var_name] = self.category
+        return ""
+
+@register.tag
+def coop_category(parser, token):
+    #Newsletter friendly CSS
+    args = token.split_contents()
+    cat_slug = args[1]
+    var_name = args[2]
+    return CoopCategoryNode(cat_slug, var_name)
+
