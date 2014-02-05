@@ -142,6 +142,7 @@ class CoopCategoryNode(template.Node):
             self.category.save()
         
         context.dicts[0][self.var_name] = self.category
+        
         return ""
 
 @register.tag

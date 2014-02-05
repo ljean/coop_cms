@@ -3880,4 +3880,22 @@ class CoopCategoryTemplateTagTest(BaseTestCase):
         html = tpl.render(Context({'cat': "abc"}))
         self.assertEqual(ArticleCategory.objects.count(), 1)
         self.assertEqual(html, "!!abc!!")
+        
+    def test_view_category_articles(self):
+        cat = mommy.make(ArticleCategory, name="abc")
+        art1 = mommy.make(get_article_class(), category=cat, publication=True, publication_date=datetime.now())
+        art2 = mommy.make(get_article_class(), category=cat, publication=True,
+            publication_date=datetime.now()-timedelta(1))
+        
+        self.assertEqual(list(cat.get_articles_qs().all()), [art2, art1])
+        
+
+    def test_view_category_articles_not_all_published(self):
+        cat = mommy.make(ArticleCategory, name="abc")
+        art1 = mommy.make(get_article_class(), category=cat, publication=False)
+        art2 = mommy.make(get_article_class(), category=cat, publication=True)
+        
+        
+        self.assertEqual(list(cat.get_articles_qs().all()), [art2])
+        
    

@@ -285,6 +285,10 @@ class ArticleCategory(models.Model):
 
     def get_absolute_url(self):
         return reverse('coop_cms_articles_category', args=[self.slug])
+    
+    def get_articles_qs(self):
+        return get_article_class().objects.filter(
+            category=self, publication=BaseArticle.PUBLISHED).order_by('publication_date')
 
     class Meta:
         verbose_name = _(u'article category')
@@ -378,7 +382,7 @@ class BaseArticle(BaseNavigable):
     def next_in_category(self):
         if self.category:
             try:
-                return get_article_class().objects.filter(category=self.category,
+                return get_article_class().objects.filter(category=self.category, publication=BaseArticle.PUBLISHED,
                     publication_date__gt=self.publication_date).order_by('publication_date')[0]
             except IndexError:
                 pass
