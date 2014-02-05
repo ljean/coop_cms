@@ -4,7 +4,7 @@ from coop_cms.settings import get_article_class
 from coop_cms.shortcuts import get_article
 from django import template
 register = template.Library()
-from django.template.defaultfilters import slugify
+from django.utils.text import slugify
 from coop_cms.utils import dehtml as do_dehtml
 from bs4 import BeautifulSoup
 import unicodedata
@@ -136,13 +136,12 @@ class CoopCategoryNode(template.Node):
     def render(self, context):
         if self.cat_var:
             self.cat = self.cat_var.resolve(context)
-        self.category, is_new = ArticleCategory.objects.get_or_create(slug=self.cat)
-        if is_new:
-            self.category.name = self.cat
-            self.category.save()
-        
+        try:
+            slug = slugify(self.cat)
+            self.category = ArticleCategory.objects.get(slug=slug)
+        except ArticleCategory.DoesNotExist:
+            self.category = ArticleCategory.objects.create(name=self.cat)
         context.dicts[0][self.var_name] = self.category
-        
         return ""
 
 @register.tag

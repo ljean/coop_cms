@@ -3867,6 +3867,26 @@ class CoopCategoryTemplateTagTest(BaseTestCase):
         self.assertEqual(ArticleCategory.objects.count(), 1)
         self.assertEqual(html, "!!abc!!")
         
+    def test_use_template_several_times(self):
+        tpl = Template('{% load coop_utils %}{% coop_category "joe" bar %}{% coop_category "abc" def %}!!{{def}}-{{bar}}!!')
+        html = tpl.render(Context({}))
+        self.assertEqual(ArticleCategory.objects.count(), 2)
+        self.assertEqual(html, "!!abc-joe!!")
+        
+    def test_use_template_many_calls(self):
+        tpl = Template('{% load coop_utils %}{% coop_category "abc" def %}!!{{def}}!!')
+        for i in range(10):
+            html = tpl.render(Context({}))
+        self.assertEqual(ArticleCategory.objects.count(), 1)
+        self.assertEqual(html, "!!abc!!")
+    
+    def test_use_template_many_calls_not_slug(self):
+        tpl = Template('{% load coop_utils %}{% coop_category "Ab CD" def %}!!{{def}}!!')
+        for i in range(10):
+            html = tpl.render(Context({}))
+        self.assertEqual(ArticleCategory.objects.count(), 1)
+        self.assertEqual(html, "!!Ab CD!!")
+        
     def test_use_template_existing_category(self):
         mommy.make(ArticleCategory, name="abc")
         tpl = Template('{% load coop_utils %}{% coop_category "abc" def %}!!{{def}}!!')
@@ -3877,7 +3897,7 @@ class CoopCategoryTemplateTagTest(BaseTestCase):
     def test_use_template_as_variable(self):
         mommy.make(ArticleCategory, name="abc")
         tpl = Template('{% load coop_utils %}{% coop_category cat def %}!!{{def}}!!')
-        html = tpl.render(Context({'cat': "abc"}))
+        html = tpl.render(Context({'cat': u"abc"}))
         self.assertEqual(ArticleCategory.objects.count(), 1)
         self.assertEqual(html, "!!abc!!")
         
