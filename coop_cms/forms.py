@@ -367,10 +367,11 @@ class AddFragmentForm(forms.ModelForm):
 
     class Meta:
         model = Fragment
-        fields = ('type', 'name', 'position')
+        fields = ('type', 'name', 'position', 'filter')
         
     def __init__(self, data=None, article=None, *args, **kwargs):
         super(AddFragmentForm, self).__init__(data, *args, **kwargs)
+        self.fields['filter'].widget = forms.HiddenInput()
         
 class EditFragmentForm(forms.ModelForm):
     delete_me = forms.BooleanField(label=_(u"delete"), required=False)

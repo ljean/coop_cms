@@ -95,7 +95,14 @@ admin.site.register(models.Image)
 admin.site.register(models.PieceOfHtml)
 admin.site.register(models.NewsletterSending)
 admin.site.register(models.FragmentType)
-admin.site.register(models.Fragment)
+admin.site.register(models.FragmentFilter)
+
+class FragmentAdmin(BaseAdminClass):
+    pass
+    list_display = ['name', 'position', 'type', 'filter', 'css_class']
+    list_filter = ['type', 'filter', 'css_class']
+
+admin.site.register(models.Fragment, FragmentAdmin)
 
 
 class ArticleCategoryAdmin(admin.ModelAdmin):

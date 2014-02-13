@@ -832,12 +832,23 @@ class FragmentType(models.Model):
     def __unicode__(self):
         return self.name
 
+class FragmentFilter(models.Model):
+    extra_id = models.CharField(max_length=100, db_index=True, verbose_name=_(u"extra_id"))
+    
+    class Meta:
+        verbose_name = _(u'Fragment filter')
+        verbose_name_plural = _(u'Fragment filters')
+        
+    def __unicode__(self):
+        return self.extra_id
+    
 class Fragment(models.Model):
     type = models.ForeignKey(FragmentType, verbose_name=_(u'fragment type'))
     name = models.CharField(max_length=100, db_index=True, verbose_name=_(u'name'))
     css_class = models.CharField(max_length=100, default=u"", blank=True, verbose_name=_(u'CSS class'))
     position = models.IntegerField(verbose_name=_("position"), default=0)
     content = models.TextField(default=u"", blank=True, verbose_name=_(u'content'))
+    filter = models.ForeignKey(FragmentFilter, verbose_name=_(u'fragment filter'), blank=True, null=True, default=None)
     
     class Meta:
         verbose_name = _(u'Fragment')

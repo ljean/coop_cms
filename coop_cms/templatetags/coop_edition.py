@@ -3,7 +3,7 @@
 from django import template
 register = template.Library()
 from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleEditNode
-from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType
+from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
 from django.utils.translation import ugettext_lazy as _
 from django.core.context_processors import csrf
 from django.utils.safestring import mark_safe
@@ -32,13 +32,18 @@ class FragmentEditNode(DjalohaMultipleEditNode):
     
     def _get_objects(self, lookup):
         self.fragment_type, _x = FragmentType.objects.get_or_create(name=lookup['name'])
-        return Fragment.objects.filter(type=self.fragment_type)
+        qs = Fragment.objects.filter(type=self.fragment_type)
+        if lookup.has_key('extra_id'):
+            self.fragment_filter, _x = FragmentFilter.objects.get_or_create(extra_id=lookup['extra_id'])
+            qs = qs.filter(filter=self.fragment_filter)
+        return qs
     
     def _get_object_lookup(self, obj):
         return {"id": obj.id}
 
     def __init__(self, lookup):
         super(FragmentEditNode, self).__init__(Fragment, lookup, 'content')
+        self.fragment_filter = None
     
     def _pre_object_render(self, obj):
         return u'<div class="coop-fragment {0}" rel="{1}">'.format(obj.css_class, obj.id)
@@ -50,15 +55,19 @@ class FragmentEditNode(DjalohaMultipleEditNode):
         if context.get('form', None):
             context.dicts[0]['djaloha_edit'] = True
         #context.dicts[0]['can_edit_template'] = True
+        filter_id = self.fragment_filter.id if self.fragment_filter else 0
         html = super(FragmentEditNode, self).render(context)
-        pre_html = u'<div style="display: none" class="coop-fragment-type" rel="{0}">{1}</div>'.format(
-            self.fragment_type.id, self.fragment_type.name)
+        pre_html = u'<div style="display: none" class="coop-fragment-type" rel="{0}" data-filter="{2}">{1}</div>'.format(
+            self.fragment_type.id, self.fragment_type.name, filter_id)
         return pre_html+html
 
 @register.tag
 def coop_fragments(parser, token):
-    type_name = token.split_contents()[1]
-    return FragmentEditNode({'name': type_name})
+    args = token.split_contents()
+    lookup = {'name': args[1]}
+    if len(args) > 2:
+        lookup["extra_id"] = args[2]
+    return FragmentEditNode(lookup)
 
 ################################################################################
 class ArticleSummaryEditNode(DjalohaEditNode):
