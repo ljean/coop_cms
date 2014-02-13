@@ -5,8 +5,10 @@
     $(function() {
       $(document).bind('cbox_complete', function(){
         var keep_ids = [];
+        var extra_ids = {};
         parent.$(".coop-fragment-type").each(function(idx, elt) {
             keep_ids.push($(elt).attr('rel'));
+            extra_ids[$(elt).attr('rel')] = $(elt).attr('data-filter');
         });
         $("select#id_type option").each(function(idx, elt) {
             var val = $(elt).val();
@@ -14,6 +16,10 @@
                 $(elt).remove();
             }
         });
+        $("select#id_type").change(function() {
+            $("#id_filter").val(extra_ids[$(this).val()]);
+        });
+        $("select#id_type").change();
       });
     });
     </script>

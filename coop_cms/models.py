@@ -857,7 +857,7 @@ class Fragment(models.Model):
         
     def save(self, *args, **kwargs):
         if not self.id and not self.position:
-            max_position = Fragment.objects.filter(type=self.type).aggregate(Max('position'))['position__max'] or 0
+            max_position = Fragment.objects.filter(type=self.type, filter=self.filter).aggregate(Max('position'))['position__max'] or 0
             self.position = max_position + 1
             
         return super(Fragment, self).save(*args, **kwargs)

@@ -378,9 +378,10 @@ class EditFragmentForm(forms.ModelForm):
 
     class Meta:
         model = Fragment
-        fields = ('type', 'name', 'css_class', 'position')
+        fields = ('type', 'filter', 'name', 'css_class', 'position')
         widgets = {
-            "type": forms.HiddenInput()
+            "type": forms.HiddenInput(),
+            "filter": forms.HiddenInput(),
         }
         
     def __init__(self, *args, **kwargs):

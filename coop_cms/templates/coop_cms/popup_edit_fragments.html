@@ -6,15 +6,18 @@
 {% block extra_head %}
     <script type="text/javascript">
     $(function() {
+        var extra_ids = {};
         parent.$(".coop-fragment-type").each(function(idx, elt) {
             $("select#fragment-types").append('<option value="'+$(elt).attr("rel")+'">'+$(elt).text()+'</option>');;
+            extra_ids[$(elt).attr('rel')] = $(elt).attr('data-filter');
         });
         $("select#fragment-types").change(function() {
-            //$("")
             var type_id = $(this).val();
+            var extra_id = extra_ids[type_id];
             $("tr.field-row").hide();
             $("tr td.ft-id").each(function(idx, elt) {
-                if ($(elt).find("input").val() == type_id) {
+                var ff_id = $(elt).closest("tr").find("td.ff-id input").val();
+                if ($(elt).find("input").val() == type_id && (extra_id == ff_id)) {
                     $(elt).closest("tr").show();
                 }
             })
@@ -43,7 +46,9 @@
         {% endif %}
         <tr class="field-row">
         {% for field in f %}
-            <td class="{% if forloop.counter0 == 0 %}ft-id{% endif %}">{{field}}{{ field.errors }}</td>
+            <td class="{% if forloop.counter0 == 0 %}ft-id{% endif %}{% if forloop.counter0 == 1 %}ff-id{% endif %}">
+                {{field}}{{ field.errors }}
+            </td>
         {% endfor %}
         </tr>
     {% endfor %}

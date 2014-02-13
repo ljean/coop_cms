@@ -3008,6 +3008,42 @@ class FragmentsTest(BaseTestCase):
         for idx, elt in enumerate([g1, g2, g3]):
             self.assertEqual(idx+1, elt.position)
             
+    def test_fragment_position_extra_id(self):
+        ft1 = mommy.make(FragmentType)
+        ft2 = mommy.make(FragmentType)
+        ff1 = mommy.make(FragmentFilter)
+        ff2 = mommy.make(FragmentFilter)
+        
+        f1 = mommy.make(Fragment, type=ft1, filter=ff1)
+        f2 = mommy.make(Fragment, type=ft1, filter=ff1)
+        f3 = mommy.make(Fragment, type=ft1, filter=ff1)
+        
+        f4 = mommy.make(Fragment, type=ft1, filter=ff2)
+        
+        g1 = mommy.make(Fragment, type=ft2, filter=ff1)
+        g2 = mommy.make(Fragment, type=ft2, filter=ff2)
+        g3 = mommy.make(Fragment, type=ft2, filter=ff2)
+        
+        f5 = mommy.make(Fragment, type=ft1, filter=ff1)
+        
+        f6 = mommy.make(Fragment, type=ft1)
+        f7 = mommy.make(Fragment, type=ft1)
+        
+        for idx, elt in enumerate([f1, f2, f3, f5]):
+            self.assertEqual(idx+1, elt.position)
+            
+        for idx, elt in enumerate([f4]):
+            self.assertEqual(idx+1, elt.position)
+        
+        for idx, elt in enumerate([g1]):
+            self.assertEqual(idx+1, elt.position)
+            
+        for idx, elt in enumerate([g2, g3]):
+            self.assertEqual(idx+1, elt.position)
+            
+        for idx, elt in enumerate([f6, f7]):
+            self.assertEqual(idx+1, elt.position)
+            
     def test_fragment_position_update(self):
         ft1 = mommy.make(FragmentType)
         ft2 = mommy.make(FragmentType)
@@ -3061,6 +3097,14 @@ class FragmentsTest(BaseTestCase):
         sorted_positions = positions[:]
         sorted_positions.sort()
         self.assertEqual(positions, sorted_positions)
+        
+        soup = BeautifulSoup(html)
+        ft_tags = soup.select(".coop-fragment-type")
+        self.assertEqual(len(ft_tags), 1)
+        ft_tag = ft_tags[0]
+        self.assertEqual(ft_tag['rel'], str(ft1.id))
+        self.assertEqual(ft_tag['data-filter'], str(ff1.id))
+        
         
         for f in [f3, f4]:
             self.assertTrue(html.find(f.content)<0)

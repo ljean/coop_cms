@@ -55,8 +55,8 @@ class FragmentEditNode(DjalohaMultipleEditNode):
         if context.get('form', None):
             context.dicts[0]['djaloha_edit'] = True
         #context.dicts[0]['can_edit_template'] = True
-        filter_id = self.fragment_filter.id if self.fragment_filter else 0
         html = super(FragmentEditNode, self).render(context)
+        filter_id = self.fragment_filter.id if self.fragment_filter else 0
         pre_html = u'<div style="display: none" class="coop-fragment-type" rel="{0}" data-filter="{2}">{1}</div>'.format(
             self.fragment_type.id, self.fragment_type.name, filter_id)
         return pre_html+html
