@@ -22,7 +22,7 @@ from django.core.servers.basehttp import FileWrapper
 import mimetypes, unicodedata
 from django.conf import settings
 from django.contrib import messages
-from colorbox.decorators import popup_redirect
+from colorbox.decorators import popup_redirect, popup_close
 from coop_cms.utils import send_newsletter
 from coop_cms.shortcuts import get_article_or_404, get_headlines, redirect_if_alias
 from django.utils.log import getLogger
@@ -968,25 +968,25 @@ def schedule_newsletter_sending(request, newsletter_id):
     )
 
 @login_required
-@popup_redirect
-def add_fragment(request, article_id):
+@popup_close
+def add_fragment(request):
     """add a fragment to the current template"""
-    article = get_object_or_404(get_article_class(), id=article_id)
-
-    if not request.user.has_perm('can_edit_article', article):
+    
+    ct = ContentType.objects.get_for_model(models.Fragment)
+    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+    if not request.user.has_perm(perm):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = forms.AddFragmentForm(request.POST, article=article)
+        form = forms.AddFragmentForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(article.get_edit_url())
+            return None #popup_close decorator will close and refresh
     else:
-        form = forms.AddFragmentForm(article=article)
+        form = forms.AddFragmentForm()
         
     context_dict = {
         'form': form,
-        'article': article,
     }
 
     return render_to_response(
@@ -996,12 +996,13 @@ def add_fragment(request, article_id):
     )
 
 @login_required
-@popup_redirect
-def edit_fragments(request, article_id):
+@popup_close
+def edit_fragments(request):
     """edit fragments of the current template"""
-    article = get_object_or_404(get_article_class(), id=article_id)
-
-    if not request.user.has_perm('can_edit_article', article):
+    
+    ct = ContentType.objects.get_for_model(models.Fragment)
+    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+    if not request.user.has_perm(perm):
         raise PermissionDenied
     
     EditFragmentFormset = modelformset_factory(models.Fragment, forms.EditFragmentForm, extra=0)
@@ -1010,13 +1011,12 @@ def edit_fragments(request, article_id):
         formset = EditFragmentFormset(request.POST, queryset=models.Fragment.objects.all())
         if formset.is_valid():
             formset.save()
-            return HttpResponseRedirect(article.get_edit_url())
+            return None #popup_close decorator will close and refresh
     else:
         formset = EditFragmentFormset(queryset=models.Fragment.objects.all())
     
     context_dict = {
         'form': formset,
-        'article': article,
         'title': _(u"Edit fragments of this template?"),
     }
 

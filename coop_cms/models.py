@@ -855,6 +855,21 @@ class Fragment(models.Model):
         verbose_name_plural = _(u'Fragment')
         ordering = ("position", "id")
         
+    def _can_change(self, user):
+        ct = ContentType.objects.get_for_model(get_article_class())
+        perm = '{0}.change_{1}'.format(ct.app_label, ct.model)
+        return user.has_perm(perm)
+
+    def can_add_fragment(self, user):
+        ct = ContentType.objects.get_for_model(Fragment)
+        perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+        return user.has_perm(perm)
+
+    def can_edit_fragment(self, user):
+        ct = ContentType.objects.get_for_model(Fragment)
+        perm = '{0}.change_{1}'.format(ct.app_label, ct.model)
+        return user.has_perm(perm)
+        
     def save(self, *args, **kwargs):
         if not self.id and not self.position:
             max_position = Fragment.objects.filter(type=self.type, filter=self.filter).aggregate(Max('position'))['position__max'] or 0

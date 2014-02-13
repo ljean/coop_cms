@@ -3284,15 +3284,18 @@ class FragmentsTest(BaseTestCase):
     def _log_as_editor(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
         
-        ct = ContentType.objects.get_for_model(get_article_class())
+        ct1 = ContentType.objects.get_for_model(get_article_class())
+        ct2 = ContentType.objects.get_for_model(Fragment)
         
-        perm = 'change_{0}'.format(ct.model)
-        can_edit_article = Permission.objects.get(content_type=ct, codename=perm)
-        user.user_permissions.add(can_edit_article)
-        
-        perm = 'add_{0}'.format(ct.model)
-        can_add_article = Permission.objects.get(content_type=ct, codename=perm)
-        user.user_permissions.add(can_add_article)
+        for ct in (ct1, ct2):
+            
+            perm = 'change_{0}'.format(ct.model)
+            can_edit = Permission.objects.get(content_type=ct, codename=perm)
+            user.user_permissions.add(can_edit)
+            
+            perm = 'add_{0}'.format(ct.model)
+            can_add = Permission.objects.get(content_type=ct, codename=perm)
+            user.user_permissions.add(can_add)
         
         user.save()
         return self.client.login(username='toto', password='toto')
@@ -3435,7 +3438,7 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_add_fragment", args=[article.id])
+        url = reverse("coop_cms_add_fragment")
         response = self.client.get(url)
         
         self.assertEqual(200, response.status_code)
@@ -3444,13 +3447,11 @@ class FragmentsTest(BaseTestCase):
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        url = reverse("coop_cms_add_fragment", args=[article.id])
+        url = reverse("coop_cms_add_fragment")
         response = self.client.get(url)
-        
         self.assertEqual(302, response.status_code)
         
         self._log_as_regular_user()
-        url = reverse("coop_cms_add_fragment", args=[article.id])
         response = self.client.get(url)
         self.assertEqual(403, response.status_code)
         
@@ -3460,18 +3461,15 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_add_fragment", args=[article.id])
+        url = reverse("coop_cms_add_fragment")
         response = self.client.post(url, data=data, follow=True)
-        
         self.assertEqual(200, response.status_code)
-        #self.assertEqual(article.get_edit_url(), response['Location'])
-        #print response.content
         
         soup = BeautifulSoup(response.content)
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
         
-        expected = u'<script>$.colorbox.close(); window.location="{0}";</script>'.format(article.get_edit_url())
+        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
         self.assertEqual(response.content, expected)
         
         return response        
@@ -3559,7 +3557,7 @@ class FragmentsTest(BaseTestCase):
             'position': 0,
         }
         
-        url = reverse("coop_cms_add_fragment", args=[article.id])
+        url = reverse("coop_cms_add_fragment")
         response = self.client.post(url, data=data, follow=False)
         self.assertEqual(302, response.status_code)
         next_url = "http://testserver/accounts/login/?next={0}".format(url)
@@ -3577,7 +3575,7 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.get(url)
         
         self.assertEqual(200, response.status_code)
@@ -3591,7 +3589,7 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.get(url)
         
         self.assertEqual(200, response.status_code)
@@ -3602,7 +3600,7 @@ class FragmentsTest(BaseTestCase):
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.get(url)
         
         self.assertEqual(302, response.status_code)
@@ -3642,7 +3640,7 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
         
@@ -3650,7 +3648,7 @@ class FragmentsTest(BaseTestCase):
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
         
-        expected = u'<script>$.colorbox.close(); window.location="{0}";</script>'.format(article.get_edit_url())
+        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
         self.assertEqual(response.content, expected)
         
         self.assertEqual(2, Fragment.objects.count())
@@ -3699,7 +3697,7 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
         
@@ -3707,7 +3705,7 @@ class FragmentsTest(BaseTestCase):
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
         
-        expected = u'<script>$.colorbox.close(); window.location="{0}";</script>'.format(article.get_edit_url())
+        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
         self.assertEqual(response.content, expected)
         
         self.assertEqual(2, Fragment.objects.count())
@@ -3756,7 +3754,7 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
         
@@ -3764,7 +3762,7 @@ class FragmentsTest(BaseTestCase):
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
         
-        expected = u'<script>$.colorbox.close(); window.location="{0}";</script>'.format(article.get_edit_url())
+        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
         self.assertEqual(response.content, expected)
         
         self.assertEqual(2, Fragment.objects.count())
@@ -3814,7 +3812,7 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
         
@@ -3822,7 +3820,7 @@ class FragmentsTest(BaseTestCase):
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
         
-        expected = u'<script>$.colorbox.close(); window.location="{0}";</script>'.format(article.get_edit_url())
+        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
         self.assertEqual(response.content, expected)
         
         self.assertEqual(1, Fragment.objects.count())
@@ -3865,7 +3863,7 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
         
@@ -3904,7 +3902,7 @@ class FragmentsTest(BaseTestCase):
         
         self._log_as_editor()
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
         
@@ -3942,7 +3940,7 @@ class FragmentsTest(BaseTestCase):
             'form-MAX_NUM_FORMS': 2
         }
         
-        url = reverse("coop_cms_edit_fragments", args=[article.id])
+        url = reverse("coop_cms_edit_fragments")
         response = self.client.post(url, data=data, follow=False)
         
         self.assertEqual(302, response.status_code)

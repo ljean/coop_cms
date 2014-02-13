@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from django.template.loader import get_template
 from django.template import Context
-from coop_cms.models import Link
+from coop_cms.models import Link, Fragment
 from coop_cms.settings import get_article_class, get_navtree_class
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -307,25 +307,23 @@ def test_newsletter(request, context):
 #        return make_link(url, _(u'Schedule sending'), 'fugue/alarm-clock--arrow.png',
 #            classes=['alert_on_click', 'colorbox-form', 'icon'])
 
-@can_edit_article
 def cms_add_fragment(request, context):
-    if context.get('article'):
-        obj = context.get('article')
-        
-        url = reverse("coop_cms_add_fragment", args=[obj.id])
-        
-        return make_link(url, _(u'Add fragment'), 'fugue/block--plus.png',
-                classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments'])
+    if request:
+        ct = ContentType.objects.get_for_model(Fragment)
+        perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+        if request.user.has_perm(perm):
+            url = reverse("coop_cms_add_fragment")
+            return make_link(url, _(u'Add fragment'), 'fugue/block--plus.png',
+                    classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments'])
 
-@can_edit_article
 def cms_edit_fragments(request, context):
-    if context.get('article'):
-        obj = context.get('article')
-        
-        url = reverse("coop_cms_edit_fragments", args=[obj.id])
-        
-        return make_link(url, _(u'Edit fragments'), 'fugue/block--pencil.png',
-                classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments'])
+    if request:
+        ct = ContentType.objects.get_for_model(Fragment)
+        perm = '{0}.change_{1}'.format(ct.app_label, ct.model)
+        if request.user.has_perm(perm):
+            url = reverse("coop_cms_edit_fragments")
+            return make_link(url, _(u'Edit fragments'), 'fugue/block--pencil.png',
+                    classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments'])
 
 def load_commands(coop_bar):
     
