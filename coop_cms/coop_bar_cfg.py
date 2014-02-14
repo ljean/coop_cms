@@ -329,7 +329,7 @@ def load_commands(coop_bar):
     
     coop_bar.register([
         [log_out],
-        [django_admin, django_admin_edit_article, django_admin_navtree, view_all_articles],
+        [django_admin, django_admin_edit_article, django_admin_edit_object, django_admin_navtree, view_all_articles],
         [cms_add_fragment, cms_edit_fragments],
         [cms_media_library, cms_upload_image, cms_upload_doc],
         [cms_new_newsletter, edit_newsletter, cancel_edit_newsletter, save_newsletter,
