@@ -17,8 +17,14 @@
             $("tr.field-row").hide();
             $("tr td.ft-id").each(function(idx, elt) {
                 var ff_id = $(elt).closest("tr").find("td.ff-id input").val();
-                if ($(elt).find("input").val() == type_id && (extra_id == ff_id)) {
-                    $(elt).closest("tr").show();
+                if (extra_id && extra_id!='0') {
+                    if ($(elt).find("input").val() == type_id && (extra_id == ff_id)) {
+                        $(elt).closest("tr").show();
+                    }
+                } else {
+                    if ($(elt).find("input").val() == type_id) {
+                        $(elt).closest("tr").show();
+                    }   
                 }
             })
             parent.$.colorbox.resize();
