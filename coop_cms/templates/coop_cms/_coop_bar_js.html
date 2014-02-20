@@ -34,9 +34,15 @@ $(document).ready(function(){
 	    if (!$(".show-dirty").is(":visible")) {
 			$(".show-clean").hide();
 			$(".show-dirty").show();
-			$("a.alert_on_click").bind('click', function(event) {
-				return confirm("{% trans 'Your modifications are not saved and will be lost. Continue?' %}");
-			});
+			
+			$("a.alert_on_click").each(function(idx, elt) {
+				if (!$(elt).hasClass('toogle-save-active')) {
+					$(elt).addClass('toogle-save-active');
+					$(elt).bind('click', function(event) {
+						return confirm("{% trans 'Your modifications are not saved and will be lost. Continue?' %}");
+					});
+				}
+			})
 		}
 		{% if draft %}
 		$(".publish").hide();
