@@ -8,14 +8,14 @@ from django.utils.translation import get_language
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404
 
-#def get_article_slug(*args, **kwargs):
-#    slug = reverse(*args, **kwargs)
-#    if 'localeurl' in settings.INSTALLED_APPS:
-#        #If localeurl is installed reverse is patched
-#        #We must remove the lang prefix
-#        from localeurl.utils import strip_path
-#        lang, slug = strip_path(slug)
-#    return slug.strip('/')
+def get_article_slug(*args, **kwargs):
+    slug = reverse(*args, **kwargs)
+    if 'localeurl' in settings.INSTALLED_APPS:
+        #If localeurl is installed reverse is patched
+        #We must remove the lang prefix
+        from localeurl.utils import strip_path
+        lang, slug = strip_path(slug)
+    return slug.strip('/')
 
 def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwargs):
     Article = get_article_class()
