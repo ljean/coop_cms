@@ -158,7 +158,7 @@ def cms_new_link(request, context):
 @can_add_article
 def cms_set_homepage(request, context):
     article = context.get('article', None)
-    if context.get('edit_mode') and article and (not article.is_homepage):
+    if context.get('edit_mode') and article and (not getattr(article, 'is_homepage', False)):
         url = reverse('coop_cms_set_homepage', args=[article.id])
         return make_link(url, _(u'Set homepage'), 'fugue/home--pencil.png',
             classes=['alert_on_click', 'colorbox-form', 'icon'])
@@ -205,7 +205,7 @@ def cms_edit(request, context):
 @can_publish_article
 def cms_publish(request, context):
     article = context.get('article')
-    if article:
+    if article and ('draft' in context) :
         if context['draft']:
             
             return make_link(article.get_publish_url(), _(u'Draft'), 'fugue/lock.png',
