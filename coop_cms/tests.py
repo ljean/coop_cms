@@ -27,11 +27,11 @@ from datetime import datetime, timedelta
 from django.core import management
 from django.utils import timezone
 from django.contrib.sites.models import Site
-from django.utils.unittest.case import SkipTest
 from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
 from bs4 import BeautifulSoup
 import logging
 from django.utils.translation import activate, get_language
+from unittest import skipIf
 
 class BaseTestCase(TestCase):
     def setUp(self):
@@ -46,22 +46,7 @@ def make_dt(dt):
     else:
         return dt
     
-
-class ArticleTest(BaseTestCase):
-    
-    def setUp(self):
-        super(ArticleTest, self).setUp()
-        self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
-        settings.COOP_CMS_ARTICLE_TEMPLATES = (
-            ('test/newsletter_red.html', 'Red'),
-            ('test/newsletter_blue.html', 'Blue'),
-        )
-        
-    def tearDown(self):
-        super(ArticleTest, self).tearDown()
-        #restore
-        settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
-        
+class BaseArticleTest(BaseTestCase):
     def _log_as_editor(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
         
@@ -90,6 +75,23 @@ class ArticleTest(BaseTestCase):
         user.save()
         
         return self.client.login(username='toto', password='toto')
+    
+class ArticleTest(BaseArticleTest):
+    
+    def setUp(self):
+        super(ArticleTest, self).setUp()
+        self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
+        settings.COOP_CMS_ARTICLE_TEMPLATES = (
+            ('test/newsletter_red.html', 'Red'),
+            ('test/newsletter_blue.html', 'Blue'),
+        )
+        
+    def tearDown(self):
+        super(ArticleTest, self).tearDown()
+        #restore
+        settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
+        
+    
 
     def _check_article(self, response, data):
         for (key, value) in data.items():
@@ -395,11 +397,11 @@ class ArticleTest(BaseTestCase):
     def test_new_article_navigation_leaf(self):
         initial_data = {'title': "test", 'content': "this is my article content"}
         Article = get_article_class()
-        art1 = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+        art1 = Article.objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         
         tree = get_navtree_class().objects.create()
         ct = ContentType.objects.get_for_model(Article)
-        node1 = NavNode.objects.create(content_type=ct, object_id=art1.id, tree=tree)
+        node1 = NavNode.objects.create(content_type=ct, object_id=art1.id, tree=tree, parent=None)
         
         self._log_as_editor()
         data = {
@@ -411,7 +413,6 @@ class ArticleTest(BaseTestCase):
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        
         self.assertEqual(Article.objects.exclude(id=art1.id).count(), 1)
         art2 = Article.objects.exclude(id=art1.id)[0]
         
@@ -1648,10 +1649,8 @@ class DownloadDocTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, self._get_file().read())
         
-    
+    @skipIf('sanza.Profile' in settings.INSTALLED_APPS, "sanza.Profile installed")
     def test_download_private(self):
-        if 'sanza.Profile' in settings.INSTALLED_APPS:
-            raise SkipTest()
             
         #create a public doc
         file = File(self._get_file())
@@ -2451,10 +2450,8 @@ class HomepageTest(UserBaseTestCase):
         
 class UrlLocalizationTest(BaseTestCase):
     
+    @skipIf(not is_localized() and len(settings.LANGUAGES)<2, "not localized")
     def test_get_locale_article(self):
-        
-        if not is_localized() and len(settings.LANGUAGES)<2:
-            raise SkipTest()
         
         original_text = '*!-+' * 10
         translated_text = ':%@/' * 9
@@ -2476,10 +2473,8 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, translated_text)
 
+    @skipIf(not is_localized(), "not localized")
     def test_change_lang(self):
-        
-        if not is_localized() and len(settings.LANGUAGES)<2:
-            raise SkipTest()
         
         original_text = '*!-+' * 10
         translated_text = ':%@/' * 9
@@ -2509,11 +2504,9 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, translated_text)
             
+    @skipIf(not is_localized(), "not localized")
     def test_change_lang_no_trans(self):
         
-        if not is_localized() and len(settings.LANGUAGES)<2:
-            raise SkipTest()
-            
         original_text = '*!-+' * 10
         
         a1 = get_article_class().objects.create(title="Home", content=original_text)
@@ -2545,9 +2538,8 @@ class UrlLocalizationTest(BaseTestCase):
         a1 = Article.objects.get(id=a1.id)
         self.assertEqual(original_slug, a1.slug)
         
+    @skipIf(not is_localized(), "not localized")
     def test_keep_localized_slug(self):
-        if not is_localized() and len(settings.LANGUAGES)<2:
-            raise SkipTest()
         
         Article = get_article_class()
         a1 = Article.objects.create(title=u"Home", content="aa")
@@ -2578,10 +2570,8 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertFalse(True) #Force to fail
         
+    @skipIf(not is_localized(), "not localized")
     def test_create_article_in_additional_lang(self):
-        
-        if not is_localized() and len(settings.LANGUAGES)<2:
-            raise SkipTest()
         
         Article = get_article_class()
         
@@ -2633,9 +2623,8 @@ class ArticleTemplateTagsTest(BaseTestCase):
         a = Article.objects.all()[0]
         self.assertEqual(a.slug, "test")
         
+    @skipIf(len(settings.LANGUAGES)==0, "not languages")
     def test_article_link_language(self):
-        if len(settings.LANGUAGES)==0:
-            raise SkipTest()
         
         lang = settings.LANGUAGES[0][0]
         
@@ -2647,9 +2636,8 @@ class ArticleTemplateTagsTest(BaseTestCase):
         a = Article.objects.all()[0]
         self.assertEqual(a.slug, "test")
             
+    @skipIf(not is_localized() and len(settings.LANGUAGES)<2, "not localized")
     def test_article_link_force_language(self):
-        if not is_localized() and len(settings.LANGUAGES)<2:
-            raise SkipTest()
         
         lang = settings.LANGUAGES[0][0]
         
@@ -2663,9 +2651,8 @@ class ArticleTemplateTagsTest(BaseTestCase):
         a = Article.objects.all()[0]
         self.assertEqual(a.slug, "test")
             
+    @skipIf(not is_localized() and len(settings.LANGUAGES)<2, "not localized")
     def test_article_existing_link_force_language(self):
-        if not is_localized() and len(settings.LANGUAGES)<2:
-            raise SkipTest()
         
         Article = get_article_class()
         
@@ -2687,9 +2674,8 @@ class ArticleTemplateTagsTest(BaseTestCase):
         self.assertEqual(a.slug, "test")
         self.assertEqual(getattr(article, "slug_"+lang), "test_"+lang)
             
+    @skipIf(not is_localized() and len(settings.LANGUAGES)<2, "not localized")
     def test_article_existing_link_force_default_language(self):
-        if not is_localized() and len(settings.LANGUAGES)<2:
-            raise SkipTest()
         
         Article = get_article_class()
         
@@ -2924,9 +2910,8 @@ class ArticleSlugTestCase(BaseTestCase):
         response = self.client.get(article1.get_absolute_url())
         self.assertEqual(200, response.status_code)
         
+    @skipIf(not is_localized(), "not localized")
     def test_create_lang(self):
-        if not is_localized():
-            raise SkipTest()
         
         Article = get_article_class()
         a1 = Article.objects.create(title="Titre de l'article")
@@ -3337,12 +3322,14 @@ class FragmentsTest(BaseTestCase):
         
     def test_view_article_with_fragments(self):
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
         ft = mommy.make(FragmentType, name="parts")
         f1 = mommy.make(Fragment, type=ft, content="Azertyuiop")
         
         response = self.client.get(article.get_absolute_url())
+        
         self.assertEqual(200, response.status_code)
         self.assertContains(response, f1.content)
         
@@ -4141,3 +4128,61 @@ class CoopCategoryTemplateTagTest(BaseTestCase):
         self.assertEqual(list(cat.get_articles_qs().all()), [art2])
         
    
+class BlockInheritanceTest(BaseArticleTest):
+    
+    def setUp(self):
+        super(BlockInheritanceTest, self).setUp()
+        self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
+        settings.COOP_CMS_ARTICLE_TEMPLATES = (
+            ('test/article_with_blocks.html', 'Article with blocks'),
+        )
+        
+    def tearDown(self):
+        super(BlockInheritanceTest, self).tearDown()
+        #restore
+        settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
+
+    def test_view_with_blocks(self):
+        Article = get_article_class()
+        a = mommy.make(Article,
+            title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+            template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0])
+        
+        response = self.client.get(a.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertContains(response, a.title)
+        self.assertContains(response, a.content)
+        
+        self.assertContains(response, "*** HELLO FROM CHILD ***")
+        self.assertContains(response, "*** HELLO FROM PARENT ***")
+        self.assertContains(response, "*** HELLO FROM BLOCK ***")
+        
+    def test_edit_with_blocks(self):
+        Article = get_article_class()
+        a = mommy.make(Article,
+            title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+            template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0])
+        
+        self._log_as_editor()
+        
+        data = {
+            "title": u"This is a new title", 
+            'content': "<p>This is a <i>*** NEW ***</i> <b>content</b></p>"
+        }
+        response = self.client.post(a.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        a = Article.objects.get(id=a.id)
+        
+        self.assertEqual(a.title, data['title'])
+        self.assertEqual(a.content, data['content'])
+        
+        self.assertContains(response, a.title)
+        self.assertContains(response, a.content)
+        
+        self.assertContains(response, "*** HELLO FROM CHILD ***")
+        self.assertContains(response, "*** HELLO FROM PARENT ***")
+        self.assertContains(response, "*** HELLO FROM BLOCK ***")
+
+        

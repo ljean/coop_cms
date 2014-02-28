@@ -1,0 +1,19 @@
+{% extends "coop_cms/article.html" %}
+{% load coop_edition coop_utils i18n %}
+
+{% block article %}
+{% cms_edit article %}
+
+{% block article_data %}
+{% endblock %}
+
+{% end_cms_edit %}
+
+{% if_cms_edition %} {% include "coop_cms/_article_publication.html" %} {% endif %}
+
+{% block other_data %}
+    *** HELLO FROM PARENT ***
+{% endblock %}
+
+{% endblock %}
+

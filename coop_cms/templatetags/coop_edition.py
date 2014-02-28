@@ -268,7 +268,9 @@ class CmsEditNode(template.Node):
             if any([isinstance(node, node_type) for  node_type in managed_node_types]):
                 c = node.render(template.Context(safe_context))
             elif isinstance(node, template.loader_tags.BlockNode):
-                c = node.render(context)
+                sf = template.Context(safe_context)
+                sf.render_context['block_context'] = context.render_context.get('block_context', None)
+                c = node.render(sf)
             elif isinstance(node, template.VariableNode):
                 if node.filter_expression.filters:
                     c = node.render(context)

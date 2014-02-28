@@ -1,0 +1,25 @@
+{% extends "test/article_with_blocks_parent.html" %}
+{% load i18n %}
+
+{% block article_data %}
+
+<div class="article-content">
+<div class="row">
+    <div class="col-md-12">
+    {{ article.title }}
+    </div>
+</div>    
+
+<div class="row">
+    <div class="col-md-9">
+    {{ article.content }}
+    </div>
+</div>
+</div>
+*** HELLO FROM BLOCK ***
+{% endblock %}
+
+{% block other_data %}
+    {{ block.super }}
+    *** HELLO FROM CHILD ***
+{% endblock %}
