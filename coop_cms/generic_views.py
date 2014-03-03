@@ -84,7 +84,7 @@ class EditableObjectView(View):
         
         if not self.can_view_object():
             logger.error("PermissionDenied")
-            error_message(request, _(u'Permission denied'))
+            #error_message(request, _(u'Permission denied'))
             raise PermissionDenied
         
         self.form = self.form_class(instance=self.object)
