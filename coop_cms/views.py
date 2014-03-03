@@ -274,7 +274,7 @@ def show_media(request, media_type):
                 'html': html,
                 'media_type': media_type,
             }
-            return HttpResponse(json.dumps(data), mimetype="application/json")
+            return HttpResponse(json.dumps(data), content_type="application/json")
         else:
             return HttpResponse(html)
     except Exception:
@@ -473,12 +473,12 @@ def update_logo(request, article_id):
                 article.save()
                 url = article.logo_thumbnail(True).url
                 data = {'ok': True, 'src': url}
-                return HttpResponse(json.dumps(data), mimetype='application/json')
+                return HttpResponse(json.dumps(data), content_type='application/json')
             else:
                 t = get_template('coop_cms/popup_update_logo.html')
                 html = t.render(Context(locals()))
                 data = {'ok': False, 'html': html}
-                return HttpResponse(json.dumps(data), mimetype='application/json')
+                return HttpResponse(json.dumps(data), content_type='application/json')
         else:
             form = forms.ArticleLogoForm()
     
@@ -510,7 +510,7 @@ def download_doc(request, doc_id):
         mime_type = mimetypes.guess_type(file.name)[0]
         if not mime_type:
             mime_type = u'application/octet-stream'
-        response = HttpResponse(wrapper, mimetype=mime_type)
+        response = HttpResponse(wrapper, content_type=mime_type)
         response['Content-Length'] = file.size
         filename = unicodedata.normalize('NFKD', os.path.split(file.name)[1]).encode("utf8", 'ignore')
         filename = filename.replace(' ', '-')
@@ -830,7 +830,7 @@ def process_nav_edition(request, tree_id):
         #     response = {'status': 'error', 'message': u"An error occured"}
 
         #return the result as json object
-        return HttpResponse(json.dumps(response), mimetype='application/json')
+        return HttpResponse(json.dumps(response), content_type='application/json')
     raise Http404
 
 
