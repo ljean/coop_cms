@@ -379,6 +379,9 @@ class BaseArticle(BaseNavigable):
             return self.homepage_for_site.id == settings.SITE_ID
         return False
     
+    def is_draft(self):
+        return self.publication == BaseArticle.DRAFT
+    
     def next_in_category(self):
         if self.category:
             try:

@@ -9,6 +9,8 @@ from django.core.exceptions import ValidationError
 from coop_cms.apps.rss_sync.models import RssItem, RssSource
 from coop_cms.models import BaseArticle
 from django.contrib.contenttypes.models import ContentType
+from django.conf import settings
+from unittest import skipUnless
 
 class BaseTestCase(TestCase):
     def setUp(self):
@@ -49,6 +51,7 @@ class BaseTestCase(TestCase):
         
         self.client.login(username='titi', password='titi')
 
+@skipUnless('coop_cms.apps.rss_sync' in settings.INSTALLED_APPS, "rss_sync not installed installed")
 class RssTest(BaseTestCase):
 
     def _do_test_creatitem_from_source(self, url):
@@ -120,6 +123,7 @@ class RssTest(BaseTestCase):
         self.assertTrue(RssItem.objects.count() == 0)
                              
 
+@skipUnless('coop_cms.apps.rss_sync' in settings.INSTALLED_APPS, "rss_sync not installed installed")
 class CreateArticleTest(BaseTestCase):
     def test_create_article_from_rssitem(self):
         source = RssSource.objects.create(url='http://www.apidev.fr/blog/rss/')
