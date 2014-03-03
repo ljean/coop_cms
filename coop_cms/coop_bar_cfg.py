@@ -220,7 +220,7 @@ def cms_extra_js(request, context):
     return t.render(context)
     
 def log_out(request, context):
-    if request and request.user.is_authenticated():
+    if request and request.user.is_authenticated() and request.user.is_staff:
         return make_link(reverse("django.contrib.auth.views.logout"), _(u'Log out'), 'fugue/control-power.png',
             classes=['alert_on_click', 'icon'])
 
