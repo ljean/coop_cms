@@ -11,6 +11,7 @@ import unicodedata
 from django.conf import settings
 from floppyforms import CheckboxInput
 from coop_cms.models import ArticleCategory
+import os.path
 
 ################################################################################
 class ArticleLinkNode(template.Node):
@@ -152,3 +153,7 @@ def coop_category(parser, token):
     var_name = args[2]
     return CoopCategoryNode(cat_slug, var_name)
 
+
+@register.filter
+def basename(fullname):
+    return os.path.basename(fullname)
