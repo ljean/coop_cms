@@ -146,6 +146,9 @@ class NavNode(models.Model):
 
     def has_children(self):
         return self.get_children(True).count()
+    
+    def get_children_navigation(self):
+        return self.get_children(True)
 
     def get_siblings(self, in_navigation=None):
         nodes = NavNode.objects.filter(parent=self.parent).order_by("ordering")
@@ -198,8 +201,12 @@ class NavNode(models.Model):
             return t.render(Context({'node': self}))
         else:
             return u''
+        
+    #def render(self, template_name):
+    #    t = get_template(template_name)
+    #    return t.render(Context({'node': self}))
 
-    def as_navigation(self, li_template=None, css_class="", ul_template=None, li_args=None):
+    def as_navigation(self, li_template=None, css_class="", ul_template=None, li_args=None, active_class="active-node"):
         #Display the node and his children as nested ul and li html tags.
         #li_template is a custom template that can be passed
 
@@ -213,20 +220,20 @@ class NavNode(models.Model):
         if args:
             css_class = " "+args
         if self.is_active_node():
-            css_class += ' class="active-node"'
-        return u'<li{0}>{1}{2}</li>'.format(css_class, self._get_li_content(li_template), children_html)
+            css_class += (" "+active_class)
+        return u'<li class="{0}">{1}{2}</li>'.format(css_class, self._get_li_content(li_template), children_html)
 
     def as_breadcrumb(self, li_template=None, css_class=""):
         html = self.parent.as_breadcrumb(li_template) if self.parent else u""
-        return html + u'<li{0}>{1}</li>'.format(css_class, self._get_li_content(li_template))
+        return html + u'<li class="{0}">{1}</li>'.format(css_class, self._get_li_content(li_template))
 
     def children_as_navigation(self, li_template=None, css_class=""):
-        children_li = [u'<li{0}>{1}</li>'.format(css_class, child._get_li_content(li_template))
+        children_li = [u'<li class="{0}">{1}</li>'.format(css_class, child._get_li_content(li_template))
             for child in self.get_children(in_navigation=True)]
         return  u''.join(children_li)
 
     def siblings_as_navigation(self, li_template=None, css_class=""):
-        siblings_li = [u'<li{0}>{1}</li>'.format(css_class, sibling._get_li_content(li_template))
+        siblings_li = [u'<li class="{0}">{1}</li>'.format(css_class, sibling._get_li_content(li_template))
             for sibling in self.get_siblings(in_navigation=True)]
         return  u''.join(siblings_li)
 

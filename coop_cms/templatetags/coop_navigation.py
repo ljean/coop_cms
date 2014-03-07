@@ -10,7 +10,7 @@ from coop_cms.settings import get_navtree_class
 from django.contrib.contenttypes.models import ContentType
 register = template.Library()
 from django.template import VariableDoesNotExist
-
+from django.template import Context
 
 def extract_kwargs(args):
     kwargs = {}
@@ -30,8 +30,8 @@ class NavigationTemplateNode(template.Node):
         for (k, v) in kwargs.items():
             self._kwargs[k] = template.Variable(v)
 
-    def format_css_class(self, class_name):
-        return u' class="{0}"'.format(class_name) if class_name else u""
+    #def format_css_class(self, class_name):
+    #    return u' class="{0}"'.format(class_name) if class_name else u""
 
     def resolve_kwargs(self, context):
         kwargs = {}
@@ -41,8 +41,8 @@ class NavigationTemplateNode(template.Node):
             except VariableDoesNotExist:
                 kwargs[k] = v.var  # if the variable can not be resolved, thake the value as is
 
-            if k == 'css_class':
-                kwargs[k] = self.format_css_class(v)
+            #if k == 'css_class':
+            #    kwargs[k] = self.format_css_class(v)
 
         if not 'tree' in kwargs:
             kwargs['tree'] = 'default'
@@ -56,7 +56,6 @@ class NavigationTemplateNode(template.Node):
         return kwargs
 
 #----------------------------------------------------------
-
 
 class NavigationAsNestedUlNode(NavigationTemplateNode):
 
@@ -77,7 +76,6 @@ def navigation_as_nested_ul(parser, token):
     return NavigationAsNestedUlNode(**kwargs)
 
 #----------------------------------------------------------
-
 
 class NavigationBreadcrumbNode(NavigationTemplateNode):
     def __init__(self, object, **kwargs):
@@ -103,6 +101,7 @@ def navigation_breadcrumb(parser, token):
         raise template.TemplateSyntaxError(_("navigation_breadcrumb requires object as argument"))
     return NavigationBreadcrumbNode(args[1], **kwargs)
 
+#----------------------------------------------------------
 
 class NavigationChildrenNode(NavigationTemplateNode):
 
@@ -120,7 +119,6 @@ class NavigationChildrenNode(NavigationTemplateNode):
             return nav_nodes[0].children_as_navigation(**kwargs)
         return u''
 
-
 @register.tag
 def navigation_children(parser, token):
     args = token.contents.split()
@@ -129,6 +127,7 @@ def navigation_children(parser, token):
         raise template.TemplateSyntaxError(_("navigation_children requires object as argument and optionally tree={{tree_name}}"))
     return NavigationChildrenNode(args[1], **kwargs)
 
+#----------------------------------------------------------
 
 class NavigationSiblingsNode(NavigationTemplateNode):
 
@@ -154,3 +153,28 @@ def navigation_siblings(parser, token):
     if len(args) < 2:
         raise template.TemplateSyntaxError(_("navigation_siblings requires object as argument"))
     return NavigationSiblingsNode(args[1], **kwargs)
+
+#----------------------------------------------------------
+DEFAULT_NAVROOT_TEMPLATE = 'coop_cms/navigation_node.html'
+@register.filter
+def render_template_node(node, template_name=""):
+    t = get_template(template_name or DEFAULT_NAVROOT_TEMPLATE)
+    return t.render(Context({'node': node}))
+
+class NavigationRootNode(NavigationTemplateNode):
+
+    #def __init__(self, **kwargs):
+    #    super(NavigationTreeNode, self).__init__(**kwargs)
+
+    def render(self, context):
+        kwargs = self.resolve_kwargs(context)
+        tree_name = kwargs.pop('tree', 'default')
+        template_name = kwargs.pop('template_name', DEFAULT_NAVROOT_TEMPLATE)
+        root_nodes = NavNode.objects.filter(tree__name=tree_name, parent__isnull=True, in_navigation=True).order_by("ordering")
+        return u''.join([render_template_node(node, template_name) for node in root_nodes])
+
+@register.tag
+def navigation_root_nodes(parser, token):
+    args = token.contents.split()
+    kwargs = extract_kwargs(args)
+    return NavigationRootNode(**kwargs)
