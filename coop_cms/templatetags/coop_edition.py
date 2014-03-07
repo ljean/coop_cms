@@ -233,7 +233,7 @@ class CmsEditNode(template.Node):
         request = context.get('request')
         
         form = context.get('form', None)
-        obj = context.get(self.var_name, None)
+        obj = context.get(self.var_name, None) if self.var_name else None
         
         formset = context.get('formset', None)
         objects = context.get('objects', None)
@@ -247,14 +247,15 @@ class CmsEditNode(template.Node):
         self.post_url = obj.get_edit_url() if obj else context.get('coop_cms_edit_url')
         outer_context = {'post_url': self.post_url}
 
-        inner_context[self.var_name] = obj
+        if self.var_name:
+            inner_context[self.var_name] = obj
         if formset:
             inner_context['formset'] = formset
         if objects:
             inner_context['objects'] = objects
 
         safe_context = inner_context.copy()
-        inner_context[self.var_name] = obj
+        #inner_context[self.var_name] = obj
         inner_value = u""
 
         if form or formset:
@@ -273,7 +274,7 @@ class CmsEditNode(template.Node):
                 safe_context['objects'] = [SafeWrapper(o, logo_size=self._logo_size) for o in objects]
                 
         managed_node_types = [
-            template.TextNode, template.defaulttags.IfNode,
+            template.TextNode, template.defaulttags.IfNode, template.defaulttags.ForNode,
             IfCmsEditionNode, IfNotCmsEditionNode,
         ]
                 
@@ -300,7 +301,7 @@ class CmsEditNode(template.Node):
 def cms_edit(parser, token):
     args = token.split_contents()[1:]
     data = {}
-    var_name = args[0]
+    var_name = args[0] if len(args) else ''
     for arg in args[1:]:
         k, v = arg.split('=')
         data[k] = v
