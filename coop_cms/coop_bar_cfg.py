@@ -177,6 +177,14 @@ def cms_save(request, context):
         #No link, will be managed by catching the js click event
         return make_link('', _(u'Save'), 'fugue/disk-black.png', id="coopbar_save",
             classes=['icon'])
+    
+def cms_save2(request, context):
+    if request and request.user.is_staff:
+        url = context.get('coop_cms_edit_url', None)
+        if url and context.get('edit_mode'):
+            #No link, will be managed by catching the js click event
+            return make_link('', _(u'Save'), 'fugue/disk-black.png', id="coopbar_save",
+                classes=['icon'])
 
 #@can_edit_article
 #def cms_view(request, context):
@@ -193,14 +201,31 @@ def cms_cancel(request, context):
             next_url = getattr(object, 'get_cancel_url', object.get_absolute_url)()
             return make_link(next_url, _(u'Cancel'), 'fugue/cross.png',
                 classes=['alert_on_click', 'icon'])
-
+        
+def cms_cancel2(request, context):
+    if request and request.user.is_staff:
+        url = context.get('coop_cms_cancel_url', None)
+        if url and context.get('edit_mode'):
+            return make_link(url, _(u'Cancel'), 'fugue/cross.png',
+                classes=['alert_on_click', 'icon'])
+        
 @can_edit_object
 def cms_edit(request, context):
     if not context.get('edit_mode'):
         object = context.get('article', None) or context.get('object', None)
         if object:
-            return make_link(object.get_edit_url(), _(u'Edit'), 'fugue/document--pencil.png',
+            url = object.get_edit_url()
+        else:
+            context.get('coop_cms_edit_url', None)
+        if url:
+            return make_link(url, _(u'Edit'), 'fugue/document--pencil.png',
                 classes=['icon'])
+        
+def cms_edit2(request, context):
+    if request and request.user.is_staff:
+        url = context.get('coop_cms_edit_url', None)
+        if url and not context.get('edit_mode'):
+            return make_link(url, _(u'Edit'), 'fugue/document--pencil.png', classes=['icon'])
 
 @can_publish_article
 def cms_publish(request, context):
@@ -335,7 +360,7 @@ def load_commands(coop_bar):
         [cms_new_newsletter, edit_newsletter, cancel_edit_newsletter, save_newsletter,
             change_newsletter_settings, newsletter_admin, newsletter_articles, 
             test_newsletter],
-        [cms_edit, cms_save, cms_cancel],
+        [cms_edit, cms_save, cms_cancel, cms_edit2],
         [cms_new_article, cms_new_link, cms_article_settings, cms_set_homepage],
         [cms_publish],
     ])

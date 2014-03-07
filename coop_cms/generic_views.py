@@ -2,6 +2,7 @@
 
 from django.views.generic.list import ListView as DjangoListView
 from django.views.generic.base import View
+from django.views.generic import TemplateView
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from djaloha import utils as djaloha_utils
@@ -10,6 +11,7 @@ from django.contrib.messages.api import error as error_message
 from django.utils.translation import ugettext as _
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.core.exceptions import ValidationError, PermissionDenied
+from django.forms.models import modelformset_factory
 import logging
 logger = logging.getLogger("coop_cms")
 
@@ -133,3 +135,93 @@ class EditableObjectView(View):
             context_instance=RequestContext(request)
         )
 
+class EditableFormsetView(TemplateView):
+    template_name = ""
+    model = None
+    form_class = None
+    extra = 1
+    edit_mode = False
+    success_url = "/"
+    
+    def can_edit_objects(self):
+        return self.request.user.is_authenticated() and self.request.user.is_staff
+    
+    def get_context_data(self):
+        context = {
+            'edit_mode': self.edit_mode,
+            'coop_cms_edit_url': self.get_edit_url(),
+            'coop_cms_cancel_url': self.get_cancel_url(),
+            'objects': self.get_queryset(),
+        }
+        if self.edit_mode:
+            context['formset'] = self.formset
+        return context
+        
+    def get_form_class(self):
+        return self.form_class
+    
+    def get_queryset(self):
+        return self.model.objects.all()
+    
+    def get_template(self):
+        return self.template_name
+    
+    def get_cancel_url(self):
+        return self.get_success_url()
+    
+    def get_edit_url(self):
+        return ''
+        
+    def get_success_url(self):
+        return self.success_url
+    
+    def get_formset(self):
+        return modelformset_factory(self.model, self.get_form_class(), extra=self.extra)
+    
+    def get(self, request, *args, **kwargs):
+        Formset = self.get_formset()
+        self.formset = Formset(queryset=self.get_queryset())
+        
+        return render_to_response(
+            self.get_template(),
+            self.get_context_data(),
+            context_instance=RequestContext(request)
+        )
+    
+    def _pre_save_object(self, form):
+        return True
+    
+    def post(self, request, *args, **kwargs):
+        Formset = self.get_formset()
+        
+        if not self.can_edit_objects():
+            raise PermissionDenied
+        
+        self.formset = Formset(request.POST, request.FILES, queryset=self.get_queryset())
+        
+        forms_args = djaloha_utils.extract_forms_args(request.POST)
+        djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)
+
+        if self.formset.is_valid() and all([f.is_valid() for f in djaloha_forms]):
+            for form in self.formset:
+                if self._pre_save_object(form):
+                    form.save()
+            
+            if djaloha_forms:
+                [f.save() for f in djaloha_forms]
+            
+            success_message(request, _(u'The objects have been saved properly'))
+
+            url = self.get_success_url()
+            return HttpResponseRedirect(url)
+        else:
+            for f in self.formset:
+                errors = f.errors
+                if errors:
+                    logger.error(error)
+        
+        return render_to_response(
+            self.get_template(),
+            self.get_context_data(),
+            context_instance=RequestContext(request)
+        )

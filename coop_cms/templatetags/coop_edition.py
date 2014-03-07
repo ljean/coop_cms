@@ -16,7 +16,7 @@ logger = logging.getLogger("coop_cms")
 ################################################################################
 class PieceOfHtmlEditNode(DjalohaEditNode):
     def render(self, context):
-        if context.get('form', None):
+        if context.get('form', None) or context.get('formset', None):
             context.dicts[0]['djaloha_edit'] = True
         #context.dicts[0]['can_edit_template'] = True
         return super(PieceOfHtmlEditNode, self).render(context)
@@ -52,7 +52,7 @@ class FragmentEditNode(DjalohaMultipleEditNode):
         return u'</div>'
     
     def render(self, context):
-        if context.get('form', None):
+        if context.get('form', None) or context.get('formset', None):
             context.dicts[0]['djaloha_edit'] = True
         #context.dicts[0]['can_edit_template'] = True
         html = super(FragmentEditNode, self).render(context)
@@ -106,15 +106,15 @@ class CmsFormMediaNode(template.Node):
 
     def render(self, context):
         form = context.get('form', None)
-        if form:
+        formset = context.get('formset', None)
+        if form or formset:
             t = template.Template("{{form.media}}")
-            html = t.render(template.Context({'form': form}))
+            html = t.render(template.Context({'form': form or formset}))
             #django 1.5 fix : " are escaped as &quot; and cause script tag 
             #for aloha to be broken
             return html.replace("&quot;", '"') 
         else:
             return ""
-
 
 @register.tag
 def cms_form_media(parser, token):
@@ -145,7 +145,7 @@ class IfCmsEditionNode(template.Node):
             yield node
 
     def _check_condition(self, context):
-        return context.get('form', None)
+        return context.get('form', None) or context.get('formset', None)
 
     def render(self, context):
         if self._check_condition(context):
@@ -203,9 +203,9 @@ class SafeWrapper:
 
 class FormWrapper:
 
-    def __init__(self, form, the_object, logo_size=None):
+    def __init__(self, form, obj, logo_size=None):
         self._form = form
-        self._obj = the_object
+        self._obj = obj
         if logo_size:
             self._form.set_logo_size(logo_size)
 
@@ -230,9 +230,13 @@ class CmsEditNode(template.Node):
             yield node
 
     def render(self, context):
-        form = context.get('form', None)
         request = context.get('request')
-        the_object = context.get(self.var_name)
+        
+        form = context.get('form', None)
+        obj = context.get(self.var_name, None)
+        
+        formset = context.get('formset', None)
+        objects = context.get('objects', None)
 
         #the context used for rendering the templatetag content
         inner_context = {}
@@ -240,23 +244,33 @@ class CmsEditNode(template.Node):
             inner_context.update(x)
 
         #the context used for rendering the whole page
-        self.post_url = the_object.get_edit_url()
+        self.post_url = obj.get_edit_url() if obj else context.get('coop_cms_edit_url')
         outer_context = {'post_url': self.post_url}
 
-        inner_context[self.var_name] = the_object
+        inner_context[self.var_name] = obj
+        if formset:
+            inner_context['formset'] = formset
+        if objects:
+            inner_context['objects'] = objects
 
         safe_context = inner_context.copy()
-        inner_context[self.var_name] = the_object
+        inner_context[self.var_name] = obj
         inner_value = u""
 
-        if form:
+        if form or formset:
             t = template.Template(CMS_FORM_TEMPLATE)
-            safe_context[self.var_name] = FormWrapper(form, the_object, logo_size=self._logo_size)
+            if form:
+                safe_context[self.var_name] = FormWrapper(form, obj, logo_size=self._logo_size)
+            else:
+                safe_context['objects'] = [FormWrapper(f, o, logo_size=self._logo_size) for (f, o) in zip(formset, objects)]
             outer_context.update(csrf(request))
             #outer_context['inner'] = self.nodelist_content.render(template.Context(inner_context))
         else:
             t = template.Template("{{inner|safe}}")
-            safe_context[self.var_name] = SafeWrapper(the_object, logo_size=self._logo_size)
+            if obj:
+                safe_context[self.var_name] = SafeWrapper(obj, logo_size=self._logo_size)
+            else:
+                safe_context['objects'] = [SafeWrapper(o, logo_size=self._logo_size) for o in objects]
                 
         managed_node_types = [
             template.TextNode, template.defaulttags.IfNode,
@@ -279,7 +293,7 @@ class CmsEditNode(template.Node):
             else:
                 c = node.render(template.Context(inner_context))
             inner_value += c
-        outer_context['inner'] = mark_safe(inner_value) if form else inner_value
+        outer_context['inner'] = mark_safe(inner_value) if (form or formset) else inner_value
         return t.render(template.Context(outer_context))
 
 @register.tag
