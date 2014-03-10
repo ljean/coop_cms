@@ -12,6 +12,7 @@ from django.utils.translation import ugettext as _
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.forms.models import modelformset_factory
+from django.core.urlresolvers import reverse
 import logging
 logger = logging.getLogger("coop_cms")
 
@@ -141,7 +142,8 @@ class EditableFormsetView(TemplateView):
     form_class = None
     extra = 1
     edit_mode = False
-    success_url = "/"
+    success_url = ""
+    success_view_name = ""
     
     def can_edit_objects(self):
         return self.request.user.is_authenticated() and self.request.user.is_staff
@@ -152,6 +154,7 @@ class EditableFormsetView(TemplateView):
             'coop_cms_edit_url': self.get_edit_url(),
             'coop_cms_cancel_url': self.get_cancel_url(),
             'objects': self.get_queryset(),
+            'raw_objects': self.get_queryset(),
         }
         if self.edit_mode:
             context['formset'] = self.formset
@@ -173,15 +176,17 @@ class EditableFormsetView(TemplateView):
         return ''
         
     def get_success_url(self):
-        return self.success_url
+        return self.success_url or reverse(self.success_view_name) if self.success_view_name else ''
     
-    def get_formset(self):
+    def get_formset_class(self):
         return modelformset_factory(self.model, self.get_form_class(), extra=self.extra)
     
+    def get_formset(self, *args, **kwargs):
+        Formset = self.get_formset_class()
+        return Formset(queryset=self.get_queryset(), *args, **kwargs)
+    
     def get(self, request, *args, **kwargs):
-        Formset = self.get_formset()
-        self.formset = Formset(queryset=self.get_queryset())
-        
+        self.formset = self.get_formset()
         return render_to_response(
             self.get_template(),
             self.get_context_data(),
@@ -191,13 +196,14 @@ class EditableFormsetView(TemplateView):
     def _pre_save_object(self, form):
         return True
     
+    def _post_save_object(self, obj, form):
+        pass
+    
     def post(self, request, *args, **kwargs):
-        Formset = self.get_formset()
-        
         if not self.can_edit_objects():
             raise PermissionDenied
         
-        self.formset = Formset(request.POST, request.FILES, queryset=self.get_queryset())
+        self.formset = self.get_formset(request.POST, request.FILES)
         
         forms_args = djaloha_utils.extract_forms_args(request.POST)
         djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)
@@ -205,7 +211,8 @@ class EditableFormsetView(TemplateView):
         if self.formset.is_valid() and all([f.is_valid() for f in djaloha_forms]):
             for form in self.formset:
                 if self._pre_save_object(form):
-                    form.save()
+                    obj = form.save()
+                    self._post_save_object(obj, form)
             
             if djaloha_forms:
                 [f.save() for f in djaloha_forms]

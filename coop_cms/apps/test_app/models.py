@@ -5,9 +5,11 @@ from django.core.urlresolvers import reverse
 
 class TestClass(models.Model):
     
-    field1 = models.TextField(blank=True, default="")
-    field2 = models.TextField(blank=True, default="")
-    other_field = models.CharField(max_length=100, blank=True, default="")
+    field1 = models.TextField()
+    field2 = models.TextField()
+    field3 = models.CharField(max_length=100, blank=True)
+    
+    other_field = models.CharField(max_length=100)
 
     def __unicode__(self):
         return u"Test Object {0}".format(self.id)
