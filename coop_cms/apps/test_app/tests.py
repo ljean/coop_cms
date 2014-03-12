@@ -22,6 +22,10 @@ class BaseTestCase(TestCase):
     def tearDown(self):
         logging.disable(logging.NOTSET)
     
+    def _log_as_viewer(self):
+        self.viewer = user = User.objects.create_user('viewer', 'viewer@toto.fr', 'viewer')
+        return self.client.login(username='viewer', password='viewer')
+    
     def _log_as_editor(self):
         self.editor = User.objects.create_user('editor', 'toto@toto.fr', 'editor')
         self.editor.is_staff = True

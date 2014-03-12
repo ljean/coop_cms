@@ -123,8 +123,11 @@ class NavNode(models.Model):
         url = self.get_absolute_url()
         if url and is_requestprovider_installed():
             from gadjo.requestprovider.signals import get_request
-            http_request = get_request()
-            return http_request and http_request.path == url
+            try:
+                http_request = get_request()
+                return http_request and http_request.path == url
+            except IndexError:
+                pass
         return False
 
     def get_content_name(self):
@@ -213,7 +216,7 @@ class NavNode(models.Model):
         if not self.in_navigation:
             return ""
 
-        children_li = [child.as_navigation(li_template) for child in self.get_children(in_navigation=True)]
+        children_li = [child.as_navigation(li_template, css_class) for child in self.get_children(in_navigation=True)]
         ul_format = self._get_ul_format(ul_template)
         children_html = ul_format.format(u''.join(children_li)) if children_li else ""
         args = self._get_li_args(li_args)
@@ -226,7 +229,7 @@ class NavNode(models.Model):
 
     def as_breadcrumb(self, li_template=None, css_class=""):
         html = self.parent.as_breadcrumb(li_template) if self.parent else u""
-        return html + u'<li class="{0}">{1}</li>'.format(self._css_class(css_class), self._get_li_content(li_template))
+        return html + u'<li class="{0}">{1}</li>'.format(css_class, self._get_li_content(li_template))
 
     def children_as_navigation(self, li_template=None, css_class=""):
         children_li = [u'<li class="{0}">{1}</li>'.format(css_class, child._get_li_content(li_template))
