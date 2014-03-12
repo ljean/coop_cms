@@ -590,7 +590,7 @@ class Link(BaseNavigable):
         return self.url
 
     def __unicode__(self):
-        return self.title
+        return dehtml(self.title)
 
     class Meta:
         verbose_name = _(u"link")
