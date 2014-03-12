@@ -16,17 +16,28 @@ def can_do(perm, object_names):
             if not editable:
                 return
             for object_name in object_names:
-                object = context.get(object_name)
-                if object and request and request.user.has_perm(perm+"_"+object_name, object):
-                    yes_we_can = func(request, context)
-                    if yes_we_can:
-                        return yes_we_can
+                obj = context.get(object_name, None)
+                if obj:
+                    #print '>', func.__name__, object_name, obj
+                
+                    callback_name = u"coop_cms_{0}_callback".format(perm, object_name)
+                    callback = context.get(callback_name, None)
+                    
+                    if callback and request and callback():
+                        yes_we_can = func(request, context)
+                        if yes_we_can:
+                            return yes_we_can
+                    
+                #if object and request and request.user.has_perm(perm+"_"+object_name, object):
+                #    yes_we_can = func(request, context)
+                #    if yes_we_can:
+                #        return yes_we_can
             return
         return wrapper
     return inner_decorator
 
 can_edit_article = can_do('can_edit', ['article'])
-can_edit_object = can_do('can_edit', ['article', 'object'])
+can_edit_object = can_do('can_edit', ['article', 'object', 'objects'])
 can_publish_article = can_do('can_publish', ['article'])
 can_edit_newsletter = can_do('can_edit', ['newsletter'])
 can_edit = can_do('can_edit', ['article', 'newsletter', 'object'])
@@ -179,6 +190,7 @@ def cms_save(request, context):
             classes=['icon'])
     
 def cms_save2(request, context):
+    return
     if request and request.user.is_staff:
         url = context.get('coop_cms_edit_url', None)
         if url and context.get('edit_mode'):
@@ -196,13 +208,12 @@ def cms_save2(request, context):
 @can_edit_object
 def cms_cancel(request, context):
     if context.get('edit_mode'):
-        object = context.get('article', None) or context.get('object', None)
-        if object:
-            next_url = getattr(object, 'get_cancel_url', object.get_absolute_url)()
-            return make_link(next_url, _(u'Cancel'), 'fugue/cross.png',
-                classes=['alert_on_click', 'icon'])
+        url = context.get('coop_cms_cancel_url', None)
+        if url:
+            return make_link(url, _(u'Cancel'), 'fugue/cross.png', classes=['alert_on_click', 'icon'])
         
 def cms_cancel2(request, context):
+    return
     if request and request.user.is_staff:
         url = context.get('coop_cms_cancel_url', None)
         if url and context.get('edit_mode'):
@@ -212,16 +223,12 @@ def cms_cancel2(request, context):
 @can_edit_object
 def cms_edit(request, context):
     if not context.get('edit_mode'):
-        object = context.get('article', None) or context.get('object', None)
-        if object:
-            url = object.get_edit_url()
-        else:
-            context.get('coop_cms_edit_url', None)
+        url = context.get('coop_cms_edit_url', None)
         if url:
-            return make_link(url, _(u'Edit'), 'fugue/document--pencil.png',
-                classes=['icon'])
+            return make_link(url, _(u'Edit'), 'fugue/document--pencil.png', classes=['icon'])
         
 def cms_edit2(request, context):
+    return
     if request and request.user.is_staff:
         url = context.get('coop_cms_edit_url', None)
         if url and not context.get('edit_mode'):
@@ -319,10 +326,11 @@ def change_newsletter_template(request, context):
 
 @can_edit_newsletter
 def test_newsletter(request, context):
-    newsletter = context.get('newsletter')
-    url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
-    return make_link(url, _(u'Send test'), 'fugue/mail-at-sign.png',
-        classes=['alert_on_click', 'colorbox-form', 'icon'])
+    newsletter = context.get('newsletter', None)
+    if newsletter:
+        url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
+        return make_link(url, _(u'Send test'), 'fugue/mail-at-sign.png',
+            classes=['alert_on_click', 'colorbox-form', 'icon'])
 
 #@can_edit_newsletter
 #def schedule_newsletter(request, context):

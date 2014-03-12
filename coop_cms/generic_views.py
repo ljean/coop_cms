@@ -13,6 +13,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpRespons
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.forms.models import modelformset_factory
 from django.core.urlresolvers import reverse
+from django.contrib.contenttypes.models import ContentType
 import logging
 logger = logging.getLogger("coop_cms")
 
@@ -42,8 +43,8 @@ class EditableObjectView(View):
     edit_mode = False
     varname = "object"
     
-    def __init__(self, *args, **kwargs):
-        super(EditableObjectView, self).__init__(*args, **kwargs)
+    #def __init__(self, *args, **kwargs):
+    #    super(EditableObjectView, self).__init__(*args, **kwargs)
     
     def can_edit_object(self):
         can_edit_perm = 'can_edit_{0}'.format(self.varname)
@@ -66,8 +67,18 @@ class EditableObjectView(View):
             'editable': self.can_edit_object(),
             'edit_mode': self.edit_mode,
             'title': getattr(self.object, 'title', unicode(self.object)),
+            'coop_cms_edit_url': self.get_edit_url(),
+            'coop_cms_cancel_url': self.get_cancel_url(),
+            'coop_cms_can_view_callback': self.can_view_object,
+            'coop_cms_can_edit_callback': self.can_edit_object,
             self.varname: self.object,
         }
+        
+    def get_edit_url(self):
+        return self.object.get_edit_url()
+    
+    def get_cancel_url(self):
+        return self.object.get_cancel_url() if hasattr(self.object, 'get_cancel_url') else self.object.get_absolute_url()
         
     def get_template(self):
         return self.template_name
@@ -106,7 +117,6 @@ class EditableObjectView(View):
         
         if not self.can_edit_object():
             logger.error("PermissionDenied")
-            error_message(request, _(u'Permission denied'))
             raise PermissionDenied
         
         self.form = self.form_class(request.POST, request.FILES, instance=self.object)
@@ -146,13 +156,26 @@ class EditableFormsetView(TemplateView):
     success_view_name = ""
     
     def can_edit_objects(self):
-        return self.request.user.is_authenticated() and self.request.user.is_staff
+        ct = ContentType.objects.get_for_model(self.model)
+        can_edit_perm = 'change_{0}'.format(ct.model)
+        return self.request.user.is_authenticated() and self.request.user.has_perm(can_edit_perm, None)
+        
+    def can_view_objects(self):
+        if self.edit_mode:
+            return self.can_edit_objects()
+        return True
+    
+    #def can_edit_objects(self):
+    #    return self.request.user.is_authenticated() and self.request.user.is_staff
     
     def get_context_data(self):
         context = {
+            'editable': True,
             'edit_mode': self.edit_mode,
             'coop_cms_edit_url': self.get_edit_url(),
             'coop_cms_cancel_url': self.get_cancel_url(),
+            'coop_cms_can_view_callback': self.can_view_objects,
+            'coop_cms_can_edit_callback': self.can_edit_objects,
             'objects': self.get_queryset(),
             'raw_objects': self.get_queryset(),
         }
@@ -186,6 +209,9 @@ class EditableFormsetView(TemplateView):
         return Formset(queryset=self.get_queryset(), *args, **kwargs)
     
     def get(self, request, *args, **kwargs):
+        if not self.can_view_objects():
+            raise PermissionDenied
+            
         self.formset = self.get_formset()
         return render_to_response(
             self.get_template(),
