@@ -27,9 +27,22 @@ class BaseTestCase(TestCase):
         return self.client.login(username='viewer', password='viewer')
     
     def _log_as_editor(self):
-        self.editor = User.objects.create_user('editor', 'toto@toto.fr', 'editor')
-        self.editor.is_staff = True
-        self.editor.save()
+        self.editor = user = User.objects.create_user('editor', 'toto@toto.fr', 'editor')
+        
+        ct = ContentType.objects.get_for_model(TestClass)
+        
+        perm = 'change_{0}'.format(ct.model)
+        can_edit = Permission.objects.get(content_type=ct, codename=perm)
+        user.user_permissions.add(can_edit)
+        
+        perm = 'add_{0}'.format(ct.model)
+        can_add = Permission.objects.get(content_type=ct, codename=perm)
+        user.user_permissions.add(can_add)
+        
+        user.is_active = True
+        user.is_staff = True #can_edit_object
+        #user.user_permissions
+        user.save()
         return self.client.login(username='editor', password='editor')
   
 
@@ -102,6 +115,23 @@ class GenericViewTestCase(BaseTestCase):
         self.assertEqual(obj.field1, data["field1"])
         self.assertEqual(obj.field2, data["field2"])
         
+    def test_edit_object_inactive(self):
+        self._log_as_editor()
+        self.editor.is_active = False
+        self.editor.save()
+        
+        obj = mommy.make(TestClass)
+        response = self.client.get(obj.get_edit_url())
+        self.assertEqual(403, response.status_code)
+        
+        data = {'field1': "ABC", 'field2': "DEF"}
+        response = self.client.post(obj.get_edit_url(), data=data, follow=True)
+        self.assertEqual(403, response.status_code)
+        
+        obj = TestClass.objects.get(id=obj.id)
+        self.assertNotEqual(obj.field1, data["field1"])
+        self.assertNotEqual(obj.field2, data["field2"])
+        
         
 class FormsetViewTestCase(BaseTestCase):
     
@@ -127,7 +157,7 @@ class FormsetViewTestCase(BaseTestCase):
         self.assertContains(response, obj.field2)
         self.assertContains(response, obj.other_field)
         
-    def test_view_formset_seeveral_object(self):
+    def test_view_formset_several_object(self):
         self._log_as_viewer()
         
         obj1 = mommy.make(TestClass)
@@ -193,7 +223,7 @@ class FormsetViewTestCase(BaseTestCase):
         self.assertEqual(other_field, obj.other_field)
         
         
-    def test_edit_formset_seeveral_object(self):
+    def test_edit_formset_several_object(self):
         self._log_as_editor()
         
         obj1 = mommy.make(TestClass)
@@ -283,6 +313,33 @@ class FormsetViewTestCase(BaseTestCase):
         
     def test_edit_formset_viewer(self):
         self._log_as_viewer()
+        
+        obj = mommy.make(TestClass)
+        
+        url = reverse('coop_cms_testapp_formset')
+        
+        other_field = obj.other_field
+        data = {
+            'form-0-id': obj.id,
+            'form-0-field1': "AZERTYUIOP",
+            'form-0-field2': "<p>QWERTY/nUIOP</p>",
+            'form-TOTAL_FORMS': 1,
+            'form-INITIAL_FORMS': 1,
+            'form-MAX_NUM_FORMS': 1,
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(403, response.status_code)
+        
+        obj = TestClass.objects.get(id=obj.id)
+        
+        self.assertNotEqual(data['form-0-field1'], obj.field1)
+        self.assertNotEqual(data['form-0-field2'], obj.field2)
+        
+    def test_edit_formset_inactive(self):
+        self._log_as_editor()
+        self.editor.is_active = False
+        self.editor.save()
         
         obj = mommy.make(TestClass)
         

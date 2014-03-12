@@ -48,7 +48,8 @@ class EditableObjectView(View):
     
     def can_edit_object(self):
         can_edit_perm = 'can_edit_{0}'.format(self.varname)
-        return self.request.user.is_authenticated() and self.request.user.has_perm(can_edit_perm, self.object)
+        user = self.request.user
+        return user.is_authenticated() and user.is_active and user.has_perm(can_edit_perm, self.object)
         
     def can_view_object(self):
         if self.edit_mode:
@@ -157,16 +158,14 @@ class EditableFormsetView(TemplateView):
     
     def can_edit_objects(self):
         ct = ContentType.objects.get_for_model(self.model)
-        can_edit_perm = 'change_{0}'.format(ct.model)
-        return self.request.user.is_authenticated() and self.request.user.has_perm(can_edit_perm, None)
+        can_edit_perm = '{0}.change_{1}'.format(ct.app_label, ct.model)
+        user = self.request.user
+        return user.is_authenticated() and user.is_active and user.has_perm(can_edit_perm, None)
         
     def can_view_objects(self):
         if self.edit_mode:
             return self.can_edit_objects()
         return True
-    
-    #def can_edit_objects(self):
-    #    return self.request.user.is_authenticated() and self.request.user.is_staff
     
     def get_context_data(self):
         context = {

@@ -60,6 +60,7 @@ class BaseArticleTest(BaseTestCase):
         can_add_article = Permission.objects.get(content_type=ct, codename=perm)
         user.user_permissions.add(can_add_article)
         
+        user.is_active = True
         user.save()
         return self.client.login(username='toto', password='toto')
         
@@ -72,6 +73,7 @@ class BaseArticleTest(BaseTestCase):
         can_edit_article = Permission.objects.get(content_type=ct, codename=perm)
         user.user_permissions.add(can_edit_article)
         
+        user.is_active = True
         user.save()
         
         return self.client.login(username='toto', password='toto')
@@ -605,6 +607,7 @@ class NavigationTest(BaseTestCase):
                 codename='change_{0}'.format(tree_class._meta.module_name)
             )
             self.editor.user_permissions.add(can_edit_tree)
+            self.editor.is_active
             self.editor.save()
         
         return self.client.login(username='toto', password='toto')
@@ -613,6 +616,7 @@ class NavigationTest(BaseTestCase):
         if not self.staff:
             self.staff = User.objects.create_user('titi', 'titi@titi.fr', 'titi')
             self.staff.is_staff = True
+            self.staff.is_active = True
             self.staff.save()
         
         self.client.login(username='titi', password='titi')
@@ -1647,6 +1651,7 @@ class CmsEditTagTest(BaseTestCase):
         can_add_article = Permission.objects.get(content_type=ct, codename=perm)
         user.user_permissions.add(can_add_article)
         
+        user.is_active = True
         user.save()
         
         return self.client.login(username='toto', password='toto')
@@ -1874,6 +1879,7 @@ class UserBaseTestCase(BaseTestCase):
         if not self.editor:
             self.editor = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
             self.editor.is_staff = True
+            self.editor.is_active = True
             can_edit_newsletter = Permission.objects.get(content_type__app_label='coop_cms', codename='change_newsletter')
             self.editor.user_permissions.add(can_edit_newsletter)
             
@@ -1889,6 +1895,7 @@ class UserBaseTestCase(BaseTestCase):
         if not self.viewer:
             self.viewer = User.objects.create_user('titi', 'titi@toto.fr', 'titi')
             self.viewer.is_staff = True
+            self.viewer.is_active = True
             self.viewer.user_permissions.add(can_edit_newsletter)
             self.viewer.save()
         
@@ -3470,6 +3477,7 @@ class FragmentsTest(BaseTestCase):
             can_add = Permission.objects.get(content_type=ct, codename=perm)
             user.user_permissions.add(can_add)
         
+        user.is_active = True
         user.save()
         return self.client.login(username='toto', password='toto')
     
@@ -3478,6 +3486,7 @@ class FragmentsTest(BaseTestCase):
         
         ct = ContentType.objects.get_for_model(get_article_class())
         
+        user.is_active = True
         user.save()
         return self.client.login(username='titi', password='titi')
         
