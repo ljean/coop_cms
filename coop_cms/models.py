@@ -217,15 +217,16 @@ class NavNode(models.Model):
         ul_format = self._get_ul_format(ul_template)
         children_html = ul_format.format(u''.join(children_li)) if children_li else ""
         args = self._get_li_args(li_args)
-        if args:
-            css_class = " "+args
-        if self.is_active_node():
-            css_class += (" "+active_class)
-        return u'<li class="{0}">{1}{2}</li>'.format(css_class, self._get_li_content(li_template), children_html)
+        if args.find("class=")<0:
+            css_class = u'class="{0}{1}"'.format(css_class, active_class if self.is_active_node() else "")
+        else:
+            css_class=""
+        return u'<li {0} {1}>{2}{3}</li>'.format(
+            css_class, args, self._get_li_content(li_template), children_html)
 
     def as_breadcrumb(self, li_template=None, css_class=""):
         html = self.parent.as_breadcrumb(li_template) if self.parent else u""
-        return html + u'<li class="{0}">{1}</li>'.format(css_class, self._get_li_content(li_template))
+        return html + u'<li class="{0}">{1}</li>'.format(self._css_class(css_class), self._get_li_content(li_template))
 
     def children_as_navigation(self, li_template=None, css_class=""):
         children_li = [u'<li class="{0}">{1}</li>'.format(css_class, child._get_li_content(li_template))
