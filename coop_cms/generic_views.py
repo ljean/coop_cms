@@ -73,6 +73,7 @@ class EditableObjectView(View):
             'coop_cms_can_view_callback': self.can_view_object,
             'coop_cms_can_edit_callback': self.can_edit_object,
             self.varname: self.object,
+            'raw_'+self.varname: self.object,
         }
         
     def get_edit_url(self):
