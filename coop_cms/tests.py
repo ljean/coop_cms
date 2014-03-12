@@ -1345,14 +1345,14 @@ class TemplateTagsTest(BaseTestCase):
     def test_view_navigation_css(self):
         tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul css_class=toto%}')
         html = tpl.render(Context({}))
-        self.assertEqual(html.count('<li class="toto" >'), len(self.nodes))
+        self.assertEqual(html.count('<li class="toto " >'), len(self.nodes))
         
     def test_view_navigation_custom_template_and_css(self):
         tpl = Template(
             '{% load coop_navigation %}{%navigation_as_nested_ul li_template=coop_cms/test_li.html css_class=toto%}'
         )
         html = tpl.render(Context({}))
-        self.assertEqual(html.count('<li class="toto" >'), len(self.nodes))
+        self.assertEqual(html.count('<li class="toto " >'), len(self.nodes))
             
         for n in self.nodes:
             self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)

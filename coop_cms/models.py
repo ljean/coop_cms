@@ -221,7 +221,7 @@ class NavNode(models.Model):
         children_html = ul_format.format(u''.join(children_li)) if children_li else ""
         args = self._get_li_args(li_args)
         if args.find("class=")<0:
-            css_class = u'class="{0}{1}"'.format(css_class, active_class if self.is_active_node() else "")
+            css_class = u'class="{0} {1}"'.format(css_class, active_class if self.is_active_node() else "")
         else:
             css_class=""
         return u'<li {0} {1}>{2}{3}</li>'.format(
