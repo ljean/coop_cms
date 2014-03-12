@@ -28,3 +28,4 @@ class TestClass(models.Model):
     
     def can_edit_object(self, user):
         return user.is_staff
+

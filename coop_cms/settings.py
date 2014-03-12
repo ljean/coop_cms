@@ -91,6 +91,32 @@ def get_article_form():
 
     return article_form
 
+def get_article_settings_form():
+    try:
+        full_class_name = getattr(django_settings, 'COOP_CMS_ARTICLE_SETTINGS_FORM')
+        module_name, class_name = full_class_name.rsplit('.', 1)
+        module = import_module(module_name)
+        article_form = getattr(module, class_name)
+
+    except AttributeError:
+        from coop_cms.forms import ArticleSettingsForm
+        article_form = ArticleSettingsForm
+
+    return article_form
+
+def get_new_article_form():
+    try:
+        full_class_name = getattr(django_settings, 'COOP_CMS_NEW_ARTICLE_FORM')
+        module_name, class_name = full_class_name.rsplit('.', 1)
+        module = import_module(module_name)
+        article_form = getattr(module, class_name)
+
+    except AttributeError:
+        from coop_cms.forms import NewArticleForm
+        article_form = NewArticleForm
+
+    return article_form
+
 def get_newsletter_templates(newsletter, user):
     try:
         return getattr(django_settings, 'COOP_CMS_NEWSLETTER_TEMPLATES')
