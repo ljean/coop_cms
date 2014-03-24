@@ -17,6 +17,7 @@ from django.contrib.messages.api import error as error_message
 from coop_cms import models
 from django.contrib.auth.decorators import login_required
 from coop_cms.settings import get_article_class, get_article_form, get_newsletter_form, get_navtree_class
+from coop_cms.settings import get_new_article_form, get_article_settings_form
 from djaloha import utils as djaloha_utils
 from django.core.servers.basehttp import FileWrapper
 import mimetypes, unicodedata
@@ -357,14 +358,19 @@ def change_template(request, article_id):
 @popup_redirect
 def article_settings(request, article_id):
     article = get_object_or_404(get_article_class(), id=article_id)
+    ArticleSettingsForm = get_article_settings_form()
+    
+    if not request.user.has_perm('can_edit_article', article):
+        raise PermissionDenied
+    
     if request.method == "POST":
-        form = forms.ArticleSettingsForm(request.user, request.POST, request.FILES, instance=article)
+        form = ArticleSettingsForm(request.user, request.POST, request.FILES, instance=article)
         if form.is_valid():
             #article.template = form.cleaned_data['template']
             article = form.save()
             return HttpResponseRedirect(article.get_absolute_url())
     else:
-        form = forms.ArticleSettingsForm(request.user, instance=article)
+        form = ArticleSettingsForm(request.user, instance=article)
 
     context = {
         'article': article,
@@ -380,6 +386,8 @@ def article_settings(request, article_id):
 @popup_redirect
 def new_article(request):
     Article = get_article_class()
+    NewArticleForm = get_new_article_form()
+    
     ct = ContentType.objects.get_for_model(Article)
     perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
 
@@ -387,14 +395,14 @@ def new_article(request):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = forms.NewArticleForm(request.user, request.POST, request.FILES)
+        form = NewArticleForm(request.user, request.POST, request.FILES)
         if form.is_valid():
             #article.template = form.cleaned_data['template']
             article = form.save()
             success_message(request, _(u'The article has been created properly'))
             return HttpResponseRedirect(article.get_edit_url())
     else:
-        form = forms.NewArticleForm(request.user)
+        form = NewArticleForm(request.user)
 
     return render_to_response(
         'coop_cms/popup_new_article.html',

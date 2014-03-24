@@ -60,6 +60,7 @@ class BaseArticleTest(BaseTestCase):
         can_add_article = Permission.objects.get(content_type=ct, codename=perm)
         user.user_permissions.add(can_add_article)
         
+        user.is_active = True
         user.save()
         return self.client.login(username='toto', password='toto')
         
@@ -72,6 +73,7 @@ class BaseArticleTest(BaseTestCase):
         can_edit_article = Permission.objects.get(content_type=ct, codename=perm)
         user.user_permissions.add(can_edit_article)
         
+        user.is_active = True
         user.save()
         
         return self.client.login(username='toto', password='toto')
@@ -605,6 +607,7 @@ class NavigationTest(BaseTestCase):
                 codename='change_{0}'.format(tree_class._meta.module_name)
             )
             self.editor.user_permissions.add(can_edit_tree)
+            self.editor.is_active
             self.editor.save()
         
         return self.client.login(username='toto', password='toto')
@@ -613,6 +616,7 @@ class NavigationTest(BaseTestCase):
         if not self.staff:
             self.staff = User.objects.create_user('titi', 'titi@titi.fr', 'titi')
             self.staff.is_staff = True
+            self.staff.is_active = True
             self.staff.save()
         
         self.client.login(username='titi', password='titi')
@@ -1301,7 +1305,34 @@ class TemplateTagsTest(BaseTestCase):
         for n in self.nodes:
             self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
-            
+    
+    def test_navigation_other_tree(self):    
+        link1 = Link.objects.create(url='http://www.my-tree.com')
+        link2 = Link.objects.create(url='http://www.mon-arbre.fr')
+        link3 = Link.objects.create(url='http://www.mon-arbre.eu')
+        
+        tree = get_navtree_class().objects.create(name="mon_arbre")
+        
+        n1 = NavNode.objects.create(tree=tree, label=link1.url, content_object=link1, ordering=1, parent=None)
+        n2 = NavNode.objects.create(tree=tree, label=link2.url, content_object=link2, ordering=2, parent=None)
+        n3 = NavNode.objects.create(tree=tree, label=link3.url, content_object=link3, ordering=2, parent=n2)
+        
+        tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul tree=mon_arbre %}')
+        html = tpl.render(Context({}))
+        soup = BeautifulSoup(html)
+        self.assertEqual(len(soup.select('li')), 3)
+        
+        self.assertTrue(html.find(n1.get_absolute_url())>0)
+        self.assertTrue(html.find(n2.get_absolute_url())>0)
+        self.assertTrue(html.find(n3.get_absolute_url())>0)
+        
+        self.assertTrue(html.find(self.nodes[0].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[2].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[3].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[4].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[5].get_absolute_url())<0)
+        
     def test_view_navigation_custom_template_file(self):
         tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul li_template=coop_cms/test_li.html%}')
         
@@ -1310,18 +1341,18 @@ class TemplateTagsTest(BaseTestCase):
         for n in self.nodes:
             self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
-            
+    
     def test_view_navigation_css(self):
         tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul css_class=toto%}')
         html = tpl.render(Context({}))
-        self.assertTrue(html.count('<li class="toto">'), len(self.nodes))
+        self.assertEqual(html.count('<li class="toto " >'), len(self.nodes))
         
     def test_view_navigation_custom_template_and_css(self):
         tpl = Template(
             '{% load coop_navigation %}{%navigation_as_nested_ul li_template=coop_cms/test_li.html css_class=toto%}'
         )
         html = tpl.render(Context({}))
-        self.assertTrue(html.count('<li class="toto">'), len(self.nodes))
+        self.assertEqual(html.count('<li class="toto " >'), len(self.nodes))
             
         for n in self.nodes:
             self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
@@ -1506,7 +1537,97 @@ class TemplateTagsTest(BaseTestCase):
         tpl = Template('{% load coop_navigation %}{% navigation_siblings obj %}')
         html = tpl.render(Context({'obj': link})).replace(' ', '')
         self.assertEqual(html, '')
-               
+        
+    def test_navigation_root_nodes_no_nodes(self):
+        NavNode.objects.all().delete()
+        tpl = Template('{% load coop_navigation %}{%navigation_root_nodes%}')
+        html = tpl.render(Context({}))
+        soup = BeautifulSoup(html)
+        self.assertEqual(len(soup.select('li')), 0)
+        
+    def test_navigation_root_nodes(self):
+        tpl = Template('{% load coop_navigation %}{%navigation_root_nodes%}')
+        html = tpl.render(Context({}))
+        soup = BeautifulSoup(html)
+        self.assertEqual(len(soup.select('li')), len(self.nodes))
+    
+    def test_navigation_root_nodes_other_template(self):
+        tpl = Template('{% load coop_navigation %}{%navigation_root_nodes template_name="test/navigation_node.html" %}')
+        html = tpl.render(Context({}))
+        soup = BeautifulSoup(html)
+        self.assertEqual(len(soup.select('li.test')), len(self.nodes))
+        
+    def test_navigation_root_nodes_out_of_navigation(self):
+        self.nodes[1].in_navigation = False
+        self.nodes[1].save()
+        
+        tpl = Template('{% load coop_navigation %}{%navigation_root_nodes%}')
+        html = tpl.render(Context({}))
+        soup = BeautifulSoup(html)
+        self.assertEqual(len(soup.select('li')), len(self.nodes)-1)
+        
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url())<0)
+        
+    def test_navigation_root_nodes_out_of_navigation_with_child(self):
+        self.nodes[2].in_navigation = False
+        self.nodes[2].save()
+        
+        tpl = Template('{% load coop_navigation %}{%navigation_root_nodes%}')
+        html = tpl.render(Context({}))
+        soup = BeautifulSoup(html)
+        self.assertEqual(len(soup.select('li')), len(self.nodes)-4)
+        
+        self.assertTrue(html.find(self.nodes[0].get_absolute_url())>0)
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url())>0)
+        self.assertTrue(html.find(self.nodes[2].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[3].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[4].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[5].get_absolute_url())<0)
+        
+    def test_navigation_root_nodes_out_of_navigation_child(self):
+        self.nodes[4].in_navigation = False
+        self.nodes[4].save()
+        
+        tpl = Template('{% load coop_navigation %}{%navigation_root_nodes%}')
+        html = tpl.render(Context({}))
+        soup = BeautifulSoup(html)
+        self.assertEqual(len(soup.select('li')), len(self.nodes)-1)
+        
+        self.assertTrue(html.find(self.nodes[0].get_absolute_url())>0)
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url())>0)
+        self.assertTrue(html.find(self.nodes[2].get_absolute_url())>0)
+        self.assertTrue(html.find(self.nodes[3].get_absolute_url())>0)
+        self.assertTrue(html.find(self.nodes[4].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[5].get_absolute_url())>0)
+    
+    def test_navigation_root_nodes_other_tree(self):    
+        link1 = Link.objects.create(url='http://www.my-tree.com')
+        link2 = Link.objects.create(url='http://www.mon-arbre.fr')
+        link3 = Link.objects.create(url='http://www.mon-arbre.eu')
+        
+        tree = get_navtree_class().objects.create(name="mon_arbre")
+        
+        n1 = NavNode.objects.create(tree=tree, label=link1.url, content_object=link1, ordering=1, parent=None)
+        n2 = NavNode.objects.create(tree=tree, label=link2.url, content_object=link2, ordering=2, parent=None)
+        n3 = NavNode.objects.create(tree=tree, label=link3.url, content_object=link3, ordering=2, parent=n2)
+        
+        tpl = Template('{% load coop_navigation %}{%navigation_root_nodes tree=mon_arbre %}')
+        html = tpl.render(Context({}))
+        soup = BeautifulSoup(html)
+        self.assertEqual(len(soup.select('li')), 3)
+        
+        self.assertTrue(html.find(n1.get_absolute_url())>0)
+        self.assertTrue(html.find(n2.get_absolute_url())>0)
+        self.assertTrue(html.find(n3.get_absolute_url())>0)
+        
+        self.assertTrue(html.find(self.nodes[0].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[2].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[3].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[4].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[5].get_absolute_url())<0)
+        
+        
         
 class CmsEditTagTest(BaseTestCase):
     
@@ -1530,6 +1651,7 @@ class CmsEditTagTest(BaseTestCase):
         can_add_article = Permission.objects.get(content_type=ct, codename=perm)
         user.user_permissions.add(can_add_article)
         
+        user.is_active = True
         user.save()
         
         return self.client.login(username='toto', password='toto')
@@ -1757,6 +1879,7 @@ class UserBaseTestCase(BaseTestCase):
         if not self.editor:
             self.editor = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
             self.editor.is_staff = True
+            self.editor.is_active = True
             can_edit_newsletter = Permission.objects.get(content_type__app_label='coop_cms', codename='change_newsletter')
             self.editor.user_permissions.add(can_edit_newsletter)
             
@@ -1772,6 +1895,7 @@ class UserBaseTestCase(BaseTestCase):
         if not self.viewer:
             self.viewer = User.objects.create_user('titi', 'titi@toto.fr', 'titi')
             self.viewer.is_staff = True
+            self.viewer.is_active = True
             self.viewer.user_permissions.add(can_edit_newsletter)
             self.viewer.save()
         
@@ -3353,6 +3477,7 @@ class FragmentsTest(BaseTestCase):
             can_add = Permission.objects.get(content_type=ct, codename=perm)
             user.user_permissions.add(can_add)
         
+        user.is_active = True
         user.save()
         return self.client.login(username='toto', password='toto')
     
@@ -3361,6 +3486,7 @@ class FragmentsTest(BaseTestCase):
         
         ct = ContentType.objects.get_for_model(get_article_class())
         
+        user.is_active = True
         user.save()
         return self.client.login(username='titi', password='titi')
         

@@ -123,8 +123,11 @@ class NavNode(models.Model):
         url = self.get_absolute_url()
         if url and is_requestprovider_installed():
             from gadjo.requestprovider.signals import get_request
-            http_request = get_request()
-            return http_request and http_request.path == url
+            try:
+                http_request = get_request()
+                return http_request and http_request.path == url
+            except IndexError:
+                pass
         return False
 
     def get_content_name(self):
@@ -146,6 +149,9 @@ class NavNode(models.Model):
 
     def has_children(self):
         return self.get_children(True).count()
+    
+    def get_children_navigation(self):
+        return self.get_children(True)
 
     def get_siblings(self, in_navigation=None):
         nodes = NavNode.objects.filter(parent=self.parent).order_by("ordering")
@@ -198,35 +204,40 @@ class NavNode(models.Model):
             return t.render(Context({'node': self}))
         else:
             return u''
+        
+    #def render(self, template_name):
+    #    t = get_template(template_name)
+    #    return t.render(Context({'node': self}))
 
-    def as_navigation(self, li_template=None, css_class="", ul_template=None, li_args=None):
+    def as_navigation(self, li_template=None, css_class="", ul_template=None, li_args=None, active_class="active-node"):
         #Display the node and his children as nested ul and li html tags.
         #li_template is a custom template that can be passed
 
         if not self.in_navigation:
             return ""
 
-        children_li = [child.as_navigation(li_template) for child in self.get_children(in_navigation=True)]
+        children_li = [child.as_navigation(li_template, css_class) for child in self.get_children(in_navigation=True)]
         ul_format = self._get_ul_format(ul_template)
         children_html = ul_format.format(u''.join(children_li)) if children_li else ""
         args = self._get_li_args(li_args)
-        if args:
-            css_class = " "+args
-        if self.is_active_node():
-            css_class += ' class="active-node"'
-        return u'<li{0}>{1}{2}</li>'.format(css_class, self._get_li_content(li_template), children_html)
+        if args.find("class=")<0:
+            css_class = u'class="{0} {1}"'.format(css_class, active_class if self.is_active_node() else "")
+        else:
+            css_class=""
+        return u'<li {0} {1}>{2}{3}</li>'.format(
+            css_class, args, self._get_li_content(li_template), children_html)
 
     def as_breadcrumb(self, li_template=None, css_class=""):
         html = self.parent.as_breadcrumb(li_template) if self.parent else u""
-        return html + u'<li{0}>{1}</li>'.format(css_class, self._get_li_content(li_template))
+        return html + u'<li class="{0}">{1}</li>'.format(css_class, self._get_li_content(li_template))
 
     def children_as_navigation(self, li_template=None, css_class=""):
-        children_li = [u'<li{0}>{1}</li>'.format(css_class, child._get_li_content(li_template))
+        children_li = [u'<li class="{0}">{1}</li>'.format(css_class, child._get_li_content(li_template))
             for child in self.get_children(in_navigation=True)]
         return  u''.join(children_li)
 
     def siblings_as_navigation(self, li_template=None, css_class=""):
-        siblings_li = [u'<li{0}>{1}</li>'.format(css_class, sibling._get_li_content(li_template))
+        siblings_li = [u'<li class="{0}">{1}</li>'.format(css_class, sibling._get_li_content(li_template))
             for sibling in self.get_siblings(in_navigation=True)]
         return  u''.join(siblings_li)
 
@@ -579,7 +590,7 @@ class Link(BaseNavigable):
         return self.url
 
     def __unicode__(self):
-        return self.title
+        return dehtml(self.title)
 
     class Meta:
         verbose_name = _(u"link")

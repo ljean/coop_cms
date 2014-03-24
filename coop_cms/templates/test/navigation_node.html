@@ -1,0 +1,17 @@
+{% load coop_navigation %}
+{% with has_children=node.has_children is_active=node.is_active_node %}
+{% spaceless %}
+<li class="test {% if has_children %}dropdown{% endif %} {% if is_active %}active{% endif %}">
+  <a{% if node.get_absolute_url %} href="{{ node.get_absolute_url }}{% endif %}"></a>
+    {{ node.label }}
+  </a>
+  {% if has_children %}
+  <ul class="dropdown-menu">
+    {% for child in node.get_children_navigation %}
+        {{ child|render_template_node:"test/navigation_node.html" }}
+    {% endfor %}
+  </ul>
+  {% endif %}
+</li>
+{% endspaceless %}
+{% endwith %}
