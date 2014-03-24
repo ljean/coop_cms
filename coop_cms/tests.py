@@ -3501,6 +3501,59 @@ class FragmentsTest(BaseTestCase):
         
         self.assertEqual(200, response.status_code)
         
+    def test_view_add_fragment_check_filters(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[1][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        self._log_as_editor()
+        
+        #url = reverse("coop_cms_add_fragment")
+        url = article.get_edit_url()
+        response = self.client.get(url)
+        
+        self.assertEqual(200, response.status_code)
+        soup = BeautifulSoup(response.content)
+        
+        ft_tags = soup.select(".coop-fragment-type")
+        ft_objs = FragmentType.objects.all()
+        ff_objs = FragmentFilter.objects.all()
+        
+        self.assertEqual(len(ft_tags), 2)
+        self.assertEqual(ft_objs.count(), 2)
+        self.assertEqual(ff_objs.count(), 1)
+        
+        for i in range(2):
+            self.assertEqual(int(ft_tags[i]["rel"]), ft_objs[i].id)
+        
+        self.assertEqual(ft_tags[0]["data-filter"], '')
+        self.assertEqual(ft_tags[1]["data-filter"], str(ff_objs[0].id))
+        
+        
+    def test_view_add_fragment_no_filter_check_filters(self):
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        
+        self._log_as_editor()
+        
+        #url = reverse("coop_cms_add_fragment")
+        url = article.get_edit_url()
+        response = self.client.get(url)
+        
+        self.assertEqual(200, response.status_code)
+        soup = BeautifulSoup(response.content)
+        
+        ft_tags = soup.select(".coop-fragment-type")
+        ft_objs = FragmentType.objects.all()
+        ff_objs = FragmentFilter.objects.all()
+        
+        self.assertEqual(len(ft_tags), 1)
+        self.assertEqual(ft_objs.count(), 1)
+        self.assertEqual(ff_objs.count(), 0)
+        
+        self.assertEqual(int(ft_tags[0]["rel"]), ft_objs[0].id)
+        
+        self.assertEqual(ft_tags[0]["data-filter"], '')
+        
     def test_view_add_fragment_permission_denied(self):
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
@@ -3513,7 +3566,7 @@ class FragmentsTest(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(403, response.status_code)
         
-    def _add_fragment(self, data):
+    def _add_fragment(self, data, errors_count=0):
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
@@ -3525,10 +3578,12 @@ class FragmentsTest(BaseTestCase):
         
         soup = BeautifulSoup(response.content)
         errs = soup.select("ul.errorlist li")
-        self.assertEqual([], errs)
-        
-        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-        self.assertEqual(response.content, expected)
+        if errors_count:
+            self.assertEqual(errors_count, len(errs))
+        else:
+            self.assertEqual([], errs)
+            expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
+            self.assertEqual(response.content, expected)
         
         return response        
         
@@ -3576,6 +3631,7 @@ class FragmentsTest(BaseTestCase):
             'type': ft.id,
             'name': 'abcd',
             'position': 2,
+            'filter': '',
         }
         
         response = self._add_fragment(data)
@@ -3585,6 +3641,18 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(f.name, data['name'])
         self.assertEqual(f.css_class, '')
         self.assertEqual(f.position, 2)
+        
+    def test_add_fragment_invalid_filter(self):
+        ft = mommy.make(FragmentType, name="parts")
+        data = {
+            'type': ft.id,
+            'name': 'abcd',
+            'position': 2,
+            'filter': '0',
+        }
+        
+        response = self._add_fragment(data, 1)
+        self.assertEqual(0, Fragment.objects.count())
         
     def test_add_fragment_css(self):
         ft = mommy.make(FragmentType, name="parts")
