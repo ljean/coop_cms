@@ -55,19 +55,38 @@ class GenericViewTestCase(BaseTestCase):
     
     def test_view_object_anomymous(self):
         obj = mommy.make(TestClass)
-        response = self.client.get(obj.get_absolute_url())
-        self.assertEqual(403, response.status_code)
+        url = obj.get_absolute_url()
+        response = self.client.get(url)
+        if coop_settings.is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = reverse("auth_login")
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
+        
     
     def test_edit_object_anonymous(self):
         obj = mommy.make(TestClass)
-        response = self.client.get(obj.get_edit_url())
-        self.assertEqual(403, response.status_code)
+        url = obj.get_edit_url()
+        
+        response = self.client.get(url)
+        if coop_settings.is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = reverse("auth_login")
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
         
         field1, field2 = obj.field1, obj.field2
-        
         data = {'field1': "ABC", 'field2': "DEF"}
-        response = self.client.post(obj.get_edit_url(), data=data, follow=True)
-        self.assertEqual(403, response.status_code)
+        response = self.client.post(url, data=data)
+        
+        if coop_settings.is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = reverse("auth_login")
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
         
         obj = TestClass.objects.get(id=obj.id)
         self.assertEqual(obj.field1, field1)
@@ -303,8 +322,14 @@ class FormsetViewTestCase(BaseTestCase):
             'form-MAX_NUM_FORMS': 1,
         }
         
-        response = self.client.post(url, data=data, follow=True)
-        self.assertEqual(403, response.status_code)
+        response = self.client.post(url, data=data)
+        
+        if coop_settings.is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = reverse("auth_login")
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
         
         obj = TestClass.objects.get(id=obj.id)
         
@@ -426,10 +451,10 @@ class ArticleFormTest(BaseTestCase):
     def test_view_new_article_anonymous(self):
         url = reverse('coop_cms_new_article')
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
-        login_url = reverse('auth_login')
-        self.assertTrue(response['Location'].find(login_url)>0)
-        
+        self.assertEqual(302, response.status_code)
+        auth_url = reverse("auth_login")
+        self.assertRedirects(response, auth_url+'?next='+url)
+
     def test_view_article_not_allowed(self):
         self._log_as_viewer()
         Article = coop_settings.get_article_class()
@@ -512,9 +537,10 @@ class ArticleFormTest(BaseTestCase):
         article = mommy.make(Article)
         url = reverse('coop_cms_article_settings', args=[article.id])
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 302)
-        login_url = reverse('auth_login')
-        self.assertTrue(response['Location'].find(login_url)>0)
+        self.assertEqual(302, response.status_code)
+        auth_url = reverse("auth_login")
+        self.assertRedirects(response, auth_url+'?next='+url)
+        
         
     def test_view_article_settings_not_allowed(self):
         self._log_as_viewer()

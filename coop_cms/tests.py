@@ -15,7 +15,7 @@ from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, Article
 from coop_cms.settings import is_localized
 import json
 from django.core.exceptions import ValidationError
-from coop_cms.settings import get_article_class, get_article_templates, get_navtree_class
+from coop_cms.settings import get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed
 from model_mommy import mommy
 from django.conf import settings
 import os.path, shutil
@@ -63,6 +63,13 @@ class BaseArticleTest(BaseTestCase):
         user.is_active = True
         user.save()
         return self.client.login(username='toto', password='toto')
+    
+    def _log_as_non_editor(self):
+        self.regular_user = user = User.objects.create_user('zozo', 'zozo@toto.fr', 'zozo')
+        
+        user.is_active = True
+        user.save()
+        return self.client.login(username='zozo', password='zozo')
         
     def _log_as_editor_no_add(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
@@ -123,8 +130,14 @@ class ArticleTest(BaseArticleTest):
     def test_publication_flag_draft(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
         self.assertEqual(article.is_draft(), True)
-        response = self.client.get(article.get_absolute_url())
-        self.assertEqual(403, response.status_code)
+        url = article.get_absolute_url()
+        response = self.client.get(url)
+        if is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = reverse("auth_login")
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
         
     def test_404_ok(self):
         response = self.client.get("/jhjhjkahekhj", follow=True)
@@ -162,10 +175,15 @@ class ArticleTest(BaseArticleTest):
     def test_article_edition_permission(self):
         initial_data = {'title': "test", 'content': "this is my article content"}
         article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
-        
+        url = article.get_edit_url()
         data = {"title": 'salut', "content": 'oups'}
-        response = self.client.post(article.get_edit_url(), data=data, follow=True)
-        self.assertEqual(response.status_code, 403)
+        response = self.client.post(url, data=data)
+        if is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = reverse("auth_login")
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
         
         article = get_article_class().objects.get(id=article.id)
         self.assertEquals(article.title, initial_data['title'])
@@ -183,16 +201,17 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(article.get_absolute_url(), follow=True)
         self.assertEqual(200, response.status_code)
         
-        response = self.client.get(article.get_edit_url(), follow=True)
-        self.assertEqual(403, response.status_code)
-        #self.assertEqual(200, response.status_code) #if can_edit returns 404 error
-        #next_url = response.redirect_chain[-1][0]
-        #expected_next = article.get_edit_url().replace('/', '%2F')
-        #login_url = reverse('django.contrib.auth.views.login')+"?next="+expected_next
-        #self.assertTrue(login_url in next_url)
-        
+        url = article.get_edit_url()
+        response = self.client.get(url, follow=False)
+        if is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = reverse("auth_login")
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
+    
         self._log_as_editor()
-        response = self.client.get(article.get_edit_url(), follow=True)
+        response = self.client.get(article.get_edit_url(), follow=False)#follow was TRue?
         self.assertEqual(200, response.status_code)
         
     def test_aloha_loaded(self):
@@ -222,8 +241,15 @@ class ArticleTest(BaseArticleTest):
     def test_view_draft_article(self):
         self.client.logout()
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
-        response = self.client.get(article.get_absolute_url())
-        self.assertEqual(403, response.status_code)
+        url = article.get_absolute_url()
+        response = self.client.get(url)
+        if is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = reverse("auth_login")
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
+        
         self._log_as_editor()
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
@@ -4445,4 +4471,51 @@ class BlockInheritanceTest(BaseArticleTest):
         self.assertContains(response, "*** HELLO FROM PARENT ***")
         self.assertContains(response, "*** HELLO FROM BLOCK ***")
 
+class PermissionMiddlewareTest(BaseArticleTest):
+    
+    def setUp(self):
+        super(PermissionMiddlewareTest, self).setUp()
+        self._MIDDLEWARE_CLASSES = settings.MIDDLEWARE_CLASSES
+        if not 'coop_cms.middleware.PermissionsMiddleware' in settings.MIDDLEWARE_CLASSES:
+            settings.MIDDLEWARE_CLASSES += ('coop_cms.middleware.PermissionsMiddleware',)
         
+    def tearDown(self):
+        super(PermissionMiddlewareTest, self).tearDown()
+        self.MIDDLEWARE_CLASSES = self._MIDDLEWARE_CLASSES
+        
+    def test_view_draft_anonymous(self):
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
+        self.assertEqual(article.is_draft(), True)
+        url = article.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(302, response.status_code)
+        auth_url = reverse("auth_login")
+        self.assertRedirects(response, auth_url+'?next='+url)
+        
+    def test_edit_anonymous(self):
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
+        self.assertEqual(article.is_draft(), True)
+        url = article.get_edit_url()
+        response = self.client.get(url)
+        self.assertEqual(302, response.status_code)
+        auth_url = reverse("auth_login")
+        self.assertRedirects(response, auth_url+'?next='+url)
+        
+    def test_view_published_anonymous(self):
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        self.assertEqual(article.is_draft(), False)
+        url = article.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+        
+    def test_view_draft_not_allowed(self):
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
+        self.assertEqual(article.is_draft(), True)
+        
+        self._log_as_non_editor()
+        
+        url = article.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(403, response.status_code)
+        
+    
