@@ -251,7 +251,7 @@ class EditableFormsetView(TemplateView):
             for f in self.formset:
                 errors = f.errors
                 if errors:
-                    logger.error(error)
+                    logger.error(errors)
         
         return render_to_response(
             self.get_template(),
