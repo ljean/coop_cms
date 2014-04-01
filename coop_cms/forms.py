@@ -354,7 +354,7 @@ class NewsletterAdminForm(forms.ModelForm):
                 'items': ChosenSelectMultiple(),
             })
         except NameError:
-            print 'No ChosenSelectMultiple'
+            #print 'No ChosenSelectMultiple'
             pass
 
     class Media:
