@@ -99,7 +99,7 @@ class EditableObjectView(View):
                 raise
         
         if not self.can_view_object():
-            logger.error("PermissionDenied")
+            logger.warning("PermissionDenied")
             #error_message(request, _(u'Permission denied'))
             raise PermissionDenied
         
@@ -118,7 +118,7 @@ class EditableObjectView(View):
         self.object = self.get_object()
         
         if not self.can_edit_object():
-            logger.error("PermissionDenied")
+            logger.warning("PermissionDenied")
             raise PermissionDenied
         
         self.form = self.form_class(request.POST, request.FILES, instance=self.object)
@@ -251,7 +251,7 @@ class EditableFormsetView(TemplateView):
             for f in self.formset:
                 errors = f.errors
                 if errors:
-                    logger.error(errors)
+                    logger.warning(errors)
         
         return render_to_response(
             self.get_template(),
