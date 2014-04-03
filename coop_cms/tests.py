@@ -2808,7 +2808,80 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, a1.content)
         
+
+class PieceOfHtmlTagsTest(BaseTestCase):
+    
+    def test_create_poc(self):
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" %}')
+        html = tpl.render(Context({}))
+        self.assertEqual(html, "")
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
         
+    def test_existing_poc(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" %}')
+        html = tpl.render(Context({}))
+        self.assertEqual(html, poc.content)
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        
+    def test_create_poc_read_only(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" read-only %}')
+        html = tpl.render(Context({}))
+        self.assertEqual(html, poc.content)
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        
+    def test_create_edit_poc(self):
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" %}')
+        html = tpl.render(Context({"djaloha_edit": True}))
+        self.assertNotEqual(html, "")
+        
+        soup = BeautifulSoup(html)
+        tags = soup.select("#djaloha_djaloha__coop_cms__PieceOfHtml__div_id__test__content")
+        self.assertEqual(len(tags), 1)
+        self.assertEqual(tags[0].text, "")
+        
+        tags_hidden = soup.select("#djaloha_djaloha__coop_cms__PieceOfHtml__div_id__test__content_hidden")
+        self.assertEqual(len(tags_hidden), 1)
+        self.assertEqual(tags_hidden[0].get("value", ""), "")
+        
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        
+    def test_edit_poc(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" %}')
+        html = tpl.render(Context({"djaloha_edit": True}))
+        self.assertNotEqual(html, poc.content)
+        
+        soup = BeautifulSoup(html)
+        tags = soup.select("#djaloha_djaloha__coop_cms__PieceOfHtml__div_id__test__content")
+        self.assertEqual(len(tags), 1)
+        self.assertEqual(tags[0].text, poc.content)
+        
+        tags_hidden = soup.select("#djaloha_djaloha__coop_cms__PieceOfHtml__div_id__test__content_hidden")
+        self.assertEqual(len(tags_hidden), 1)
+        self.assertEqual(tags_hidden[0]["value"], poc.content)
+        
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        
+    def test_edit_poc_read_only(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" read-only %}')
+        html = tpl.render(Context({"djaloha_edit": True}))
+        self.assertEqual(html, poc.content)
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
         
 class ArticleTemplateTagsTest(BaseTestCase):
     

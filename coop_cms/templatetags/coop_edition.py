@@ -15,6 +15,7 @@ logger = logging.getLogger("coop_cms")
 
 ################################################################################
 class PieceOfHtmlEditNode(DjalohaEditNode):
+    
     def render(self, context):
         if context.get('form', None) or context.get('formset', None):
             context.dicts[0]['djaloha_edit'] = True
@@ -23,8 +24,12 @@ class PieceOfHtmlEditNode(DjalohaEditNode):
 
 @register.tag
 def coop_piece_of_html(parser, token):
-    div_id = token.split_contents()[1]
-    return PieceOfHtmlEditNode(PieceOfHtml, {'div_id': div_id}, 'content')
+    args = token.split_contents()
+    div_id = args[1]
+    read_only = False
+    if len(args)>2:
+        read_only = (args[2]=="read-only")
+    return PieceOfHtmlEditNode(PieceOfHtml, {'div_id': div_id}, 'content', read_only)
 
 ################################################################################
 
