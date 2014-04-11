@@ -33,6 +33,12 @@ import logging
 from django.utils.translation import activate, get_language
 from unittest import skipIf
 
+try:
+    AUTH_LOGIN_NAME = "auth_login"
+    reverse(AUTH_LOGIN_NAME)
+except:
+    AUTH_LOGIN_NAME = "login"
+
 class BaseTestCase(TestCase):
     def setUp(self):
         logging.disable(logging.CRITICAL)
@@ -134,7 +140,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse("auth_login")
+            auth_url = reverse(AUTH_LOGIN_NAME)
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -180,7 +186,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.post(url, data=data)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse("auth_login")
+            auth_url = reverse(AUTH_LOGIN_NAME)
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -205,7 +211,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url, follow=False)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse("auth_login")
+            auth_url = reverse(AUTH_LOGIN_NAME)
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -245,7 +251,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse("auth_login")
+            auth_url = reverse(AUTH_LOGIN_NAME)
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -686,7 +692,7 @@ class NavigationTest(BaseTestCase):
         #Add a second node as child
         link2 = Link.objects.create(url="http://www.python.org")
         data['object_id'] = link2.id
-        data['parent_id'] = link.id
+        data['parent_id'] = nav_node.id
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
@@ -2666,9 +2672,31 @@ class HomepageTest(UserBaseTestCase):
         
 class UrlLocalizationTest(BaseTestCase):
     
+    def setUp(self):
+        activate(settings.LANGUAGES[0][0])
+    
+    def tearDown(self):
+        activate(settings.LANGUAGES[0][0])
+    
+    def _log_as_editor(self):
+        self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
+        
+        ct = ContentType.objects.get_for_model(get_article_class())
+        
+        perm = 'change_{0}'.format(ct.model)
+        can_edit_article = Permission.objects.get(content_type=ct, codename=perm)
+        user.user_permissions.add(can_edit_article)
+        
+        perm = 'add_{0}'.format(ct.model)
+        can_add_article = Permission.objects.get(content_type=ct, codename=perm)
+        user.user_permissions.add(can_add_article)
+        
+        user.is_active = True
+        user.save()
+        return self.client.login(username='toto', password='toto')
+    
     @skipIf(not is_localized() and len(settings.LANGUAGES)<2, "not localized")
     def test_get_locale_article(self):
-        
         original_text = '*!-+' * 10
         translated_text = ':%@/' * 9
         
@@ -2775,6 +2803,195 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertEqual(original_slug, a1.slug)
         self.assertEqual(original_trans_slug, getattr(a1, 'slug_'+trans_lang))
+        
+    @skipIf(not is_localized(), "not localized")
+    def test_localized_slug_already_existing(self):
+        
+        Article = get_article_class()
+        a1 = Article.objects.create(title=u"Home", content="aa")
+        a2 = Article.objects.create(title=u"Rome", content="aa")
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        setattr(a1, 'title_'+trans_lang, a2.title)
+        a1.save()
+        
+        a2.save()
+        
+        setattr(a2, 'title_'+trans_lang, a2.title)
+        a2.save()
+        
+        self.assertNotEqual(getattr(a2, 'slug_'+trans_lang), getattr(a1, 'slug_'+trans_lang))
+        
+    @skipIf(not is_localized(), "not localized")
+    def test_localized_slug_already_existing2(self):
+        
+        Article = get_article_class()
+        a1 = Article.objects.create(title=u"Home", content="aa")
+        a2 = Article.objects.create(title=u"Rome", content="aa")
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        setattr(a1, 'title_'+trans_lang, a2.title)
+        a1.save()
+        
+        setattr(a2, 'title_'+trans_lang, a2.title)
+        a2.save()
+        
+        self.assertNotEqual(getattr(a2, 'slug_'+trans_lang), getattr(a1, 'slug_'+trans_lang))
+        
+    @skipIf(not is_localized(), "not localized")
+    def test_localized_slug_already_existing3(self):
+        self._log_as_editor()
+        Article = get_article_class()
+
+        a1 = Article.objects.create(title=u"Home", content="aa")
+        a2 = Article.objects.create(title=u"Rome", content="aa", template='test/article.html')
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        setattr(a1, 'title_'+trans_lang, a2.title)
+        a1.save()
+        
+        #CHANGE LANGUUAGE
+        activate(trans_lang)
+        
+        url = a2.get_edit_url()
+        
+        data = {
+            'title': a2.title,
+            'content': 'translation', 
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        a2_updated = Article.objects.get(id=a2.id)
+        
+        self.assertEqual(getattr(a2_updated, 'title_'+trans_lang), a2.title)
+        
+        self.assertNotEqual(getattr(a2_updated, 'slug_'+trans_lang), getattr(a1, 'slug_'+trans_lang))
+        
+    @skipIf(not is_localized(), "not localized")
+    def test_localize_existing_article1(self):
+        self._log_as_editor()
+        Article = get_article_class()
+        a1 = Article.objects.create(title=u"Home", template='test/article.html')
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        #CHANGE LANGUUAGE
+        activate(trans_lang)
+        
+        url = a1.get_edit_url()
+        
+        data = {
+            'title': u"Home",
+            'content': 'translation', 
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        a1_updated = Article.objects.get(id=a1.id)
+        
+        self.assertEqual(getattr(a1_updated, 'title_'+trans_lang), a1.title)
+        self.assertEqual(getattr(a1_updated, 'slug_'+trans_lang), getattr(a1, 'slug_'+origin_lang))
+        
+    @skipIf(not is_localized(), "not localized")
+    def test_localize_existing_article2(self):
+        self._log_as_editor()
+        Article = get_article_class()
+        a1 = Article.objects.create(title=u"Accueil", template='test/article.html')
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        #CHANGE LANGUUAGE
+        activate(trans_lang)
+        
+        url = a1.get_edit_url()
+        
+        data = {
+            'title': u"Home",
+            'content': 'translation', 
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        a1_updated = Article.objects.get(id=a1.id)
+        self.assertEqual(getattr(a1_updated, 'title_'+origin_lang), a1.title)
+        self.assertEqual(getattr(a1_updated, 'title_'+trans_lang), data["title"])
+        self.assertEqual(getattr(a1_updated, 'slug_'+trans_lang), "home")
+        self.assertEqual(getattr(a1_updated, 'slug_'+origin_lang), "accueil")
+        
+    @skipIf(not is_localized(), "not localized")
+    def test_localized_slug_already_existing4(self):
+        self._log_as_editor()
+        Article = get_article_class()
+        a1 = Article.objects.create(title=u"Home", content="aa")
+        a2 = Article.objects.create(title=u"Rome", content="aa", template='test/article.html')
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        self.assertEqual(None, getattr(a2, 'slug_'+trans_lang))
+        
+        #CHANGE LANGUUAGE
+        activate(trans_lang)
+        
+        url = a2.get_edit_url()
+        
+        data = {
+            'title': a1.title,
+            'content': 'translation', 
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        a2_updated = Article.objects.get(id=a2.id)
+        
+        self.assertEqual(getattr(a2_updated, 'title_'+trans_lang), a1.title)
+        
+        self.assertNotEqual(getattr(a2_updated, 'slug_'+trans_lang), a1.slug)
+        
+    @skipIf(not is_localized(), "not localized")
+    def test_localized_slug_already_existing5(self):
+        self._log_as_editor()
+        Article = get_article_class()
+        a1 = Article.objects.create(title=u"Home", content="aa")
+        a2 = Article.objects.create(title=u"Rome", content="aa", template='test/article.html')
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        self.assertEqual(None, getattr(a2, 'slug_'+trans_lang))
+        
+        setattr(a2, 'title_'+trans_lang, a1.title)
+        a2.save()
+        self.assertNotEqual(a1.slug, getattr(a2, 'slug_'+trans_lang))
+        
+        #CHANGE LANGUUAGE
+        activate(trans_lang)
+        
+        url = a2.get_edit_url()
+        
+        data = {
+            'title': a1.title,
+            'content': 'translation', 
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        a2_updated = Article.objects.get(id=a2.id)
+        
+        self.assertEqual(getattr(a2_updated, 'title_'+trans_lang), a1.title)
+        
+        self.assertNotEqual(getattr(a2_updated, 'slug_'+trans_lang), a1.slug)
             
     def test_no_title(self):
         Article = get_article_class()
@@ -4562,7 +4779,7 @@ class PermissionMiddlewareTest(BaseArticleTest):
         url = article.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        auth_url = reverse("auth_login")
+        auth_url = reverse(AUTH_LOGIN_NAME)
         self.assertRedirects(response, auth_url+'?next='+url)
         
     def test_edit_anonymous(self):
@@ -4571,8 +4788,9 @@ class PermissionMiddlewareTest(BaseArticleTest):
         url = article.get_edit_url()
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        auth_url = reverse("auth_login")
-        self.assertRedirects(response, auth_url+'?next='+url)
+        auth_url = reverse(AUTH_LOGIN_NAME)
+        self.assertEqual(response["Location"], "http://testserver"+auth_url+'?next='+url)
+        #self.assertRedirects(response, auth_url+'?next='+url)
         
     def test_view_published_anonymous(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
