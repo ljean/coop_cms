@@ -72,21 +72,11 @@ class ArticleAdmin(BaseAdminClass):
         (_('Debug'), {'fields': ('temp_logo',)}),
     )
     
-    def __init__(self, *args, **kwargs):
-        if not can_rewrite_url():
-            slug_fields = [] 
-            if is_localized():
-                for (lang, _name) in settings.LANGUAGES:
-                    slug_fields.append('slug_'+lang)
-            else:
-                slug_fields = ['slug']
-            self.readonly_fields = slug_fields + self.readonly_fields
-        super(ArticleAdmin, self).__init__(*args, **kwargs)
-
     def get_form(self, request, obj=None, **kwargs):
         form = super(ArticleAdmin, self).get_form(request, obj, **kwargs)
         form.current_user = request.user
         return form
+    
 admin.site.register(get_article_class(), ArticleAdmin)
 
 admin.site.register(models.Link)

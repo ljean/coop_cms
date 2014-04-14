@@ -1,0 +1,2 @@
+<div id="id_readonly_{{name}}">{{ value|safe }}</div>
+<input type="hidden" id="id_{{name}}" name="{{ name }}"{% if value %} value="{{ value }}"{% endif %}{% if required %} required{% endif %}>
