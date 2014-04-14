@@ -65,11 +65,11 @@ class ArticleAdmin(BaseAdminClass):
     date_hierarchy = 'publication_date'
     fieldsets = (
         #(_('Navigation'), {'fields': ('navigation_parent',)}),
-        (_('General'), {'fields': ('slug', 'title', 'content')}),
-        (_('Advanced'), {'fields': ('sites', 'template', 'category', 'logo', 'in_newsletter')}),
-        (_('Publication'), {'fields': ('publication', 'publication_date', 'headline', 'is_homepage', 'homepage_for_site', 'created', 'modified')}),
-        (_('Summary'), {'fields': ('summary',)}),
-        (_('Debug'), {'fields': ('temp_logo',)}),
+        (_(u'General'), {'fields': ('slug', 'title', 'subtitle', 'publication', )}),
+        (_(u'Settings'), {'fields': ('sites', 'template', 'category', 'headline', 'is_homepage', 'logo', 'in_newsletter')}),
+        (_(u'Advanced'), {'fields': ('publication_date', 'homepage_for_site', 'created', 'modified')}),
+        (_(u'Content'), {'fields': ('content','summary',)}),
+        (_(u'Debug'), {'fields': ('temp_logo',)}),
     )
     
     def get_form(self, request, obj=None, **kwargs):
