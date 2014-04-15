@@ -4561,6 +4561,42 @@ class ArticlesByCaregoryTest(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, art.title)
+    
+    def test_view_articles_ordering(self):
+        Article = get_article_class()
+        cat = mommy.make(ArticleCategory)
+        
+        dt1 = datetime.now() + timedelta(1)
+        dt2 = datetime.now()
+        dt3 = datetime.now() - timedelta(2)
+        dt4 = datetime.now() - timedelta(1)
+        
+        
+        art1 = mommy.make(Article, category=cat, title=u"#ITEM1#", publication_date=dt1,
+            publication=BaseArticle.PUBLISHED)
+        art2 = mommy.make(Article, category=cat, title=u"#ITEM2#", publication_date=dt2,
+            publication=BaseArticle.PUBLISHED)
+        art3 = mommy.make(Article, category=cat, title=u"#ITEM3#", publication_date=dt3,
+            publication=BaseArticle.PUBLISHED)
+        art4 = mommy.make(Article, category=cat, title=u"#ITEM4#", publication_date=dt4,
+            publication=BaseArticle.PUBLISHED)
+        
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, art1.title)
+        self.assertContains(response, art2.title)
+        self.assertContains(response, art3.title)
+        self.assertContains(response, art4.title)
+        
+        content = response.content.decode('utf-8')
+        articles = sorted((art1, art2, art3, art4), key=lambda x: x.publication_date)
+        articles.reverse()
+        
+        positions = [content.find(a.title) for a in articles]
+        
+        self.assertEqual(positions, sorted(positions))
+        
         
     def test_view_no_articles(self):
         Article = get_article_class()

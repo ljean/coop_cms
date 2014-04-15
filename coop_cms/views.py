@@ -1040,7 +1040,8 @@ def articles_category(request, slug):
     if not request.user.has_perm('can_view_category', category):
         raise PermissionDenied()
     
-    articles = get_article_class().objects.filter(category=category, publication=models.BaseArticle.PUBLISHED).order_by("-created")
+    articles = get_article_class().objects.filter(
+        category=category, publication=models.BaseArticle.PUBLISHED).order_by("-publication_date")
     
     if articles.count()==0:
         raise Http404
