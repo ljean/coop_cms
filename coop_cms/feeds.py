@@ -2,6 +2,7 @@
 
 from django.contrib.syndication.views import Feed
 from coop_cms.settings import get_article_class
+from coop_cms.utils import dehtml
 
 class ArticleFeed(Feed):
     title = ""
@@ -13,7 +14,7 @@ class ArticleFeed(Feed):
         return Article.objects.filter(category__in_rss=True).order_by('-publication_date')
 
     def item_title(self, item):
-        return item.title
+        return dehtml(item.title)
 
     def item_description(self, item):
         return item.summary
