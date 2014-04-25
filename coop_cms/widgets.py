@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from floppyforms.widgets import ClearableFileInput, Select, SelectMultiple
+from floppyforms.widgets import ClearableFileInput, Select, SelectMultiple, HiddenInput
+
+
+class ReadOnlyInput(HiddenInput):
+    template_name = 'coop_cms/widgets/readonlyinput.html'
 
 class ImageEdit(ClearableFileInput):
     template_name = 'coop_cms/widgets/imageedit.html'

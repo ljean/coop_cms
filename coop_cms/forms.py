@@ -1,5 +1,5 @@
 from django import forms
-from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending, Link, Document, Fragment
+from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending, Link, Document, Fragment, BaseArticle
 from django.contrib.contenttypes.models import ContentType
 from settings import get_navigable_content_types
 from django.core.exceptions import ValidationError
@@ -14,7 +14,9 @@ from django.core.urlresolvers import reverse
 from coop_cms.utils import dehtml
 from datetime import datetime
 from django.utils.timezone import now as dt_now
-from coop_cms.widgets import ChosenSelectMultiple
+from coop_cms.widgets import ChosenSelectMultiple, ReadOnlyInput
+from settings import is_localized, can_rewrite_url
+from django.contrib.auth.models import Permission
 
 class NavTypeForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -158,6 +160,24 @@ class ArticleAdminForm(forms.ModelForm):
         templates = get_article_templates(self.article, self.current_user)
         if templates:
             self.fields['template'].widget = forms.Select(choices=templates)
+        
+        Article = get_article_class()
+        
+        self.slug_fields = []
+        if is_localized():
+            for (lang, _name) in settings.LANGUAGES:
+                self.slug_fields.append('slug_'+lang)
+        else:
+            self.slug_fields = ['slug']
+        
+        can_change_article_slug = can_rewrite_url()
+        
+        if not can_change_article_slug:
+            can_change_article_slug = (self.article.publication != BaseArticle.PUBLISHED) if self.article else True
+        
+        for slug_field in self.slug_fields:
+            if not can_change_article_slug:
+                self.fields[slug_field].widget = ReadOnlyInput()
 
     class Meta:
         model = get_article_class()

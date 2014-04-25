@@ -475,7 +475,8 @@ class BaseArticle(BaseNavigable):
                 locale_slug = getattr(self, loc_slug_var, '')
                 
                 if locale_title and not locale_slug:
-                    slug = self.get_unique_slug(loc_slug_var, locale_title)
+                    #slug = self.get_unique_slug(loc_slug_var, locale_title)
+                    slug = self.get_unique_slug('slug', locale_title)
                     setattr(self, loc_slug_var, slug)
         else:
             if not self.slug:
@@ -500,22 +501,39 @@ class BaseArticle(BaseNavigable):
         #no html in title
         title = dehtml(title)
         slug = slugify(title)
-        next, origin_slug = 2, slug
-        while True:
+        next_suffix, origin_slug = 2, slug
+        Article = get_article_class()
+        slug_exists = True
+        while slug_exists:
             #Check that this slug doesn't already exist
             #The slug must be unique for all sites
-            Article = get_article_class()
-            try:
-                attrs = {slug_field: slug}
-                if self.id:
-                    Article.objects.get(Q(**attrs) & ~Q(id=self.id))
-                else:
-                    Article.objects.get(**attrs)
+            if is_localized():
+                from modeltranslation.utils import build_localized_fieldname
+                slug_fields = []
+                for (lang_code, lang_name) in settings.LANGUAGES:
+                    loc_slug_var = build_localized_fieldname('slug', lang_code)
+                    slug_fields.append(loc_slug_var)
+            else:
+                slug_fields = ('slug',)
+            
+            slug_exists = False
+            for slug_field in slug_fields:
+                try:
+                    attrs = {slug_field: slug}
+                    if self.id:
+                        Article.objects.get(Q(**attrs) & ~Q(id=self.id))
+                    else:
+                        Article.objects.get(**attrs)
+                    #the slug exists in one language: we can not use it, try another one
+                    slug_exists = True
+                    break
+                except Article.DoesNotExist:
+                    pass #Ok this slug is not used: break the loop and return
+            
+            if slug_exists:
                 #oups the slug is already used: change it and try again
-                slug = u"{0}{1}".format(origin_slug, next)
-                next += 1
-            except Article.DoesNotExist:
-                break #Ok this slug is not used: break the loop and return
+                slug = u"{0}{1}".format(origin_slug, next_suffix)
+                next_suffix += 1
         return slug
         
     def template_name(self):
