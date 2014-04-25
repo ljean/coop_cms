@@ -1256,6 +1256,75 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(1, nodes.count())
         node = nodes[0]
         self.assertEqual(addrs[0], node.content_object.url)
+        
+    def test_delete_article(self):
+        Article = get_article_class()
+        article1 = mommy.make(Article, title="abcd")
+        article2 = mommy.make(Article, title="efgh")
+        
+        nodes = []
+        parent = None
+        for i, art in enumerate((article1, article2)):
+            node = NavNode.objects.create(
+                tree=self.tree, label=art.title, content_object=art, ordering=i+1, parent=None)
+            
+        article2.delete()
+        
+        self.assertEqual(1, Article.objects.count())
+            
+        nodes = NavNode.objects.all()
+        self.assertEqual(1, nodes.count())
+        node = nodes[0]
+        self.assertEqual(article1.get_absolute_url(), node.get_absolute_url())
+        
+    def test_invalid_node(self):
+        Article = get_article_class()
+        article = mommy.make(Article, title="abcd")
+        
+        ct = ContentType.objects.get_for_model(Article)
+        
+        nodes = []
+        parent = None
+        node1 = NavNode.objects.create(
+            tree=self.tree, label="#LABEL1#", content_type=None, object_id=article.id, ordering=1, parent=None)
+        
+        node2 = NavNode.objects.create(
+            tree=self.tree, label="#LABEL2#", content_type=ct, object_id=0, ordering=1, parent=None)
+        
+        nodes = NavNode.objects.all()
+        self.assertEqual(2, nodes.count())
+        self.assertEqual(None, nodes[0].get_absolute_url())
+        self.assertEqual(None, nodes[1].get_absolute_url())
+        
+        tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul%}')
+        html = tpl.render(Context({}))
+        self.assertTrue(html.find(node1.label)>0)
+        self.assertTrue(html.find(node2.label)>0)
+        
+    def test_delete_parent(self):
+        Article = get_article_class()
+        article = mommy.make(Article, title="abcd")
+        
+        ct = ContentType.objects.get_for_model(Article)
+        
+        nodes = []
+        parent = None
+        node1 = NavNode.objects.create(
+            tree=self.tree, label="#LABEL1#", content_type=None, object_id=article.id, ordering=1, parent=None)
+        
+        node2 = NavNode.objects.create(
+            tree=self.tree, label="#LABEL2#", content_type=ct, object_id=0, ordering=1, parent=None)
+        
+        nodes = NavNode.objects.all()
+        self.assertEqual(2, nodes.count())
+        self.assertEqual(None, nodes[0].get_absolute_url())
+        self.assertEqual(None, nodes[1].get_absolute_url())
+        
+        tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul%}')
+        html = tpl.render(Context({}))
+        self.assertTrue(html.find(node1.label)>0)
+        self.assertTrue(html.find(node2.label)>0)
+        
 
 class TemplateTagsTest(BaseTestCase):
     

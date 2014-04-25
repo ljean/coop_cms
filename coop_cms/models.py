@@ -115,8 +115,11 @@ class NavNode(models.Model):
     in_navigation = models.BooleanField(_("in navigation"), default=True)
 
     def get_absolute_url(self):
-        if self.content_object:
-            return self.content_object.get_absolute_url()
+        try:
+            if self.content_object:
+                return self.content_object.get_absolute_url()
+        except AttributeError:
+            pass
         return None
     
     def is_active_node(self):
