@@ -83,7 +83,7 @@ class GenericViewTestCase(BaseTestCase):
         response = self.client.get(url)
         if coop_settings.is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(reverse(AUTH_LOGIN_NAME))
+            auth_url = reverse(AUTH_LOGIN_NAME)
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -94,7 +94,7 @@ class GenericViewTestCase(BaseTestCase):
         
         if coop_settings.is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(reverse(AUTH_LOGIN_NAME))
+            auth_url = reverse(AUTH_LOGIN_NAME)
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)

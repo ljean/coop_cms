@@ -16,7 +16,7 @@ from django.utils.html import escape
 from django.core.exceptions import ValidationError
 # from html_field.db.models import HTMLField
 # from html_field import html_cleaner
-from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes
+from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes, get_article_logo_crop
 from coop_cms.settings import get_navtree_class, is_localized, COOP_CMS_NAVTREE_CLASS, get_article_templates
 from coop_cms.settings import get_default_logo, is_requestprovider_installed
 from coop_cms.utils import dehtml
@@ -412,7 +412,7 @@ class BaseArticle(BaseNavigable):
             except IndexError:
                 pass
 
-    def logo_thumbnail(self, temp=False, logo_size=None):
+    def logo_thumbnail(self, temp=False, logo_size=None, logo_crop=None):
         logo = self.temp_logo if (temp and self.temp_logo) else self.logo
         size = logo_size or get_article_logo_size(self)
         logo_file = None
@@ -423,9 +423,11 @@ class BaseArticle(BaseNavigable):
                 pass
         if not logo_file:
             logo_file = self._get_default_logo()
+        crop = logo_crop or get_article_logo_crop(self)
         try:
-            return sorl_thumbnail.backend.get_thumbnail(logo_file, size, crop='center')
+            return sorl_thumbnail.backend.get_thumbnail(logo_file, size, crop=crop)
         except Exception, msg:
+            print "#### ERR", msg
             return logo_file
 
     def _get_default_logo(self):

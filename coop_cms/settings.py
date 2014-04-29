@@ -162,23 +162,29 @@ def get_article_templates(article, user):
 
     return article_templates
 
-def get_article_logo_size(article):
+def _get_article_setting(article, setting_name, default_value):
     try:
-        get_size_name = getattr(django_settings, 'COOP_CMS_ARTICLE_LOGO_SIZE')
+        get_setting_name = getattr(django_settings, setting_name)
         try:
-            module_name, fct_name = get_size_name.rsplit('.', 1)
+            module_name, fct_name = get_setting_name.rsplit('.', 1)
             module = import_module(module_name)
-            get_size = getattr(module, fct_name)
-            if callable(get_size):
-                size = get_size(article)
+            get_setting = getattr(module, fct_name)
+            if callable(get_setting):
+                value = get_setting(article)
             else:
-                size = get_size
+                value = get_setting
         except ValueError:
-            size = get_size_name
+            value = get_setting_name
 
     except AttributeError:
-        size = "48x48"
-    return size
+        value = default_value
+    return value
+
+def get_article_logo_size(article):
+    return _get_article_setting(article, 'COOP_CMS_ARTICLE_LOGO_SIZE', '48x48')
+
+def get_article_logo_crop(article):
+    return _get_article_setting(article, 'COOP_CMS_ARTICLE_LOGO_CROP', 'center')
 
 def get_newsletter_item_classes():
     if hasattr(get_newsletter_item_classes, '_cache_class'):

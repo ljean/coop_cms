@@ -1,0 +1,14 @@
+{% extends "coop_cms/article.html" %}
+{% load coop_edition coop_utils i18n %}
+
+{% block article %}
+{% cms_edit article logo_size="32x32" logo_crop="top" %}
+    {{ article.title }}
+    {{ article.logo }}
+    {{ article.content }}
+{% end_cms_edit %}
+
+{% if_cms_edition %} {% include "coop_cms/_article_publication.html" %} {% endif %}
+
+{% endblock %}
+

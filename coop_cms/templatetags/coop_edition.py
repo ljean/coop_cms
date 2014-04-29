@@ -184,9 +184,10 @@ CMS_FORM_TEMPLATE = """
 
 class SafeWrapper:
 
-    def __init__(self, wrapped, logo_size=None):
+    def __init__(self, wrapped, logo_size=None, logo_crop=None):
         self._wrapped = wrapped
         self._logo_size = logo_size
+        self._logo_crop = logo_crop
 
     def __getattr__(self, field):
         value = getattr(self._wrapped, field)
@@ -194,7 +195,7 @@ class SafeWrapper:
         if hasattr(value, 'pk'):
             return value
         elif field=='logo':
-            src = getattr(self._wrapped, 'logo_thumbnail')(False, self._logo_size)
+            src = getattr(self._wrapped, 'logo_thumbnail')(False, self._logo_size, self._logo_crop)
             if src:
                 try:
                     t, _o = find_template("coop_cms/widgets/_img_logo.html")
@@ -211,11 +212,11 @@ class SafeWrapper:
 
 class FormWrapper:
 
-    def __init__(self, form, obj, logo_size=None):
+    def __init__(self, form, obj, logo_size=None, logo_crop=None):
         self._form = form
         self._obj = obj
         if logo_size:
-            self._form.set_logo_size(logo_size)
+            self._form.set_logo_size(logo_size, logo_crop)
 
     def __getitem__(self, field, logo_size=None):
         if field in self._form.fields.keys():
@@ -228,10 +229,13 @@ class FormWrapper:
 
 class CmsEditNode(template.Node):
 
-    def __init__(self, nodelist_content, var_name, logo_size=None):
+    def __init__(self, nodelist_content, var_name, logo_size=None, logo_crop=None):
         self.var_name = var_name
         self.nodelist_content = nodelist_content
-        self._logo_size = logo_size
+        self._logo_size = logo_size.strip("'").strip('"') if logo_size else None
+        self._logo_crop = logo_crop.strip("'").strip('"') if logo_crop else None
+        self._render_logo_size = self._logo_size and (self._logo_size!=logo_size)
+        self._render_logo_crop = self._logo_crop and (self._logo_crop!=logo_crop)
 
     def __iter__(self):
         for node in self.nodelist_content:
@@ -242,6 +246,12 @@ class CmsEditNode(template.Node):
         
         form = context.get('form', None)
         obj = context.get(self.var_name, None) if self.var_name else None
+        
+        if self._render_logo_size:
+            self._logo_size = context.get(self._logo_size, None)
+            
+        if self._render_logo_crop:
+            self._logo_crop = context.get(self._logo_crop, None)
         
         formset = context.get('formset', None)
         objects = context.get('objects', None)
@@ -269,17 +279,24 @@ class CmsEditNode(template.Node):
         if form or formset:
             t = template.Template(CMS_FORM_TEMPLATE)
             if form:
-                safe_context[self.var_name] = FormWrapper(form, obj, logo_size=self._logo_size)
+                safe_context[self.var_name] = FormWrapper(
+                    form, obj, logo_size=self._logo_size, logo_crop=self._logo_crop)
             else:
-                safe_context['objects'] = [FormWrapper(f, o, logo_size=self._logo_size) for (f, o) in zip(formset, objects)]
+                safe_context['objects'] = [
+                    FormWrapper(f, o, logo_size=self._logo_size, logo_crop=self._logo_crop)
+                    for (f, o) in zip(formset, objects)
+                ]
             outer_context.update(csrf(request))
             #outer_context['inner'] = self.nodelist_content.render(template.Context(inner_context))
         else:
             t = template.Template("{{inner|safe}}")
             if obj:
-                safe_context[self.var_name] = SafeWrapper(obj, logo_size=self._logo_size)
+                safe_context[self.var_name] = SafeWrapper(
+                    obj, logo_size=self._logo_size, logo_crop=self._logo_crop)
             else:
-                safe_context['objects'] = [SafeWrapper(o, logo_size=self._logo_size) for o in objects]
+                safe_context['objects'] = [
+                    SafeWrapper(o, logo_size=self._logo_size, logo_crop=self._logo_crop) for o in objects
+                ]
                 
         managed_node_types = [
             template.TextNode, template.defaulttags.IfNode, template.defaulttags.ForNode,

@@ -32,6 +32,7 @@ from bs4 import BeautifulSoup
 import logging
 from django.utils.translation import activate, get_language
 from unittest import skipIf
+#from django.core.files.uploadedfile import SimpleUploadedFile
 
 try:
     AUTH_LOGIN_NAME = "auth_login"
@@ -3098,7 +3099,6 @@ class UrlLocalizationTest(BaseTestCase):
         response = self.client.get(a1.get_absolute_url())
         self.assertEqual(200, response.status_code)
         self.assertContains(response, a1.content)
-        
 
 class PieceOfHtmlTagsTest(BaseTestCase):
     
@@ -4619,7 +4619,7 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(f2.css_class, "")   
         self.assertEqual(f2.position, 1)
         
-class ArticlesByCaregoryTest(BaseTestCase):
+class ArticlesByCategoryTest(BaseTestCase):
 
     def test_view_articles(self):
         Article = get_article_class()
@@ -4734,7 +4734,8 @@ class ArticlesByCaregoryTest(BaseTestCase):
         Article = get_article_class()
         cat = mommy.make(ArticleCategory)
         for i in range(30):
-            art = mommy.make(Article, category=cat, title=u"AZERTY-{0}-UIOP".format(i), publication=BaseArticle.PUBLISHED)
+            art = mommy.make(Article, category=cat, publication_date=datetime(2014, 3, i+1),
+                title=u"AZERTY-{0}-UIOP".format(i), publication=BaseArticle.PUBLISHED)
         
         url = reverse('coop_cms_articles_category', args=[cat.slug])
         response = self.client.get(url)
@@ -4812,8 +4813,131 @@ class CoopCategoryTemplateTagTest(BaseTestCase):
         
         
         self.assertEqual(list(cat.get_articles_qs().all()), [art2])
+
+class ArticleLogoTest(BaseArticleTest):
+    
+    def _get_file(self, file_name='unittest1.png'):
+        full_name = os.path.normpath(os.path.dirname(__file__) + '/fixtures/' + file_name)
+        return open(full_name, 'rb')
+    
+    def setUp(self):
+        super(ArticleLogoTest, self).setUp()
+        self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
+        settings.COOP_CMS_ARTICLE_TEMPLATES = (
+            ('test/article_with_logo_size.html', 'Article with logo size'),
+            ('test/article_with_logo_size_and_crop.html', 'Article with logo size and crop'),
+            ('test/article_no_logo_size.html', 'Article no logo size and crop'),
+        )
+        self._default_logo_size = getattr(settings, 'COOP_CMS_ARTICLE_LOGO_SIZE', None)
+        self._default_logo_crop = getattr(settings, 'COOP_CMS_ARTICLE_LOGO_CROP', None)
         
-   
+    def tearDown(self):
+        super(ArticleLogoTest, self).tearDown()
+        #restore
+        settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
+        settings.COOP_CMS_ARTICLE_LOGO_SIZE = self._default_logo_size
+        settings.COOP_CMS_ARTICLE_LOGO_CROP = self._default_logo_crop
+        
+    def test_view_article_no_image(self, template_index=0, image=False):
+        Article = get_article_class()
+        a = mommy.make(Article,
+            title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+            template = settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0])
+        if image:
+            a.logo = File(self._get_file())
+            a.save()
+        
+        response = self.client.get(a.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertContains(response, a.title)
+        self.assertContains(response, a.content)
+        
+    def test_view_article_no_image_crop(self):
+        self.test_view_article_no_image(1)
+        
+    def test_view_article_image_no_crop(self):
+        self.test_view_article_no_image(0, True)
+        
+    def test_view_article_image_and_crop(self):
+        self.test_view_article_no_image(1, True)
+        
+    def test_edit_article_no_image(self, template_index=0, image=False, post_image=False):
+        Article = get_article_class()
+        if image:
+            a = mommy.make(Article,
+                title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+                template = settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0], logo=File(self._get_file())
+            )
+        else:
+            a = mommy.make(Article,
+                title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+                template = settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0]
+            )
+            
+        self._log_as_editor()
+        
+        response = self.client.post(a.get_edit_url())
+        self.assertEqual(response.status_code, 200)
+        
+        data = {
+            'title': 'Title of the article',
+            'content': 'The content',
+        }
+        if post_image:
+            data['logo'] = self._get_file('unittest2.png')
+        response = self.client.post(a.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        
+        a = Article.objects.get(id=a.id)
+        
+        self.assertEqual(data['title'], a.title)
+        self.assertEqual(data['content'], a.content)
+        
+        self.assertContains(response, a.title)
+        self.assertContains(response, a.content)
+        
+    def test_edit_article_no_image_crop(self):
+        self.test_edit_article_no_image(1)
+        
+    def test_edit_article_image_no_post_no_crop(self):
+        self.test_edit_article_no_image(0, True, False)
+        
+    def test_edit_article_image_no_post_crop(self):
+        self.test_edit_article_no_image(1, True, False)
+        
+    def test_edit_article_image_post_no_crop(self):
+        self.test_edit_article_no_image(0, True, True)
+        
+    def test_edit_article_image_post_crop(self):
+        self.test_edit_article_no_image(1, True, True)
+    
+    def test_view_article_no_image_template1(self):
+        self.test_view_article_no_image(2, False)
+        
+    def test_view_article_no_image_template2(self):
+        self.test_view_article_no_image(2, True)
+        
+    def test_view_article_no_image_template3(self):
+        settings.COOP_CMS_ARTICLE_LOGO_SIZE = "x100"
+        settings.COOP_CMS_ARTICLE_LOGO_CROP = "top"
+        self.test_view_article_no_image(2, True)
+        
+    def test_edit_article_no_image_template1(self):
+        self.test_edit_article_no_image(2, False, False)
+        
+    def test_edit_article_no_image_template2(self):
+        self.test_edit_article_no_image(2, True, False)
+        
+    def test_edit_article_no_image_template3(self):
+        self.test_edit_article_no_image(2, True, True)
+        
+    def test_edit_article_no_image_template4(self):
+        settings.COOP_CMS_ARTICLE_LOGO_SIZE = "x100"
+        settings.COOP_CMS_ARTICLE_LOGO_CROP = "top"
+        self.test_edit_article_no_image(2, True, True)
+    
+        
 class BlockInheritanceTest(BaseArticleTest):
     
     def setUp(self):
