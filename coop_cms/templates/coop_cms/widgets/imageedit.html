@@ -8,7 +8,7 @@
                 return document.title;
             },
             onComplete : function(){
-                $("form#template-form").ajaxForm({
+                $("form.colorbox-form").ajaxForm({
                     dataType: 'json',
                     success: function (data) {
                         if (data['src']){
