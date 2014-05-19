@@ -232,6 +232,8 @@ class ArticleSettingsForm(WithNavigationModelForm):
         kwargs['initial'] = initials
         super(ArticleSettingsForm, self).__init__(*args, **kwargs)
 
+        self.fields['category'].queryset = self.fields['category'].queryset.filter(sites=settings.SITE_ID)
+
         choices = get_article_templates(article, user)
         if choices:
             self.fields["template"] = forms.ChoiceField(choices=choices)

@@ -4866,12 +4866,12 @@ class ArticleLogoTest(BaseArticleTest):
         Article = get_article_class()
         if image:
             a = mommy.make(Article,
-                title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+                title=u"This is my article", content=u"<p>This is my <b>content</b></p>", slug="",
                 template = settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0], logo=File(self._get_file())
             )
         else:
             a = mommy.make(Article,
-                title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+                title=u"This is my article", content=u"<p>This is my <b>content</b></p>", slug="",
                 template = settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0]
             )
             
@@ -5122,9 +5122,15 @@ class ArticleAdminTest(BaseArticleTest):
         
 class MultiSiteTest(BaseArticleTest):
     
+    def setUp(self):
+        self.settings_site_id = settings.SITE_ID
+        settings.SITE_ID = 1
+        
+    def tearDown(self):
+         settings.SITE_ID = self.settings_site_id
+    
     def test_article_category_other_site(self):
         Article = get_article_class()
-        settings.SITE_ID = 1
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = mommy.make(Site)
         
@@ -5149,7 +5155,6 @@ class MultiSiteTest(BaseArticleTest):
         
     def test_article_category_same_site(self):
         Article = get_article_class()
-        settings.SITE_ID = 1
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = mommy.make(Site)
         
@@ -5170,7 +5175,6 @@ class MultiSiteTest(BaseArticleTest):
         
     def test_article_category_not_published(self):
         Article = get_article_class()
-        settings.SITE_ID = 1
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = mommy.make(Site)
         
@@ -5188,4 +5192,40 @@ class MultiSiteTest(BaseArticleTest):
         
         self.assertEqual(art1.previous_in_category(), None)
         self.assertEqual(art1.next_in_category(), None)
+        
+    def test_article_category(self, ):
+        self._log_as_editor()
+        
+        Article = get_article_class()
+        site1 = Site.objects.get(id=settings.SITE_ID)
+        site2 = mommy.make(Site)
+        
+        cat = mommy.make(ArticleCategory)
+        self.assertEqual(list(cat.sites.all()), [site1])
+        
+        cat2 = mommy.make(ArticleCategory)
+        cat2.sites.remove(site1)
+        cat2.sites.add(site2)
+        cat2.save()
+        self.assertEqual(list(cat2.sites.all()), [site2])
+        
+        cat3 = mommy.make(ArticleCategory)
+        cat3.sites.remove(site1)
+        cat3.save()
+        self.assertEqual(list(cat3.sites.all()), [])
+        
+        art1 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED)
+        
+        url = reverse('coop_cms_article_settings', args=[art1.id])
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+        
+        soup = BeautifulSoup(response.content)
+        cat_choices = soup.select("select#id_category option")
+        self.assertEqual(2, len(cat_choices))
+        self.assertEqual("", cat_choices[0]["value"])
+        self.assertEqual(str(cat.id), cat_choices[1]["value"])
+        self.assertEqual(cat.name, cat_choices[1].text)
+        
+    
     

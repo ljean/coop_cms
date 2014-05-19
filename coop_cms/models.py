@@ -290,6 +290,7 @@ class ArticleCategory(models.Model):
     ordering = models.IntegerField(_(u'ordering'), default=0)
     in_rss = models.BooleanField(_(u'in rss'), default=False,
         help_text=_(u"The articles of this category will be listed in the main rss feed"))
+    sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
 
     def __unicode__(self):
         return self.name
@@ -307,7 +308,15 @@ class ArticleCategory(models.Model):
     class Meta:
         verbose_name = _(u'article category')
         verbose_name_plural = _(u'article categories')
-
+        
+    def save(self, *args, **kwargs):
+        is_new = not bool(self.id)
+        ret = super(ArticleCategory, self).save(*args, **kwargs)
+        
+        if is_new:
+            site = Site.objects.get(id=settings.SITE_ID)
+            self.sites.add(site)
+            ret = super(ArticleCategory, self).save()
 
 class BaseNavigable(TimeStampedModel):
 
@@ -366,7 +375,9 @@ class BaseArticle(BaseNavigable):
             img_root = settings.CMS_ARTICLE_LOGO_FOLDER
         except AttributeError:
             img_root = 'cms_logos'
-        return u'{0}/{1}/{2}'.format(img_root, self.id, filename)
+        basename = os.path.basename(filename)   
+        return u'{0}/{1}/{2}'.format(img_root, self.id, basename)
+        
 
     #slug = AutoSlugField(populate_from='title', max_length=100, unique=True)
     slug = models.CharField(max_length=100, unique=True, db_index=True, blank=False)
@@ -537,7 +548,9 @@ class BaseArticle(BaseNavigable):
             
             if slug_exists:
                 #oups the slug is already used: change it and try again
-                slug = u"{0}{1}".format(origin_slug, next_suffix)
+                next_suffix_len = len(str(next_suffix))
+                safe_slug = origin_slug[:(100-next_suffix_len)]
+                slug = u"{0}{1}".format(safe_slug, next_suffix)
                 next_suffix += 1
         return slug
         
@@ -918,11 +931,4 @@ class Fragment(models.Model):
         return super(Fragment, self).save(*args, **kwargs)
         
     def __unicode__(self):
-        return u"{0} {1} {2}".format(self.type, self.position, self.name)
-    
-    
-    
-
-
-
-    
+        return u"{0} {1} {2}".format(self.type, self.position, self.name)    
