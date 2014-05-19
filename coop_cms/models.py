@@ -399,7 +399,8 @@ class BaseArticle(BaseNavigable):
     def next_in_category(self):
         if self.category:
             try:
-                return get_article_class().objects.filter(category=self.category, publication=BaseArticle.PUBLISHED,
+                return get_article_class().objects.filter(sites__id=settings.SITE_ID, category=self.category,
+                    publication=BaseArticle.PUBLISHED,
                     publication_date__gt=self.publication_date).order_by('publication_date')[0]
             except IndexError:
                 pass
@@ -407,7 +408,9 @@ class BaseArticle(BaseNavigable):
     def previous_in_category(self):
         if self.category:
             try:
-                return get_article_class().objects.filter(category=self.category,
+                return get_article_class().objects.filter(
+                    sites__id=settings.SITE_ID, category=self.category,
+                    publication=BaseArticle.PUBLISHED,
                     publication_date__lt=self.publication_date).order_by('-publication_date')[0]
             except IndexError:
                 pass

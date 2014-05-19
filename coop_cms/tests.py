@@ -5120,3 +5120,72 @@ class ArticleAdminTest(BaseArticleTest):
         else:
             self.assertEqual(soup.select("#id_slug")[0]["type"], "text")
         
+class MultiSiteTest(BaseArticleTest):
+    
+    def test_article_category_other_site(self):
+        Article = get_article_class()
+        settings.SITE_ID = 1
+        site1 = Site.objects.get(id=settings.SITE_ID)
+        site2 = mommy.make(Site)
+        
+        cat = mommy.make(ArticleCategory)
+        
+        art1 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED)
+        
+        art2 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED,
+            publication_date=art1.publication_date+timedelta(1))
+        art2.sites.add(site2)
+        art2.sites.remove(site1)
+        art2.save()
+        
+        art3 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED,
+            publication_date=art1.publication_date-timedelta(1))
+        art3.sites.add(site2)
+        art3.sites.remove(site1)
+        art3.save()
+        
+        self.assertEqual(art1.previous_in_category(), None)
+        self.assertEqual(art1.next_in_category(), None)
+        
+    def test_article_category_same_site(self):
+        Article = get_article_class()
+        settings.SITE_ID = 1
+        site1 = Site.objects.get(id=settings.SITE_ID)
+        site2 = mommy.make(Site)
+        
+        cat = mommy.make(ArticleCategory)
+        
+        art1 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED)
+        
+        art2 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED,
+            publication_date=art1.publication_date+timedelta(1))
+        
+        art3 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED,
+            publication_date=art1.publication_date-timedelta(1))
+        art3.sites.add(site2)
+        art3.save()
+        
+        self.assertEqual(art1.previous_in_category(), art3)
+        self.assertEqual(art1.next_in_category(), art2)
+        
+    def test_article_category_not_published(self):
+        Article = get_article_class()
+        settings.SITE_ID = 1
+        site1 = Site.objects.get(id=settings.SITE_ID)
+        site2 = mommy.make(Site)
+        
+        cat = mommy.make(ArticleCategory)
+        
+        art1 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED)
+        
+        art2 = mommy.make(Article, category=cat, publication=BaseArticle.DRAFT,
+            publication_date=art1.publication_date+timedelta(1))
+        
+        art3 = mommy.make(Article, category=cat, publication=BaseArticle.DRAFT,
+            publication_date=art1.publication_date-timedelta(1))
+        art3.sites.add(site2)
+        art3.save()
+        
+        self.assertEqual(art1.previous_in_category(), None)
+        self.assertEqual(art1.next_in_category(), None)
+    

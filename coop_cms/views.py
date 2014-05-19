@@ -80,7 +80,7 @@ def view_all_articles(request):
     return render_to_response(
         'coop_cms/view_all_articles.html',
         {
-            'articles': get_article_class().objects.all().order_by('-id')[:10],
+            'articles': get_article_class().objects.filter(sites__id=settings.SITE_ID).order_by('-id')[:10],
             'newsletters': models.Newsletter.objects.all().order_by('-id')[:10],
             'editable': True,
             'articles_list_url': articles_admin_url,
