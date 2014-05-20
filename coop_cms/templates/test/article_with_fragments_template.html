@@ -1,0 +1,28 @@
+{% extends "coop_cms/article.html" %}
+{% load coop_edition coop_utils i18n %}
+
+{% block article %}
+{% cms_edit article %}
+
+<div class="article-content">
+<div class="row">
+    <div class="col-md-12">
+    {{ article.title }}
+    </div>
+</div>    
+
+<div class="row">
+    <div class="col-md-9">
+    {{ article.content }}
+    </div>
+</div>
+</div>
+
+    {% coop_fragments "eggs" %}
+
+    {% coop_fragments "parts" template_name="test/_fragment.html" %}
+
+{% end_cms_edit %}
+
+{% if_cms_edition %} {% include "coop_cms/_article_publication.html" %} {% endif %}
+{% endblock %}

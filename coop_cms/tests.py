@@ -3550,6 +3550,7 @@ class FragmentsTest(BaseTestCase):
         settings.COOP_CMS_ARTICLE_TEMPLATES = (
             ('test/article_with_fragments.html', 'Article with fragments'),
             ('test/article_with_fragments_extra_id.html', 'Article with fragments extra id'),
+            ('test/article_with_fragments_template.html', 'Article with fragments template'),
         )
         
     def tearDown(self):
@@ -3850,6 +3851,80 @@ class FragmentsTest(BaseTestCase):
         positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [g1, f3, f4]]
         for pos in positions:
             self.assertTrue(pos==-1)
+            
+    def test_fragments_with_template(self):
+        ft_name = u"contacts"
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        
+        soup = BeautifulSoup(html)
+        self.assertEqual(0, len(soup.select('.panel')))
+        
+    def test_view_fragments_with_template(self):
+        ft_name = u"contacts"
+        ft = mommy.make(FragmentType, name=ft_name)
+        
+        f = mommy.make(Fragment, type=ft)
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        
+        soup = BeautifulSoup(html)
+        self.assertEqual(1, len(soup.select('.panel')))
+        
+    def test_view_fragments_with_template_edit_mode(self):
+        ft_name = u"contacts"
+        ft = mommy.make(FragmentType, name=ft_name)
+        
+        f = mommy.make(Fragment, type=ft)
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name, 'form': True}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        
+        soup = BeautifulSoup(html)
+        self.assertEqual(1, len(soup.select('.panel')))
+        self.assertEqual(1, len(soup.select('.panel input')))
+        self.assertEqual(1, len(soup.select('.panel .djaloha-editable')))
+    
+    def test_view_fragments_with_template2(self):
+        ft_name = u"contacts"
+        ft = mommy.make(FragmentType, name=ft_name)
+        
+        f = mommy.make(Fragment, type=ft)
+        f = mommy.make(Fragment, type=ft)
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        soup = BeautifulSoup(html)
+        self.assertEqual(2, len(soup.select('.panel')))
+        
+    def test_view_fragments_with_template3(self):
+        ft_name = u"contacts"
+        ft = mommy.make(FragmentType, name=ft_name)
+        
+        f = mommy.make(Fragment, type=ft)
+        f = mommy.make(Fragment, type=ft)
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name, 'form': True}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        soup = BeautifulSoup(html)
+        self.assertEqual(3, len(soup.select('.panel'))) # 1 extra panel if_cms_edition and fragment index > 0
     
     def _log_as_editor(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
