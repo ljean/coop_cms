@@ -46,9 +46,10 @@ class FragmentEditNode(DjalohaMultipleEditNode):
     def _get_object_lookup(self, obj):
         return {"id": obj.id}
 
-    def __init__(self, lookup):
+    def __init__(self, lookup, kwargs=None):
         super(FragmentEditNode, self).__init__(Fragment, lookup, 'content')
         self.fragment_filter = None
+        self.kwargs = kwargs or {}
     
     def _pre_object_render(self, obj):
         return u'<div class="coop-fragment {0}" rel="{1}">'.format(obj.css_class, obj.id)
@@ -56,9 +57,28 @@ class FragmentEditNode(DjalohaMultipleEditNode):
     def _post_object_render(self, obj):
         return u'</div>'
     
+    def _object_render(self, idx, obj, context):
+        value = getattr(obj, self._field_name)
+        template_name = self.kwargs.get('template_name', '')
+        if template_name:
+            template_name = self._resolve_arg(template_name, context)
+            t, _o = find_template(template_name)
+            object_content = t.render(template.Context({
+                'index': idx,
+                'fragment': self._render_value(context, self._get_object_lookup(obj), value),
+                'form': self._edit_mode #if_cms_edition --> active
+            }))
+        else:
+            object_content = self._pre_object_render(obj)
+            object_content += self._render_value(context, self._get_object_lookup(obj), value)
+            object_content += self._post_object_render(obj)
+        return object_content
+    
     def render(self, context):
+        self._edit_mode = False
         if context.get('form', None) or context.get('formset', None):
             context.dicts[0]['djaloha_edit'] = True
+            self._edit_mode = True
         #context.dicts[0]['can_edit_template'] = True
         html = super(FragmentEditNode, self).render(context)
         filter_id = self.fragment_filter.id if self.fragment_filter else ""
@@ -71,8 +91,15 @@ def coop_fragments(parser, token):
     args = token.split_contents()
     lookup = {'name': args[1]}
     if len(args) > 2:
-        lookup["extra_id"] = args[2]
-    return FragmentEditNode(lookup)
+        args2 = args[2]
+        if args2.find("=")<0:
+            lookup["extra_id"] = args2
+    kwargs = {}
+    for arg in args[2:]:
+        if arg.find("=")>0:
+            k, v = arg.split('=')
+            kwargs[k] = v
+    return FragmentEditNode(lookup, kwargs)
 
 ################################################################################
 class ArticleSummaryEditNode(DjalohaEditNode):
@@ -150,7 +177,7 @@ class IfCmsEditionNode(template.Node):
             yield node
 
     def _check_condition(self, context):
-        return context.get('form', None) or context.get('formset', None)
+        return context.get('form', None) or context.get('formset', None) 
 
     def render(self, context):
         if self._check_condition(context):

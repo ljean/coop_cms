@@ -233,6 +233,9 @@ def is_localized():
         return True
     return False
 
+def is_multilang():
+    return len(django_settings.LANGUAGES)>1
+
 def is_requestprovider_installed():
     return ('gadjo.requestprovider.middleware.RequestProvider' in django_settings.MIDDLEWARE_CLASSES)
     
