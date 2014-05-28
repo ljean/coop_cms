@@ -64,6 +64,7 @@ class FragmentEditNode(DjalohaMultipleEditNode):
             template_name = self._resolve_arg(template_name, context)
             t, _o = find_template(template_name)
             object_content = t.render(template.Context({
+                'css_class': obj.css_class,
                 'index': idx,
                 'fragment': self._render_value(context, self._get_object_lookup(obj), value),
                 'form': self._edit_mode #if_cms_edition --> active
