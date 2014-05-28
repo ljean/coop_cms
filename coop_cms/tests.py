@@ -2822,6 +2822,35 @@ class UrlLocalizationTest(BaseTestCase):
         response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
         self.assertEqual(200, response.status_code)
         self.assertContains(response, translated_text)
+        
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    def test_change_lang_next_url_after(self):
+        
+        original_text = '*!-+' * 10
+        translated_text = ':%@/' * 9
+        
+        a1 = get_article_class().objects.create(title="Home", content=original_text)
+        
+        a2 = get_article_class().objects.create(title="Next", content="****NEXT****")
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        setattr(a1, 'title_'+trans_lang, 'Accueil')
+        setattr(a1, 'content_'+trans_lang, translated_text)
+        
+        a1.save()
+        
+        origin_url = '/{0}/home'.format(origin_lang)
+        response = self.client.get(origin_url, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        data = {'language': trans_lang, 'next_url_after_change_lang': a2.get_absolute_url()}
+        response = self.client.post(reverse('coop_cms_change_language'),
+            data=data, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, a2.content)
             
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_change_lang_no_trans(self):

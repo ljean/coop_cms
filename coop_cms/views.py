@@ -1065,25 +1065,26 @@ def change_language(request):
     except ImportError:
         raise Http404
     
-    next = request.REQUEST.get('next', None)
-    if not next:
+    next_url = request.REQUEST.get('next', None)
+    if not next_url:
         try:
             url = urlparse(request.META.get('HTTP_REFERER'))
             if url:
-                next = url.path
+                next_url = url.path
         except:
             pass
-    if not next:
-        next = '/'
     
     if request.method == 'POST':
-        
         lang_code = request.POST.get('language', None)
+        after_change_url = request.POST.get('next_url_after_change_lang', None)
+        if after_change_url:
+            next_url = after_change_url
+            
         if lang_code and check_for_language(lang_code):
             
             #locale is the current language
             #path is the locale-independant url
-            locale, path = localeurl_utils.strip_path(next)
+            locale, path = localeurl_utils.strip_path(next_url)
             
             Article = get_article_class()
             try:
@@ -1096,19 +1097,23 @@ def change_language(request):
                 
             except Article.DoesNotExist:
                 next_article = None
-                
+            
             if hasattr(request, 'session'):
                 request.session['django_language'] = lang_code
             else:
                 response.set_cookie(settings.LANGUAGE_COOKIE_NAME, lang_code)
             activate(lang_code)
-                
+            
             if next_article:
-                next = next_article.get_absolute_url()
+                next_url = next_article.get_absolute_url()
             else:
-                next = localeurl_utils.locale_path(path, lang_code)
-
-    return HttpResponseRedirect(next)
+                next_url = localeurl_utils.locale_path(path, lang_code)
+                    
+                    
+    if not next_url:
+        next_url = '/'
+    
+    return HttpResponseRedirect(next_url)
     
 class ArticleView(EditableObjectView):
     model = get_article_class()
