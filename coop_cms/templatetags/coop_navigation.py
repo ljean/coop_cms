@@ -66,7 +66,11 @@ class NavigationAsNestedUlNode(NavigationTemplateNode):
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
         root_nodes = NavNode.objects.filter(tree__name=tree_name, parent__isnull=True).order_by("ordering")
-        return u''.join([node.as_navigation(**kwargs) for node in root_nodes])
+        total_nodes = root_nodes.count()    
+        return u''.join([
+            node.as_navigation(node_pos=i+1, total_nodes=total_nodes, **kwargs)
+                for (i, node) in enumerate(root_nodes)
+        ])
 
 
 @register.tag

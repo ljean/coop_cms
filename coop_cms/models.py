@@ -153,6 +153,9 @@ class NavNode(models.Model):
     def has_children(self):
         return self.get_children(True).count()
     
+    def get_children_count(self):
+        return self.get_children(True).count()
+    
     def get_children_navigation(self):
         return self.get_children(True)
 
@@ -183,10 +186,15 @@ class NavNode(models.Model):
             self.id, li_content, u''.join(children_li), "in_nav" if self.in_navigation else "out_nav"
         )
 
-    def _get_li_content(self, li_template):
+    def _get_li_content(self, li_template, node_pos=0, total_nodes=0):
         if li_template:
             t = li_template if hasattr(li_template, 'render') else get_template(li_template)
-            return t.render(Context({'node': self}))
+            return t.render(
+                Context({
+                    'node': self, 'STATIC_URL': settings.STATIC_URL,
+                    'node_pos': node_pos, 'total_nodes': total_nodes,
+                })
+            )
         else:
             url = self.get_absolute_url()
             if url == None:
@@ -212,14 +220,21 @@ class NavNode(models.Model):
     #    t = get_template(template_name)
     #    return t.render(Context({'node': self}))
 
-    def as_navigation(self, li_template=None, css_class="", ul_template=None, li_args=None, active_class="active-node"):
+    def as_navigation(self, li_node=None, li_template=None, css_class="",
+        ul_template=None, li_args=None, active_class="active-node", node_pos=0, total_nodes=0):
         #Display the node and his children as nested ul and li html tags.
         #li_template is a custom template that can be passed
 
         if not self.in_navigation:
             return ""
+        
+        children = self.get_children(in_navigation=True)
+        children_count = self.get_children_count()
 
-        children_li = [child.as_navigation(li_template, css_class) for child in self.get_children(in_navigation=True)]
+        children_li = [
+            child.as_navigation(li_node, li_template, css_class, node_pos=i+1, total_nodes=children_count)
+            for (i, child) in enumerate(children)
+        ]
         ul_format = self._get_ul_format(ul_template)
         children_html = ul_format.format(u''.join(children_li)) if children_li else ""
         args = self._get_li_args(li_args)
@@ -227,8 +242,11 @@ class NavNode(models.Model):
             css_class = u'class="{0} {1}"'.format(css_class, active_class if self.is_active_node() else "")
         else:
             css_class=""
-        return u'<li {0} {1}>{2}{3}</li>'.format(
-            css_class, args, self._get_li_content(li_template), children_html)
+        if not li_node:
+            return u'<li {0} {1}>{2}{3}</li>'.format(
+                css_class, args, self._get_li_content(li_template), children_html)
+        else:
+            return self._get_li_content(li_node, node_pos, total_nodes)
 
     def as_breadcrumb(self, li_template=None, css_class=""):
         html = self.parent.as_breadcrumb(li_template) if self.parent else u""
