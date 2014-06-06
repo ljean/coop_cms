@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
@@ -571,9 +572,11 @@ class ArticleFormTest(BaseTestCase):
         article = mommy.make(Article)
         url = reverse('coop_cms_article_settings', args=[article.id])
         
+        now = datetime.now()
+        now = now.replace(microsecond=0)
         data = {
             'template': settings.COOP_CMS_ARTICLE_TEMPLATES[0][0],
-            'publication_date': datetime.now(),
+            'publication_date': now,
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
             'summary': 'Summary',

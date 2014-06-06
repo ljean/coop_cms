@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, Fragment, FragmentType, FragmentFilter
 from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias
-from coop_cms.settings import is_localized
+from coop_cms.settings import is_localized, is_multilang
 import json
 from django.core.exceptions import ValidationError
 from coop_cms.settings import get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed
@@ -2770,7 +2770,7 @@ class UrlLocalizationTest(BaseTestCase):
         user.save()
         return self.client.login(username='toto', password='toto')
     
-    @skipIf(not is_localized() and len(settings.LANGUAGES)<2, "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_get_locale_article(self):
         original_text = '*!-+' * 10
         translated_text = ':%@/' * 9
@@ -2792,7 +2792,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, translated_text)
 
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_change_lang(self):
         
         original_text = '*!-+' * 10
@@ -2822,8 +2822,37 @@ class UrlLocalizationTest(BaseTestCase):
         response = self.client.get('/{0}/accueil/'.format(trans_lang), follow=True)
         self.assertEqual(200, response.status_code)
         self.assertContains(response, translated_text)
+        
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    def test_change_lang_next_url_after(self):
+        
+        original_text = '*!-+' * 10
+        translated_text = ':%@/' * 9
+        
+        a1 = get_article_class().objects.create(title="Home", content=original_text)
+        
+        a2 = get_article_class().objects.create(title="Next", content="****NEXT****")
+        
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+        
+        setattr(a1, 'title_'+trans_lang, 'Accueil')
+        setattr(a1, 'content_'+trans_lang, translated_text)
+        
+        a1.save()
+        
+        origin_url = '/{0}/home'.format(origin_lang)
+        response = self.client.get(origin_url, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, original_text)
+        
+        data = {'language': trans_lang, 'next_url_after_change_lang': a2.get_absolute_url()}
+        response = self.client.post(reverse('coop_cms_change_language'),
+            data=data, follow=True)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, a2.content)
             
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_change_lang_no_trans(self):
         
         original_text = '*!-+' * 10
@@ -2857,7 +2886,7 @@ class UrlLocalizationTest(BaseTestCase):
         a1 = Article.objects.get(id=a1.id)
         self.assertEqual(original_slug, a1.slug)
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_keep_localized_slug(self):
         
         Article = get_article_class()
@@ -2879,7 +2908,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(original_slug, a1.slug)
         self.assertEqual(original_trans_slug, getattr(a1, 'slug_'+trans_lang))
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing(self):
         
         Article = get_article_class()
@@ -2898,7 +2927,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertNotEqual(getattr(a2, 'slug_'+trans_lang), getattr(a1, 'slug_'+trans_lang))
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing2(self):
         
         Article = get_article_class()
@@ -2915,7 +2944,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertNotEqual(getattr(a2, 'slug_'+trans_lang), getattr(a1, 'slug_'+trans_lang))
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing3(self):
         self._log_as_editor()
         Article = get_article_class()
@@ -2947,7 +2976,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertNotEqual(getattr(a2_updated, 'slug_'+trans_lang), getattr(a1, 'slug_'+trans_lang))
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localize_existing_article1(self):
         self._log_as_editor()
         Article = get_article_class()
@@ -2974,7 +3003,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(getattr(a1_updated, 'title_'+trans_lang), a1.title)
         self.assertEqual(getattr(a1_updated, 'slug_'+trans_lang), getattr(a1, 'slug_'+origin_lang))
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localize_existing_article2(self):
         self._log_as_editor()
         Article = get_article_class()
@@ -3002,7 +3031,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(getattr(a1_updated, 'slug_'+trans_lang), "home")
         self.assertEqual(getattr(a1_updated, 'slug_'+origin_lang), "accueil")
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing4(self):
         self._log_as_editor()
         Article = get_article_class()
@@ -3033,7 +3062,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertNotEqual(getattr(a2_updated, 'slug_'+trans_lang), a1.slug)
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing5(self):
         self._log_as_editor()
         Article = get_article_class()
@@ -3078,7 +3107,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertFalse(True) #Force to fail
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_create_article_in_additional_lang(self):
         
         Article = get_article_class()
@@ -3216,7 +3245,7 @@ class ArticleTemplateTagsTest(BaseTestCase):
         a = Article.objects.all()[0]
         self.assertEqual(a.slug, "test")
             
-    @skipIf(not is_localized() and len(settings.LANGUAGES)<2, "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_article_link_force_language(self):
         
         lang = settings.LANGUAGES[0][0]
@@ -3231,7 +3260,7 @@ class ArticleTemplateTagsTest(BaseTestCase):
         a = Article.objects.all()[0]
         self.assertEqual(a.slug, "test")
             
-    @skipIf(not is_localized() and len(settings.LANGUAGES)<2, "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_article_existing_link_force_language(self):
         
         Article = get_article_class()
@@ -3254,7 +3283,7 @@ class ArticleTemplateTagsTest(BaseTestCase):
         self.assertEqual(a.slug, "test")
         self.assertEqual(getattr(article, "slug_"+lang), "test_"+lang)
             
-    @skipIf(not is_localized() and len(settings.LANGUAGES)<2, "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_article_existing_link_force_default_language(self):
         
         Article = get_article_class()
@@ -3490,7 +3519,7 @@ class ArticleSlugTestCase(BaseTestCase):
         response = self.client.get(article1.get_absolute_url())
         self.assertEqual(200, response.status_code)
         
-    @skipIf(not is_localized(), "not localized")
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_create_lang(self):
         
         Article = get_article_class()
@@ -3550,6 +3579,7 @@ class FragmentsTest(BaseTestCase):
         settings.COOP_CMS_ARTICLE_TEMPLATES = (
             ('test/article_with_fragments.html', 'Article with fragments'),
             ('test/article_with_fragments_extra_id.html', 'Article with fragments extra id'),
+            ('test/article_with_fragments_template.html', 'Article with fragments template'),
         )
         
     def tearDown(self):
@@ -3850,6 +3880,80 @@ class FragmentsTest(BaseTestCase):
         positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [g1, f3, f4]]
         for pos in positions:
             self.assertTrue(pos==-1)
+            
+    def test_fragments_with_template(self):
+        ft_name = u"contacts"
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        
+        soup = BeautifulSoup(html)
+        self.assertEqual(0, len(soup.select('.panel')))
+        
+    def test_view_fragments_with_template(self):
+        ft_name = u"contacts"
+        ft = mommy.make(FragmentType, name=ft_name)
+        
+        f = mommy.make(Fragment, type=ft)
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        
+        soup = BeautifulSoup(html)
+        self.assertEqual(1, len(soup.select('.panel')))
+        
+    def test_view_fragments_with_template_edit_mode(self):
+        ft_name = u"contacts"
+        ft = mommy.make(FragmentType, name=ft_name)
+        
+        f = mommy.make(Fragment, type=ft)
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name, 'form': True}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        
+        soup = BeautifulSoup(html)
+        self.assertEqual(1, len(soup.select('.panel')))
+        self.assertEqual(1, len(soup.select('.panel input')))
+        self.assertEqual(1, len(soup.select('.panel .djaloha-editable')))
+    
+    def test_view_fragments_with_template2(self):
+        ft_name = u"contacts"
+        ft = mommy.make(FragmentType, name=ft_name)
+        
+        f = mommy.make(Fragment, type=ft)
+        f = mommy.make(Fragment, type=ft)
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        soup = BeautifulSoup(html)
+        self.assertEqual(2, len(soup.select('.panel')))
+        
+    def test_view_fragments_with_template3(self):
+        ft_name = u"contacts"
+        ft = mommy.make(FragmentType, name=ft_name)
+        
+        f = mommy.make(Fragment, type=ft)
+        f = mommy.make(Fragment, type=ft)
+        
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
+        html = tpl.render(Context({"ft_name": ft_name, 'form': True}))
+        
+        self.assertEqual(FragmentType.objects.count(), 1)
+        self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
+        soup = BeautifulSoup(html)
+        self.assertEqual(3, len(soup.select('.panel'))) # 1 extra panel if_cms_edition and fragment index > 0
     
     def _log_as_editor(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
@@ -4877,7 +4981,7 @@ class ArticleLogoTest(BaseArticleTest):
             
         self._log_as_editor()
         
-        response = self.client.post(a.get_edit_url())
+        response = self.client.post(a.get_edit_url(), follow=True)
         self.assertEqual(response.status_code, 200)
         
         data = {

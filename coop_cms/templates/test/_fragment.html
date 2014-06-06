@@ -1,0 +1,12 @@
+{% load coop_edition %}
+
+{% if_cms_edition %}{% if index != 0 %}
+<div class="panel">
+	<!-- Quick fix -->
+</div>
+{% endif %}{% endif %}
+<div class="panel">
+	<div class="panel-wrapper">
+		{{ fragment|safe }}
+	</div>
+</div>

@@ -11,6 +11,8 @@ from django.template.loader import get_template
 from django.template import Context
 from coop_cms.settings import get_newsletter_context_callbacks
 from bs4 import BeautifulSoup
+from django.utils import translation
+
 
 class _DeHTMLParser(HTMLParser):
     def __init__(self, allow_spaces=False):
@@ -75,7 +77,12 @@ def make_links_absolute(html_content, newsletter=None):
     return soup.prettify()
         
 def send_newsletter(newsletter, dests):
-
+    lang = translation.get_language()[:2]
+    if not (lang in [c for (c, n) in settings.LANGUAGES]): # The current language is not defined in sttings.LANGUAGE
+        #force it to the defined language
+        lang = settings.LANGUAGE_CODE[:2]
+        translation.activate(lang)
+    
     t = get_template(newsletter.get_template_name())
     context_dict = {
         'title': newsletter.subject, 'newsletter': newsletter, 'by_email': True,
