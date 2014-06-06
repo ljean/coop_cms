@@ -1035,13 +1035,13 @@ def edit_fragments(request):
     )
 
 def articles_category(request, slug):
-    category = get_object_or_404(models.ArticleCategory, slug=slug)
+    category = get_object_or_404(models.ArticleCategory, slug=slug, sites__id=settings.SITE_ID)
     
     if not request.user.has_perm('can_view_category', category):
         raise PermissionDenied()
     
-    articles = get_article_class().objects.filter(
-        category=category, publication=models.BaseArticle.PUBLISHED).order_by("-publication_date")
+    articles = category.get_articles_qs().filter(
+        publication=models.BaseArticle.PUBLISHED).order_by("-publication_date")
     
     if articles.count()==0:
         raise Http404

@@ -302,7 +302,7 @@ class ArticleCategory(models.Model):
         return reverse('coop_cms_articles_category', args=[self.slug])
     
     def get_articles_qs(self):
-        return get_article_class().objects.filter(
+        return get_article_class().objects.filter(sites__id=settings.SITE_ID,
             category=self, publication=BaseArticle.PUBLISHED).order_by('publication_date')
 
     class Meta:

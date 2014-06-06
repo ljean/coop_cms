@@ -5193,7 +5193,7 @@ class MultiSiteTest(BaseArticleTest):
         self.assertEqual(art1.previous_in_category(), None)
         self.assertEqual(art1.next_in_category(), None)
         
-    def test_article_category(self, ):
+    def test_article_category(self):
         self._log_as_editor()
         
         Article = get_article_class()
@@ -5227,5 +5227,52 @@ class MultiSiteTest(BaseArticleTest):
         self.assertEqual(str(cat.id), cat_choices[1]["value"])
         self.assertEqual(cat.name, cat_choices[1].text)
         
+        
+    def test_view_category_articles(self):
+        cat = mommy.make(ArticleCategory, name="abc")
+        
+        Article = get_article_class()
+        site1 = Site.objects.get(id=settings.SITE_ID)
+        site2 = mommy.make(Site)
+        
+        cat = mommy.make(ArticleCategory)
+        self.assertEqual(list(cat.sites.all()), [site1])
+        cat.sites.add(site2)
+        cat.save()
+        
+        art1 = mommy.make(Article, category=cat, publication=True, title=u"#THis is crazy")
+        art2 = mommy.make(Article, category=cat, publication=True, title=u"#Call me maybe")
+        
+        art2.sites.remove(site1)
+        art2.save()
+        
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, art1.title)
+        self.assertNotContains(response, art2.title)
+        
+    def test_view_category_of_other_site(self):
+        cat = mommy.make(ArticleCategory, name="abc")
+        
+        Article = get_article_class()
+        site1 = Site.objects.get(id=settings.SITE_ID)
+        site2 = mommy.make(Site)
+        
+        cat = mommy.make(ArticleCategory)
+        self.assertEqual(list(cat.sites.all()), [site1])
+        
+        cat2 = mommy.make(ArticleCategory)
+        cat2.sites.remove(site1)
+        cat2.sites.add(site2)
+        cat2.save()
+        
+        art1 = mommy.make(Article, category=cat, publication=True)
+        art2 = mommy.make(Article, category=cat2, publication=True)
+        
+        url = reverse('coop_cms_articles_category', args=[cat2.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
     
     
