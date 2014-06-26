@@ -729,9 +729,10 @@ class PieceOfHtml(models.Model):
     div_id = models.CharField(verbose_name=_(u"identifier"), max_length=100, db_index=True)
     #content = HTMLField(content_cleaner, verbose_name=_(u"content"), default="", blank=True)
     content = models.TextField(_(u"content"), default="", blank=True)
+    extra_id = models.CharField(verbose_name=_(u"extra identifier"), blank=True, default="", max_length=100, db_index=True)
 
     def __unicode__(self):
-        return self.div_id
+        return u" ".join([self.div_id, self.extra_id])
 
     class Meta:
         verbose_name = _(u'piece of HTML')

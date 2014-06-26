@@ -3203,6 +3203,63 @@ class PieceOfHtmlTagsTest(BaseTestCase):
         poc = PieceOfHtml.objects.all()[0]
         self.assertEqual(poc.div_id, "test")
         
+    def test_view_poc_extra_id(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=1 %}')
+        html = tpl.render(Context({"djaloha_edit": False}))
+        self.assertEqual(html, poc.content)
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        self.assertEqual(poc.extra_id, "1")
+        
+    def test_edit_poc_extra_id(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=1 %}')
+        html = tpl.render(Context({"djaloha_edit": True}))
+        
+        soup = BeautifulSoup(html)
+        #print html
+        tags = soup.select("input[type=hidden]")
+        self.assertEqual(len(tags), 1)
+        div_selector = tags[0].attrs['id']
+        div_selector = div_selector.replace("_hidden", "")
+        
+        tags = soup.select("#"+div_selector)
+        self.assertEqual(len(tags), 1)
+        self.assertEqual(tags[0].text, poc.content)
+        
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        self.assertEqual(poc.extra_id, "1")
+        
+    def test_create_poc_extra_id(self):
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=1 %}')
+        html = tpl.render(Context({"djaloha_edit": False}))
+        self.assertEqual(html, "")
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        self.assertEqual(poc.extra_id, "1")
+        
+    def test_create_new_poc_extra_id(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=2 %}')
+        html = tpl.render(Context({"djaloha_edit": False}))
+        self.assertEqual(html, "")
+        self.assertEqual(PieceOfHtml.objects.count(), 2)
+        PieceOfHtml.objects.get(div_id="test", extra_id="1")
+        PieceOfHtml.objects.get(div_id="test", extra_id="2")
+        
+    def test_poc_extra_id_readonly(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" read-only extra_id=1 %}')
+        html = tpl.render(Context({"djaloha_edit": True}))
+        self.assertEqual(html, poc.content)
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        PieceOfHtml.objects.get(div_id="test", extra_id="1")
+        
 class ArticleTemplateTagsTest(BaseTestCase):
     
     def _request(self):
