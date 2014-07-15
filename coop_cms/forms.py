@@ -252,6 +252,7 @@ class NewArticleForm(WithNavigationModelForm):
             self.fields["template"] = forms.ChoiceField(choices=choices)
         else:
             self.fields["template"] = forms.CharField()
+        self.fields["title"].required = True
         self.fields["title"].widget = forms.TextInput(attrs={'size': 30})
 
 
