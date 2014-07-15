@@ -357,6 +357,24 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(article.template, data['template'])
         self.assertEqual(article.navigation_parent, None)
         self.assertEqual(NavNode.objects.count(), 0)
+    
+    def test_new_article_title_required(self):
+        Article = get_article_class()
+        
+        self._log_as_editor()
+        data = {
+            'title': "",
+            'publication': BaseArticle.DRAFT,
+            'template': get_article_templates(None, self.user)[0][0],
+            'navigation_parent': None,
+        }
+        
+        response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        
+        self.assertEqual(Article.objects.count(), 0)
+        self.assertEqual(len(soup.select("ul.errorlist")), 1)
         
     def test_new_article_published(self):
         Article = get_article_class()
