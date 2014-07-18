@@ -311,7 +311,7 @@ class CmsEditNode(template.Node):
             inner_context[self.var_name] = obj
         if formset:
             inner_context['formset'] = formset
-        if objects:
+        if objects != None:
             inner_context['objects'] = objects
 
         safe_context = inner_context.copy()

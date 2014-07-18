@@ -174,6 +174,20 @@ class FormsetViewTestCase(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
         
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(0, len(soup.select('form')))
+        
+    def test_edit_formset_no_objects(self):
+        self._log_as_editor()
+        
+        url = reverse('coop_cms_testapp_formset_edit')
+        
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+        
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(1, len(soup.select('form')))
+    
     def test_view_formset_one_object(self):
         self._log_as_viewer()
         
@@ -183,6 +197,26 @@ class FormsetViewTestCase(BaseTestCase):
         
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
+        
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(0, len(soup.select('form')))
+        
+        self.assertContains(response, obj.field1)
+        self.assertContains(response, obj.field2)
+        self.assertContains(response, obj.other_field)
+        
+    def test_edit_formset_one_object(self):
+        self._log_as_viewer()
+        
+        obj = mommy.make(TestClass)
+        
+        url = reverse('coop_cms_testapp_formset_edit')
+        
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+        
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(1, len(soup.select('form')))
         
         self.assertContains(response, obj.field1)
         self.assertContains(response, obj.field2)
@@ -210,7 +244,7 @@ class FormsetViewTestCase(BaseTestCase):
     def test_edit_formset_no_objects(self):
         self._log_as_editor()
         
-        url = reverse('coop_cms_testapp_formset')
+        url = reverse('coop_cms_testapp_formset_edit')
         
         data = {
             'form-TOTAL_FORMS': 0,
@@ -221,12 +255,26 @@ class FormsetViewTestCase(BaseTestCase):
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
         
+    def test_post_formset_on_view(self):
+        self._log_as_editor()
+        
+        url = reverse('coop_cms_testapp_formset')
+        
+        data = {
+            'form-TOTAL_FORMS': 0,
+            'form-INITIAL_FORMS': 0,
+            'form-MAX_NUM_FORMS': 1,
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(404, response.status_code)
+        
     def test_edit_formset_one_object(self):
         self._log_as_editor()
         
         obj = mommy.make(TestClass)
         
-        url = reverse('coop_cms_testapp_formset')
+        url = reverse('coop_cms_testapp_formset_edit')
         
         other_field = obj.other_field
         data = {
@@ -274,7 +322,7 @@ class FormsetViewTestCase(BaseTestCase):
             'form-MAX_NUM_FORMS': 2,
         }
         
-        url = reverse('coop_cms_testapp_formset')
+        url = reverse('coop_cms_testapp_formset_edit')
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
@@ -305,7 +353,7 @@ class FormsetViewTestCase(BaseTestCase):
             'form-MAX_NUM_FORMS': 2,
         }
         
-        url = reverse('coop_cms_testapp_formset')
+        url = reverse('coop_cms_testapp_formset_edit')
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
@@ -322,7 +370,7 @@ class FormsetViewTestCase(BaseTestCase):
     def test_edit_formset_anonymous(self):
         obj = mommy.make(TestClass)
         
-        url = reverse('coop_cms_testapp_formset')
+        url = reverse('coop_cms_testapp_formset_edit')
         
         other_field = obj.other_field
         data = {
@@ -353,7 +401,7 @@ class FormsetViewTestCase(BaseTestCase):
         
         obj = mommy.make(TestClass)
         
-        url = reverse('coop_cms_testapp_formset')
+        url = reverse('coop_cms_testapp_formset_edit')
         
         other_field = obj.other_field
         data = {
@@ -380,7 +428,7 @@ class FormsetViewTestCase(BaseTestCase):
         
         obj = mommy.make(TestClass)
         
-        url = reverse('coop_cms_testapp_formset')
+        url = reverse('coop_cms_testapp_formset_edit')
         
         other_field = obj.other_field
         data = {

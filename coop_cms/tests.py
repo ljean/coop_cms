@@ -184,6 +184,20 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(response.status_code, 200)
         self._check_article(response, data)
         
+    def test_post_on_view_article(self):
+        initial_data = {'title': "test", 'content': "this is my article content"}
+        article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+        
+        data = {"title": 'salut', 'content': 'bonjour!'}
+        
+        self._log_as_editor()
+        response = self.client.post(article.get_absolute_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 404)
+        
+        article = get_article_class().objects.get(id=article.id)
+        self.assertEquals(article.title, initial_data['title'])
+        self.assertEquals(article.content, initial_data['content'])
+        
     def test_article_edition_permission(self):
         initial_data = {'title': "test", 'content': "this is my article content"}
         article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)

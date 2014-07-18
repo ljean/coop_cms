@@ -17,9 +17,8 @@ def can_do(perm, object_names):
                 return
             for object_name in object_names:
                 obj = context.get(object_name, None)
-                if obj:
-                    #print '>', func.__name__, object_name, obj
-                
+                if obj != None:
+                    
                     callback_name = u"coop_cms_{0}_callback".format(perm, object_name)
                     callback = context.get(callback_name, None)
                     
@@ -27,11 +26,6 @@ def can_do(perm, object_names):
                         yes_we_can = func(request, context)
                         if yes_we_can:
                             return yes_we_can
-                    
-                #if object and request and request.user.has_perm(perm+"_"+object_name, object):
-                #    yes_we_can = func(request, context)
-                #    if yes_we_can:
-                #        return yes_we_can
             return
         return wrapper
     return inner_decorator

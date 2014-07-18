@@ -115,6 +115,9 @@ class EditableObjectView(View):
         pass
     
     def post(self, request, *args, **kwargs):
+        if not self.edit_mode:
+            raise Http404
+        
         self.object = self.get_object()
         
         if not self.can_edit_object():
@@ -226,6 +229,9 @@ class EditableFormsetView(TemplateView):
         pass
     
     def post(self, request, *args, **kwargs):
+        if not self.edit_mode:
+            raise Http404
+    
         if not self.can_edit_objects():
             raise PermissionDenied
         
