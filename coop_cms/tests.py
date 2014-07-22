@@ -16,6 +16,7 @@ from coop_cms.settings import is_localized, is_multilang
 import json
 from django.core.exceptions import ValidationError
 from coop_cms.settings import get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed
+from coop_cms.settings import cms_no_homepage
 from model_mommy import mommy
 from django.conf import settings
 import os.path, shutil
@@ -2044,7 +2045,7 @@ class UserBaseTestCase(BaseTestCase):
         self.editor = None
         self.viewer = None
 
-    def _log_as_editor(self):
+    def _log_as_editor(self, can_add=False):
         if not self.editor:
             self.editor = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
             self.editor.is_staff = True
@@ -2056,6 +2057,12 @@ class UserBaseTestCase(BaseTestCase):
             codename = 'change_{0}'.format(ct.model)
             can_edit_article = Permission.objects.get(content_type__app_label=ct.app_label, codename=codename)
             self.editor.user_permissions.add(can_edit_article)
+            
+            if can_add:
+                codename = 'add_{0}'.format(ct.model)
+                can_add_article = Permission.objects.get(content_type__app_label=ct.app_label, codename=codename)
+                self.editor.user_permissions.add(can_add_article)
+            
             self.editor.save()
         
         return self.client.login(username='toto', password='toto')
@@ -2637,11 +2644,45 @@ class NavigationTreeTest(BaseTestCase):
         
         for n in nodes_in:
             self.assertTrue(html.find(unicode(n))>=0)
-            
+
+class NoHomepageTest(UserBaseTestCase):
+    
+    def setUp(self):
+        super(NoHomepageTest, self).setUp()
+        self._settings_backup = getattr(settings, 'COOP_CMS_NO_HOMEPAGE', False)
+    
+    def tearDown(self):
+        super(NoHomepageTest, self).tearDown()
+        settings.COOP_CMS_NO_HOMEPAGE = self._settings_backup
+        
+    def test_view_article_set_homepage_no_homepage(self):
+        settings.COOP_CMS_NO_HOMEPAGE = True
+        self._log_as_editor(can_add=True)
+        Article = get_article_class()
+        art = mommy.make(Article, is_homepage=False, publication=BaseArticle.PUBLISHED)
+        response = self.client.get(art.get_edit_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        url = reverse('coop_cms_set_homepage', args=[art.id])
+        links = soup.select(".coop-bar a[href={0}]".format(url))
+        self.assertEqual(0, len(links))
+        
+    def test_view_article_set_homepage(self):
+        settings.COOP_CMS_NO_HOMEPAGE = False
+        self._log_as_editor(can_add=True)
+        Article = get_article_class()
+        art = mommy.make(Article, is_homepage=False, publication=BaseArticle.PUBLISHED)
+        response = self.client.get(art.get_edit_url())
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        url = reverse('coop_cms_set_homepage', args=[art.id])
+        links = soup.select(".coop-bar a[href={0}]".format(url))
+        self.assertEqual(1, len(links))
+  
+@skipIf(cms_no_homepage(), "no homepage")          
 class HomepageTest(UserBaseTestCase):
     
     def setUp(self):
-        super(HomepageTest, self).setUp()
         super(HomepageTest, self).setUp()
         self.site_id = settings.SITE_ID
     

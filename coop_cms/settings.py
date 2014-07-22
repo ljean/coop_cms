@@ -236,6 +236,9 @@ def is_localized():
 def is_multilang():
     return len(django_settings.LANGUAGES)>1
 
+def cms_no_homepage():
+    return getattr(django_settings, 'COOP_CMS_NO_HOMEPAGE', False)
+
 def is_requestprovider_installed():
     return ('gadjo.requestprovider.middleware.RequestProvider' in django_settings.MIDDLEWARE_CLASSES)
     

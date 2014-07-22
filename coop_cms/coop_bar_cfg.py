@@ -4,7 +4,7 @@ from django.utils.translation import ugettext as _
 from django.template.loader import get_template
 from django.template import Context
 from coop_cms.models import Link, Fragment
-from coop_cms.settings import get_article_class, get_navtree_class
+from coop_cms.settings import get_article_class, get_navtree_class, cms_no_homepage
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from coop_bar.utils import make_link
@@ -162,6 +162,9 @@ def cms_new_link(request, context):
 
 @can_add_article
 def cms_set_homepage(request, context):
+    if cms_no_homepage():
+        return
+
     article = context.get('article', None)
     if context.get('edit_mode') and article and (not getattr(article, 'is_homepage', False)):
         url = reverse('coop_cms_set_homepage', args=[article.id])
