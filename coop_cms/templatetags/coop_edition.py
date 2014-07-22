@@ -16,6 +16,10 @@ logger = logging.getLogger("coop_cms")
 ################################################################################
 class PieceOfHtmlEditNode(DjalohaEditNode):
     
+    #def __init__(self, *args, **kwargs):
+    #    extra_id = kwargs.pop('extra_id', None)
+    #    super(PieceOfHtmlEditNode, self).__init__(*args, **kwargs)    
+    
     def render(self, context):
         if context.get('form', None) or context.get('formset', None):
             context.dicts[0]['djaloha_edit'] = True
@@ -27,9 +31,19 @@ def coop_piece_of_html(parser, token):
     args = token.split_contents()
     div_id = args[1]
     read_only = False
+    extra_id = ""
     if len(args)>2:
+        for x in args[2:]:
+            if 0==x.find("extra_id="):
+                extra_id = x.replace("extra_id=", '')
+        
         read_only = (args[2]=="read-only")
-    return PieceOfHtmlEditNode(PieceOfHtml, {'div_id': div_id}, 'content', read_only)
+    
+    lookup_args = {'div_id': div_id}
+    if extra_id:
+        lookup_args.update({'extra_id': extra_id})
+    
+    return PieceOfHtmlEditNode(PieceOfHtml, lookup_args, 'content', read_only)
 
 ################################################################################
 
@@ -297,7 +311,7 @@ class CmsEditNode(template.Node):
             inner_context[self.var_name] = obj
         if formset:
             inner_context['formset'] = formset
-        if objects:
+        if objects != None:
             inner_context['objects'] = objects
 
         safe_context = inner_context.copy()

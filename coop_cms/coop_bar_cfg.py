@@ -17,9 +17,8 @@ def can_do(perm, object_names):
                 return
             for object_name in object_names:
                 obj = context.get(object_name, None)
-                if obj:
-                    #print '>', func.__name__, object_name, obj
-                
+                if obj != None:
+                    
                     callback_name = u"coop_cms_{0}_callback".format(perm, object_name)
                     callback = context.get(callback_name, None)
                     
@@ -27,11 +26,6 @@ def can_do(perm, object_names):
                         yes_we_can = func(request, context)
                         if yes_we_can:
                             return yes_we_can
-                    
-                #if object and request and request.user.has_perm(perm+"_"+object_name, object):
-                #    yes_we_can = func(request, context)
-                #    if yes_we_can:
-                #        return yes_we_can
             return
         return wrapper
     return inner_decorator
@@ -75,9 +69,9 @@ def django_admin_edit_article(request, context):
             classes=['icon', 'alert_on_click'])
 
 def django_admin_edit_object(request, context):
-    if request and request.user.is_staff and 'object' in context:
-        object = context['object']
-        object_class = object.__class__
+    if request and request.user.is_staff and context.get('object', None):
+        obj = context['object']
+        object_class = obj.__class__
         view_name = 'admin:%s_%s_change' % (object_class._meta.app_label,  object_class._meta.module_name)
         try:
             return make_link(reverse(view_name, args=[object.id]),
@@ -87,7 +81,7 @@ def django_admin_edit_object(request, context):
             pass
 
 def django_admin_add_object(request, context):
-    if request and request.user.is_staff and (('object' in context) or ('model' in context)):
+    if request and request.user.is_staff and (context.get('object', None) or context.get('model', None)):
         object_class = context.get('model', None)
         if not object_class:
             object_class = context['object'].__class__
@@ -100,7 +94,7 @@ def django_admin_add_object(request, context):
             pass
 
 def django_admin_list_objects(request, context):
-    if request and request.user.is_staff and (('object' in context) or ('model' in context)):
+    if request and request.user.is_staff and (context.get('object', None) or context.get('model', None)):
         object_class = context.get('model', None)
         if not object_class:
             object_class = context['object'].__class__

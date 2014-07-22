@@ -184,6 +184,20 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(response.status_code, 200)
         self._check_article(response, data)
         
+    def test_post_on_view_article(self):
+        initial_data = {'title': "test", 'content': "this is my article content"}
+        article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+        
+        data = {"title": 'salut', 'content': 'bonjour!'}
+        
+        self._log_as_editor()
+        response = self.client.post(article.get_absolute_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 404)
+        
+        article = get_article_class().objects.get(id=article.id)
+        self.assertEquals(article.title, initial_data['title'])
+        self.assertEquals(article.content, initial_data['content'])
+        
     def test_article_edition_permission(self):
         initial_data = {'title': "test", 'content': "this is my article content"}
         article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
@@ -357,6 +371,24 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(article.template, data['template'])
         self.assertEqual(article.navigation_parent, None)
         self.assertEqual(NavNode.objects.count(), 0)
+    
+    def test_new_article_title_required(self):
+        Article = get_article_class()
+        
+        self._log_as_editor()
+        data = {
+            'title': "",
+            'publication': BaseArticle.DRAFT,
+            'template': get_article_templates(None, self.user)[0][0],
+            'navigation_parent': None,
+        }
+        
+        response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        
+        self.assertEqual(Article.objects.count(), 0)
+        self.assertEqual(len(soup.select("ul.errorlist")), 1)
         
     def test_new_article_published(self):
         Article = get_article_class()
@@ -3203,6 +3235,63 @@ class PieceOfHtmlTagsTest(BaseTestCase):
         poc = PieceOfHtml.objects.all()[0]
         self.assertEqual(poc.div_id, "test")
         
+    def test_view_poc_extra_id(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=1 %}')
+        html = tpl.render(Context({"djaloha_edit": False}))
+        self.assertEqual(html, poc.content)
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        self.assertEqual(poc.extra_id, "1")
+        
+    def test_edit_poc_extra_id(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=1 %}')
+        html = tpl.render(Context({"djaloha_edit": True}))
+        
+        soup = BeautifulSoup(html)
+        #print html
+        tags = soup.select("input[type=hidden]")
+        self.assertEqual(len(tags), 1)
+        div_selector = tags[0].attrs['id']
+        div_selector = div_selector.replace("_hidden", "")
+        
+        tags = soup.select("#"+div_selector)
+        self.assertEqual(len(tags), 1)
+        self.assertEqual(tags[0].text, poc.content)
+        
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        self.assertEqual(poc.extra_id, "1")
+        
+    def test_create_poc_extra_id(self):
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=1 %}')
+        html = tpl.render(Context({"djaloha_edit": False}))
+        self.assertEqual(html, "")
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        poc = PieceOfHtml.objects.all()[0]
+        self.assertEqual(poc.div_id, "test")
+        self.assertEqual(poc.extra_id, "1")
+        
+    def test_create_new_poc_extra_id(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=2 %}')
+        html = tpl.render(Context({"djaloha_edit": False}))
+        self.assertEqual(html, "")
+        self.assertEqual(PieceOfHtml.objects.count(), 2)
+        PieceOfHtml.objects.get(div_id="test", extra_id="1")
+        PieceOfHtml.objects.get(div_id="test", extra_id="2")
+        
+    def test_poc_extra_id_readonly(self):
+        poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
+        tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" read-only extra_id=1 %}')
+        html = tpl.render(Context({"djaloha_edit": True}))
+        self.assertEqual(html, poc.content)
+        self.assertEqual(PieceOfHtml.objects.count(), 1)
+        PieceOfHtml.objects.get(div_id="test", extra_id="1")
+        
 class ArticleTemplateTagsTest(BaseTestCase):
     
     def _request(self):
@@ -5297,7 +5386,7 @@ class MultiSiteTest(BaseArticleTest):
         self.assertEqual(art1.previous_in_category(), None)
         self.assertEqual(art1.next_in_category(), None)
         
-    def test_article_category(self, ):
+    def test_article_category(self):
         self._log_as_editor()
         
         Article = get_article_class()
@@ -5331,5 +5420,52 @@ class MultiSiteTest(BaseArticleTest):
         self.assertEqual(str(cat.id), cat_choices[1]["value"])
         self.assertEqual(cat.name, cat_choices[1].text)
         
+        
+    def test_view_category_articles(self):
+        cat = mommy.make(ArticleCategory, name="abc")
+        
+        Article = get_article_class()
+        site1 = Site.objects.get(id=settings.SITE_ID)
+        site2 = mommy.make(Site)
+        
+        cat = mommy.make(ArticleCategory)
+        self.assertEqual(list(cat.sites.all()), [site1])
+        cat.sites.add(site2)
+        cat.save()
+        
+        art1 = mommy.make(Article, category=cat, publication=True, title=u"#THis is crazy")
+        art2 = mommy.make(Article, category=cat, publication=True, title=u"#Call me maybe")
+        
+        art2.sites.remove(site1)
+        art2.save()
+        
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, art1.title)
+        self.assertNotContains(response, art2.title)
+        
+    def test_view_category_of_other_site(self):
+        cat = mommy.make(ArticleCategory, name="abc")
+        
+        Article = get_article_class()
+        site1 = Site.objects.get(id=settings.SITE_ID)
+        site2 = mommy.make(Site)
+        
+        cat = mommy.make(ArticleCategory)
+        self.assertEqual(list(cat.sites.all()), [site1])
+        
+        cat2 = mommy.make(ArticleCategory)
+        cat2.sites.remove(site1)
+        cat2.sites.add(site2)
+        cat2.save()
+        
+        art1 = mommy.make(Article, category=cat, publication=True)
+        art2 = mommy.make(Article, category=cat2, publication=True)
+        
+        url = reverse('coop_cms_articles_category', args=[cat2.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
     
     

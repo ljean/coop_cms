@@ -320,7 +320,7 @@ class ArticleCategory(models.Model):
         return reverse('coop_cms_articles_category', args=[self.slug])
     
     def get_articles_qs(self):
-        return get_article_class().objects.filter(
+        return get_article_class().objects.filter(sites__id=settings.SITE_ID,
             category=self, publication=BaseArticle.PUBLISHED).order_by('publication_date')
 
     class Meta:
@@ -747,9 +747,10 @@ class PieceOfHtml(models.Model):
     div_id = models.CharField(verbose_name=_(u"identifier"), max_length=100, db_index=True)
     #content = HTMLField(content_cleaner, verbose_name=_(u"content"), default="", blank=True)
     content = models.TextField(_(u"content"), default="", blank=True)
+    extra_id = models.CharField(verbose_name=_(u"extra identifier"), blank=True, default="", max_length=100, db_index=True)
 
     def __unicode__(self):
-        return self.div_id
+        return u" ".join([self.div_id, self.extra_id])
 
     class Meta:
         verbose_name = _(u'piece of HTML')
