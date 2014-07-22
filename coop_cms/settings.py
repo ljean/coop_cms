@@ -239,6 +239,9 @@ def is_multilang():
 def cms_no_homepage():
     return getattr(django_settings, 'COOP_CMS_NO_HOMEPAGE', False)
 
+def hide_media_library_menu():
+    return getattr(django_settings, 'COOP_CMS_HIDE_MEDIA_LIBRARY_MENU', False)
+
 def is_requestprovider_installed():
     return ('gadjo.requestprovider.middleware.RequestProvider' in django_settings.MIDDLEWARE_CLASSES)
     

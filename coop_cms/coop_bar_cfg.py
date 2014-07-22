@@ -4,7 +4,7 @@ from django.utils.translation import ugettext as _
 from django.template.loader import get_template
 from django.template import Context
 from coop_cms.models import Link, Fragment
-from coop_cms.settings import get_article_class, get_navtree_class, cms_no_homepage
+from coop_cms.settings import get_article_class, get_navtree_class, cms_no_homepage, hide_media_library_menu
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from coop_bar.utils import make_link
@@ -130,18 +130,27 @@ def view_all_articles(request, context):
 
 @can_edit
 def cms_media_library(request, context):
+    if hide_media_library_menu():
+        return
+    
     if context.get('edit_mode'):
         return make_link(reverse('coop_cms_media_images'), _(u'Media library'), 'fugue/images-stack.png',
             'coopbar_medialibrary', ['icon', 'slide'])
         
 @can_edit
 def cms_upload_image(request, context):
+    if hide_media_library_menu():
+        return
+    
     if context.get('edit_mode'):
         return make_link(reverse('coop_cms_upload_image'), _(u'Add image'), 'fugue/image--plus.png',
             classes=['coopbar_addfile', 'colorbox-form', 'icon'])
 
 @can_edit
 def cms_upload_doc(request, context):
+    if hide_media_library_menu():
+        return
+    
     if context.get('edit_mode'):
         return make_link(reverse('coop_cms_upload_doc'), _(u'Add document'), 'fugue/document-import.png',
             classes=['coopbar_addfile', 'colorbox-form', 'icon'])

@@ -658,9 +658,11 @@ def get_img_folder(instance, filename):
         img_root = settings.IMAGE_FOLDER
     except AttributeError:
         img_root = 'img'
+    
+    return u'{0}/{1}'.format(img_root, filename)
 
-    return u'{0}/{1}/{2}'.format(img_root,
-        instance.created.strftime('%Y%d%m%H%M%S'), filename)
+    #return u'{0}/{1}/{2}'.format(img_root,
+    #    instance.created.strftime('%Y%d%m%H%M%S'), filename)
 
 class Media(TimeStampedModel):
     name = models.CharField(_('name'), max_length=200, blank=True, default='')
@@ -706,8 +708,10 @@ class Document(Media):
         name, ext = os.path.splitext(filename)
         filename = slugify(name) + ext
         
-        return u'{0}/{1}/{2}'.format(doc_root,
-            self.created.strftime('%Y%d%m%H%M%S'), filename)
+        return u'{0}/{1}'.format(doc_root, filename)
+
+        #return u'{0}/{1}/{2}'.format(doc_root,
+        #    self.created.strftime('%Y%d%m%H%M%S'), filename)
 
     file = models.FileField(_('file'), upload_to=get_doc_folder)
     is_private = models.BooleanField(_('is private'), default=False,
