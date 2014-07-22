@@ -761,9 +761,9 @@ def remove_from_navigation(sender, instance, **kwargs):
     if hasattr(instance, 'id'):
         try:
             ct = ContentType.objects.get_for_model(instance)
-            node = NavNode.objects.get(content_type=ct, object_id=instance.id)
-            node.delete()
-        except (NavNode.DoesNotExist, ContentType.DoesNotExist):
+            nodes = NavNode.objects.filter(content_type=ct, object_id=instance.id)
+            nodes.delete()
+        except (ContentType.DoesNotExist):
             pass
 pre_delete.connect(remove_from_navigation)
 

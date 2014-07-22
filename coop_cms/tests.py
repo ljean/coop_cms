@@ -1301,6 +1301,36 @@ class NavigationTest(BaseTestCase):
         node = nodes[0]
         self.assertEqual(addrs[0], node.content_object.url)
         
+    def test_delete_object_in_two_different_navigation(self):
+        addrs = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        links = [Link.objects.create(url=a) for a in addrs]
+        
+        #nodes = []
+        parent = None
+        for i, link in enumerate(links):
+            parent = NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=parent)
+            
+        parent = None
+        other_tree = get_navtree_class().objects.create(name="other")
+        for i, link in enumerate(links):
+            parent = NavNode.objects.create(tree=other_tree, label=link.url, content_object=link, ordering=i+1, parent=parent)
+            
+        links[1].delete()
+        
+        self.assertEqual(0, Link.objects.filter(url=addrs[1]).count())
+        for url in addrs[:1]+addrs[2:]:
+            self.assertEqual(1, Link.objects.filter(url=url).count())
+            
+        nodes = NavNode.objects.filter(tree=self.tree)
+        self.assertEqual(1, nodes.count())
+        node = nodes[0]
+        self.assertEqual(addrs[0], node.content_object.url)
+        
+        nodes = NavNode.objects.filter(tree=other_tree)
+        self.assertEqual(1, nodes.count())
+        node = nodes[0]
+        self.assertEqual(addrs[0], node.content_object.url)
+        
     def test_delete_article(self):
         Article = get_article_class()
         article1 = mommy.make(Article, title="abcd")
