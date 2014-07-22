@@ -65,11 +65,12 @@ class ArticleForm(AlohaEditableModelForm):
         no_aloha_widgets = ('logo',)
 
     def set_logo_size(self, logo_size=None, logo_crop=None):
-        thumbnail_src = self.logo_thumbnail(logo_size, logo_crop)
-        update_url = reverse('coop_cms_update_logo', args=[self.article.id])
-        self.fields['logo'].widget = ImageEdit(update_url,
-            thumbnail_src.url if thumbnail_src else '',
-            attrs={"class": "resizable"})
+        if self.fields.has_key('logo'):
+            thumbnail_src = self.logo_thumbnail(logo_size, logo_crop)
+            update_url = reverse('coop_cms_update_logo', args=[self.article.id])
+            self.fields['logo'].widget = ImageEdit(update_url,
+                thumbnail_src.url if thumbnail_src else '',
+                attrs={"class": "resizable"})
 
     def logo_thumbnail(self, logo_size=None, logo_crop=None):
         if self.article:
