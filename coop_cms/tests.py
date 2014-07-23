@@ -11,7 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, Fragment, FragmentType, FragmentFilter
-from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias
+from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias, Image, MediaFilter
 from coop_cms.settings import is_localized, is_multilang
 import json
 from django.core.exceptions import ValidationError
@@ -1854,8 +1854,8 @@ class CmsEditTagTest(BaseTestCase):
         self.assertContains(response, "Hello")
         self.assertContains(response, article.content)
         self.assertContains(response, self.link1.url)
-        
-class DownloadDocTest(BaseTestCase):
+
+class MediaBaseTestCase(BaseTestCase):
 
     def _clean_files(self):
         dirs = (settings.DOCUMENT_FOLDER, settings.PRIVATE_DOCUMENT_FOLDER)
@@ -1867,23 +1867,144 @@ class DownloadDocTest(BaseTestCase):
                 pass
     
     def setUp(self):
-        super(DownloadDocTest, self).setUp()
+        super(MediaBaseTestCase, self).setUp()
         settings.DOCUMENT_FOLDER = '_unittest_docs'
         settings.PRIVATE_DOCUMENT_FOLDER = '_unittest_private_docs'
         self._clean_files()
+
+    def tearDown(self):
+        super(MediaBaseTestCase, self).tearDown()
+        self._clean_files()
+        
+    def _get_file(self, file_name='unittest1.txt'):
+        full_name = os.path.normpath(os.path.dirname(__file__) + '/fixtures/' + file_name)
+        return open(full_name, 'rb')
+
+
+class MediaLibraryTest(MediaBaseTestCase):
+    
+    def _log_as_editor(self, is_staff=True):
+        u = User.objects.create(username='toto', is_staff=is_staff)
+        u.set_password('toto')
+        u.save()
+        logged = self.client.login(username='toto', password='toto')
+        if not logged: raise Exception("Not logged")
+    
+    def test_show_images_empty(self):
+        self._log_as_editor()
+        url = reverse('coop_cms_media_images')
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+        
+    def test_show_documents_empty(self):
+        self._log_as_editor()
+        url = reverse('coop_cms_media_documents')
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+            
+    def test_show_media_anonymous(self):
+        url = reverse('coop_cms_media_images')
+        response = self.client.get(url)
+        self.assertEqual(302, response.status_code)
+        next_url = "http://testserver/accounts/login/?next={0}".format(url)
+        self.assertEqual(next_url, response['Location'])
+        
+    def test_show_media_not_staff(self):
+        self._log_as_editor(is_staff=False)
+        url = reverse('coop_cms_media_images')
+        response = self.client.get(url)
+        self.assertEqual(403, response.status_code)
+    
+    def test_show_images(self):
+        self._log_as_editor()
+        images = mommy.make(Image, _quantity=2)
+        url = reverse('coop_cms_media_images')
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+        soup = BeautifulSoup(response.content)
+        nodes = soup.select(".library-thumbnail")
+        self.assertEqual(2, len(nodes))
+        
+    def test_show_images_pagination(self):
+        self._log_as_editor()
+        images = mommy.make(Image, _quantity=16)
+        url = reverse('coop_cms_media_images')
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+        soup = BeautifulSoup(response.content)
+        nodes = soup.select(".library-thumbnail")
+        self.assertEqual(15, len(nodes))
+    
+    def test_show_images_page_2(self):
+        self._log_as_editor()
+        images = mommy.make(Image, _quantity=16)
+        url = reverse('coop_cms_media_images')+"?page=2"
+        response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(200, response.status_code)
+        data = json.loads(response.content)
+        soup = BeautifulSoup(data['html'])
+        nodes = soup.select(".library-thumbnail")
+        self.assertEqual(1, len(nodes))
+        
+    def test_show_images_media_filter(self):
+        self._log_as_editor()
+        mf = mommy.make(MediaFilter)
+        images = []
+        for i in range(16):
+            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i)))
+        images.reverse()
+        
+        images[5].filters.add(mf)
+        images[15].filters.add(mf)
+        url = reverse('coop_cms_media_images')+"?page=1&media_filter={0}".format(mf.id)
+        response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(200, response.status_code)
+        data = json.loads(response.content)
+        soup = BeautifulSoup(data['html'])
+        nodes = soup.select(".library-thumbnail")
+        self.assertEqual(2, len(nodes))
+        expected = [x.file.url for x in (images[5], images[15])]
+        actual = [node["rel"] for node in nodes]
+        self.assertEqual(expected, actual)
+        
+    
+    def test_show_images_media_filter_all(self):
+        self._log_as_editor()
+        mf = mommy.make(MediaFilter)
+        
+        images = []
+        for i in range(16):
+            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i)))
+        images.reverse()
+        
+        images[5].filters.add(mf)
+        images[15].filters.add(mf)
+        url = reverse('coop_cms_media_images')+"?page=1&media_filter={0}".format(0)
+        response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        self.assertEqual(200, response.status_code)
+        data = json.loads(response.content)
+        soup = BeautifulSoup(data['html'])
+        nodes = soup.select(".library-thumbnail")
+        self.assertEqual(15, len(nodes))
+        expected = [x.file.url for x in images[:15]]
+        actual = [node["rel"] for node in nodes]
+        self.assertEqual(expected, actual)
+    
+
+
+    
+class DownloadDocTest(MediaBaseTestCase):
+    
+    def setUp(self):
+        super(MediaBaseTestCase, self).setUp()
         u = User.objects.create(username='toto')
         u.is_superuser = True
         u.set_password('toto')
         u.save()
 
     def tearDown(self):
-        super(DownloadDocTest, self).tearDown()
-        self._clean_files()
+        super(MediaBaseTestCase, self).tearDown()
         
-    def _get_file(self, file_name='unittest1.txt'):
-        full_name = os.path.normpath(os.path.dirname(__file__) + '/fixtures/' + file_name)
-        return open(full_name, 'rb')
-    
     def test_upload_public_doc(self):
         data = {
             'file': self._get_file(),

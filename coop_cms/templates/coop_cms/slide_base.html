@@ -2,7 +2,7 @@
 {% if not is_ajax %}
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="/static/css/mediatheque.css">
+    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}/css/mediatheque.css?v=1.1">
     <script>
     $(function() {
       $('.pagination a').live('click', function(e) {
@@ -40,7 +40,18 @@
             }
           });
         if (!$(this).hasClass('active')){ $(".media-selector a").toggleClass('active'); }
-
+      });
+      $('.media-filters a').click( function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $.ajax({
+          url: $(this).attr('href'),
+          dataType: 'json',
+          success: function(data) {
+            $("#media_slide_content").html(data["html"]);
+            }
+          });
+        if (!$(this).hasClass('active')){ $(".media-filters a").toggleClass('active'); }
       });
       
       active_link('{{media_type}}');
@@ -61,6 +72,14 @@
           <a class="image-sel" href="{{images_url}}?page=1">{% trans "Images" %}</a>
           <a class="document-sel" href="{{docs_url}}?page=1">{% trans "Documents" %}</a>
         </div>
+        {% if media_filters %}
+        <div class="media-filters">
+          <a class="active" href="{{media_url}}?page=1&media_filter=0">{% trans "All" %}</a>
+          {% for mf in media_filters %}
+            <a href="{{media_url}}?page=1&media_filter={{ mf.id }}">{{ mf.name }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
         <div id="media_slide_content">
         {% include media_slide_template %}
         </div>

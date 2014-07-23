@@ -3,7 +3,7 @@
   <div class="library-items library-images">
   {% autopaginate images 15 %}  
   {% for img in images %}
-      <img class="library-thumbnail" src="{{ img.as_thumbnail.url }}" title="{{img.name}}" rel="{{img.get_absolute_url}}">
+      <img class="library-thumbnail" src="{{ img.as_thumbnail.url }}" title="{{img.name}}" rel="{{img.get_absolute_url}}" />
   {% endfor %}
   {% paginate %}  
   </div>

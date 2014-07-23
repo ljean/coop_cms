@@ -127,3 +127,5 @@ class AliasAdmin(admin.ModelAdmin):
     list_display = ['path', 'redirect_url']
     list_editable = ['redirect_url']
 admin.site.register(models.Alias, AliasAdmin)
+
+admin.site.register(models.MediaFilter)

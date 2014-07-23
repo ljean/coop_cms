@@ -664,8 +664,19 @@ def get_img_folder(instance, filename):
     #return u'{0}/{1}/{2}'.format(img_root,
     #    instance.created.strftime('%Y%d%m%H%M%S'), filename)
 
+class MediaFilter(models.Model):
+    name = models.CharField(_('name'), max_length=100)
+    
+    class Meta:
+        verbose_name = _(u'media filter')
+        verbose_name_plural = _(u'media filters')
+        
+    def __unicode__(self):
+        return self.name
+
 class Media(TimeStampedModel):
     name = models.CharField(_('name'), max_length=200, blank=True, default='')
+    filters = models.ManyToManyField(MediaFilter, blank=True, default=None, verbose_name=_(u"filters"))
 
     def __unicode__(self):
         return self.name

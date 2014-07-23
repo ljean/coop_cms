@@ -43,11 +43,31 @@
 	color: #949494;
 }
 
-a.active {
+.media-selector a.active {
 	text-decoration: none;
 	background-color: rgba(255,255,255,0.45);
 	color: #2a62d5;
 }
+
+.media-filters {
+	background: #FFFFFF;
+	background: linear-gradient(#FFFFFF, #ABABAB);
+	font-weight: bold;
+	line-height: 20px;
+	padding-left: 8px;
+}
+
+.media-filters a {
+	height: 20px;
+	display: inline-block;
+	padding: 2px;
+	color: #949494;
+}
+
+.media-filters a.active {
+	color: #000;
+}
+
 
 .close-slider a {
 	float: right;
@@ -107,6 +127,8 @@ a.active {
 	cursor: move;
 	vertical-align: middle;
 }
+
+
 
 /*
 .djaloha-document {

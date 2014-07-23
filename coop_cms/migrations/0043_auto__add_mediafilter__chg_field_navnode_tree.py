@@ -8,19 +8,51 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'MediaFilter'
+        db.create_table(u'coop_cms_mediafilter', (
+            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=100)),
+        ))
+        db.send_create_signal(u'coop_cms', ['MediaFilter'])
 
-        # Adding field 'PieceOfHtml.extra_id'
-        db.add_column(u'coop_cms_pieceofhtml', 'extra_id',
-                      self.gf('django.db.models.fields.CharField')(default='', max_length=100, db_index=True, blank=True),
-                      keep_default=False)
+        # Adding M2M table for field filters on 'Document'
+        m2m_table_name = db.shorten_name(u'coop_cms_document_filters')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('document', models.ForeignKey(orm[u'coop_cms.document'], null=False)),
+            ('mediafilter', models.ForeignKey(orm[u'coop_cms.mediafilter'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['document_id', 'mediafilter_id'])
+
+        # Adding M2M table for field filters on 'Image'
+        m2m_table_name = db.shorten_name(u'coop_cms_image_filters')
+        db.create_table(m2m_table_name, (
+            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
+            ('image', models.ForeignKey(orm[u'coop_cms.image'], null=False)),
+            ('mediafilter', models.ForeignKey(orm[u'coop_cms.mediafilter'], null=False))
+        ))
+        db.create_unique(m2m_table_name, ['image_id', 'mediafilter_id'])
 
 
     def backwards(self, orm):
+        # Deleting model 'MediaFilter'
+        db.delete_table(u'coop_cms_mediafilter')
 
-        # Deleting field 'PieceOfHtml.extra_id'
-        db.delete_column(u'coop_cms_pieceofhtml', 'extra_id')
+        # Removing M2M table for field filters on 'Document'
+        db.delete_table(db.shorten_name(u'coop_cms_document_filters'))
+
+        # Removing M2M table for field filters on 'Image'
+        db.delete_table(db.shorten_name(u'coop_cms_image_filters'))
+
 
     models = {
+        u'basic_cms.navtree': {
+            'Meta': {'object_name': 'NavTree'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'last_update': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'default': "'default'", 'unique': 'True', 'max_length': '100', 'db_index': 'True'}),
+            'types': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['coop_cms.NavType']", 'symmetrical': 'False', 'blank': 'True'})
+        },
         u'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
             'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -48,6 +80,7 @@ class Migration(SchemaMigration):
             'category': ('django.db.models.fields.related.ForeignKey', [], {'default': 'None', 'to': u"orm['coop_cms.ArticleCategory']", 'null': 'True', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'file': ('django.db.models.fields.files.FileField', [], {'max_length': '100'}),
+            'filters': ('django.db.models.fields.related.ManyToManyField', [], {'default': 'None', 'to': u"orm['coop_cms.MediaFilter']", 'symmetrical': 'False', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'is_private': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
@@ -78,6 +111,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Image'},
             'created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'file': ('django.db.models.fields.files.ImageField', [], {'max_length': '100'}),
+            'filters': ('django.db.models.fields.related.ManyToManyField', [], {'default': 'None', 'to': u"orm['coop_cms.MediaFilter']", 'symmetrical': 'False', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '200', 'blank': 'True'})
@@ -89,6 +123,11 @@ class Migration(SchemaMigration):
             'modified': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'default': "u'title'", 'max_length': '200'}),
             'url': ('django.db.models.fields.CharField', [], {'max_length': '200'})
+        },
+        u'coop_cms.mediafilter': {
+            'Meta': {'object_name': 'MediaFilter'},
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         u'coop_cms.navnode': {
             'Meta': {'object_name': 'NavNode'},
@@ -138,13 +177,6 @@ class Migration(SchemaMigration):
             'div_id': ('django.db.models.fields.CharField', [], {'max_length': '100', 'db_index': 'True'}),
             'extra_id': ('django.db.models.fields.CharField', [], {'default': "''", 'max_length': '100', 'db_index': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'})
-        },
-        u'basic_cms.navtree': {
-            'Meta': {'object_name': 'NavTree'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'last_update': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'default': "'default'", 'unique': 'True', 'max_length': '100', 'db_index': 'True'}),
-            'types': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['coop_cms.NavType']", 'symmetrical': 'False', 'blank': 'True'})
         },
         u'sites.site': {
             'Meta': {'ordering': "(u'domain',)", 'object_name': 'Site', 'db_table': "u'django_site'"},

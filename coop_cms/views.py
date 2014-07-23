@@ -35,6 +35,7 @@ from generic_views import EditableObjectView
 from django.forms.models import modelformset_factory
 import logging
 logger = logging.getLogger("coop_cms")
+import itertools
 
 def get_article_template(article):
     template = article.template
@@ -248,27 +249,43 @@ def publish_article(request, url):
 @login_required
 def show_media(request, media_type):
     try:
+        if not request.user.is_staff:
+            raise PermissionDenied
+        
         is_ajax = request.GET.get('page', 0)
+        media_filter = request.GET.get('media_filter', 0)
     
         if request.session.get("coop_cms_media_doc", False):
             media_type = 'document' #force the doc
             del request.session["coop_cms_media_doc"]
     
         if media_type == 'image':
+            qs = models.Image.objects.all().order_by("-created")
             context = {
-                'images': models.Image.objects.all().order_by("-created"),
                 'media_url': reverse('coop_cms_media_images'),
                 'media_slide_template': 'coop_cms/slide_images_content.html',
             }
         else:
+            media_type = "document"
+            qs = models.Document.objects.all().order_by("-created")
             context = {
-                'documents': models.Document.objects.all().order_by("-created"),
                 'media_url': reverse('coop_cms_media_documents'),
                 'media_slide_template': 'coop_cms/slide_docs_content.html',
             }
+            
         context['is_ajax'] = is_ajax
         context['media_type'] = media_type
-    
+        
+        media_filters = [media.filters.all() for media in qs.all()] # list of lists of media_filters
+        media_filters = itertools.chain(*media_filters) #flat list of media_filters
+        context['media_filters'] = sorted(
+            list(set(media_filters)), key=lambda mf: mf.name.upper()
+        )#flat list of unique media filters sorted by alphabetical order (ignore case)
+        
+        if int(media_filter):
+            qs = qs.filter(filters__id=media_filter)
+        context[media_type+'s'] = qs
+        
         t = get_template('coop_cms/slide_base.html')
         html = t.render(RequestContext(request, context))
     
