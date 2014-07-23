@@ -54,7 +54,48 @@ def make_dt(dt):
     else:
         return dt
     
-class BaseArticleTest(BaseTestCase):
+class MediaBaseTestCase(BaseTestCase):
+
+    def _clean_files(self):
+        if self._media_root != settings.MEDIA_ROOT:
+            try:
+                shutil.rmtree(settings.MEDIA_ROOT)
+            except OSError:
+                pass
+        else:
+            raise Exception("Warning! wrong media root for unittesting")
+    
+    def setUp(self):
+        super(MediaBaseTestCase, self).setUp()
+        self._media_root = settings.MEDIA_ROOT
+        settings.MEDIA_ROOT = os.path.join(self._media_root, '_unit_tests')
+        self._clean_files()
+
+    def tearDown(self):
+        self._clean_files()
+        settings.MEDIA_ROOT = self._media_root
+        super(MediaBaseTestCase, self).tearDown()
+        
+    def _get_file(self, file_name='unittest1.txt'):
+        full_name = os.path.normpath(os.path.dirname(__file__) + '/fixtures/' + file_name)
+        return open(full_name, 'rb')
+
+    def _log_as_mediamgr(self, is_staff=True, perm=None):
+        u = User.objects.create(username='toto', is_staff=is_staff)
+        u.set_password('toto')
+        if perm:
+            u.user_permissions.add(perm)
+        u.save()
+        logged = self.client.login(username='toto', password='toto')
+        if not logged: raise Exception("Not logged")
+
+    def _permission(self, code, model_class):
+        ct = ContentType.objects.get_for_model(model_class)
+        codename = '{0}_{1}'.format(code, ct.model)
+        return Permission.objects.get(content_type__app_label=ct.app_label, codename=codename)
+
+
+class BaseArticleTest(MediaBaseTestCase):
     def _log_as_editor(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
         
@@ -1854,50 +1895,152 @@ class CmsEditTagTest(BaseTestCase):
         self.assertContains(response, "Hello")
         self.assertContains(response, article.content)
         self.assertContains(response, self.link1.url)
-
-class MediaBaseTestCase(BaseTestCase):
-
-    def _clean_files(self):
-        dirs = (settings.DOCUMENT_FOLDER, settings.PRIVATE_DOCUMENT_FOLDER)
-        for d in dirs:
-            try:
-                dir_name = '{0}/{1}'.format(settings.MEDIA_ROOT, d)
-                shutil.rmtree(dir_name)
-            except:
-                pass
     
-    def setUp(self):
-        super(MediaBaseTestCase, self).setUp()
-        settings.DOCUMENT_FOLDER = '_unittest_docs'
-        settings.PRIVATE_DOCUMENT_FOLDER = '_unittest_private_docs'
-        self._clean_files()
 
-    def tearDown(self):
-        super(MediaBaseTestCase, self).tearDown()
-        self._clean_files()
+class ImageUploadTest(MediaBaseTestCase):
+    
+    def test_view_form_no_filters(self):
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        id_filters = soup.select("input#id_filters")
+        self.assertEqual(1, len(id_filters))
+        self.assertEqual("hidden", id_filters[0]["type"])
+
+    def test_view_form_with_filters(self):
+        f1 = mommy.make(MediaFilter, name="icons")
+        f2 = mommy.make(MediaFilter, name="big-images")
         
-    def _get_file(self, file_name='unittest1.txt'):
-        full_name = os.path.normpath(os.path.dirname(__file__) + '/fixtures/' + file_name)
-        return open(full_name, 'rb')
-
-
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        id_filters = soup.select("select#id_filters option")
+        self.assertEqual(2, len(id_filters))
+        
+    def test_post_form_no_filters(self):
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': 'a test file',
+            'filters': ''
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        
+        images = Image.objects.all()
+        self.assertEquals(1, images.count())
+        self.assertEqual(images[0].name, data['descr'])
+        self.assertEqual(images[0].filters.count(), 0)
+        f = images[0].file
+        f.open('rb')
+        self.assertEqual(f.read(), self._get_file("unittest1.png").read())
+        
+    def test_post_form_anonymous(self):
+        url = reverse('coop_cms_upload_image')
+        
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': 'a test file',
+            'filters': ''
+        }
+        
+        response = self.client.post(url, data=data, follow=False)
+        self.assertEqual(response.status_code, 302)
+        next_url = "http://testserver/accounts/login/?next={0}".format(url)
+        self.assertEqual(next_url, response['Location'])
+        
+        images = Image.objects.all()
+        self.assertEquals(0, images.count())
+        
+    def test_post_form_not_allowed(self):
+        self._log_as_mediamgr()
+        url = reverse('coop_cms_upload_image')
+        
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': 'a test file',
+            'filters': ''
+        }
+        
+        response = self.client.post(url, data=data, follow=False)
+        self.assertEqual(response.status_code, 403)
+        
+        images = Image.objects.all()
+        self.assertEquals(0, images.count())
+        
+    def test_post_form_with_filters(self):
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        
+        f1 = mommy.make(MediaFilter, name="icons")
+        f2 = mommy.make(MediaFilter, name="big-images")
+        f3 = mommy.make(MediaFilter, name="small-images")
+        
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': 'a test file',
+            'filters': [str(f.id) for f in (f1,f3)],
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        
+        images = Image.objects.all()
+        self.assertEquals(1, images.count())
+        self.assertEqual(images[0].name, data['descr'])
+        self.assertEqual(images[0].filters.count(), 2)
+        self.assertEqual(list(images[0].filters.all().order_by('id')), [f1, f3])
+        
+        f = images[0].file
+        f.open('rb')
+        self.assertEqual(f.read(), self._get_file("unittest1.png").read())
+        
+    def test_post_form_with_filters_no_choice(self):
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        
+        f1 = mommy.make(MediaFilter, name="icons")
+        f2 = mommy.make(MediaFilter, name="big-images")
+        f3 = mommy.make(MediaFilter, name="small-images")
+        
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': 'a test file',
+            'filters': [],
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        
+        images = Image.objects.all()
+        self.assertEquals(1, images.count())
+        self.assertEqual(images[0].name, data['descr'])
+        self.assertEqual(images[0].filters.count(), 0)
+        
+        f = images[0].file
+        f.open('rb')
+        self.assertEqual(f.read(), self._get_file("unittest1.png").read())
+    
 class MediaLibraryTest(MediaBaseTestCase):
     
-    def _log_as_editor(self, is_staff=True):
-        u = User.objects.create(username='toto', is_staff=is_staff)
-        u.set_password('toto')
-        u.save()
-        logged = self.client.login(username='toto', password='toto')
-        if not logged: raise Exception("Not logged")
-    
     def test_show_images_empty(self):
-        self._log_as_editor()
+        self._log_as_mediamgr()
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
         
     def test_show_documents_empty(self):
-        self._log_as_editor()
+        self._log_as_mediamgr()
         url = reverse('coop_cms_media_documents')
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
@@ -1910,13 +2053,13 @@ class MediaLibraryTest(MediaBaseTestCase):
         self.assertEqual(next_url, response['Location'])
         
     def test_show_media_not_staff(self):
-        self._log_as_editor(is_staff=False)
+        self._log_as_mediamgr(is_staff=False)
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
         self.assertEqual(403, response.status_code)
     
     def test_show_images(self):
-        self._log_as_editor()
+        self._log_as_mediamgr()
         images = mommy.make(Image, _quantity=2)
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
@@ -1926,7 +2069,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         self.assertEqual(2, len(nodes))
         
     def test_show_images_pagination(self):
-        self._log_as_editor()
+        self._log_as_mediamgr()
         images = mommy.make(Image, _quantity=16)
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
@@ -1936,7 +2079,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         self.assertEqual(15, len(nodes))
     
     def test_show_images_page_2(self):
-        self._log_as_editor()
+        self._log_as_mediamgr()
         images = mommy.make(Image, _quantity=16)
         url = reverse('coop_cms_media_images')+"?page=2"
         response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
@@ -1947,7 +2090,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         self.assertEqual(1, len(nodes))
         
     def test_show_images_media_filter(self):
-        self._log_as_editor()
+        self._log_as_mediamgr()
         mf = mommy.make(MediaFilter)
         images = []
         for i in range(16):
@@ -1966,10 +2109,9 @@ class MediaLibraryTest(MediaBaseTestCase):
         expected = [x.file.url for x in (images[5], images[15])]
         actual = [node["rel"] for node in nodes]
         self.assertEqual(expected, actual)
-        
     
     def test_show_images_media_filter_all(self):
-        self._log_as_editor()
+        self._log_as_mediamgr()
         mf = mommy.make(MediaFilter)
         
         images = []
@@ -1990,28 +2132,21 @@ class MediaLibraryTest(MediaBaseTestCase):
         actual = [node["rel"] for node in nodes]
         self.assertEqual(expected, actual)
     
-
-
-    
 class DownloadDocTest(MediaBaseTestCase):
     
     def setUp(self):
-        super(MediaBaseTestCase, self).setUp()
-        u = User.objects.create(username='toto')
-        u.is_superuser = True
-        u.set_password('toto')
-        u.save()
-
+        super(DownloadDocTest, self).setUp()
+    
     def tearDown(self):
-        super(MediaBaseTestCase, self).tearDown()
-        
+        super(DownloadDocTest, self).tearDown()
+    
     def test_upload_public_doc(self):
+        self._log_as_mediamgr(perm=self._permission("add", Document))
         data = {
             'file': self._get_file(),
             'is_private': False,
             'name': 'a test file',
         }
-        self.assertTrue(self.client.login(username='toto', password='toto'))
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, 'close_popup_and_media_slide')
@@ -2024,6 +2159,7 @@ class DownloadDocTest(MediaBaseTestCase):
         self.assertEqual(f.read(), self._get_file().read())
         
     def test_upload_public_doc_category(self):
+        self._log_as_mediamgr(perm=self._permission("add", Document))
         cat = mommy.make(ArticleCategory, name="my cat")
         data = {
             'file': self._get_file(),
@@ -2031,7 +2167,6 @@ class DownloadDocTest(MediaBaseTestCase):
             'name': 'a test file',
             'category': cat.id,
         }
-        self.assertTrue(self.client.login(username='toto', password='toto'))
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, 'close_popup_and_media_slide')
@@ -2044,10 +2179,10 @@ class DownloadDocTest(MediaBaseTestCase):
         self.assertEqual(f.read(), self._get_file().read())
         
     def test_upload_doc_missing_fields(self):
+        self._log_as_mediamgr(perm=self._permission("add", Document))
         data = {
             'is_private': False,
         }
-        self.assertTrue(self.client.login(username='toto', password='toto'))
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.content, 'close_popup_and_media_slide')
@@ -2065,14 +2200,24 @@ class DownloadDocTest(MediaBaseTestCase):
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
         self.assertTrue(redirect_url.find(login_url)>0)
+        
+    def test_upload_not_allowed(self):
+        self._log_as_mediamgr()
+        data = {
+            'file': self._get_file(),
+            'is_private': False,
+        }
+        response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
+        self.assertEqual(response.status_code, 403)
+        
 
         
     def test_upload_private_doc(self):
+        self._log_as_mediamgr(perm=self._permission("add", Document))
         data = {
             'file': self._get_file(),
             'is_private': True,
         }
-        self.assertTrue(self.client.login(username='toto', password='toto'))
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, 'close_popup_and_media_slide')
@@ -2085,12 +2230,12 @@ class DownloadDocTest(MediaBaseTestCase):
         self.assertEqual(f.read(), self._get_file().read())
     
     def test_view_docs(self):
+        self._log_as_mediamgr(perm=self._permission("add", Document))
         file1 = File(self._get_file())
         doc1 = mommy.make(Document, is_private=True, file=file1)
         file2 = File(self._get_file())
         doc2 = mommy.make(Document, is_private=False, file=file2)
         
-        self.assertTrue(self.client.login(username='toto', password='toto'))
         response = self.client.get(reverse('coop_cms_media_documents'))
         self.assertEqual(response.status_code, 200)
         
@@ -2105,6 +2250,11 @@ class DownloadDocTest(MediaBaseTestCase):
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
         self.assertTrue(redirect_url.find(login_url)>0)
+        
+    def test_view_docs_not_allowed(self):
+        self._log_as_mediamgr(is_staff=False)
+        response = self.client.get(reverse('coop_cms_media_documents'), follow=True)
+        self.assertEqual(response.status_code, 403)
     
     def test_download_public(self):
         #create a public doc
@@ -2116,7 +2266,7 @@ class DownloadDocTest(MediaBaseTestCase):
         self.assertNotEqual(doc.get_download_url(), private_url)
         
         #login and download
-        self.assertTrue(self.client.login(username='toto', password='toto'))
+        self._log_as_mediamgr()
         response = self.client.get(doc.get_download_url())
         self.assertEqual(response.status_code, 200)
 
@@ -2142,7 +2292,7 @@ class DownloadDocTest(MediaBaseTestCase):
         self.assertEqual(doc.get_download_url(), private_url)
         
         #login and download
-        self.assertTrue(self.client.login(username='toto', password='toto'))
+        self._log_as_mediamgr()
         response = self.client.get(doc.get_download_url())
         self.assertEqual(response.status_code, 200)
         self.assertEquals(response['Content-Disposition'], "attachment; filename=unittest1.txt")
@@ -5201,9 +5351,8 @@ class CoopCategoryTemplateTagTest(BaseTestCase):
 
 class ArticleLogoTest(BaseArticleTest):
     
-    def _get_file(self, file_name='unittest1.png'):
-        full_name = os.path.normpath(os.path.dirname(__file__) + '/fixtures/' + file_name)
-        return open(full_name, 'rb')
+    def _get_image(self, file_name='unittest1.png'):
+        return self._get_file(file_name)
     
     def setUp(self):
         super(ArticleLogoTest, self).setUp()
@@ -5229,7 +5378,7 @@ class ArticleLogoTest(BaseArticleTest):
             title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
             template = settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0])
         if image:
-            a.logo = File(self._get_file())
+            a.logo = File(self._get_image())
             a.save()
         
         response = self.client.get(a.get_absolute_url())
@@ -5252,7 +5401,7 @@ class ArticleLogoTest(BaseArticleTest):
         if image:
             a = mommy.make(Article,
                 title=u"This is my article", content=u"<p>This is my <b>content</b></p>", slug="",
-                template = settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0], logo=File(self._get_file())
+                template = settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0], logo=File(self._get_image())
             )
         else:
             a = mommy.make(Article,
@@ -5270,7 +5419,7 @@ class ArticleLogoTest(BaseArticleTest):
             'content': 'The content',
         }
         if post_image:
-            data['logo'] = self._get_file('unittest2.png')
+            data['logo'] = self._get_image('unittest2.png')
         response = self.client.post(a.get_edit_url(), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         

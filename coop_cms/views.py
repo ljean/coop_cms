@@ -304,6 +304,10 @@ def show_media(request, media_type):
 @login_required
 def upload_image(request):
     try:
+        
+        if not request.user.has_perm("coop_cms.add_image"):
+            raise PermissionDenied()
+        
         if request.method == "POST":
             form = forms.AddImageForm(request.POST, request.FILES)
             if form.is_valid():
@@ -314,6 +318,12 @@ def upload_image(request):
                 image = models.Image(name=descr)
                 image.file.save(src.name, src)
                 image.save()
+                
+                filters = form.cleaned_data['filters']
+                if filters:
+                    image.filters.add(*filters)
+                    image.save()
+                
                 return HttpResponse("close_popup_and_media_slide")
         else:
             form = forms.AddImageForm()
@@ -331,6 +341,9 @@ def upload_image(request):
 @login_required
 def upload_doc(request):
     try:
+        if not request.user.has_perm("coop_cms.add_document"):
+            raise PermissionDenied()
+        
         if request.method == "POST":
             form = forms.AddDocForm(request.POST, request.FILES)
             if form.is_valid():

@@ -1,5 +1,5 @@
 from django import forms
-from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending, Link, Document, Fragment, BaseArticle
+from coop_cms.models import NavType, NavNode, Newsletter, NewsletterSending, Link, Document, Fragment, BaseArticle, MediaFilter
 from django.contrib.contenttypes.models import ContentType
 from settings import get_navigable_content_types
 from django.core.exceptions import ValidationError
@@ -192,6 +192,19 @@ class AddImageForm(forms.Form):
         attrs={'size': '35', 'placeholder': _(u'Optional description'),}),
         label = _('Description'),
     )
+    filters = forms.MultipleChoiceField(required=False, label=_(u"Filters"))
+    
+    def __init__(self, *args, **kwargs):
+        super(AddImageForm, self).__init__(*args, **kwargs)
+        qs = MediaFilter.objects.all()
+        if qs.count():
+            self.fields['filters'].choices = [(x.id, x.name) for x in qs]
+        else:
+            self.fields['filters'].widget = forms.HiddenInput()
+            
+    def clean_filters(self):
+        filters = self.cleaned_data['filters']
+        return [MediaFilter.objects.get(id=pk) for pk in filters]
 
 class AddDocForm(forms.ModelForm):
     class Meta:
