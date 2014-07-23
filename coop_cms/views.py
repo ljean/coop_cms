@@ -284,6 +284,7 @@ def show_media(request, media_type):
         
         if int(media_filter):
             qs = qs.filter(filters__id=media_filter)
+            context['media_filter'] = int(media_filter)
         context[media_type+'s'] = qs
         
         t = get_template('coop_cms/slide_base.html')
