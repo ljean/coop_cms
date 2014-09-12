@@ -240,7 +240,15 @@ class EditableFormsetView(TemplateView):
         forms_args = djaloha_utils.extract_forms_args(request.POST)
         djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)
 
-        if self.formset.is_valid() and all([f.is_valid() for f in djaloha_forms]):
+        #Handle case where formet post data has value which are not in the queryset
+        formset_index_error = False
+        try:
+            formset_is_valid = self.formset.is_valid()
+        except IndexError:
+            formset_index_error = True
+            formset_is_valid = False
+
+        if  formset_is_valid and all([f.is_valid() for f in djaloha_forms]):
             for form in self.formset:
                 if self._pre_save_object(form):
                     obj = form.save()
@@ -254,10 +262,15 @@ class EditableFormsetView(TemplateView):
             url = self.get_success_url()
             return HttpResponseRedirect(url)
         else:
-            for f in self.formset:
-                errors = f.errors
-                if errors:
-                    logger.warning(errors)
+            if formset_index_error:
+                logger.warning(_(u'Index error in formset: some objects may be missing'))
+                error_message = (_(u'An error occured: At least one object is missing. Please try again.'))
+                return HttpResponseRedirect(self.get_cancel_url())
+            else:
+                for f in self.formset:
+                    errors = f.errors
+                    if errors:
+                        logger.warning(errors)
         
         return render_to_response(
             self.get_template(),
