@@ -276,9 +276,9 @@ class CmsEditNode(template.Node):
         self.nodelist_content = nodelist_content
         self._logo_size = logo_size.strip("'").strip('"') if logo_size else None
         self._logo_crop = logo_crop.strip("'").strip('"') if logo_crop else None
-        self._render_logo_size = self._logo_size and (self._logo_size!=logo_size)
-        self._render_logo_crop = self._logo_crop and (self._logo_crop!=logo_crop)
-
+        self._render_logo_size = self._logo_size and (self._logo_size==logo_size)
+        self._render_logo_crop = self._logo_crop and (self._logo_crop==logo_crop)
+        
     def __iter__(self):
         for node in self.nodelist_content:
             yield node
@@ -317,7 +317,7 @@ class CmsEditNode(template.Node):
         safe_context = inner_context.copy()
         #inner_context[self.var_name] = obj
         inner_value = u""
-
+        
         if form or formset:
             t = template.Template(CMS_FORM_TEMPLATE)
             if form:
