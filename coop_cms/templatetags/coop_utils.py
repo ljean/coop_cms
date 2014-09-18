@@ -175,7 +175,7 @@ class ImageListNode(template.Node):
         if self.filter_var:
             self.filter_value = self.filter_var.resolve(context)
         images = Image.objects.filter(filters__name=self.filter_value)
-        context.dicts[0][self.var_name] = images
+        context.dicts[1][self.var_name] = images
         return ""
 
 @register.tag
