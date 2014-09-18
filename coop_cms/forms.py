@@ -188,14 +188,14 @@ class ArticleAdminForm(forms.ModelForm):
         }
 
 class AddImageForm(floppyforms.Form):
-    image = forms.ImageField(required=True, label = _('Image'),)
-    descr = forms.CharField(required=False, widget=forms.TextInput(
+    image = floppyforms.ImageField(required=True, label = _('Image'),)
+    descr = floppyforms.CharField(required=False, widget=forms.TextInput(
         attrs={'size': '35', 'placeholder': _(u'Optional description'),}),
         label = _('Description'),
     )
-    filters = forms.MultipleChoiceField(required=False, label=_(u"Filters"),
+    filters = floppyforms.MultipleChoiceField(required=False, label=_(u"Filters"),
         help_text=_(u"Choose betwwen tags to find images more easily"))
-    size = forms.ChoiceField(required=False, label=_(u"Size"),
+    size = floppyforms.ChoiceField(required=False, label=_(u"Size"),
         help_text=_(u"Define a size if you want to resize the image"))
     
     def __init__(self, *args, **kwargs):
@@ -212,14 +212,14 @@ class AddImageForm(floppyforms.Form):
                 #print 'No ChosenSelectMultiple'
                 pass
         else:
-            self.fields['filters'].widget = forms.HiddenInput()
+            self.fields['filters'].widget = floppyforms.HiddenInput()
             
         #Image size
         qs = ImageSize.objects.all()
         if qs.count():
             self.fields['size'].choices = [('', '')]+[(x.id, unicode(x)) for x in qs]
         else:
-            self.fields['size'].widget = forms.HiddenInput()
+            self.fields['size'].widget = floppyforms.HiddenInput()
             
             
     def clean_filters(self):

@@ -1908,6 +1908,16 @@ class ImageUploadTest(MediaBaseTestCase):
         id_filters = soup.select("input#id_filters")
         self.assertEqual(1, len(id_filters))
         self.assertEqual("hidden", id_filters[0]["type"])
+        
+    def test_view_form_no_sizes(self):
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        id_size = soup.select("input#id_size")
+        self.assertEqual(1, len(id_size))
+        self.assertEqual("hidden", id_size[0]["type"])
 
     def test_view_form_with_filters(self):
         f1 = mommy.make(MediaFilter, name="icons")
@@ -1920,6 +1930,18 @@ class ImageUploadTest(MediaBaseTestCase):
         soup = BeautifulSoup(response.content)
         id_filters = soup.select("select#id_filters option")
         self.assertEqual(2, len(id_filters))
+    
+    def test_view_form_with_sizes(self):
+        s1 = mommy.make(ImageSize, name="icons")
+        s2 = mommy.make(ImageSize, name="big-images")
+        
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        id_sizes = soup.select("select#id_size option")
+        self.assertEqual(['', str(s1.id), str(s2.id)], [x["value"] for x in id_sizes])
         
     def test_post_form_no_filters(self):
         self._log_as_mediamgr(perm=self._permission("add", Image))
