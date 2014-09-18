@@ -174,7 +174,7 @@ class ImageListNode(template.Node):
     def render(self, context):
         if self.filter_var:
             self.filter_value = self.filter_var.resolve(context)
-        images = Image.objects.filter(filters__name=self.filter_value)
+        images = Image.objects.filter(filters__name=self.filter_value).order_by("ordering", "-created")
         context.dicts[1][self.var_name] = images
         return ""
 
