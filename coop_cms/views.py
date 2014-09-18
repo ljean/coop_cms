@@ -36,6 +36,7 @@ from django.forms.models import modelformset_factory
 import logging
 logger = logging.getLogger("coop_cms")
 import itertools
+from coop_cms.settings import cms_no_homepage
 
 def get_article_template(article):
     template = article.template
