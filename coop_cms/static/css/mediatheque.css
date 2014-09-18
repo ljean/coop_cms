@@ -97,6 +97,9 @@
 .library-image {
 	display: inline-block;
 	text-align: center;
+	max-width: 80px;
+	overflow: hidden;
+	margin: 10px;
 }
 
 .library-images img.library-thumbnail {
