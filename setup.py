@@ -45,7 +45,7 @@ setup(
     license = 'BSD',
     zip_safe = False,
     install_requires = [
-        'django >= 1.5',
+        'django==1.6.6',
         'south',
         'django-floppyforms',
         'django-extensions',
