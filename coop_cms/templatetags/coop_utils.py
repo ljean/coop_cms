@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 import unicodedata
 from django.conf import settings
 from floppyforms import CheckboxInput
-from coop_cms.models import ArticleCategory
+from coop_cms.models import ArticleCategory, Image
 import os.path
 
 ################################################################################
@@ -157,3 +157,34 @@ def coop_category(parser, token):
 @register.filter
 def basename(fullname):
     return os.path.basename(fullname)
+
+
+################################################################################
+class ImageListNode(template.Node):
+
+    def __init__(self, filter_name, var_name):
+        stripped_filter_name = filter_name.strip("'").strip('"')
+        self.filter_var, self.filter_value = None, None
+        if stripped_filter_name == filter_name:
+            self.filter_var = template.Variable(filter_name)
+        else:
+            self.filter_value = stripped_filter_name
+        self.var_name = var_name
+
+    def render(self, context):
+        if self.filter_var:
+            self.filter_value = self.filter_var.resolve(context)
+        images = Image.objects.filter(filters__name=self.filter_value)
+        context.dicts[0][self.var_name] = images
+        return ""
+
+@register.tag
+def coop_image_list(parser, token):
+    args = token.split_contents()
+    try:
+        filter_name = args[1]
+        as_name = args[2]
+        var_name = args[3]
+    except IndexError:
+        raise Exception(u"coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
+    return ImageListNode(filter_name, var_name)

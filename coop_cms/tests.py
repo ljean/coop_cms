@@ -3592,6 +3592,45 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, a1.content)
 
+class ImageListTemplateTagTest(BaseTestCase):
+    
+    def test_non_existing_filter(self):
+        tpl = Template('{% load coop_utils %}{% coop_image_list "test" as image_list %}{{image_list|length}}')
+        html = tpl.render(Context({}))
+        self.assertEqual(html, "0")
+        
+    def test_empty_filter(self):
+        f = mommy.make(MediaFilter, name="abcd")
+        tpl = Template('{% load coop_utils %}{% coop_image_list "abcd" as image_list %}{{image_list|length}}')
+        html = tpl.render(Context({}))
+        self.assertEqual(html, "0")
+        
+    def test_filter_with_images(self):
+        f = mommy.make(MediaFilter, name="abcd")
+        img1 = mommy.make(Image, filters=[f])
+        tpl = Template('{% load coop_utils %}{% coop_image_list "abcd" as image_list %}{{image_list|length}}')
+        html = tpl.render(Context({}))
+        self.assertEqual(html, "1")
+        
+    def test_filter_with_images_var_name(self):
+        f = mommy.make(MediaFilter, name="abcd")
+        img1 = mommy.make(Image, filters=[f])
+        tpl = Template('{% load coop_utils %}{% coop_image_list filter_name as image_list %}{{image_list|length}}')
+        html = tpl.render(Context({"filter_name": f.name}))
+        self.assertEqual(html, "1")
+        
+    def test_filter_as_missing(self):
+        f = mommy.make(MediaFilter, name="abcd")
+        img1 = mommy.make(Image, filters=[f])
+        try:
+            tpl = Template('{% load coop_utils %}{% coop_image_list "abcd" image_list %}{{image_list|length}}')
+        except Exception, msg:
+            self.assertEqual("coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}", unicode(msg))
+        else:
+            self.assertEqual("", "No exception")
+        
+
+
 class PieceOfHtmlTagsTest(BaseTestCase):
     
     def test_create_poc(self):
