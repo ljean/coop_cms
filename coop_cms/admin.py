@@ -101,8 +101,9 @@ class MediaFilterFilter(admin.SimpleListFilter):
 
 
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ['name', 'file', 'size']
+    list_display = ['name', 'file', 'size', 'ordering']
     list_filter = [MediaFilterFilter, 'size']
+    list_editable = ('ordering',)
     search_fields = ['name']
 
 admin.site.register(models.Image, ImageAdmin)
