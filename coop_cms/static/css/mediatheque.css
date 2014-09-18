@@ -99,7 +99,8 @@
 	text-align: center;
 	max-width: 80px;
 	overflow: hidden;
-	margin: 10px;
+	margin: 0 10px;
+	vertical-align: top;
 }
 
 .library-images img.library-thumbnail {
@@ -107,7 +108,7 @@
 	-webkit-box-shadow: #666 0px 2px 8px;
 	-moz-box-shadow: #666 0px 2px 8px;
 	box-shadow: #555 0px 2px 8px;
-	margin: 12px;
+	/*margin: 12px; */
 	cursor: move;
 	width: 64px;
 	height: 64px;

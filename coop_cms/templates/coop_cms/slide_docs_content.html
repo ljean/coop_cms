@@ -1,6 +1,6 @@
 {% load i18n pagination_tags %}
 <div class="library-items library-docs">
-  {% autopaginate documents 20 %}  
+  {% autopaginate documents 10 %}  
   {% for doc in documents %}
   <div class="library-doc-item">
     <img src="{{doc.get_fileicon_url}}" class="library-document{% if doc.is_private %} private-doc{% endif %}" rel="{{doc.get_download_url}}" title="{{doc.name}}" />
