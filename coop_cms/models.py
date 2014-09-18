@@ -690,6 +690,7 @@ class ImageSize(models.Model):
 class Media(TimeStampedModel):
     name = models.CharField(_('name'), max_length=200, blank=True, default='')
     filters = models.ManyToManyField(MediaFilter, blank=True, default=None, verbose_name=_(u"filters"))
+    ordering = models.IntegerField(_(u"ordering"), default=100)
 
     def __unicode__(self):
         return self.name
@@ -700,7 +701,7 @@ class Media(TimeStampedModel):
 class Image(Media):
     file = models.ImageField(_(u'file'), upload_to=get_img_folder)
     size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_(u"size"))
-
+    
     def as_thumbnail(self):
         try:
             return sorl_thumbnail.backend.get_thumbnail(self.file.file, "64x64", crop='center')

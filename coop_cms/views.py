@@ -261,14 +261,14 @@ def show_media(request, media_type):
             del request.session["coop_cms_media_doc"]
     
         if media_type == 'image':
-            qs = models.Image.objects.all().order_by("-created")
+            qs = models.Image.objects.all().order_by("ordering", "-created")
             context = {
                 'media_url': reverse('coop_cms_media_images'),
                 'media_slide_template': 'coop_cms/slide_images_content.html',
             }
         else:
             media_type = "document"
-            qs = models.Document.objects.all().order_by("-created")
+            qs = models.Document.objects.all().order_by("ordering", "-created")
             context = {
                 'media_url': reverse('coop_cms_media_documents'),
                 'media_slide_template': 'coop_cms/slide_docs_content.html',
