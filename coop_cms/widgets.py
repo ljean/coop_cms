@@ -28,11 +28,16 @@ class ChosenWidgetMixin(object):
             "{0}?v=1".format("chosen/chosen.jquery.min.js"),
         )
         css = {
-            "all": ("{0}?v=1".format("chosen/chosen.css")),
+            "all": ("{0}?v=1".format("chosen/chosen.css"),),
         }
 
     def __init__(self, attrs=None, *args, **kwargs):
+        
         chosen_css = "chosen-select"
+        self._extra_context = {}
+        if kwargs.pop("force_template", False):
+            self._extra_context['super_template'] = self.template_name
+            self.template_name = 'coop_cms/widgets/chosen.html'
         
         if not attrs:
             attrs = {}
@@ -46,8 +51,17 @@ class ChosenWidgetMixin(object):
             
         super(ChosenWidgetMixin, self).__init__(attrs, *args, **kwargs)
 
+
 class ChosenSelectMultiple(ChosenWidgetMixin, SelectMultiple):
-    pass
+    #template_name = 'coop_cms/widgets/chosen.html'
+    
+    def get_context(self, *args, **kwargs):
+        context = super(SelectMultiple, self).get_context(*args, **kwargs)
+        context.update(self._extra_context)
+        return context
 
 class ChosenSelect(ChosenWidgetMixin, Select):
-    pass
+    def get_context(self, *args, **kwargs):
+        context = super(Select, self).get_context(*args, **kwargs)
+        context.update(self._extra_context)
+        return context

@@ -187,14 +187,16 @@ class ArticleAdminForm(forms.ModelForm):
             'title': forms.TextInput(attrs={'size': 100})
         }
 
-class AddImageForm(forms.Form):
+class AddImageForm(floppyforms.Form):
     image = forms.ImageField(required=True, label = _('Image'),)
     descr = forms.CharField(required=False, widget=forms.TextInput(
         attrs={'size': '35', 'placeholder': _(u'Optional description'),}),
         label = _('Description'),
     )
-    filters = forms.MultipleChoiceField(required=False, label=_(u"Filters"))
-    size = forms.ChoiceField(required=False, label=_(u"Size"))
+    filters = forms.MultipleChoiceField(required=False, label=_(u"Filters"),
+        help_text=_(u"Choose betwwen tags to find images more easily"))
+    size = forms.ChoiceField(required=False, label=_(u"Size"),
+        help_text=_(u"Define a size if you want to resize the image"))
     
     def __init__(self, *args, **kwargs):
         super(AddImageForm, self).__init__(*args, **kwargs)
@@ -202,13 +204,20 @@ class AddImageForm(forms.Form):
         qs = MediaFilter.objects.all()
         if qs.count():
             self.fields['filters'].choices = [(x.id, x.name) for x in qs]
+            try:
+                self.fields['filters'].widget = ChosenSelectMultiple(
+                    choices=self.fields['filters'].choices, force_template=True,
+                )
+            except NameError:
+                #print 'No ChosenSelectMultiple'
+                pass
         else:
             self.fields['filters'].widget = forms.HiddenInput()
             
         #Image size
         qs = ImageSize.objects.all()
         if qs.count():
-            self.fields['size'].choices = [(x.id, unicode(x)) for x in qs]
+            self.fields['size'].choices = [('', '')]+[(x.id, unicode(x)) for x in qs]
         else:
             self.fields['size'].widget = forms.HiddenInput()
             
