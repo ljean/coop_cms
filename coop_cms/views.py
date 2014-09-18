@@ -347,11 +347,14 @@ def upload_doc(request):
             raise PermissionDenied()
         
         if request.method == "POST":
+            print request.POST, request.FILES
             form = forms.AddDocForm(request.POST, request.FILES)
             if form.is_valid():
                 doc = form.save()
                 if not doc.name:
+                    print ">>>>>> UPDATE doc name: ", doc.file.name
                     doc.name = os.path.splitext(os.path.basename(doc.file.name))[0]
+                    print ">>>>>> UPDATE doc name: ", doc.name
                     doc.save()
     
                 request.session["coop_cms_media_doc"] = True
