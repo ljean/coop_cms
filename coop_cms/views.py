@@ -318,6 +318,7 @@ def upload_image(request):
                 if not descr:
                     descr = os.path.splitext(src.name)[0]
                 image = models.Image(name=descr)
+                image.size = form.cleaned_data["size"]
                 image.file.save(src.name, src)
                 image.save()
                 

@@ -81,7 +81,32 @@ admin.site.register(get_article_class(), ArticleAdmin)
 
 admin.site.register(models.Link)
 admin.site.register(models.Document)
-admin.site.register(models.Image)
+
+
+class MediaFilterFilter(admin.SimpleListFilter):
+    title = _(u'Media filter')
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'media_filter'
+
+    def lookups(self, request, model_admin):
+        qs = models.MediaFilter.objects.all()
+        return [(x.id, x.name) for x in qs]
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == None:
+            return queryset
+        return queryset.filter(filters__id=value)
+
+
+class ImageAdmin(admin.ModelAdmin):
+    list_display = ['name', 'file', 'size']
+    list_filter = [MediaFilterFilter, 'size']
+
+admin.site.register(models.Image, ImageAdmin)
+
+
 admin.site.register(models.PieceOfHtml)
 admin.site.register(models.NewsletterSending)
 admin.site.register(models.FragmentType)
@@ -129,3 +154,7 @@ class AliasAdmin(admin.ModelAdmin):
 admin.site.register(models.Alias, AliasAdmin)
 
 admin.site.register(models.MediaFilter)
+
+class ImageSizeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'size', 'crop']
+admin.site.register(models.ImageSize, ImageSizeAdmin)

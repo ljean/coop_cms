@@ -30,7 +30,8 @@ import urlparse
 from sorl.thumbnail import default
 from django.contrib.sites.models import Site
 ADMIN_THUMBS_SIZE = '60x60'
-
+import logging
+logger = logging.getLogger("coop_cms")
 
 def get_object_label(content_type, object):
     """
@@ -673,6 +674,18 @@ class MediaFilter(models.Model):
         
     def __unicode__(self):
         return self.name
+    
+class ImageSize(models.Model):
+    name = models.CharField(_(u'name'), max_length=100)
+    size = models.CharField(_(u'size'), max_length=100)
+    crop = models.CharField(_(u'crop'), max_length=100, blank=True, default="")
+    
+    class Meta:
+        verbose_name = _(u'Image size')
+        verbose_name_plural = _(u'Image sizes')
+        
+    def __unicode__(self):
+        return u"{0} ({1}{2})".format(self.name, self.size, (" "+self.crop if self.crop else ""))
 
 class Media(TimeStampedModel):
     name = models.CharField(_('name'), max_length=200, blank=True, default='')
@@ -685,17 +698,24 @@ class Media(TimeStampedModel):
         abstract = True
 
 class Image(Media):
-    file = models.ImageField(_('file'), upload_to=get_img_folder)
+    file = models.ImageField(_(u'file'), upload_to=get_img_folder)
+    size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_(u"size"))
 
     def as_thumbnail(self):
         try:
             return sorl_thumbnail.backend.get_thumbnail(self.file.file, "64x64", crop='center')
         except Exception, msg:
             return self.file
-        
 
     def get_absolute_url(self):
-        return self.file.url
+        if not self.size:
+            return self.file.url
+        try:
+            crop = self.size.crop or None
+            return sorl_thumbnail.backend.get_thumbnail(self.file.file, self.size.size, crop=crop).url
+        except Exception, msg:
+            logger.error("Image can not resize: {0}".format(self.size))
+            return self.file.url
 
     class Meta:
         verbose_name = _(u'image')

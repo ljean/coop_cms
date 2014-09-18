@@ -94,6 +94,11 @@
 	padding: 10px;
 }
 
+.library-image {
+	display: inline-block;
+	text-align: center;
+}
+
 .library-images img.library-thumbnail {
 	border: 6px solid white;
 	-webkit-box-shadow: #666 0px 2px 8px;

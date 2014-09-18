@@ -11,7 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, Fragment, FragmentType, FragmentFilter
-from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias, Image, MediaFilter
+from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias, Image, MediaFilter, ImageSize
 from coop_cms.settings import is_localized, is_multilang
 import json
 from django.core.exceptions import ValidationError
@@ -1939,6 +1939,31 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEquals(1, images.count())
         self.assertEqual(images[0].name, data['descr'])
         self.assertEqual(images[0].filters.count(), 0)
+        self.assertEqual(images[0].size, None)
+        f = images[0].file
+        f.open('rb')
+        self.assertEqual(f.read(), self._get_file("unittest1.png").read())
+        
+    def test_post_form_size(self):
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        img_size = mommy.make(ImageSize, size="128")
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': 'a test file',
+            'filters': '',
+            'size': img_size.id,
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        
+        images = Image.objects.all()
+        self.assertEquals(1, images.count())
+        self.assertEqual(images[0].name, data['descr'])
+        self.assertEqual(images[0].filters.count(), 0)
+        self.assertEqual(images[0].size, img_size)
         f = images[0].file
         f.open('rb')
         self.assertEqual(f.read(), self._get_file("unittest1.png").read())
@@ -2030,6 +2055,24 @@ class ImageUploadTest(MediaBaseTestCase):
         f = images[0].file
         f.open('rb')
         self.assertEqual(f.read(), self._get_file("unittest1.png").read())
+        
+    def test_post_form_with_invalid_size(self):
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': 'a test file',
+            'filters': [],
+            'size': "hhjk",
+        }
+        
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.content, 'close_popup_and_media_slide')
+        
+        images = Image.objects.all()
+        self.assertEquals(0, images.count())
     
 class MediaLibraryTest(MediaBaseTestCase):
     
@@ -2132,6 +2175,30 @@ class MediaLibraryTest(MediaBaseTestCase):
         actual = [node["rel"] for node in nodes]
         self.assertEqual(expected, actual)
     
+    def test_image_no_size(self):
+        image = mommy.make(Image, size=None)
+        url = image.get_absolute_url()
+        self.assertEqual(url, image.file.url)
+        
+    def test_image_size(self):
+        image_size = mommy.make(ImageSize, size="128x128")
+        image = mommy.make(Image, size=image_size)
+        url = image.get_absolute_url()
+        self.assertNotEqual(url, image.file.url)
+        
+    def test_image_wrong_size(self):
+        image_size = mommy.make(ImageSize, size="blabla")
+        image = mommy.make(Image, size=image_size)
+        url = image.get_absolute_url()
+        self.assertEqual(url, image.file.url)
+        
+    def test_image_size_crop(self):
+        image_size = mommy.make(ImageSize, size="128x128", crop="center")
+        image = mommy.make(Image, size=image_size)
+        url = image.get_absolute_url()
+        self.assertNotEqual(url, image.file.url)
+    
+    
 class DownloadDocTest(MediaBaseTestCase):
     
     def setUp(self):
@@ -2209,8 +2276,6 @@ class DownloadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 403)
-        
-
         
     def test_upload_private_doc(self):
         self._log_as_mediamgr(perm=self._permission("add", Document))
