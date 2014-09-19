@@ -2142,7 +2142,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         self.assertEqual(200, response.status_code)
         soup = BeautifulSoup(response.content)
         nodes = soup.select(".library-thumbnail")
-        self.assertEqual(15, len(nodes))
+        self.assertEqual(12, len(nodes))
     
     def test_show_images_page_2(self):
         self._log_as_mediamgr()
@@ -2153,7 +2153,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         data = json.loads(response.content)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
-        self.assertEqual(1, len(nodes))
+        self.assertEqual(4, len(nodes))
         
     def test_show_images_media_filter(self):
         self._log_as_mediamgr()
@@ -2193,8 +2193,8 @@ class MediaLibraryTest(MediaBaseTestCase):
         data = json.loads(response.content)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
-        self.assertEqual(15, len(nodes))
-        expected = [x.file.url for x in images[:15]]
+        self.assertEqual(12, len(nodes))
+        expected = [x.file.url for x in images[:12]]
         actual = [node["rel"] for node in nodes]
         self.assertEqual(expected, actual)
     
