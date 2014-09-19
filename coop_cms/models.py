@@ -986,4 +986,23 @@ class Fragment(models.Model):
         return super(Fragment, self).save(*args, **kwargs)
         
     def __unicode__(self):
-        return u"{0} {1} {2}".format(self.type, self.position, self.name)    
+        return u"{0} {1} {2}".format(self.type, self.position, self.name)
+    
+class SiteSettings(models.Model):
+    site = models.OneToOneField(Site, verbose_name=_(u'site settings'))
+    homepage_url = models.CharField(
+        max_length=256, blank=True, default="", verbose_name=_(u'homepage URL'),
+        help_text=_(u"if set, the homepage will be redirected to the given URL")
+    )
+    
+    def __unicode__(self):
+        return u"{0}".format(self.site)
+    
+    class Meta:
+        verbose_name = _(u'Sites settings')
+        verbose_name_plural = _(u'Site settings')
+        ordering = ("site__id",)
+    
+    
+    
+    

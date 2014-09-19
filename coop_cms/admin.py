@@ -160,3 +160,5 @@ admin.site.register(models.MediaFilter)
 class ImageSizeAdmin(admin.ModelAdmin):
     list_display = ['name', 'size', 'crop']
 admin.site.register(models.ImageSize, ImageSizeAdmin)
+
+admin.site.register(models.SiteSettings, BaseAdminClass)

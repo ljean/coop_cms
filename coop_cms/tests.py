@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, Fragment, FragmentType, FragmentFilter
 from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias, Image, MediaFilter, ImageSize
+from coop_cms.models import SiteSettings
 from coop_cms.settings import is_localized, is_multilang
 import json
 from django.core.exceptions import ValidationError
@@ -3049,6 +3050,36 @@ class HomepageTest(UserBaseTestCase):
     def tearDown(self):
         super(HomepageTest, self).tearDown()
         settings.SITE_ID = self.site_id
+        
+    def test_user_settings_homepage(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        a1 = get_article_class().objects.create(title="python", content='python')
+        site_settings = mommy.make(SiteSettings, site=site, homepage_url=a1.get_absolute_url())
+    
+        response = self.client.get(reverse('coop_cms_homepage'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['Location'].find(a1.get_absolute_url())>0)
+            
+    def test_user_settings_homepage_priority(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        a1 = get_article_class().objects.create(title="python", content='python')
+        a2 = get_article_class().objects.create(title="django", content='django', homepage_for_site=site)
+        site_settings = mommy.make(SiteSettings, site=site, homepage_url=a1.get_absolute_url())
+    
+        response = self.client.get(reverse('coop_cms_homepage'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['Location'].find(a1.get_absolute_url())>0)
+    
+    def test_user_settings_homepage_not_set(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        a1 = get_article_class().objects.create(title="python", content='python')
+        a2 = get_article_class().objects.create(title="django", content='django', homepage_for_site=site)
+        site_settings = mommy.make(SiteSettings, site=site, homepage_url="")
+    
+        response = self.client.get(reverse('coop_cms_homepage'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['Location'].find(a2.get_absolute_url())>0)
+    
     
     def test_only_one_homepage(self):
         site = Site.objects.get(id=settings.SITE_ID)
