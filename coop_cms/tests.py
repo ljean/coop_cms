@@ -36,6 +36,7 @@ from django.utils.translation import activate, get_language
 from unittest import skipIf
 #from django.core.files.uploadedfile import SimpleUploadedFile
 from coop_cms.utils import RequestManager, RequestMiddleware, RequestNotFound
+from coop_cms.templatetags.coop_utils import get_part
 
 try:
     AUTH_LOGIN_NAME = "auth_login"
@@ -5980,3 +5981,18 @@ class RequestManagerTest(TestCase):
         RequestManager().clean()
         self.assertRaises(RequestNotFound, RequestManager().get_request)
     
+    
+class get_part_TemplateFilterTest(TestCase):
+    
+    def test_get_part_exact(self):
+        objs = range(9)
+        self.assertEqual([0, 1, 2], get_part(objs, "1/3"))
+        self.assertEqual([3, 4, 5], get_part(objs, "2/3"))
+        self.assertEqual([6, 7, 8], get_part(objs, "3/3"))
+    
+    def test_get_part_inexact(self):
+        objs = range(10)
+        self.assertEqual([0, 1, 2, 3], get_part(objs, "1/3"))
+        self.assertEqual([4, 5, 6, 7], get_part(objs, "2/3"))
+        self.assertEqual([8, 9], get_part(objs, "3/3"))
+        

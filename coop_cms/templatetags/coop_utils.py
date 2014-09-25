@@ -158,6 +158,16 @@ def coop_category(parser, token):
 def basename(fullname):
     return os.path.basename(fullname)
 
+@register.filter
+def get_part(list_of_objs, partionning):
+    which_part, number_of_parts = [int(x) for x in partionning.split("/")]
+    nb_objs = len(list_of_objs)
+    nb_by_part = nb_objs/number_of_parts + (1 if (nb_objs % number_of_parts) else 0)
+    start_index = (which_part-1)*nb_by_part
+    stop_index = (which_part)*nb_by_part
+    return list_of_objs[start_index:stop_index]
+    
+    
 
 ################################################################################
 class ImageListNode(template.Node):
