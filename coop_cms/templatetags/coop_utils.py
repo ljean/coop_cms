@@ -159,14 +159,22 @@ def basename(fullname):
     return os.path.basename(fullname)
 
 @register.filter
+def get_parts(list_of_objs, number_of_parts):
+    nb_objs = len(list_of_objs)
+    nb_by_part, extra_nb = nb_objs/number_of_parts, nb_objs % number_of_parts
+    parts = []
+    stop_index = 0
+    for which_part in range(number_of_parts):
+        start_index = 0 if (stop_index==0) else (stop_index)
+        stop_index = start_index + nb_by_part + (1 if (which_part<extra_nb) else 0)
+        parts.append(list_of_objs[start_index:stop_index])
+    return parts
+
+@register.filter
 def get_part(list_of_objs, partionning):
     which_part, number_of_parts = [int(x) for x in partionning.split("/")]
-    nb_objs = len(list_of_objs)
-    nb_by_part = nb_objs/number_of_parts + (1 if (nb_objs % number_of_parts) else 0)
-    start_index = (which_part-1)*nb_by_part
-    stop_index = (which_part)*nb_by_part
-    return list_of_objs[start_index:stop_index]
-    
+    parts = get_parts(list_of_objs, number_of_parts)
+    return parts[which_part-1]
     
 
 ################################################################################
