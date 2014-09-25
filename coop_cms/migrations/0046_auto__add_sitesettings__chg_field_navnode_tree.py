@@ -16,17 +16,9 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'coop_cms', ['SiteSettings'])
 
-
-        # Changing field 'NavNode.tree'
-        db.alter_column(u'coop_cms_navnode', 'tree_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['gplc.NavTree']))
-
     def backwards(self, orm):
         # Deleting model 'SiteSettings'
         db.delete_table(u'coop_cms_sitesettings')
-
-
-        # Changing field 'NavNode.tree'
-        db.alter_column(u'coop_cms_navnode', 'tree_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['basic_cms.NavTree']))
 
     models = {
         u'contenttypes.contenttype': {
@@ -124,7 +116,7 @@ class Migration(SchemaMigration):
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'ordering': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'parent': ('django.db.models.fields.related.ForeignKey', [], {'default': '0', 'to': u"orm['coop_cms.NavNode']", 'null': 'True', 'blank': 'True'}),
-            'tree': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['gplc.NavTree']"})
+            'tree': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['basic_cms.NavTree']"})
         },
         u'coop_cms.navtype': {
             'Meta': {'object_name': 'NavType'},
@@ -170,7 +162,7 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'site': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['sites.Site']", 'unique': 'True'})
         },
-        u'gplc.navtree': {
+        u'basic_cms.navtree': {
             'Meta': {'object_name': 'NavTree'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_update': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
