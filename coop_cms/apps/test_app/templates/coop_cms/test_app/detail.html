@@ -7,6 +7,17 @@
     <h2>{{ object.other_field }}</h2>
     <div id="field1">{{ object.field1 }}</div>
     <div id="field2">{{ object.field2 }}</div>
+    <div id="bool_field">{{ object.bool_field }}</div>
+    {% if_cms_edition %}
+    {% else %}
+        {% if object.bool_field %}
+            <span class="bool_field_is_true"></span>
+        {% else %}
+            <span class="bool_field_is_false"></span>
+        {% endif %}
+    {% endif %}
+    <div id="int_field">{{ object.int_field }}</div>
+    <div id="float_field">{{ object.float_field }}</div>
 </div>
 {% end_cms_edit %}
 {% endblock %}

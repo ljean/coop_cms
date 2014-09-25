@@ -9,11 +9,11 @@ class TestClassForm(AlohaEditableModelForm):
     
     class Meta:
         model = TestClass
-        fields = ('field1', 'field2', 'field3') 
+        fields = ('field1', 'field2', 'field3', 'bool_field', 'int_field', 'float_field') 
         widgets = {
             'field2': AlohaInput(),
         }
-        no_aloha_widgets = ('field2', 'field3',)
+        no_aloha_widgets = ('field2', 'field3', 'bool_field', 'int_field', 'float_field')
         
 class MyNewArticleForm(NewArticleForm):
     dummy = forms.CharField(required=False)

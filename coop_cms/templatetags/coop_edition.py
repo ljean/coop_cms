@@ -233,8 +233,9 @@ class SafeWrapper:
 
     def __getattr__(self, field):
         value = getattr(self._wrapped, field)
-        
         if hasattr(value, 'pk'):
+            return value
+        if type(value) in (int, bool, float):
             return value
         elif field=='logo':
             src = getattr(self._wrapped, 'logo_thumbnail')(False, self._logo_size, self._logo_crop)
