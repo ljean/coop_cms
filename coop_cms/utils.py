@@ -12,7 +12,7 @@ from django.template import Context
 from coop_cms.settings import get_newsletter_context_callbacks
 from bs4 import BeautifulSoup
 from django.utils import translation
-
+from threading import current_thread
 
 class _DeHTMLParser(HTMLParser):
     def __init__(self, allow_spaces=False):
@@ -110,3 +110,34 @@ def send_newsletter(newsletter, dests):
         email.attach_alternative(html_text, "text/html")
         emails.append(email)
     return connection.send_messages(emails)
+
+class RequestNotFound(Exception): pass
+
+class RequestManager(object):
+    _shared = {}
+    def __init__(self):
+        self.__dict__ = RequestManager._shared
+        
+    def _get_request_dict(self):
+        if not hasattr(self, '_request'):
+            self._request = {}
+        return self._request
+    
+    def clean(self):
+        if hasattr(self, '_request'):
+            del self._request
+        
+    def get_request(self):
+        _requests = self._get_request_dict()
+        t = current_thread()
+        if t not in _requests:
+             raise RequestNotFound("Request not found: make sure that middleware is installed")
+        return _requests[t]
+    
+    def set_request(self, request):
+        _requests = self._get_request_dict()
+        _requests[current_thread()] = request
+
+class RequestMiddleware(object):
+    def process_request(self, request):
+        RequestManager().set_request(request)

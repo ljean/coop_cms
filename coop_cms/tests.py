@@ -34,6 +34,7 @@ import logging
 from django.utils.translation import activate, get_language
 from unittest import skipIf
 #from django.core.files.uploadedfile import SimpleUploadedFile
+from coop_cms.utils import RequestManager, RequestMiddleware, RequestNotFound
 
 try:
     AUTH_LOGIN_NAME = "auth_login"
@@ -5936,5 +5937,15 @@ class MultiSiteTest(BaseArticleTest):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
 
+class RequestManagerTest(TestCase):
     
+    def test_get_request(self):
+        r1 = {'user': "joe"}
+        RequestMiddleware().process_request(r1)
+        r2 = RequestManager().get_request()
+        self.assertEqual(r1, r2)
+        
+    def test_get_request_no_middleware(self):
+        RequestManager().clean()
+        self.assertRaises(RequestNotFound, RequestManager().get_request)
     
