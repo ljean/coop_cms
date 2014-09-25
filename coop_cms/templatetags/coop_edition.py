@@ -233,11 +233,7 @@ class SafeWrapper:
 
     def __getattr__(self, field):
         value = getattr(self._wrapped, field)
-        if hasattr(value, 'pk'):
-            return value
-        if type(value) in (int, bool, float):
-            return value
-        elif field=='logo':
+        if field=='logo':
             src = getattr(self._wrapped, 'logo_thumbnail')(False, self._logo_size, self._logo_crop)
             if src:
                 try:
@@ -251,7 +247,9 @@ class SafeWrapper:
                 value = u''
         elif callable(value):
             return value()
-        return mark_safe(value)
+        elif type(value) in (unicode, str):
+            return mark_safe(value)
+        return value
 
 class FormWrapper:
 

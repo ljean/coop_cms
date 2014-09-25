@@ -12,7 +12,6 @@ class TestClass(models.Model):
     int_field = models.IntegerField(default=0)
     float_field = models.FloatField(default=0.0)
     
-    
     other_field = models.CharField(max_length=100)
 
     def __unicode__(self):
@@ -32,4 +31,8 @@ class TestClass(models.Model):
     
     def can_edit_object(self, user):
         return user.is_staff
+    
+    @property
+    def properties(self):
+        return {"abc": "ABC"}
 

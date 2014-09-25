@@ -104,11 +104,14 @@ class GenericViewTestCase(BaseTestCase):
         self.assertEqual(obj.field1, field1)
         self.assertEqual(obj.field2, field2)
         
+        
     def test_view_object_viewer(self):
         self._log_as_viewer()
         obj = mommy.make(TestClass)
         response = self.client.get(obj.get_absolute_url())
         self.assertEqual(200, response.status_code)
+        soup = BeautifulSoup(response.content)
+        self.assertEqual("ABC", soup.select("#properties")[0].text)
         
     def test_view_object_viewer_bool_true(self):
         self._log_as_viewer()
@@ -117,7 +120,6 @@ class GenericViewTestCase(BaseTestCase):
         self.assertEqual(200, response.status_code)
         soup = BeautifulSoup(response.content)
         self.assertEqual(1, len(soup.select(".bool_field_is_true")))
-        
         self.assertEqual(0, len(soup.select(".bool_field_is_false")))
         
     def test_view_object_viewer_bool_false(self):
