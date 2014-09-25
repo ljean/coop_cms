@@ -5996,3 +5996,15 @@ class get_part_TemplateFilterTest(TestCase):
         self.assertEqual([4, 5, 6, 7], get_part(objs, "2/3"))
         self.assertEqual([8, 9], get_part(objs, "3/3"))
         
+    def test_get_part_empty(self):
+        objs = []
+        self.assertEqual([], get_part(objs, "1/3"))
+        self.assertEqual([], get_part(objs, "2/3"))
+        self.assertEqual([], get_part(objs, "3/3"))
+    
+    def test_get_part_less_than(self):
+        objs = [0, 1]
+        self.assertEqual([0], get_part(objs, "1/3"))
+        self.assertEqual([1], get_part(objs, "2/3"))
+        self.assertEqual([], get_part(objs, "3/3"))
+        
