@@ -243,7 +243,10 @@ def hide_media_library_menu():
     return getattr(django_settings, 'COOP_CMS_HIDE_MEDIA_LIBRARY_MENU', False)
 
 def is_requestprovider_installed():
-    return ('gadjo.requestprovider.middleware.RequestProvider' in django_settings.MIDDLEWARE_CLASSES)
+    is_installed = ('coop_cms.utils.RequestMiddleware' in django_settings.MIDDLEWARE_CLASSES)
+    if not is_installed:
+        logger.warn("You should add coop_cms.utils.RequestMiddleware to the MIDDLEWARE_CLASSES settings")
+    return is_installed
     
 def can_rewrite_url():
     return getattr(django_settings, 'COOP_CMS_CAN_EDIT_ARTICLE_SLUG', False)

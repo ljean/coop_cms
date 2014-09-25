@@ -32,6 +32,7 @@ from django.contrib.sites.models import Site
 ADMIN_THUMBS_SIZE = '60x60'
 import logging
 logger = logging.getLogger("coop_cms")
+from coop_cms.utils import RequestManager, RequestNotFound
 
 def get_object_label(content_type, object):
     """
@@ -126,11 +127,10 @@ class NavNode(models.Model):
     def is_active_node(self):
         url = self.get_absolute_url()
         if url and is_requestprovider_installed():
-            from gadjo.requestprovider.signals import get_request
             try:
-                http_request = get_request()
+                http_request = RequestManager().get_request()
                 return http_request and http_request.path == url
-            except IndexError:
+            except RequestNotFound:
                 pass
         return False
 
