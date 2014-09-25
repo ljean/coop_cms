@@ -150,7 +150,7 @@ class NewsletterAdmin(admin.ModelAdmin):
 
 admin.site.register(models.Newsletter, NewsletterAdmin)
 
-class AliasAdmin(admin.ModelAdmin):
+class AliasAdmin(BaseAdminClass):
     list_display = ['path', 'redirect_url']
     list_editable = ['redirect_url']
 admin.site.register(models.Alias, AliasAdmin)
