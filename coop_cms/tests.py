@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, Fragment, FragmentType, FragmentFilter
 from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias, Image, MediaFilter, ImageSize
+from coop_cms.models import SiteSettings
 from coop_cms.settings import is_localized, is_multilang
 import json
 from django.core.exceptions import ValidationError
@@ -2142,7 +2143,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         self.assertEqual(200, response.status_code)
         soup = BeautifulSoup(response.content)
         nodes = soup.select(".library-thumbnail")
-        self.assertEqual(15, len(nodes))
+        self.assertEqual(12, len(nodes))
     
     def test_show_images_page_2(self):
         self._log_as_mediamgr()
@@ -2153,7 +2154,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         data = json.loads(response.content)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
-        self.assertEqual(1, len(nodes))
+        self.assertEqual(4, len(nodes))
         
     def test_show_images_media_filter(self):
         self._log_as_mediamgr()
@@ -2193,8 +2194,8 @@ class MediaLibraryTest(MediaBaseTestCase):
         data = json.loads(response.content)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
-        self.assertEqual(15, len(nodes))
-        expected = [x.file.url for x in images[:15]]
+        self.assertEqual(12, len(nodes))
+        expected = [x.file.url for x in images[:12]]
         actual = [node["rel"] for node in nodes]
         self.assertEqual(expected, actual)
     
@@ -3050,6 +3051,36 @@ class HomepageTest(UserBaseTestCase):
     def tearDown(self):
         super(HomepageTest, self).tearDown()
         settings.SITE_ID = self.site_id
+        
+    def test_user_settings_homepage(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        a1 = get_article_class().objects.create(title="python", content='python')
+        site_settings = mommy.make(SiteSettings, site=site, homepage_url=a1.get_absolute_url())
+    
+        response = self.client.get(reverse('coop_cms_homepage'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['Location'].find(a1.get_absolute_url())>0)
+            
+    def test_user_settings_homepage_priority(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        a1 = get_article_class().objects.create(title="python", content='python')
+        a2 = get_article_class().objects.create(title="django", content='django', homepage_for_site=site)
+        site_settings = mommy.make(SiteSettings, site=site, homepage_url=a1.get_absolute_url())
+    
+        response = self.client.get(reverse('coop_cms_homepage'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['Location'].find(a1.get_absolute_url())>0)
+    
+    def test_user_settings_homepage_not_set(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        a1 = get_article_class().objects.create(title="python", content='python')
+        a2 = get_article_class().objects.create(title="django", content='django', homepage_for_site=site)
+        site_settings = mommy.make(SiteSettings, site=site, homepage_url="")
+    
+        response = self.client.get(reverse('coop_cms_homepage'))
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response['Location'].find(a2.get_absolute_url())>0)
+    
     
     def test_only_one_homepage(self):
         site = Site.objects.get(id=settings.SITE_ID)
