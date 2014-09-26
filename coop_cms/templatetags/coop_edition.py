@@ -245,6 +245,7 @@ class SafeWrapper:
                         logger.exception("coop_edition:SafeWrapper")
             else:
                 value = u''
+            return mark_safe(value)
         elif callable(value):
             return value()
         elif type(value) in (unicode, str):
