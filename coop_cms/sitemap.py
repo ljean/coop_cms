@@ -4,6 +4,7 @@ from django.contrib.sitemaps import Sitemap
 from coop_cms.settings import get_article_class
 from coop_cms.models import BaseArticle
 from django.conf import settings
+from django.contrib.sites.models import Site
 
 class ArticleSitemap(Sitemap):
     changefreq = "weekly"
@@ -11,7 +12,8 @@ class ArticleSitemap(Sitemap):
 
     def items(self):
         Article = get_article_class()
-        return Article.objects.filter(publication=BaseArticle.PUBLISHED)
+        return Article.objects.filter(
+            publication=BaseArticle.PUBLISHED, sites=Site.objects.get_current())
 
     def lastmod(self, obj):
         return obj.modified
@@ -31,5 +33,5 @@ def get_sitemaps(langs=None):
     return sitemaps
     
 urlpatterns = (
-    url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': get_sitemaps()}),
+    url(r'^sitemap\.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': get_sitemaps()}, name="coop_cms_sitemap"),
 )

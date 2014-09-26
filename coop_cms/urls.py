@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls import patterns, include, url
 from django.views.generic.detail import DetailView
 from coop_cms.settings import get_article_class, get_article_views, keep_deprecated_func_views_for_article
+from coop_cms import sitemap
 
 urlpatterns = patterns('coop_cms.views',
     url(r'^cms/tree/(?P<tree_id>\d*)/$', 'process_nav_edition', name='navigation_tree'),
@@ -34,6 +35,9 @@ urlpatterns = patterns('coop_cms.views',
     url(r'^cms/fragments/add/$', 'add_fragment', name='coop_cms_add_fragment'),
     url(r'^cms/fragments/edit/$', 'edit_fragments', name='coop_cms_edit_fragments'),
 )
+
+if not getattr(settings, "COOP_CMS_DISABLE_DEFAULT_SITEMAP", False):
+    urlpatterns += sitemap.urlpatterns
 
 if 'coop_cms.apps.rss_sync' in settings.INSTALLED_APPS:
     urlpatterns += patterns('',

@@ -6024,3 +6024,39 @@ class PartitionTemplateFilterTest(TestCase):
         objs = [0, 1]
         self.assertEqual([[0], [1], []], get_parts(objs, 3))
     
+class SitemapTest(TestCase):
+    
+    def test_sitemap_empty(self):
+        Article = get_article_class()
+        url = reverse("coop_cms_sitemap")
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+    
+    def test_sitemap(self):
+        site = Site.objects.get_current()
+        site2 = mommy.make(Site, id=settings.SITE_ID+1)
+        
+        Article = get_article_class()
+        
+        article1 = mommy.make(Article, publication=BaseArticle.PUBLISHED)
+        article2 = mommy.make(Article, publication=BaseArticle.PUBLISHED)
+        article3 = mommy.make(Article, publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(Article, publication=BaseArticle.DRAFT)
+        
+        article2.sites.add(site2)
+        article2.save()
+        
+        article3.sites.remove(site)
+        article3.sites.add(site2)
+        article3.save()
+        
+        
+        url = reverse("coop_cms_sitemap")
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+        
+        self.assertContains(response, article1.get_absolute_url())
+        self.assertContains(response, article2.get_absolute_url())
+        self.assertNotContains(response, article3.get_absolute_url())
+        self.assertNotContains(response, article4.get_absolute_url())
+        
