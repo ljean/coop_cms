@@ -5,6 +5,7 @@ from django.conf.urls import patterns, include, url
 from django.views.generic.detail import DetailView
 from coop_cms.settings import get_article_class, get_article_views, keep_deprecated_func_views_for_article
 from coop_cms import sitemap
+from coop_cms.views import DebugErrorCodeView
 
 urlpatterns = patterns('coop_cms.views',
     url(r'^cms/tree/(?P<tree_id>\d*)/$', 'process_nav_edition', name='navigation_tree'),
@@ -35,6 +36,11 @@ urlpatterns = patterns('coop_cms.views',
     url(r'^cms/fragments/add/$', 'add_fragment', name='coop_cms_add_fragment'),
     url(r'^cms/fragments/edit/$', 'edit_fragments', name='coop_cms_edit_fragments'),
 )
+
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        url(r'^cms/debug-error-code/((?P<error_code>\d{3}))/$', DebugErrorCodeView.as_view(), name='coop_cms_debug_404'),
+    )
 
 if not getattr(settings, "COOP_CMS_DISABLE_DEFAULT_SITEMAP", False):
     urlpatterns += sitemap.urlpatterns

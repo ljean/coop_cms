@@ -37,6 +37,7 @@ import logging
 logger = logging.getLogger("coop_cms")
 import itertools
 from coop_cms.settings import cms_no_homepage
+from django.views.generic import TemplateView
 
 def get_article_template(article):
     template = article.template
@@ -1198,3 +1199,8 @@ class ArticleView(EditableObjectView):
     
 class EditArticleView(ArticleView):
     edit_mode = True
+    
+class DebugErrorCodeView(TemplateView):
+    
+    def get_template_names(self):
+        return ("{0}.html".format(self.kwargs["error_code"]),)
