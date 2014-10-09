@@ -385,10 +385,12 @@ class BaseArticle(BaseNavigable):
 
     DRAFT = 0
     PUBLISHED = 1
+    ARCHIVED = 2
 
     PUBLICATION_STATUS = (
         (DRAFT, _(u'Draft')),
         (PUBLISHED, _(u'Published')),
+        (ARCHIVED, _(u'Archived')),
     )
 
     def get_logo_folder(self, filename):
@@ -427,6 +429,12 @@ class BaseArticle(BaseNavigable):
     
     def is_draft(self):
         return self.publication == BaseArticle.DRAFT
+    
+    def is_archived(self):
+        return self.publication == BaseArticle.ARCHIVED
+    
+    def is_published(self):
+        return self.publication == BaseArticle.PUBLISHED
     
     def next_in_category(self):
         if self.category:
@@ -617,11 +625,11 @@ class BaseArticle(BaseNavigable):
         return user.has_perm(perm)
 
     def can_view_article(self, user):
-        if self.publication != BaseArticle.PUBLISHED:
+        if not self.is_published():
             return self.can_edit_article(user)
         else:
             return True
-
+        
     def can_edit_article(self, user):
         return self._can_change(user)
 

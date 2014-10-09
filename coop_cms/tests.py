@@ -151,12 +151,16 @@ class ArticleTest(BaseArticleTest):
             ('test/newsletter_red.html', 'Red'),
             ('test/newsletter_blue.html', 'Blue'),
         )
+        self._DJALOHA_LINK_MODELS = getattr(settings, 'DJALOHA_LINK_MODELS', [])
+        Article = get_article_class()
+        ct = ContentType.objects.get_for_model(Article)
+        settings.DJALOHA_LINK_MODELS = ['{0}.{1}'.format(ct.app_label, ct.model)]
         
     def tearDown(self):
         super(ArticleTest, self).tearDown()
         #restore
         settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
-        
+        settings.DJALOHA_LINK_MODELS = self._DJALOHA_LINK_MODELS
     
 
     def _check_article(self, response, data):
@@ -183,6 +187,12 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(article.is_draft(), False)
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
+        
+    def test_publication_flag_archived(self):
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.ARCHIVED)
+        self.assertEqual(article.is_draft(), False)
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(404, response.status_code)
         
     def test_publication_flag_draft(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
@@ -216,6 +226,36 @@ class ArticleTest(BaseArticleTest):
         
     def test_edit_article(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        
+        data = {"title": 'salut', 'content': 'bonjour!'}
+        
+        self._log_as_editor()
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self._check_article(response, data)
+        
+        data = {"title": 'bye', 'content': 'au revoir'}
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self._check_article(response, data)
+        
+    def test_edit_article_draft(self):
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
+        
+        data = {"title": 'salut', 'content': 'bonjour!'}
+        
+        self._log_as_editor()
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self._check_article(response, data)
+        
+        data = {"title": 'bye', 'content': 'au revoir'}
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self._check_article(response, data)
+        
+    def test_edit_article_archived(self):
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.ARCHIVED)
         
         data = {"title": 'salut', 'content': 'bonjour!'}
         

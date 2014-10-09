@@ -38,6 +38,7 @@ logger = logging.getLogger("coop_cms")
 import itertools
 from coop_cms.settings import cms_no_homepage
 from django.views.generic import TemplateView
+from django.db.models import Q
 
 def get_article_template(article):
     template = article.template
@@ -136,7 +137,8 @@ def set_homepage(request, article_id):
 def view_article(request, url, extra_context=None, force_template=None):
     """view the article"""
     try:
-        article = get_article_or_404(slug=url, sites=settings.SITE_ID) #Draft & Published
+        not_archived = Q(publication=BaseArticle.ARCHIVED)
+        article = get_article_or_404(Q(slug=url) & Q(sites=settings.SITE_ID) & ~not_archived) #Draft & Published
     except Http404:
         return redirect_if_alias(path=url)
     
@@ -1170,7 +1172,12 @@ class ArticleView(EditableObjectView):
     varname = "article"
     
     def get_object(self):
-        return get_article_or_404(slug=self.kwargs['slug'], sites=settings.SITE_ID) 
+        return get_article_or_404(slug=self.kwargs['slug'], sites=settings.SITE_ID)
+    
+    def can_access_object(self):
+        if self.object.is_archived():
+            return super(ArticleView, self).can_view_object()
+        return True
     
     def handle_object_not_found(self):
         return redirect_if_alias(path=self.kwargs['slug'])

@@ -364,6 +364,15 @@ def cms_edit_fragments(request, context):
             return make_link(url, _(u'Edit fragments'), 'fugue/block--pencil.png',
                     classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments'])
 
+def publication_css_classes(request, context):
+    variable = context.get('article', None) or context.get('object', None)
+    if variable:
+        css_classes = []
+        if hasattr(variable, 'is_draft') and callable(variable.is_draft) and variable.is_draft():
+            return 'is-draft'
+        elif hasattr(variable, 'is_archived') and callable(variable.is_archived) and variable.is_archived():
+            return 'is-archived'    
+
 def load_commands(coop_bar):
     
     coop_bar.register([
@@ -378,6 +387,8 @@ def load_commands(coop_bar):
         [cms_new_article, cms_new_link, cms_article_settings, cms_set_homepage],
         [cms_publish],
     ])
+    
+    coop_bar.register_css_classes(publication_css_classes)
     
     coop_bar.register_header(cms_extra_js)
     

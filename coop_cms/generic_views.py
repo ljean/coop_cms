@@ -51,6 +51,9 @@ class EditableObjectView(View):
         user = self.request.user
         return user.is_authenticated() and user.is_active and user.has_perm(can_edit_perm, self.object)
         
+    def can_access_object(self):
+        return True
+    
     def can_view_object(self):
         if self.edit_mode:
             return self.can_edit_object()
@@ -97,6 +100,9 @@ class EditableObjectView(View):
                 return return_this
             else:
                 raise
+        
+        if not self.can_access_object():
+            raise Http404
         
         if not self.can_view_object():
             logger.warning("PermissionDenied")

@@ -86,3 +86,11 @@ ul.coop-cms_user-messages li a.close-message:hover {
     color: #000;
     text-decoration: underline;
 }
+
+.coop-bar-wrapper .coop-bar-sign.is-draft{
+	border-bottom: 20px solid red;
+}
+
+.coop-bar-wrapper .coop-bar-sign.is-archived{
+	border-bottom: 20px solid #ccc;
+}
