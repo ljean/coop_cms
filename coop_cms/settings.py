@@ -6,7 +6,8 @@ from django.utils.importlib import import_module
 import logging
 logger = logging.getLogger("coop_cms")
 
-COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'basic_cms.NavTree')
+COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'coop_cms.NavTree')
+DEPRECTATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'DEPRECTATED_COOP_CMS_NAVTREE_CLASS', '')
 
 def get_navigable_content_types():
     ct_choices = []
@@ -26,49 +27,31 @@ def get_navigable_content_types():
             ct_choices.append((ct.id, ct.app_label + u'.' + ct.model))
     return ct_choices
 
-
-
-def get_navtree_class():
+def get_navtree_class(defaut_class=None):
     if hasattr(get_navtree_class, '_cache_class'):
         return getattr(get_navtree_class, '_cache_class')
     else:
-        navtree_class = None
-        try:
-            full_class_name = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS')
-            app_label, model_name = full_class_name.split('.')
-            model_name = model_name.lower()
-            ct = ContentType.objects.get(app_label=app_label, model=model_name)
-            navtree_class = ct.model_class()
-            
-        except AttributeError:
-            if 'coop_cms.apps.basic_cms' in django_settings.INSTALLED_APPS:
-                from coop_cms.apps.basic_cms.models import NavTree
-                navtree_class = NavTree
-
-        if not navtree_class:
-            raise Exception('No NavTree class configured')
-
+        full_class_name = COOP_CMS_NAVTREE_CLASS
+        app_label, model_name = full_class_name.split('.')
+        model_name = model_name.lower()
+        ct = ContentType.objects.get(app_label=app_label, model=model_name)
+        navtree_class = ct.model_class()
         setattr(get_navtree_class, '_cache_class', navtree_class)
         return navtree_class
-
 
 def get_article_class():
     if hasattr(get_article_class, '_cache_class'):
         return getattr(get_article_class, '_cache_class')
     else:
         article_class = None
-        try:
-            full_class_name = getattr(django_settings, 'COOP_CMS_ARTICLE_CLASS')
+        full_class_name = getattr(django_settings, 'COOP_CMS_ARTICLE_CLASS', None)
+        if not full_class_name and ('coop_cms.apps.basic_cms' in django_settings.INSTALLED_APPS):
+            full_class_name = 'coop_cms.apps.basic_cms.models.Article'
+        if full_class_name:
             module_name, class_name = full_class_name.rsplit('.', 1)
             module = import_module(module_name)
             article_class = getattr(module, class_name)
-
-        except AttributeError:
-            if 'coop_cms.apps.basic_cms' in django_settings.INSTALLED_APPS:
-                from coop_cms.apps.basic_cms.models import Article
-                article_class = Article
-
-        if not article_class:
+        else:
             raise Exception('No article class configured')
 
         setattr(get_article_class, '_cache_class', article_class)

@@ -17,7 +17,7 @@ from django.core.exceptions import ValidationError
 # from html_field.db.models import HTMLField
 # from html_field import html_cleaner
 from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes, get_article_logo_crop
-from coop_cms.settings import get_navtree_class, is_localized, COOP_CMS_NAVTREE_CLASS, get_article_templates
+from coop_cms.settings import get_navtree_class, is_localized, get_article_templates, COOP_CMS_NAVTREE_CLASS
 from coop_cms.settings import get_default_logo, is_requestprovider_installed
 from coop_cms.utils import dehtml
 from django.contrib.staticfiles import finders
@@ -97,6 +97,27 @@ class NavType(models.Model):
         verbose_name = _(u'navigable type')
         verbose_name_plural = _(u'navigable types')
 
+
+class BaseNavTree(models.Model):
+    last_update = models.DateTimeField(auto_now=True)
+    name = models.CharField(_(u'name'), max_length=100, db_index=True, unique=True, default='default')
+    types = models.ManyToManyField('coop_cms.NavType', blank=True, related_name="%(app_label)s_%(class)s_set")
+
+    def __unicode__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse('navigation_tree', args=[self.id])
+
+    def get_root_nodes(self):
+        return NavNode.objects.filter(tree=self, parent__isnull=True).order_by("ordering")
+
+    class Meta:
+        verbose_name = _(u'Navigation tree')
+        verbose_name_plural = _(u'Navigation trees')
+        abstract = True
+
+class NavTree(BaseNavTree): pass
 
 class NavNode(models.Model):
     """
@@ -274,25 +295,6 @@ class NavNode(models.Model):
                     raise ValidationError(_(u'A node can not be child of its own child'))
                 cur_node = cur_node.parent
 
-
-class BaseNavTree(models.Model):
-    last_update = models.DateTimeField(auto_now=True)
-    name = models.CharField(_(u'name'), max_length=100, db_index=True, unique=True, default='default')
-    types = models.ManyToManyField('coop_cms.NavType', blank=True)
-
-    def __unicode__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse('navigation_tree', args=[self.id])
-
-    def get_root_nodes(self):
-        return NavNode.objects.filter(tree=self, parent__isnull=True).order_by("ordering")
-
-    class Meta:
-        verbose_name = _(u'Navigation tree')
-        verbose_name_plural = _(u'Navigation trees')
-        abstract = True
 
 #content_cleaner = html_cleaner.HTMLCleaner(
 #    allow_tags=['a', 'img', 'p', 'br', 'b', 'i', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
