@@ -51,7 +51,7 @@ setup(
         'django-extensions',
         'sorl-thumbnail',
         'apidev-coop_colorbox',
-        'apidev-coop_bar',
+        'apidev-coop_bar >= 1.1.0',
         'apidev-djaloha >= 1.0.2',
         'django-pagination',
         'feedparser',
