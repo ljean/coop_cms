@@ -3,9 +3,9 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
-from coop_cms.settings import COOP_CMS_NAVTREE_CLASS, DEPRECTATED_COOP_CMS_NAVTREE_CLASS
+from coop_cms.settings import COOP_CMS_NAVTREE_CLASS, DEPRECATED_COOP_CMS_NAVTREE_CLASS
 
-NAVTREE_CLASS = DEPRECTATED_COOP_CMS_NAVTREE_CLASS or COOP_CMS_NAVTREE_CLASS
+NAVTREE_CLASS = DEPRECATED_COOP_CMS_NAVTREE_CLASS or COOP_CMS_NAVTREE_CLASS
 
 class Migration(SchemaMigration):
 
@@ -36,8 +36,7 @@ class Migration(SchemaMigration):
         db.delete_table(u'coop_cms_navtree')
 
         # Removing M2M table for field types on 'NavTree'
-        db.delete_table(db.shorten_name(u'coop_cms_navtree_types'))
-
+        db.delete_table(db.shorten_name(u'coop_cms_navtree_types'))s
 
         # User chose to not deal with backwards NULL issues for 'NavNode.tree'
         raise RuntimeError("Cannot reverse this migration. 'NavNode.tree' and its values cannot be restored.")

@@ -3,10 +3,10 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
-from coop_cms.settings import COOP_CMS_NAVTREE_CLASS, DEPRECTATED_COOP_CMS_NAVTREE_CLASS
+from coop_cms.settings import COOP_CMS_NAVTREE_CLASS, DEPRECATED_COOP_CMS_NAVTREE_CLASS
 from django.contrib.contenttypes.models import ContentType
 
-NAVTREE_CLASS = DEPRECTATED_COOP_CMS_NAVTREE_CLASS or COOP_CMS_NAVTREE_CLASS
+NAVTREE_CLASS = DEPRECATED_COOP_CMS_NAVTREE_CLASS or COOP_CMS_NAVTREE_CLASS
 
 class Migration(DataMigration):
 
@@ -17,9 +17,8 @@ class Migration(DataMigration):
         # and orm['appname.ModelName'] for models in other applications.
         
         NavTree = orm[COOP_CMS_NAVTREE_CLASS]
-        if DEPRECTATED_COOP_CMS_NAVTREE_CLASS:
-            #OldNavTree = orm[DEPRECTATED_COOP_CMS_NAVTREE_CLASS]
-            app_label, model_name = DEPRECTATED_COOP_CMS_NAVTREE_CLASS.split('.')
+        if DEPRECATED_COOP_CMS_NAVTREE_CLASS:
+            app_label, model_name = DEPRECATED_COOP_CMS_NAVTREE_CLASS.split('.')
             model_name = model_name.lower()
             ct = ContentType.objects.get(app_label=app_label, model=model_name)
             OldNavTree = ct.model_class()
