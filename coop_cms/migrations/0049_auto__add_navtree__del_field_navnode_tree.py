@@ -36,7 +36,7 @@ class Migration(SchemaMigration):
         db.delete_table(u'coop_cms_navtree')
 
         # Removing M2M table for field types on 'NavTree'
-        db.delete_table(db.shorten_name(u'coop_cms_navtree_types'))s
+        db.delete_table(db.shorten_name(u'coop_cms_navtree_types'))
 
         # User chose to not deal with backwards NULL issues for 'NavNode.tree'
         raise RuntimeError("Cannot reverse this migration. 'NavNode.tree' and its values cannot be restored.")
