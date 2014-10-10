@@ -59,10 +59,15 @@ def get_article_or_404(slug, **kwargs):
     except Article.DoesNotExist:
         raise Http404
 
-def get_headlines(article):
+def get_headlines(article, editable=False):
     Article = get_article_class()
     if article.is_homepage:
-        return Article.objects.filter(headline=True, publication=BaseArticle.PUBLISHED).order_by("-publication_date")
+        qs = Article.objects.filter(headline=True)
+        if editable:
+            qs = qs.filter(publication__in=(BaseArticle.PUBLISHED, BaseArticle.DRAFT))
+        else:
+            qs = qs.filter(publication=BaseArticle.PUBLISHED)
+        return qs.order_by("-publication_date")
     return Article.objects.none()
     
 def redirect_if_alias(path):

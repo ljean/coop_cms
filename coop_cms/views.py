@@ -149,7 +149,8 @@ def view_article(request, url, extra_context=None, force_template=None):
     
     context_dict = {
         'editable': editable, 'edit_mode': False, 'article': article,
-        'draft': article.publication==models.BaseArticle.DRAFT, 'headlines': get_headlines(article),
+        'draft': article.publication==models.BaseArticle.DRAFT,
+        'headlines': get_headlines(article, editable=editable),
     }
     
     if extra_context:
