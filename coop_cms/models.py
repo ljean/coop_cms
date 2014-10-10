@@ -735,15 +735,9 @@ class Image(Media):
 class Document(Media):
     def get_doc_folder(self, filename):
         if not self.is_private:
-            try:
-                doc_root = settings.DOCUMENT_FOLDER
-            except AttributeError:
-                doc_root = 'documents/public'
+            doc_root = getattr(settings, 'DOCUMENT_FOLDER', 'documents/public')
         else:
-            try:
-                doc_root = settings.PRIVATE_DOCUMENT_FOLDER
-            except AttributeError:
-                doc_root = 'documents/private'
+            doc_root = getattr(settings, 'PRIVATE_DOCUMENT_FOLDER', 'documents/private')
 
         filename = os.path.basename(filename)
         #This is required for x-sendfile
