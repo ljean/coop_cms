@@ -6,6 +6,8 @@ from django.db import models
 from coop_cms.settings import COOP_CMS_NAVTREE_CLASS, DEPRECTATED_COOP_CMS_NAVTREE_CLASS
 from django.contrib.contenttypes.models import ContentType
 
+NAVTREE_CLASS = DEPRECTATED_COOP_CMS_NAVTREE_CLASS or COOP_CMS_NAVTREE_CLASS
+
 class Migration(DataMigration):
 
     def forwards(self, orm):

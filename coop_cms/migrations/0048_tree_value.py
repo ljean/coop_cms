@@ -3,6 +3,9 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import DataMigration
 from django.db import models
+from coop_cms.settings import COOP_CMS_NAVTREE_CLASS, DEPRECTATED_COOP_CMS_NAVTREE_CLASS
+
+NAVTREE_CLASS = DEPRECTATED_COOP_CMS_NAVTREE_CLASS or COOP_CMS_NAVTREE_CLASS
 
 class Migration(DataMigration):
 
@@ -19,12 +22,12 @@ class Migration(DataMigration):
         "Write your backwards methods here."
 
     models = {
-        u'basic_cms.navtree': {
+        NAVTREE_CLASS: {
             'Meta': {'object_name': 'NavTree'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'last_update': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'default': "'default'", 'unique': 'True', 'max_length': '100', 'db_index': 'True'}),
-            'types': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'basic_cms_navtree_set'", 'blank': 'True', 'to': u"orm['coop_cms.NavType']"})
+            'types': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "u'{0}_set'".format(NAVTREE_CLASS.replace(".", "_").lower()), 'blank': 'True', 'to': u"orm['coop_cms.NavType']"})
         },
         u'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
@@ -121,7 +124,7 @@ class Migration(DataMigration):
             'object_id': ('django.db.models.fields.PositiveIntegerField', [], {'null': 'True', 'blank': 'True'}),
             'ordering': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             'parent': ('django.db.models.fields.related.ForeignKey', [], {'default': '0', 'to': u"orm['coop_cms.NavNode']", 'null': 'True', 'blank': 'True'}),
-            'tree': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['basic_cms.NavTree']"}),
+            'tree': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['{0}']".format(NAVTREE_CLASS)}),
             'tree_value': ('django.db.models.fields.IntegerField', [], {'default': '0'})
         },
         u'coop_cms.navtype': {
