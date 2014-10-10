@@ -6,8 +6,8 @@ from django.utils.importlib import import_module
 import logging
 logger = logging.getLogger("coop_cms")
 
-COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'coop_cms.NavTree')
-DEPRECTATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'DEPRECTATED_COOP_CMS_NAVTREE_CLASS', '')
+COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'
+DEPRECATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', '')
 
 def get_navigable_content_types():
     ct_choices = []

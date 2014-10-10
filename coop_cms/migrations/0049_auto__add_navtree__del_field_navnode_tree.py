@@ -3,7 +3,9 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
+from coop_cms.settings import COOP_CMS_NAVTREE_CLASS, DEPRECTATED_COOP_CMS_NAVTREE_CLASS
 
+NAVTREE_CLASS = DEPRECTATED_COOP_CMS_NAVTREE_CLASS or COOP_CMS_NAVTREE_CLASS
 
 class Migration(SchemaMigration):
 
@@ -42,7 +44,7 @@ class Migration(SchemaMigration):
         
         # The following code is provided here to aid in writing a correct migration        # Adding field 'NavNode.tree'
         db.add_column(u'coop_cms_navnode', 'tree',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['basic_cms.NavTree']),
+                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm[NAVTREE_CLASS]),
                       keep_default=False)
 
 

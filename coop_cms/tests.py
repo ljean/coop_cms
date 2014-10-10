@@ -37,6 +37,7 @@ from unittest import skipIf
 #from django.core.files.uploadedfile import SimpleUploadedFile
 from coop_cms.utils import RequestManager, RequestMiddleware, RequestNotFound
 from coop_cms.templatetags.coop_utils import get_part, get_parts
+from django.test.utils import override_settings
 
 try:
     AUTH_LOGIN_NAME = "auth_login"
@@ -44,23 +45,18 @@ try:
 except:
     AUTH_LOGIN_NAME = "login"
 
-class BaseTestCase(TestCase):
-    def setUp(self):
-        logging.disable(logging.CRITICAL)
-        
-    def tearDown(self):
-        logging.disable(logging.NOTSET)
-
 def make_dt(dt):
     if settings.USE_TZ:
         return timezone.make_aware(dt, timezone.get_default_timezone())
     else:
         return dt
-    
-class MediaBaseTestCase(BaseTestCase):
 
+default_media_root = settings.MEDIA_ROOT
+
+@override_settings(MEDIA_ROOT=os.path.join(default_media_root, '_unit_tests'))
+class BaseTestCase(TestCase):
     def _clean_files(self):
-        if self._media_root != settings.MEDIA_ROOT:
+        if default_media_root != settings.MEDIA_ROOT:
             try:
                 shutil.rmtree(settings.MEDIA_ROOT)
             except OSError:
@@ -69,16 +65,16 @@ class MediaBaseTestCase(BaseTestCase):
             raise Exception("Warning! wrong media root for unittesting")
     
     def setUp(self):
-        super(MediaBaseTestCase, self).setUp()
-        self._media_root = settings.MEDIA_ROOT
-        settings.MEDIA_ROOT = os.path.join(self._media_root, '_unit_tests')
+        logging.disable(logging.CRITICAL)
         self._clean_files()
 
     def tearDown(self):
+        logging.disable(logging.NOTSET)
         self._clean_files()
-        settings.MEDIA_ROOT = self._media_root
-        super(MediaBaseTestCase, self).tearDown()
-        
+
+    
+class MediaBaseTestCase(BaseTestCase):
+
     def _get_file(self, file_name='unittest1.txt'):
         full_name = os.path.normpath(os.path.dirname(__file__) + '/fixtures/' + file_name)
         return open(full_name, 'rb')
