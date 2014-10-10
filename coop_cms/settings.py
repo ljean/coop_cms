@@ -169,6 +169,12 @@ def get_article_logo_size(article):
 def get_article_logo_crop(article):
     return _get_article_setting(article, 'COOP_CMS_ARTICLE_LOGO_CROP', 'center')
 
+def get_headline_image_size(article):
+    return _get_article_setting(article, 'COOP_CMS_HEADLINE_IMAGE_SIZE', '900')
+
+def get_headline_image_crop(article):
+    return _get_article_setting(article, 'COOP_CMS_HEADLINE_IMAGE_CROP', None)
+
 def get_newsletter_item_classes():
     if hasattr(get_newsletter_item_classes, '_cache_class'):
         return getattr(get_newsletter_item_classes, '_cache_class')

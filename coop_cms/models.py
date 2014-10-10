@@ -19,6 +19,7 @@ from django.core.exceptions import ValidationError
 from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes, get_article_logo_crop
 from coop_cms.settings import get_navtree_class, is_localized, get_article_templates, COOP_CMS_NAVTREE_CLASS
 from coop_cms.settings import get_default_logo, is_requestprovider_installed
+from coop_cms.settings import get_headline_image_size, get_headline_image_crop
 from coop_cms.utils import dehtml
 from django.contrib.staticfiles import finders
 from django.core.files import File
@@ -472,6 +473,12 @@ class BaseArticle(BaseNavigable):
         except Exception, msg:
             print "#### ERR", msg
             return logo_file
+        
+    def get_headline_image(self):
+        img_size = get_headline_image_size(self)
+        crop = get_headline_image_crop(self)
+        return self.logo_thumbnail(logo_size=img_size, logo_crop=crop).url
+        
 
     def _get_default_logo(self):
         #copy from static to media in order to use sorl thumbnail without raising a suspicious operation

@@ -1,0 +1,28 @@
+<div id="carousel" class="carousel slide" data-ride="carousel">
+    <!-- Indicators -->
+    <ol class="carousel-indicators">
+    {% for headline in headlines %}
+      <li data-target="#carousel" data-slide-to="{{forloop.counter0}}" class="{% if forloop.counter0 == 0 %}active{% endif %}"></li>
+    {% endfor %}
+    </ol>
+
+    <!-- Wrapper for slides -->
+    <div class="carousel-inner">
+    {% for headline in headlines %}
+      <div class="item {% if forloop.counter0 == 0 %}active{% endif %}">
+        <img src="{{headline.get_headline_image}}" alt="{{headline.title}}">
+        <div class="carousel-caption">
+          {{ headline.summary }}
+        </div>
+      </div>
+    {% endfor %}
+    </div>
+
+    <!-- Controls -->
+    <a class="left carousel-control" href="#carousel" role="button" data-slide="prev">
+      <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+    <a class="right carousel-control" href="#carousel" role="button" data-slide="next">
+      <span class="glyphicon glyphicon-chevron-right"></span>
+    </a>
+</div>
