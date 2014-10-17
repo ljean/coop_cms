@@ -5,6 +5,21 @@ from coop_cms.settings import get_article_class
 from coop_cms.models import BaseArticle
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.core.urlresolvers import reverse
+
+class ViewSitemap(Sitemap):
+    view_names = []
+    
+    def items(self):
+        
+        class Klass(object):
+            def __init__(self, name):
+                self.name = name
+            
+            def get_absolute_url(self):
+                return reverse(self.name)
+            
+        return [Klass(x) for x in self.view_names]
 
 class ArticleSitemap(Sitemap):
     changefreq = "weekly"
