@@ -39,7 +39,9 @@ from coop_cms.utils import RequestManager, RequestMiddleware, RequestNotFound
 from coop_cms.templatetags.coop_utils import get_part, get_parts
 from django.test.utils import override_settings
 from coop_cms.shortcuts import get_headlines
-
+from PIL import Image as PilImage
+from StringIO import StringIO
+        
 try:
     AUTH_LOGIN_NAME = "auth_login"
     reverse(AUTH_LOGIN_NAME)
@@ -53,6 +55,11 @@ def make_dt(dt):
         return dt
 
 default_media_root = settings.MEDIA_ROOT
+
+#Used by a test below
+def dummy_image_width(img):
+    return 20
+
 
 @override_settings(MEDIA_ROOT=os.path.join(default_media_root, '_unit_tests'))
 class BaseTestCase(TestCase):
@@ -2137,6 +2144,57 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEquals(0, images.count())
     
 class MediaLibraryTest(MediaBaseTestCase):
+    
+    @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="600")
+    def test_image_max_width_size(self):
+        image = mommy.make(Image)
+        url = image.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = StringIO(response.content)
+        img = PilImage.open(data)
+        self.assertEqual(img.size[0], 130)
+        
+    @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="600")
+    def test_image_max_width_size(self):
+        size = mommy.make(ImageSize, size="60")
+        image = mommy.make(Image, size=size)
+        url = image.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = StringIO(response.content)
+        img = PilImage.open(data)
+        self.assertEqual(img.size[0], 60)
+        
+    @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="60")
+    def test_image_max_width_size_no_scale(self):
+        image = mommy.make(Image)
+        url = image.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = StringIO(response.content)
+        img = PilImage.open(data)
+        self.assertEqual(img.size[0], 60)
+        
+    @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="coop_cms.tests.dummy_image_width")
+    def test_image_max_width_size_lambda(self):
+        image = mommy.make(Image)
+        url = image.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = StringIO(response.content)
+        img = PilImage.open(data)
+        self.assertEqual(img.size[0], 20)
+        
+    @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="")
+    def test_image_max_width_size_none(self):
+        image = mommy.make(Image)
+        url = image.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        data = StringIO(response.content)
+        img = PilImage.open(data)
+        self.assertEqual(img.size[0], 130)
     
     def test_show_images_empty(self):
         self._log_as_mediamgr()

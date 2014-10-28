@@ -175,6 +175,9 @@ def get_headline_image_size(article):
 def get_headline_image_crop(article):
     return _get_article_setting(article, 'COOP_CMS_HEADLINE_IMAGE_CROP', None)
 
+def get_max_image_width(image):
+    return _get_article_setting(image, 'COOP_CMS_MAX_IMAGE_WIDTH', None)
+
 def get_newsletter_item_classes():
     if hasattr(get_newsletter_item_classes, '_cache_class'):
         return getattr(get_newsletter_item_classes, '_cache_class')

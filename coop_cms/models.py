@@ -19,7 +19,7 @@ from django.core.exceptions import ValidationError
 from coop_cms.settings import get_article_class, get_article_logo_size, get_newsletter_item_classes, get_article_logo_crop
 from coop_cms.settings import get_navtree_class, is_localized, get_article_templates, COOP_CMS_NAVTREE_CLASS
 from coop_cms.settings import get_default_logo, is_requestprovider_installed
-from coop_cms.settings import get_headline_image_size, get_headline_image_crop
+from coop_cms.settings import get_headline_image_size, get_headline_image_crop, get_max_image_width
 from coop_cms.utils import dehtml
 from django.contrib.staticfiles import finders
 from django.core.files import File
@@ -727,7 +727,15 @@ class Image(Media):
 
     def get_absolute_url(self):
         if not self.size:
-            return self.file.url
+            max_width = get_max_image_width(self)
+            if max_width:
+                try:
+                    return sorl_thumbnail.backend.get_thumbnail(self.file.file, str(max_width), upscale=False).url
+                except Exception, msg:
+                    logger.error("Image can not resize: {0}".format(max_width))
+                    return self.file.url
+            else:
+                return self.file.url
         try:
             crop = self.size.crop or None
             return sorl_thumbnail.backend.get_thumbnail(self.file.file, self.size.size, crop=crop).url
