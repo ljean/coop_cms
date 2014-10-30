@@ -14,6 +14,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
     (r'^admin/', include(admin.site.urls)),
+    (r'^accounts/', include('coop_cms.apps.email_auth.urls')),
     (r'^accounts/', include('django.contrib.auth.urls')),
 )
 
