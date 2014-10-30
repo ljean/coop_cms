@@ -1,4 +1,4 @@
-{% extends "registration/base.html" %}{% load i18n %}{% load url from future %}
+{% extends "registration/base.html" %}{% load i18n %}
 {% block registration_content %}
     <H2>{% trans "Login" %}</H2>
     {% if form.errors %}
@@ -13,8 +13,8 @@
     
         <table>
         <tr>
-            <th>{% if SANZA_EMAIL_LOGIN %}{% trans "Email" %}{% else %}{% trans "Username" %}{% endif %}</th>
-            {% include "_field.html" with field=form.username %}
+            <th>{% trans "Email" %}</th>
+            {% include "_field.html" with field=form.email %}
         </tr>
         <tr>
             <th>{% trans "Password" %}</th>

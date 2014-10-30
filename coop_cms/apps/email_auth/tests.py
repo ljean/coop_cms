@@ -1,10 +1,22 @@
 # -*- coding: utf-8 -*-
 
+from django.conf import settings
+if 'localeurl' in settings.INSTALLED_APPS:
+    from localeurl.models import patch_reverse
+    patch_reverse()
+    
 from django.test import TestCase
 from model_mommy import mommy
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from bs4 import BeautifulSoup
+from django.test.utils import override_settings
+
+TEST_AUTHENTICATION_BACKENDS = (
+    'coop_cms.perms_backends.ArticlePermissionBackend',
+    'coop_cms.apps.email_auth.auth_backends.EmailAuthBackend',
+    'django.contrib.auth.backends.ModelBackend', # Django's default auth backend
+)
 
 class BaseTest(TestCase):
     
@@ -19,6 +31,7 @@ class BaseTest(TestCase):
         return obj
     
 
+@override_settings(AUTHENTICATION_BACKENDS=TEST_AUTHENTICATION_BACKENDS)
 class EmailAuthBackendTest(BaseTest):
     
     def test_email_login(self):
@@ -48,7 +61,8 @@ class EmailAuthBackendTest(BaseTest):
         user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
         login_ok = self.client.login(email=user.email, password="toto")
         self.assertEqual(login_ok, False)    
-        
+  
+@override_settings(AUTHENTICATION_BACKENDS=TEST_AUTHENTICATION_BACKENDS)      
 class UserLoginTest(BaseTest):
 
     def test_view_login(self):
@@ -56,8 +70,8 @@ class UserLoginTest(BaseTest):
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
         soup = BeautifulSoup(response.content)
-        self.assertEqual(1, len(soup.select("input[name=email]")))
-        self.assertEqual(1, len(soup.select("input[name=password]")))
+        self.assertTrue(len(soup.select("input[name=email]"))>0)
+        self.assertTrue(len(soup.select("input[name=password]"))>0)
         self.assertEqual(0, len(soup.select("input[name=username]")))
         
     def test_post_login(self):
@@ -72,6 +86,9 @@ class UserLoginTest(BaseTest):
         
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
+        
+        user_id = self.client.session.get("_auth_user_id", 0)
+        self.assertEqual(user_id, user.id)
     
     def test_post_login_wrong_password(self):
         user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
@@ -85,8 +102,9 @@ class UserLoginTest(BaseTest):
         
         response = self.client.post(url, data=data)
         self.assertEqual(200, response.status_code)
-        soup = BeautifulSoup(response.content)
-        self.assertEqual(1, len(soup.select(".ut-login-error")))
+        
+        user_id = self.client.session.get("_auth_user_id", 0)
+        self.assertEqual(user_id, 0)
     
     def test_post_login_wrong_email(self):
         user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
@@ -100,8 +118,9 @@ class UserLoginTest(BaseTest):
         
         response = self.client.post(url, data=data)
         self.assertEqual(200, response.status_code)
-        soup = BeautifulSoup(response.content)
-        self.assertEqual(1, len(soup.select(".ut-login-error")))
+        
+        user_id = self.client.session.get("_auth_user_id", 0)
+        self.assertEqual(user_id, 0)
     
     def test_post_login_invalid_email(self):
         user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
@@ -115,8 +134,9 @@ class UserLoginTest(BaseTest):
         
         response = self.client.post(url, data=data)
         self.assertEqual(200, response.status_code)
-        soup = BeautifulSoup(response.content)
-        self.assertEqual(1, len(soup.select(".ut-login-error")))
+        
+        user_id = self.client.session.get("_auth_user_id", 0)
+        self.assertEqual(user_id, 0)
     
     def test_post_login_missing_password(self):
         user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
@@ -130,8 +150,9 @@ class UserLoginTest(BaseTest):
         
         response = self.client.post(url, data=data)
         self.assertEqual(200, response.status_code)
-        soup = BeautifulSoup(response.content)
-        self.assertEqual(1, len(soup.select(".ut-login-error")))
+        
+        user_id = self.client.session.get("_auth_user_id", 0)
+        self.assertEqual(user_id, 0)
     
     def test_post_login_missing_email(self):
         user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
@@ -145,8 +166,9 @@ class UserLoginTest(BaseTest):
         
         response = self.client.post(url, data=data)
         self.assertEqual(200, response.status_code)
-        soup = BeautifulSoup(response.content)
-        self.assertEqual(1, len(soup.select(".ut-login-error")))
+        
+        user_id = self.client.session.get("_auth_user_id", 0)
+        self.assertEqual(user_id, 0)
         
     def test_post_login_missing_both(self):
         user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
@@ -160,8 +182,9 @@ class UserLoginTest(BaseTest):
         
         response = self.client.post(url, data=data)
         self.assertEqual(200, response.status_code)
-        soup = BeautifulSoup(response.content)
-        self.assertEqual(1, len(soup.select(".ut-login-error")))
+        
+        user_id = self.client.session.get("_auth_user_id", 0)
+        self.assertEqual(user_id, 0)
     
     def test_post_login_inactive_user(self):
         user = self._make(User, is_active=False, password="password", email="toto@toto.fr", username="toto")
@@ -172,11 +195,11 @@ class UserLoginTest(BaseTest):
             'password': 'password',
             'email': user.email,
         }
-        
         response = self.client.post(url, data=data)
         self.assertEqual(200, response.status_code)
-        soup = BeautifulSoup(response.content)
-        self.assertEqual(1, len(soup.select(".ut-login-error")))
+        
+        user_id = self.client.session.get("_auth_user_id", 0)
+        self.assertEqual(user_id, 0)
     
     def test_post_login_username(self):
         user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
@@ -190,7 +213,8 @@ class UserLoginTest(BaseTest):
         
         response = self.client.post(url, data=data)
         self.assertEqual(200, response.status_code)
-        soup = BeautifulSoup(response.content)
-        self.assertEqual(1, len(soup.select(".ut-login-error")))
+        
+        user_id = self.client.session.get("_auth_user_id", 0)
+        self.assertEqual(user_id, 0)
     
     

@@ -136,6 +136,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 AUTHENTICATION_BACKENDS = (
     'coop_cms.perms_backends.ArticlePermissionBackend',
+    'coop_cms.apps.email_auth.auth_backends.EmailAuthBackend',
     'django.contrib.auth.backends.ModelBackend', # Django's default auth backend
 )
 
@@ -197,6 +198,7 @@ INSTALLED_APPS = (
     'coop_cms',
     'coop_bar',
     'coop_cms.apps.basic_cms',
+    'coop_cms.apps.email_auth',
     
     'django.contrib.admin',
     'django.contrib.admindocs',
