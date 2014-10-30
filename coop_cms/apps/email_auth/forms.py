@@ -2,11 +2,11 @@
 
 from django import forms
 from django.contrib.auth import authenticate
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext_lazy as __
 
 class EmailAuthForm(forms.Form):
-    email = forms.EmailField(required=True, label=_(u"Email"))
-    password = forms.CharField(label=_("Password"), widget=forms.PasswordInput)
+    email = forms.EmailField(required=True, label=__(u"Email"))
+    password = forms.CharField(label=__("Password"), widget=forms.PasswordInput)
 
     def __init__(self, request=None, *args, **kwargs):
         super(EmailAuthForm, self).__init__(*args, **kwargs)
