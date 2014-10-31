@@ -15,6 +15,10 @@ if 'modeltranslation' in settings.INSTALLED_APPS:
 else:
     BaseAdminClass = admin.ModelAdmin
 
+def clear_thumbnails_action(modeladmin, request, queryset):
+    for obj in queryset:
+        obj.clear_thumbnails()
+clear_thumbnails_action.short_description = _(u"Clear thumbnails")
 
 class NavNodeAdmin(admin.ModelAdmin):
     list_display = ["label", 'parent', 'ordering', 'in_navigation', 'content_type', 'object_id']
@@ -99,12 +103,12 @@ class MediaFilterFilter(admin.SimpleListFilter):
             return queryset
         return queryset.filter(filters__id=value)
 
-
 class ImageAdmin(admin.ModelAdmin):
-    list_display = ['name', 'file', 'size', 'ordering']
+    list_display = ['admin_image', 'name', 'file', 'size', 'ordering']
     list_filter = [MediaFilterFilter, 'size']
     list_editable = ('ordering',)
     search_fields = ['name']
+    actions = [clear_thumbnails_action]
 
 admin.site.register(models.Image, ImageAdmin)
 

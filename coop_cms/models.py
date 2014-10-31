@@ -8,7 +8,7 @@ from django.template.loader import get_template
 from django.template import Context
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from django.conf import settings
-from sorl.thumbnail import default as sorl_thumbnail
+from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
 import os, os.path, shutil
 from django.core.urlresolvers import reverse
 from django.db.models.aggregates import Max
@@ -719,11 +719,19 @@ class Image(Media):
     file = models.ImageField(_(u'file'), upload_to=get_img_folder)
     size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_(u"size"))
     
+    def clear_thumbnails(self):
+        sorl_delete(self.file.file, delete_file=False)    
+    
     def as_thumbnail(self):
         try:
             return sorl_thumbnail.backend.get_thumbnail(self.file.file, "64x64", crop='center')
         except Exception, msg:
             return self.file
+        
+    def admin_image(self):
+        return '<img src="{0}"/>'.format(self.as_thumbnail().url)
+    admin_image.allow_tags = True
+    admin_image.short_description = _(u"Image")
 
     def get_absolute_url(self):
         if not self.size:

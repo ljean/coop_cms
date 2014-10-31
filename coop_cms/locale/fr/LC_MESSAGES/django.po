@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coop_cms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-28 17:47+0100\n"
+"POT-Creation-Date: 2014-10-31 14:38+0100\n"
 "PO-Revision-Date: 2013-06-28 15:16+0100\n"
 "Last-Translator: Luc Jean <ljean@apidev.fr>\n"
 "Language-Team: Apidev, Quinode <contact@quinode.fr>\n"
@@ -18,39 +18,43 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n>1;\n"
 "X-Generator: Poedit 1.5.5\n"
 
-#: admin.py:43 templates/coop_cms/slide_images_content.html:5
+#: admin.py:21
+msgid "Clear thumbnails"
+msgstr "Réinitailiser les miniatures"
+
+#: admin.py:47 templates/coop_cms/slide_images_content.html:5
 msgid "All"
 msgstr "Tous"
 
-#: admin.py:46 models.py:99
+#: admin.py:50 models.py:99
 msgid "navigable types"
 msgstr "types navigables"
 
-#: admin.py:68
+#: admin.py:72
 msgid "General"
 msgstr "Général"
 
-#: admin.py:69
+#: admin.py:73
 msgid "Settings"
 msgstr "Réglages"
 
-#: admin.py:70
+#: admin.py:74
 msgid "Advanced"
 msgstr "Avancé"
 
-#: admin.py:71 apps/rss_sync/admin.py:39
+#: admin.py:75 apps/rss_sync/admin.py:39
 msgid "Content"
 msgstr "Contenu"
 
-#: admin.py:72
+#: admin.py:76
 msgid "Debug"
 msgstr "Debug"
 
-#: admin.py:87
+#: admin.py:91
 msgid "Media filter"
 msgstr "Filtre Média"
 
-#: admin.py:135
+#: admin.py:139
 msgid "Article"
 msgstr "Article"
 
@@ -190,7 +194,7 @@ msgstr "< pas dans l'arborescence >"
 msgid "Select an article"
 msgstr "Choisir un article"
 
-#: forms.py:191
+#: forms.py:191 models.py:734
 msgid "Image"
 msgstr "Image"
 
@@ -291,7 +295,7 @@ msgid "navigable type"
 msgstr "type navigable"
 
 #: models.py:104 models.py:310 models.py:686 models.py:696 models.py:708
-#: models.py:951 models.py:974
+#: models.py:959 models.py:982
 msgid "name"
 msgstr "nom"
 
@@ -307,15 +311,15 @@ msgstr "libellé"
 msgid "parent"
 msgstr "parent"
 
-#: models.py:133 models.py:312 models.py:710 models.py:829
+#: models.py:133 models.py:312 models.py:710 models.py:837
 msgid "ordering"
 msgstr "ordre"
 
-#: models.py:136 models.py:826
+#: models.py:136 models.py:834
 msgid "content_type"
 msgstr "type de contenu"
 
-#: models.py:137 models.py:827
+#: models.py:137 models.py:835
 msgid "object id"
 msgstr "identifiant de l'objet"
 
@@ -347,7 +351,7 @@ msgstr "flux rss"
 msgid "The articles of this category will be listed in the main rss feed"
 msgstr "Les articles de cette catégorie seront listés dans le flux rss"
 
-#: models.py:315 models.py:423 models.py:879
+#: models.py:315 models.py:423 models.py:887
 msgid "site"
 msgstr "site"
 
@@ -376,7 +380,7 @@ msgstr "titre"
 msgid "subtitle"
 msgstr "sous-titre"
 
-#: models.py:412 models.py:804 models.py:876 models.py:977
+#: models.py:412 models.py:812 models.py:884 models.py:985
 msgid "content"
 msgstr "contenu"
 
@@ -384,7 +388,7 @@ msgstr "contenu"
 msgid "publication"
 msgstr "publication"
 
-#: models.py:414 models.py:878
+#: models.py:414 models.py:886
 msgid "template"
 msgstr "modèle"
 
@@ -481,109 +485,109 @@ msgstr "Tailles d'images"
 msgid "filters"
 msgstr "filtres"
 
-#: models.py:719 models.py:767
+#: models.py:719 models.py:775
 msgid "file"
 msgstr "fichier"
 
-#: models.py:747
+#: models.py:755
 msgid "image"
 msgstr "image"
 
-#: models.py:748
+#: models.py:756
 msgid "images"
 msgstr "images"
 
-#: models.py:768
+#: models.py:776
 msgid "is private"
 msgstr "privé"
 
-#: models.py:769
+#: models.py:777
 msgid "Check this if you do not want to publish this document to all users"
 msgstr ""
 "Cocher cette case si vous -ne voulez pas- publier ce document à tous les "
 "utilisateurs"
 
-#: models.py:770
+#: models.py:778
 msgid "category"
 msgstr "catégorie"
 
-#: models.py:798
+#: models.py:806
 msgid "document"
 msgstr "document"
 
-#: models.py:799
+#: models.py:807
 msgid "documents"
 msgstr "documents"
 
-#: models.py:802
+#: models.py:810
 msgid "identifier"
 msgstr "identifier"
 
-#: models.py:805
+#: models.py:813
 msgid "extra identifier"
 msgstr "extra id"
 
-#: models.py:811
+#: models.py:819
 msgid "piece of HTML"
 msgstr "bloc HTML"
 
-#: models.py:812
+#: models.py:820
 msgid "pieces of HTML"
 msgstr "blocs HTML"
 
-#: models.py:833
+#: models.py:841
 msgid "newsletter item"
 msgstr "élément de lettre d'information"
 
-#: models.py:834
+#: models.py:842
 msgid "newsletter items"
 msgstr "éléments de lettre d'information"
 
-#: models.py:874
+#: models.py:882
 msgid "subject"
 msgstr "sujet"
 
-#: models.py:880
+#: models.py:888
 msgid "source url"
 msgstr "url source"
 
-#: models.py:918
+#: models.py:926
 msgid "newsletter"
 msgstr "lettre d'information"
 
-#: models.py:919
+#: models.py:927
 msgid "newsletters"
 msgstr "lettres d'information"
 
-#: models.py:925
+#: models.py:933
 msgid "scheduling date"
 msgstr "date de programmation"
 
-#: models.py:926
+#: models.py:934
 msgid "sending date"
 msgstr "date d'envoi"
 
-#: models.py:932
+#: models.py:940
 msgid "newsletter sending"
 msgstr "Envoi de lettre d'information"
 
-#: models.py:933
+#: models.py:941
 msgid "newsletter sendings"
 msgstr "Envois de lettre d'informations"
 
-#: models.py:941
+#: models.py:949
 msgid "Alias"
 msgstr "Alias"
 
-#: models.py:942
+#: models.py:950
 msgid "Aliases"
 msgstr "Alias"
 
-#: models.py:952
+#: models.py:960
 msgid "allowed css classes"
 msgstr "classes CSS autorisées"
 
-#: models.py:953
+#: models.py:961
 msgid ""
 "the css classed proposed when editing a fragment. It must be separated by "
 "comas"
@@ -591,63 +595,63 @@ msgstr ""
 "Définit les classes CSS qui sont autorisées pour ce type de fragments. Les "
 "valeurs doivent être séparées par des virgules."
 
-#: models.py:956
+#: models.py:964
 msgid "Fragment type"
 msgstr "Type de fragment"
 
-#: models.py:957
+#: models.py:965
 msgid "Fragment types"
 msgstr "types de fragments"
 
-#: models.py:963
+#: models.py:971
 msgid "extra_id"
 msgstr "extra id"
 
-#: models.py:966
+#: models.py:974
 msgid "Fragment filter"
 msgstr "Filtre de fragment"
 
-#: models.py:967
+#: models.py:975
 msgid "Fragment filters"
 msgstr "Filtres de fragments"
 
-#: models.py:973
+#: models.py:981
 msgid "fragment type"
 msgstr "type de fragment"
 
-#: models.py:975
+#: models.py:983
 msgid "CSS class"
 msgstr "classe CSS"
 
-#: models.py:976
+#: models.py:984
 msgid "position"
 msgstr "position"
 
-#: models.py:978
+#: models.py:986
 msgid "fragment filter"
 msgstr "filtre de fragment"
 
-#: models.py:981 models.py:982
+#: models.py:989 models.py:990
 msgid "Fragment"
 msgstr "Fragment"
 
-#: models.py:1011
+#: models.py:1019
 msgid "site settings"
 msgstr "Réglages article"
 
-#: models.py:1013
+#: models.py:1021
 msgid "homepage URL"
 msgstr "URL de la page d'accueil"
 
-#: models.py:1014
+#: models.py:1022
 msgid "if set, the homepage will be redirected to the given URL"
 msgstr "si défini, la page d'accueil redirigera vers l'URL"
 
-#: models.py:1021
+#: models.py:1029
 msgid "Sites settings"
 msgstr "Réglages site"
 
-#: models.py:1022
+#: models.py:1030
 msgid "Site settings"
 msgstr "Réglages site"
 
@@ -798,22 +802,14 @@ msgstr "Accueil"
 msgid "Author"
 msgstr "Auteur"
 
-#: apps/email_auth/forms.py:8
-#: ci/drone_project/templates/registration/login.html:16
-msgid "Email"
-msgstr "Email"
-
-#: apps/email_auth/forms.py:9
-#: ci/drone_project/templates/registration/login.html:20
-msgid "Password"
-msgstr "Mot de passe"
-
 #: apps/email_auth/forms.py:19
 #, python-format
 msgid ""
 "Please enter a correct %(email)s and password. Note that both fields may be "
 "case-sensitive."
 msgstr ""
+"Veuillez entrer un %(email)s valide et un mot de passe. Notez que ces 2 "
+"champs sont sensibles à la casse."
 
 #: apps/email_auth/forms.py:29
 msgid "email"
@@ -923,8 +919,12 @@ msgid "Login has failed"
 msgstr "La connexion a échoué"
 
 #: ci/drone_project/templates/registration/login.html:16
-msgid "Username"
-msgstr "Nom d'utilisateur"
+msgid "Email"
+msgstr "Email"
+
+#: ci/drone_project/templates/registration/login.html:20
+msgid "Password"
+msgstr "Mot de passe"
 
 #: ci/drone_project/templates/registration/login.html:30
 msgid "Forgotten Password"
@@ -1214,6 +1214,9 @@ msgstr "navigation_children requiert un objet en argument"
 #: templatetags/coop_navigation.py:158
 msgid "navigation_siblings requires object as argument"
 msgstr "navigation_siblings requiert un objet en argument"
+
+#~ msgid "Username"
+#~ msgstr "Nom d'utilisateur"
 
 #~ msgid "Publication"
 #~ msgstr "Publication"

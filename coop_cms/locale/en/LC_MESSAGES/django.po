@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-28 17:51+0100\n"
+"POT-Creation-Date: 2014-10-31 14:38+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,39 +17,43 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: admin.py:43 templates/coop_cms/slide_images_content.html:5
+#: admin.py:21
+msgid "Clear thumbnails"
+msgstr ""
+
+#: admin.py:47 templates/coop_cms/slide_images_content.html:5
 msgid "All"
 msgstr ""
 
-#: admin.py:46 models.py:99
+#: admin.py:50 models.py:99
 msgid "navigable types"
 msgstr ""
 
-#: admin.py:68
+#: admin.py:72
 msgid "General"
 msgstr ""
 
-#: admin.py:69
+#: admin.py:73
 msgid "Settings"
 msgstr ""
 
-#: admin.py:70
+#: admin.py:74
 msgid "Advanced"
 msgstr ""
 
-#: admin.py:71 apps/rss_sync/admin.py:39
+#: admin.py:75 apps/rss_sync/admin.py:39
 msgid "Content"
 msgstr ""
 
-#: admin.py:72
+#: admin.py:76
 msgid "Debug"
 msgstr ""
 
-#: admin.py:87
+#: admin.py:91
 msgid "Media filter"
 msgstr ""
 
-#: admin.py:135
+#: admin.py:139
 msgid "Article"
 msgstr ""
 
@@ -187,7 +191,7 @@ msgstr ""
 msgid "Select an article"
 msgstr ""
 
-#: forms.py:191
+#: forms.py:191 models.py:734
 msgid "Image"
 msgstr ""
 
@@ -288,7 +292,7 @@ msgid "navigable type"
 msgstr ""
 
 #: models.py:104 models.py:310 models.py:686 models.py:696 models.py:708
-#: models.py:951 models.py:974
+#: models.py:959 models.py:982
 msgid "name"
 msgstr ""
 
@@ -304,15 +308,15 @@ msgstr ""
 msgid "parent"
 msgstr ""
 
-#: models.py:133 models.py:312 models.py:710 models.py:829
+#: models.py:133 models.py:312 models.py:710 models.py:837
 msgid "ordering"
 msgstr ""
 
-#: models.py:136 models.py:826
+#: models.py:136 models.py:834
 msgid "content_type"
 msgstr ""
 
-#: models.py:137 models.py:827
+#: models.py:137 models.py:835
 msgid "object id"
 msgstr ""
 
@@ -344,7 +348,7 @@ msgstr ""
 msgid "The articles of this category will be listed in the main rss feed"
 msgstr ""
 
-#: models.py:315 models.py:423 models.py:879
+#: models.py:315 models.py:423 models.py:887
 msgid "site"
 msgstr ""
 
@@ -373,7 +377,7 @@ msgstr ""
 msgid "subtitle"
 msgstr ""
 
-#: models.py:412 models.py:804 models.py:876 models.py:977
+#: models.py:412 models.py:812 models.py:884 models.py:985
 msgid "content"
 msgstr ""
 
@@ -381,7 +385,7 @@ msgstr ""
 msgid "publication"
 msgstr ""
 
-#: models.py:414 models.py:878
+#: models.py:414 models.py:886
 msgid "template"
 msgstr ""
 
@@ -477,169 +481,169 @@ msgstr ""
 msgid "filters"
 msgstr ""
 
-#: models.py:719 models.py:767
+#: models.py:719 models.py:775
 msgid "file"
 msgstr ""
 
-#: models.py:747
+#: models.py:755
 msgid "image"
 msgstr ""
 
-#: models.py:748
+#: models.py:756
 msgid "images"
 msgstr ""
 
-#: models.py:768
+#: models.py:776
 msgid "is private"
 msgstr ""
 
-#: models.py:769
+#: models.py:777
 msgid "Check this if you do not want to publish this document to all users"
 msgstr ""
 
-#: models.py:770
+#: models.py:778
 msgid "category"
 msgstr ""
 
-#: models.py:798
+#: models.py:806
 msgid "document"
 msgstr ""
 
-#: models.py:799
+#: models.py:807
 msgid "documents"
 msgstr ""
 
-#: models.py:802
+#: models.py:810
 msgid "identifier"
 msgstr ""
 
-#: models.py:805
+#: models.py:813
 msgid "extra identifier"
 msgstr ""
 
-#: models.py:811
+#: models.py:819
 msgid "piece of HTML"
 msgstr ""
 
-#: models.py:812
+#: models.py:820
 msgid "pieces of HTML"
 msgstr ""
 
-#: models.py:833
+#: models.py:841
 msgid "newsletter item"
 msgstr ""
 
-#: models.py:834
+#: models.py:842
 msgid "newsletter items"
 msgstr ""
 
-#: models.py:874
+#: models.py:882
 msgid "subject"
 msgstr ""
 
-#: models.py:880
+#: models.py:888
 msgid "source url"
 msgstr ""
 
-#: models.py:918
+#: models.py:926
 msgid "newsletter"
 msgstr ""
 
-#: models.py:919
+#: models.py:927
 msgid "newsletters"
 msgstr ""
 
-#: models.py:925
+#: models.py:933
 msgid "scheduling date"
 msgstr ""
 
-#: models.py:926
+#: models.py:934
 msgid "sending date"
 msgstr ""
 
-#: models.py:932
+#: models.py:940
 msgid "newsletter sending"
 msgstr ""
 
-#: models.py:933
+#: models.py:941
 msgid "newsletter sendings"
 msgstr ""
 
-#: models.py:941
+#: models.py:949
 msgid "Alias"
 msgstr ""
 
-#: models.py:942
+#: models.py:950
 msgid "Aliases"
 msgstr ""
 
-#: models.py:952
+#: models.py:960
 msgid "allowed css classes"
 msgstr ""
 
-#: models.py:953
+#: models.py:961
 msgid ""
 "the css classed proposed when editing a fragment. It must be separated by "
 "comas"
 msgstr ""
 
-#: models.py:956
+#: models.py:964
 msgid "Fragment type"
 msgstr ""
 
-#: models.py:957
+#: models.py:965
 msgid "Fragment types"
 msgstr ""
 
-#: models.py:963
+#: models.py:971
 msgid "extra_id"
 msgstr ""
 
-#: models.py:966
+#: models.py:974
 msgid "Fragment filter"
 msgstr ""
 
-#: models.py:967
+#: models.py:975
 msgid "Fragment filters"
 msgstr ""
 
-#: models.py:973
+#: models.py:981
 msgid "fragment type"
 msgstr ""
 
-#: models.py:975
+#: models.py:983
 msgid "CSS class"
 msgstr ""
 
-#: models.py:976
+#: models.py:984
 msgid "position"
 msgstr ""
 
-#: models.py:978
+#: models.py:986
 msgid "fragment filter"
 msgstr ""
 
-#: models.py:981 models.py:982
+#: models.py:989 models.py:990
 msgid "Fragment"
 msgstr ""
 
-#: models.py:1011
+#: models.py:1019
 msgid "site settings"
 msgstr ""
 
-#: models.py:1013
+#: models.py:1021
 msgid "homepage URL"
 msgstr ""
 
-#: models.py:1014
+#: models.py:1022
 msgid "if set, the homepage will be redirected to the given URL"
 msgstr ""
 
-#: models.py:1021
+#: models.py:1029
 msgid "Sites settings"
 msgstr ""
 
-#: models.py:1022
+#: models.py:1030
 msgid "Site settings"
 msgstr ""
 
@@ -785,16 +789,6 @@ msgstr ""
 msgid "Author"
 msgstr ""
 
-#: apps/email_auth/forms.py:8
-#: ci/drone_project/templates/registration/login.html:16
-msgid "Email"
-msgstr ""
-
-#: apps/email_auth/forms.py:9
-#: ci/drone_project/templates/registration/login.html:20
-msgid "Password"
-msgstr ""
-
 #: apps/email_auth/forms.py:19
 #, python-format
 msgid ""
@@ -910,7 +904,11 @@ msgid "Login has failed"
 msgstr ""
 
 #: ci/drone_project/templates/registration/login.html:16
-msgid "Username"
+msgid "Email"
+msgstr ""
+
+#: ci/drone_project/templates/registration/login.html:20
+msgid "Password"
 msgstr ""
 
 #: ci/drone_project/templates/registration/login.html:30
