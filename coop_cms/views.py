@@ -1,45 +1,49 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
+import itertools
+import json
+import logging
+import mimetypes
+import os.path
+import sys
+import unicodedata
+from urlparse import urlparse
+
+from django.db.models import Q
+from django.db.models.aggregates import Max
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
+from django.contrib import messages
+from django.contrib.messages.api import success as success_message, error as error_message
+from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError, PermissionDenied
+from django.core.servers.basehttp import FileWrapper
+from django.core.urlresolvers import reverse
+from django.forms.models import modelformset_factory
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
+from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, Context, Template, TemplateDoesNotExist
-from django.template.loader import get_template
-from django.core.urlresolvers import reverse
-import sys, json, os.path
-from django.utils.translation import ugettext as _
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError, PermissionDenied
-from django.template.loader import select_template
-from django.db.models.aggregates import Max
-from coop_cms import forms
-from django.contrib.messages.api import success as success_message
-from django.contrib.messages.api import error as error_message
-from coop_cms import models
-from django.contrib.auth.decorators import login_required
-from coop_cms.settings import get_article_class, get_article_form, get_newsletter_form, get_navtree_class
-from coop_cms.settings import get_new_article_form, get_article_settings_form
-from djaloha import utils as djaloha_utils
-from django.core.servers.basehttp import FileWrapper
-import mimetypes, unicodedata
-from django.conf import settings
-from django.contrib import messages
-from colorbox.decorators import popup_redirect, popup_close
-from coop_cms.utils import send_newsletter
-from coop_cms.shortcuts import get_article_or_404, get_headlines, redirect_if_alias
+from django.template.loader import get_template, select_template
 from django.utils.log import getLogger
-from datetime import datetime
-from django.utils.translation import check_for_language, activate, get_language
-from urlparse import urlparse
-from django.contrib.sites.models import Site
-from generic_views import EditableObjectView
-from django.forms.models import modelformset_factory
-import logging
-logger = logging.getLogger("coop_cms")
-import itertools
-from coop_cms.settings import cms_no_homepage
+from django.utils.translation import ugettext as _, check_for_language, activate, get_language
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
-from django.db.models import Q
-from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
+
+from djaloha import utils as djaloha_utils
+from colorbox.decorators import popup_redirect, popup_close
+
+from coop_cms import forms
+from coop_cms import models
+from coop_cms.generic_views import EditableObjectView
+from coop_cms.settings import (cms_no_homepage, get_article_class, get_article_form, get_article_settings_form,
+    get_navtree_class, get_new_article_form, get_newsletter_form)
+from coop_cms.shortcuts import get_article_or_404, get_headlines, redirect_if_alias
+from coop_cms.utils import send_newsletter
+
+logger = logging.getLogger("coop_cms")
 
 def get_article_template(article):
     template = article.template
@@ -1110,6 +1114,7 @@ def articles_category(request, slug):
         context_instance=RequestContext(request)
     )
 
+@csrf_exempt
 def change_language(request):
     
     try:
