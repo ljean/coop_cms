@@ -4,43 +4,46 @@ from django.conf import settings
 if 'localeurl' in settings.INSTALLED_APPS:
     from localeurl.models import patch_reverse
     patch_reverse()
-    
-from django.test import TestCase
-from django.contrib.auth.models import User, Permission
-from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
-from django.template import Template, Context
-from coop_cms.models import Link, NavNode, NavType, Document, Newsletter, NewsletterItem, Fragment, FragmentType, FragmentFilter
-from coop_cms.models import PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory, Alias, Image, MediaFilter, ImageSize
-from coop_cms.models import SiteSettings
-from coop_cms.settings import is_localized, is_multilang
+
 import json
-from django.core.exceptions import ValidationError
-from coop_cms.settings import get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed
-from coop_cms.settings import cms_no_homepage
-from model_mommy import mommy
-from django.conf import settings
 import os.path, shutil
+from datetime import datetime, timedelta
+import logging
+from StringIO import StringIO
+from unittest import skipIf
+
+from bs4 import BeautifulSoup
+from PIL import Image as PilImage
+
+from django.contrib.auth.models import User, Permission, AnonymousUser
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
+from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core import mail
-from coop_cms.html2text import html2text
-from coop_cms.utils import make_links_absolute
-from datetime import datetime, timedelta
 from django.core import management
-from django.utils import timezone
-from django.contrib.sites.models import Site
-from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
-from bs4 import BeautifulSoup
-import logging
-from django.utils.translation import activate, get_language
-from unittest import skipIf
-#from django.core.files.uploadedfile import SimpleUploadedFile
-from coop_cms.utils import RequestManager, RequestMiddleware, RequestNotFound
-from coop_cms.templatetags.coop_utils import get_part, get_parts
+from django.core.urlresolvers import reverse
+from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
+from django.template import Template, Context
+from django.test import TestCase
+from django.test.client import RequestFactory
 from django.test.utils import override_settings
+from django.utils import timezone
+from django.utils.translation import activate, get_language
+
+from model_mommy import mommy
+
+from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
+from coop_cms.html2text import html2text
+from coop_cms.models import (Link, NavNode, NavType, Document, Newsletter, NewsletterItem,
+    Fragment, FragmentType, FragmentFilter, PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory,
+    Alias, Image, MediaFilter, ImageSize, SiteSettings)
+from coop_cms.settings import (is_localized, is_multilang, get_article_class, get_article_templates,
+    get_navtree_class, is_perm_middleware_installed, cms_no_homepage)
 from coop_cms.shortcuts import get_headlines
-from PIL import Image as PilImage
-from StringIO import StringIO
+from coop_cms.templatetags.coop_utils import get_part, get_parts
+from coop_cms.utils import make_links_absolute, RequestManager, RequestMiddleware, RequestNotFound
+from coop_cms.views import csrf_failure
         
 try:
     AUTH_LOGIN_NAME = "auth_login"
@@ -6218,5 +6221,51 @@ class HeadlineTest(TestCase):
         
         headlines = list(get_headlines(other_homepage))
         self.assertEqual([], headlines)
+    
+    
+@skipIf(getattr(settings, 'COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW', False), "coo_cms csrf failure disabled")    
+class CsrfFailureTest(BaseTestCase):
+    
+    def test_view_reason_cookie(self):
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
         
+        response = csrf_failure(request, REASON_NO_CSRF_COOKIE)
         
+        self.assertEqual(403, response.status_code)
+        soup = BeautifulSoup(response.content)
+        
+        self.assertEqual(1, len(soup.select('.cookies-error')))
+        self.assertEqual(0, len(soup.select('.referer-error')))
+        self.assertEqual(0, len(soup.select('.unknown-error')))
+        
+    
+    def test_view_reason_referer(self):
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        
+        response = csrf_failure(request, REASON_NO_REFERER)
+        
+        self.assertEqual(403, response.status_code)
+        soup = BeautifulSoup(response.content)
+        
+        self.assertEqual(0, len(soup.select('.cookies-error')))
+        self.assertEqual(1, len(soup.select('.referer-error')))
+        self.assertEqual(0, len(soup.select('.unknown-error')))
+    
+    def test_view_reason_unknown(self):
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        
+        response = csrf_failure(request, "?")
+        
+        self.assertEqual(403, response.status_code)
+        soup = BeautifulSoup(response.content)
+        
+        self.assertEqual(0, len(soup.select('.cookies-error')))
+        self.assertEqual(0, len(soup.select('.referer-error')))
+        self.assertEqual(1, len(soup.select('.unknown-error')))
+    

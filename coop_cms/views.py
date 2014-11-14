@@ -39,6 +39,7 @@ import itertools
 from coop_cms.settings import cms_no_homepage
 from django.views.generic import TemplateView
 from django.db.models import Q
+from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 
 def get_article_template(article):
     template = article.template
@@ -1212,3 +1213,24 @@ class DebugErrorCodeView(TemplateView):
     
     def get_template_names(self):
         return ("{0}.html".format(self.kwargs["error_code"]),)
+
+def csrf_failure(request, reason=""):
+    """
+    Custom view used when request fails CSRF protection.
+    
+    ENABLED by default by coop_cms unless you set COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW=True in settings.py
+    """
+    
+    logger.warn(u"csrf_failure, reason: {0}".format(reason))
+    
+    t = get_template('coop_cms/csrf_403.html')
+    
+    context = Context({
+        'DEBUG': settings.DEBUG,
+        'cookie_disabled': reason == REASON_NO_CSRF_COOKIE,
+        'no_referer': reason == REASON_NO_REFERER,
+    })
+
+    html = t.render(RequestContext(request, context))
+    
+    return HttpResponseForbidden(html, content_type='text/html')

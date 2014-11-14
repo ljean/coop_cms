@@ -228,6 +228,11 @@ def is_localized():
 def is_multilang():
     return len(django_settings.LANGUAGES)>1
 
+def install_csrf_failure_view():
+    dont_do_it = getattr(django_settings, 'COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW', False)
+    if not dont_do_it:
+        setattr(django_settings, 'CSRF_FAILURE_VIEW', 'coop_cms.views.csrf_failure')
+
 def cms_no_homepage():
     return getattr(django_settings, 'COOP_CMS_NO_HOMEPAGE', False)
 
