@@ -1088,7 +1088,7 @@ msgid ""
 "            "
 msgstr ""
 "\n"
-"            Raison inconnue: Veuillez contacter leafin de définir la cause "
+"            Raison inconnue: Veuillez contacter le webmaster du site afin de définir la cause "
 "du problème.\n"
 "            "
 
