@@ -1,0 +1,24 @@
+{% load i18n %}
+
+    {% if cookie_disabled %}
+        <p class="cookies-error"> 
+        {% blocktrans %}
+        It is possible that you disabled cookies for this site. <br /><br />
+        Cookies must be enabled in order to be able to use this site properly.
+        {% endblocktrans %}
+        </p>
+    {% else %}
+        {% if no_referer %}
+            <p class="referer-error"> 
+            {% blocktrans %}
+            If you have configured your browser to disable 'Referer' headers, please
+            re-enable them, at least for this site or for 'same-origin' requests.
+            {% endblocktrans %}
+        {% else %}
+            <p class="unknown-error"> 
+            {% blocktrans %}
+            Unknown reason: Please contact the webmaster in order to define the cause of the problem.
+            {% endblocktrans %}
+            </p>
+        {% endif %}
+    {% endif %}

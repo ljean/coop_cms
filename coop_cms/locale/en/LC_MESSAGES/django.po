@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-31 14:38+0100\n"
+"POT-Creation-Date: 2014-11-14 09:57+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -243,7 +243,7 @@ msgstr ""
 msgid "The object has been saved properly"
 msgstr ""
 
-#: generic_views.py:151 views.py:200
+#: generic_views.py:151 views.py:201
 msgid "An error occured: {0}"
 msgstr ""
 
@@ -259,7 +259,7 @@ msgstr ""
 msgid "An error occured: At least one object is missing. Please try again."
 msgstr ""
 
-#: models.py:43 views.py:824
+#: models.py:43 views.py:825
 msgid "Node"
 msgstr ""
 
@@ -647,99 +647,99 @@ msgstr ""
 msgid "Site settings"
 msgstr ""
 
-#: views.py:128
+#: views.py:129
 msgid "Do you want to use this article as homepage?"
 msgstr ""
 
-#: views.py:175
+#: views.py:176
 msgid "Permission denied"
 msgstr ""
 
-#: views.py:195
+#: views.py:196
 msgid "The article has been saved properly"
 msgstr ""
 
-#: views.py:257
+#: views.py:258
 msgid "Do you want to publish this article?"
 msgstr ""
 
-#: views.py:257
+#: views.py:258
 msgid "Make it draft?"
 msgstr ""
 
-#: views.py:453
+#: views.py:454
 msgid "The article has been created properly"
 msgstr ""
 
-#: views.py:480
+#: views.py:481
 msgid "The link has been created properly"
 msgstr ""
 
-#: views.py:631
+#: views.py:632
 msgid "The node '{0}' has been renamed into '{1}'."
 msgstr ""
 
-#: views.py:645
+#: views.py:646
 msgid "The node has been removed."
 msgstr ""
 
-#: views.py:647
+#: views.py:648
 msgid "{0} nodes has been removed."
 msgstr ""
 
-#: views.py:742
+#: views.py:743
 msgid "The node '{0}' has been moved."
 msgstr ""
 
-#: views.py:760
+#: views.py:761
 msgid "Please choose an existing {0}"
 msgstr ""
 
-#: views.py:764
+#: views.py:765
 msgid "{0} {1} not found"
 msgstr ""
 
-#: views.py:768
+#: views.py:769
 msgid "The {0} is already in navigation"
 msgstr ""
 
-#: views.py:784
+#: views.py:785
 msgid "'{0}' has added to the navigation tree."
 msgstr ""
 
-#: views.py:826 templates/coop_cms/navtree_content/default.html:14
+#: views.py:827 templates/coop_cms/navtree_content/default.html:14
 msgid "Empty node"
 msgstr ""
 
-#: views.py:841
+#: views.py:842
 msgid "The node is now visible."
 msgstr ""
 
-#: views.py:842 templates/coop_cms/navtree_content/default.html:4
+#: views.py:843 templates/coop_cms/navtree_content/default.html:4
 msgid "Hide node in navigation"
 msgstr ""
 
-#: views.py:845
+#: views.py:846
 msgid "The node is now hidden."
 msgstr ""
 
-#: views.py:846 templates/coop_cms/navtree_content/default.html:6
+#: views.py:847 templates/coop_cms/navtree_content/default.html:6
 msgid "Show node in navigation"
 msgstr ""
 
-#: views.py:916
+#: views.py:917
 msgid "The newsletter has been saved properly"
 msgstr ""
 
-#: views.py:989
+#: views.py:990
 msgid "The test email has been sent to {0} addresses: {1}"
 msgstr ""
 
-#: views.py:993
+#: views.py:994
 msgid "An error occured! Please contact your support."
 msgstr ""
 
-#: views.py:1079
+#: views.py:1080
 msgid "Edit fragments of this template?"
 msgstr ""
 
@@ -1038,6 +1038,38 @@ msgstr ""
 
 #: templates/coop_cms/_social_share.html:56
 msgid "Share on Google+"
+msgstr ""
+
+#: templates/coop_cms/csrf_403.html:5 templates/coop_cms/csrf_403.html:10
+msgid "Permission Denied"
+msgstr ""
+
+#: templates/coop_cms/csrf_403.html:14
+msgid ""
+"\n"
+"        It is possible that you disabled cookies for this site. <br /><br /"
+">\n"
+"        Cookies must be enabled in order to be able to use this site "
+"properly.\n"
+"        "
+msgstr ""
+
+#: templates/coop_cms/csrf_403.html:22
+msgid ""
+"\n"
+"            If you have configured your browser to disable 'Referer' "
+"headers, please\n"
+"            re-enable them, at least for this site or for 'same-origin' "
+"requests.\n"
+"            "
+msgstr ""
+
+#: templates/coop_cms/csrf_403.html:28
+msgid ""
+"\n"
+"            Unknown reason: Please contact the webmaster in order to define "
+"the cause of the problem.\n"
+"            "
 msgstr ""
 
 #: templates/coop_cms/newsletter.html:86
