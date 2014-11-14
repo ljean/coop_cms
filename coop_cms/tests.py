@@ -6268,4 +6268,65 @@ class CsrfFailureTest(BaseTestCase):
         self.assertEqual(0, len(soup.select('.cookies-error')))
         self.assertEqual(0, len(soup.select('.referer-error')))
         self.assertEqual(1, len(soup.select('.unknown-error')))
+        
+class AcceptCookieMessageTest(BaseTestCase):
+    
+    def test_get_hide_accept_cookies(self):
+        
+        url = reverse("coop_cms_hide_accept_cookies_message")
+        response = self.client.get(url)
+        
+        self.assertEqual(404, response.status_code)
+        
+        self.assertEqual(self.client.session.get('hide_accept_cookie_message', None), None) 
+        
+        
+    def test_post_hide_accept_cookies(self):
+        
+        url = reverse("coop_cms_hide_accept_cookies_message")
+        response = self.client.post(url)
+        
+        self.assertEqual(200, response.status_code)
+        
+        json_content = json.loads(response.content)
+        self.assertEqual(json_content["Ok"], True)
+        
+        self.assertEqual(self.client.session.get('hide_accept_cookie_message'), True)
+        
+        
+    def test_view_accept_cookies_message(self, ):
+        tpl = Template('{% load coop_utils %}{% show_accept_cookie_message %}')
+        
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        request.session = {}
+        
+        html = tpl.render(Context({'request': request}))
+        self.assertTrue(len(html) > 0)
+        url = reverse("coop_cms_hide_accept_cookies_message")
+        self.assertTrue(html.find(url) > 0)
+    
+    def test_view_accept_cookies_messages_hidden(self):
+        tpl = Template('{% load coop_utils %}{% show_accept_cookie_message %}')
+        
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        request.session = {'hide_accept_cookie_message': True}
+        
+        html = tpl.render(Context({'request': request}))
+        self.assertTrue(len(html) == 0)
+    
+    def test_view_accept_cookies_custom_template(self):
+        tpl = Template('{% load coop_utils %}{% show_accept_cookie_message "test/_accept_cookies_message.html" %}')
+        
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        request.session = {}
+        
+        html = tpl.render(Context({'request': request}))
+        self.assertEqual(html, "Accept cookies")
+
     

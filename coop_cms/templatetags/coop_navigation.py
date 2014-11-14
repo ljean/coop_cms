@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
 from django import template
-from django.template.loader import get_template
 from django.conf import settings
-from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext as _
-from coop_cms.models import NavNode
-from coop_cms.settings import get_navtree_class
 from django.contrib.contenttypes.models import ContentType
-register = template.Library()
+from django.core.urlresolvers import reverse
 from django.template import VariableDoesNotExist
 from django.template import Context
+from django.template.loader import get_template
+from django.utils.translation import ugettext as _
+
+from coop_cms.models import NavNode
+from coop_cms.settings import get_navtree_class
+
+register = template.Library()
 
 def extract_kwargs(args):
     kwargs = {}

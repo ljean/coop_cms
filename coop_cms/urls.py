@@ -43,6 +43,7 @@ urlpatterns = patterns('coop_cms.views',
     url(r'cms/change-language/$', 'change_language', name='coop_cms_change_language'),
     url(r'^cms/fragments/add/$', 'add_fragment', name='coop_cms_add_fragment'),
     url(r'^cms/fragments/edit/$', 'edit_fragments', name='coop_cms_edit_fragments'),
+    url(r'^cms/hide-accept-cookies-message/', 'hide_accept_cookies_message', name='coop_cms_hide_accept_cookies_message')
 )
 
 if settings.DEBUG:

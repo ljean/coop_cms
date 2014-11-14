@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 
+import os.path
+import unicodedata
+
+from bs4 import BeautifulSoup
+
+from django import template
+from django.conf import settings
+from django.template import Context, RequestContext
+from django.template.loader import get_template
+from django.utils.text import slugify
+
+from floppyforms import CheckboxInput
+
+from coop_cms.models import ArticleCategory, Image
 from coop_cms.settings import get_article_class
 from coop_cms.shortcuts import get_article
-from django import template
-register = template.Library()
-from django.utils.text import slugify
 from coop_cms.utils import dehtml as do_dehtml
-from bs4 import BeautifulSoup
-import unicodedata
-from django.conf import settings
-from floppyforms import CheckboxInput
-from coop_cms.models import ArticleCategory, Image
-import os.path
+
+register = template.Library()
 
 ################################################################################
 class ArticleLinkNode(template.Node):
@@ -206,3 +213,31 @@ def coop_image_list(parser, token):
     except IndexError:
         raise Exception(u"coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
     return ImageListNode(filter_name, var_name)
+
+
+################################################################################
+DEFAULT_ACCEPT_COOKIE_MESSAGE_TEMPLATE = 'coop_cms/_accept_cookies_message.html'
+
+class ShowAcceptCookieMessageNode(template.Node):
+
+    def __init__(self, template_name):
+        self.template_name = template_name or DEFAULT_ACCEPT_COOKIE_MESSAGE_TEMPLATE
+        super(ShowAcceptCookieMessageNode, self).__init__()
+
+    def render(self, context):
+        request = context.get('request', None)
+        if not request.session.get('hide_accept_cookie_message', False):
+            t = get_template(self.template_name)
+            return t.render(RequestContext(request, {}))
+        else:
+            return ""
+
+@register.tag
+def show_accept_cookie_message(parser, token):
+    args = token.split_contents()
+    if len(args) > 1:
+        template_name = args[1].strip('"').strip('"')
+    else:
+        template_name = ""
+    return ShowAcceptCookieMessageNode(template_name)
+

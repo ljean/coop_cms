@@ -1,0 +1,22 @@
+{% load i18n %}
+<script>
+    $(function() {
+        $(".accept-cookies-message a.hide-accept-cookies-message").click(function() {
+            $('.accept-cookies-message').hide();
+            $.post(
+                '{% url "coop_cms_hide_accept_cookies_message" %}',
+                function() {}
+            ).fail(function() {
+                alert("{% trans "An error occured" %}");
+                $('.accept-cookies-message').show();
+            });
+            return false;
+        })
+    })
+</script>
+<div class="accept-cookies-message">
+    {% trans "By accessing our website, you accept cookies" %}
+    <a href class="hide-accept-cookies-message">{% trans "Hide this message" %}</span>
+</div>    
+
+    

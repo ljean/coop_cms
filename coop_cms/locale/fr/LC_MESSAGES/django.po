@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coop_cms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-11-14 09:57+0100\n"
+"POT-Creation-Date: 2014-11-14 11:59+0100\n"
 "PO-Revision-Date: 2013-06-28 15:16+0100\n"
 "Last-Translator: Luc Jean <ljean@apidev.fr>\n"
 "Language-Team: Apidev, Quinode <contact@quinode.fr>\n"
@@ -246,7 +246,7 @@ msgstr "supprimer"
 msgid "The object has been saved properly"
 msgstr "L’objet a été enregistré avec succès"
 
-#: generic_views.py:151 views.py:201
+#: generic_views.py:151 views.py:205
 msgid "An error occured: {0}"
 msgstr "Une erreur est survenue: {0}"
 
@@ -262,7 +262,7 @@ msgstr "Erreur: des objets peuvent manquer"
 msgid "An error occured: At least one object is missing. Please try again."
 msgstr "Erreur: Au moins un objet est manquant. Veuillez réessayer."
 
-#: models.py:43 views.py:825
+#: models.py:43 views.py:829
 msgid "Node"
 msgstr "Noeud"
 
@@ -655,99 +655,99 @@ msgstr "Réglages site"
 msgid "Site settings"
 msgstr "Réglages site"
 
-#: views.py:129
+#: views.py:133
 msgid "Do you want to use this article as homepage?"
 msgstr "Voulez-vous utiliser cet article comme page d'accueil ?"
 
-#: views.py:176
+#: views.py:180
 msgid "Permission denied"
 msgstr "Permission refusée"
 
-#: views.py:196
+#: views.py:200
 msgid "The article has been saved properly"
 msgstr "L’article a été enregistré avec succès"
 
-#: views.py:258
+#: views.py:262
 msgid "Do you want to publish this article?"
 msgstr "Voulez-vous publier cet article ?"
 
-#: views.py:258
+#: views.py:262
 msgid "Make it draft?"
 msgstr "Voulez-vous passez en mode brouillon?"
 
-#: views.py:454
+#: views.py:458
 msgid "The article has been created properly"
 msgstr "L’article a été créé avec succès"
 
-#: views.py:481
+#: views.py:485
 msgid "The link has been created properly"
 msgstr "Le lien a été créé avec succès"
 
-#: views.py:632
+#: views.py:636
 msgid "The node '{0}' has been renamed into '{1}'."
 msgstr "L’élément '{0}' a été renommé en '{1}'."
 
-#: views.py:646
+#: views.py:650
 msgid "The node has been removed."
 msgstr "L’élément a été supprimé"
 
-#: views.py:648
+#: views.py:652
 msgid "{0} nodes has been removed."
 msgstr "{0} éléments ont été supprimés"
 
-#: views.py:743
+#: views.py:747
 msgid "The node '{0}' has been moved."
 msgstr "L'élément '{0}' a été déplacé"
 
-#: views.py:761
+#: views.py:765
 msgid "Please choose an existing {0}"
 msgstr "Veuillez choisir un {0} existant"
 
-#: views.py:765
+#: views.py:769
 msgid "{0} {1} not found"
 msgstr "{0} {1} est introuvable"
 
-#: views.py:769
+#: views.py:773
 msgid "The {0} is already in navigation"
 msgstr "Le {0} est déjà dans l’arborescence"
 
-#: views.py:785
+#: views.py:789
 msgid "'{0}' has added to the navigation tree."
 msgstr "'{0}' ajouté à l’arborescence."
 
-#: views.py:827 templates/coop_cms/navtree_content/default.html:14
+#: views.py:831 templates/coop_cms/navtree_content/default.html:14
 msgid "Empty node"
 msgstr "Noeud vide"
 
-#: views.py:842
+#: views.py:846
 msgid "The node is now visible."
 msgstr "l’élément est à présent visible dans l’arborescence."
 
-#: views.py:843 templates/coop_cms/navtree_content/default.html:4
+#: views.py:847 templates/coop_cms/navtree_content/default.html:4
 msgid "Hide node in navigation"
 msgstr "Masquer cet élément"
 
-#: views.py:846
+#: views.py:850
 msgid "The node is now hidden."
 msgstr "Cet élément est maintenant masqué."
 
-#: views.py:847 templates/coop_cms/navtree_content/default.html:6
+#: views.py:851 templates/coop_cms/navtree_content/default.html:6
 msgid "Show node in navigation"
 msgstr "Rendre visible cet élément"
 
-#: views.py:917
+#: views.py:921
 msgid "The newsletter has been saved properly"
 msgstr "La lettre d'information a été enregistré avec succès"
 
-#: views.py:990
+#: views.py:994
 msgid "The test email has been sent to {0} addresses: {1}"
 msgstr "L'email de test a été envoyé à {0} adresses: {1}"
 
-#: views.py:994
+#: views.py:998
 msgid "An error occured! Please contact your support."
 msgstr "Une erreur est intervenue, contactez le support technique."
 
-#: views.py:1080
+#: views.py:1084
 msgid "Edit fragments of this template?"
 msgstr "Editer les fragments de ce template"
 
@@ -1030,10 +1030,67 @@ msgid_plural "Please correct the errors below."
 msgstr[0] "Veuillez corriger l'erreur ci-dessous"
 msgstr[1] "Veuillez corriger les erreurs ci-dessous"
 
+#: templates/coop_cms/_accept_cookies_message.html:10
+msgid "An error occured"
+msgstr "Une erreur est survenue"
+
+#: templates/coop_cms/_accept_cookies_message.html:18
+msgid "By accessing our website, you accept cookies"
+msgstr ""
+"En accédant à notre site Internet, vous reconnaissez accepter les cookies."
+
+#: templates/coop_cms/_accept_cookies_message.html:19
+msgid "Hide this message"
+msgstr "Ne plus afficher ce message"
+
 #: templates/coop_cms/_coop_bar_js.html:42
 msgid "Your modifications are not saved and will be lost. Continue?"
 msgstr ""
 "Vos modifications n'ont pas été enregistrées et seront perdues. Continuer?"
+
+#: templates/coop_cms/_csrf_failure_message.html:5
+msgid ""
+"\n"
+"        It is possible that you disabled cookies for this site. <br /><br /"
+">\n"
+"        Cookies must be enabled in order to be able to use this site "
+"properly.\n"
+"        "
+msgstr ""
+"\n"
+"        Peut-être avez vous désactivé l'utilisation des cookies ce qui cause "
+"ce problème. <br /><br />\n"
+"        Les cookies doivent être activés pour que ce site fonctionne "
+"correctement.\n"
+"        "
+
+#: templates/coop_cms/_csrf_failure_message.html:13
+msgid ""
+"\n"
+"            If you have configured your browser to disable 'Referer' "
+"headers, please\n"
+"            re-enable them, at least for this site or for 'same-origin' "
+"requests.\n"
+"            "
+msgstr ""
+"\n"
+"            Si vous avez configuré votre navigateur pour désactiver les "
+"entêtes de type 'Referer' , merci\n"
+"            de le réactiver, au moins pour ce site ou pour les requêtes de "
+"'même-origin' requests.\n"
+"            "
+
+#: templates/coop_cms/_csrf_failure_message.html:19
+msgid ""
+"\n"
+"            Unknown reason: Please contact the webmaster in order to define "
+"the cause of the problem.\n"
+"            "
+msgstr ""
+"\n"
+"            Raison inconnue: Veuillez contacter leafin de définir la cause "
+"du problème.\n"
+"            "
 
 #: templates/coop_cms/_messages.html:4
 msgid "close"
@@ -1059,48 +1116,6 @@ msgstr "Partagez sur Google+"
 #: templates/coop_cms/csrf_403.html:5 templates/coop_cms/csrf_403.html:10
 msgid "Permission Denied"
 msgstr "Permission refusée"
-
-#: templates/coop_cms/csrf_403.html:14
-msgid ""
-"\n"
-"        It is possible that you disabled cookies for this site. <br /><br /"
-">\n"
-"        Cookies must be enabled in order to be able to use this site "
-"properly.\n"
-"        "
-msgstr ""
-"\n"
-"        Peut-être avez vous désactivé l'utilisation des cookies ce qui cause ce problème. <br /><br /"
-">\n"
-"        Les cookies doivent être activés pour que ce site fonctionne correctement.\n"
-"        "
-
-#: templates/coop_cms/csrf_403.html:22
-msgid ""
-"\n"
-"            If you have configured your browser to disable 'Referer' "
-"headers, please\n"
-"            re-enable them, at least for this site or for 'same-origin' "
-"requests.\n"
-"            "
-msgstr ""
-"\n"
-"            Si vous avez configuré votre navigateur pour désactiver les entêtes de type 'Referer' "
-", merci\n"
-"            de le réactiver, au moins pour ce site ou pour les requêtes de 'même-origin' "
-"requests.\n"
-"            "
-
-#: templates/coop_cms/csrf_403.html:28
-msgid ""
-"\n"
-"            Unknown reason: Please contact the webmaster in order to define "
-"the cause of the problem.\n"
-"            "
-msgstr ""
-"\n"
-"            Raison inconnue: Veuillez contacter leafin de définir la cause du problème.\n"
-"            "
 
 #: templates/coop_cms/newsletter.html:86
 #: templates/coop_cms/newsletter_base.html:38
@@ -1247,19 +1262,22 @@ msgstr " [EDITION]"
 msgid " [DRAFT]"
 msgstr " [BROUILLON]"
 
-#: templatetags/coop_navigation.py:105
+#: templatetags/coop_navigation.py:107
 msgid "navigation_breadcrumb requires object as argument"
 msgstr "navigation_breadcrumb requiert un objet en argument"
 
-#: templatetags/coop_navigation.py:131
+#: templatetags/coop_navigation.py:133
 msgid ""
 "navigation_children requires object as argument and optionally tree="
 "{{tree_name}}"
 msgstr "navigation_children requiert un objet en argument"
 
-#: templatetags/coop_navigation.py:158
+#: templatetags/coop_navigation.py:160
 msgid "navigation_siblings requires object as argument"
 msgstr "navigation_siblings requiert un objet en argument"
+
+#~ msgid "Ok"
+#~ msgstr "Ok"
 
 #~ msgid "Username"
 #~ msgstr "Nom d'utilisateur"
@@ -1369,9 +1387,6 @@ msgstr "navigation_siblings requiert un objet en argument"
 #~ msgstr ""
 #~ "Sélectionnez des applications contenant des objets à inclure dans la "
 #~ "navigation"
-
-#~ msgid "Ok"
-#~ msgstr "Ok"
 
 #~ msgid "Admin: Index"
 #~ msgstr "Admin: Index"

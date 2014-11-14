@@ -1115,6 +1115,14 @@ def articles_category(request, slug):
     )
 
 @csrf_exempt
+def hide_accept_cookies_message(request):
+    if request.method == 'POST':
+        request.session['hide_accept_cookie_message'] = True
+        data = {"Ok": True}
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    raise Http404
+
+@csrf_exempt
 def change_language(request):
     
     try:
