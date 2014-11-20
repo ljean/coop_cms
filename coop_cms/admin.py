@@ -14,9 +14,9 @@ from coop_cms.settings import get_article_class, get_navtree_class
 
 #The BASE_ADMIN_CLASS can be a Translation admin if needed or regular modelAdmin if not
 if 'modeltranslation' in settings.INSTALLED_APPS:
-    BASE_ADMIN_CLASS = import_module('modeltranslation').TranslationAdmin
+    BASE_ADMIN_CLASS = import_module('modeltranslation.admin').TranslationAdmin
 else:
-    BASE_ADMIN_CLASS = import_module('django.contrib.admin').ModelAdmin
+    BASE_ADMIN_CLASS = admin.ModelAdmin
 
 
 def clear_thumbnails_action(model_admin, request, queryset):
