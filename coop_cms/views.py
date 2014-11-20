@@ -26,9 +26,9 @@ from django.forms.models import modelformset_factory
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext, Context, Template, TemplateDoesNotExist
+from django.template import RequestContext, Context, TemplateDoesNotExist
 from django.template.loader import get_template, select_template
-from django.utils.translation import ugettext as _, check_for_language, activate, get_language
+from django.utils.translation import ugettext as _, check_for_language, activate
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
@@ -96,7 +96,7 @@ def view_all_articles(request):
 
     if request.user.is_staff:
         article_class = get_article_class()
-        view_name = 'admin:%s_%s_changelist' % (article_class._meta.app_label,  article_class._meta.module_name)
+        view_name = 'admin:{0}_{1}_changelist'.format(article_class._meta.app_label, article_class._meta.module_name)
         articles_admin_url = reverse(view_name)
 
         newsletters_admin_url = reverse('admin:coop_cms_newsletter_changelist')
@@ -153,7 +153,7 @@ def set_homepage(request, article_id):
 def view_article(request, url, extra_context=None, force_template=None):
     """view the article"""
     try:
-        not_archived = Q(publication=BaseArticle.ARCHIVED)
+        not_archived = Q(publication=models.BaseArticle.ARCHIVED)
         article = get_article_or_404(Q(slug=url) & Q(sites=settings.SITE_ID) & ~not_archived) #Draft & Published
     except Http404:
         return redirect_if_alias(path=url)
@@ -165,7 +165,7 @@ def view_article(request, url, extra_context=None, force_template=None):
     
     context_dict = {
         'editable': editable, 'edit_mode': False, 'article': article,
-        'draft': article.publication==models.BaseArticle.DRAFT,
+        'draft': article.publication == models.BaseArticle.DRAFT,
         'headlines': get_headlines(article, editable=editable),
     }
     
@@ -207,7 +207,8 @@ def edit_article(request, url, extra_context=None, force_template=None):
                 article.save()
 
             if djaloha_forms:
-                [f.save() for f in djaloha_forms]
+                for dj_form in djaloha_forms:
+                    dj_form.save()
 
             success_message(request, _(u'The article has been saved properly'))
 
@@ -222,7 +223,7 @@ def edit_article(request, url, extra_context=None, force_template=None):
     context_dict = {
         'form': form,
         'editable': True, 'edit_mode': True, 'title': article.title,
-        'draft': article.publication==models.BaseArticle.DRAFT, 'headlines': get_headlines(article), 
+        'draft': article.publication == models.BaseArticle.DRAFT, 'headlines': get_headlines(article),
         'article': article, 'ARTICLE_PUBLISHED': models.BaseArticle.PUBLISHED
     }
     
@@ -325,8 +326,8 @@ def show_media(request, media_type):
             context['media_filter'] = int(media_filter)
         context[media_type+'s'] = queryset
         
-        t = get_template('coop_cms/slide_base.html')
-        html = t.render(RequestContext(request, context))
+        template = get_template('coop_cms/slide_base.html')
+        html = template.render(RequestContext(request, context))
     
         if is_ajax:
             data = {
@@ -436,6 +437,7 @@ def change_template(request, article_id):
 @login_required
 @popup_redirect
 def article_settings(request, article_id):
+    """article settings"""
     article = get_object_or_404(get_article_class(), id=article_id)
     article_settings_form_class = get_article_settings_form()
     
@@ -464,6 +466,7 @@ def article_settings(request, article_id):
 @login_required
 @popup_redirect
 def new_article(request):
+    """new article"""
     article_class = get_article_class()
     new_article_form = get_new_article_form()
     
@@ -560,8 +563,8 @@ def update_logo(request, article_id):
                 data = {'ok': True, 'src': url}
                 return HttpResponse(json.dumps(data), content_type='application/json')
             else:
-                t = get_template('coop_cms/popup_update_logo.html')
-                html = t.render(Context(locals()))
+                template = get_template('coop_cms/popup_update_logo.html')
+                html = template.render(Context(locals()))
                 data = {'ok': False, 'html': html}
                 return HttpResponse(json.dumps(data), content_type='application/json')
         else:
@@ -590,15 +593,15 @@ def download_doc(request, doc_id):
     else:
         #legacy version just kept for compatibility if filetransfers is not installed
         logger.warning("install django-filetransfers for better download support")
-        file = doc.file
-        file.open('rb')
-        wrapper = FileWrapper(file)
-        mime_type = mimetypes.guess_type(file.name)[0]
+        the_file = doc.file
+        the_file.open('rb')
+        wrapper = FileWrapper(the_file)
+        mime_type = mimetypes.guess_type(the_file.name)[0]
         if not mime_type:
             mime_type = u'application/octet-stream'
         response = HttpResponse(wrapper, content_type=mime_type)
-        response['Content-Length'] = file.size
-        filename = unicodedata.normalize('NFKD', os.path.split(file.name)[1]).encode("utf8", 'ignore')
+        response['Content-Length'] = the_file.size
+        filename = unicodedata.normalize('NFKD', os.path.split(the_file.name)[1]).encode("utf8", 'ignore')
         filename = filename.replace(' ', '-')
         response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
         return response
@@ -624,8 +627,10 @@ def view_navnode(request, tree):
             #try to load the corresponding template and if not found use the default one
             model_name = unicode(node.content_type)
             object_label = unicode(node.content_object)
-            template = select_template(["coop_cms/navtree_content/{0}.html".format(node.content_type.name),
-                                    "coop_cms/navtree_content/default.html"])
+            template = select_template([
+                "coop_cms/navtree_content/{0}.html".format(node.content_type.name),
+                "coop_cms/navtree_content/default.html"
+            ])
         else:
             admin_url = u""
             template = select_template(["coop_cms/navtree_content/default.html"])
@@ -709,9 +714,9 @@ def move_navnode(request, tree):
         node.parent = parent_node
 
         #restore ex-siblings
-        for n in ex_siblings.filter(ordering__gt=node.ordering):
-            n.ordering -= 1
-            n.save()
+        for sib_node in ex_siblings.filter(ordering__gt=node.ordering):
+            sib_node.ordering -= 1
+            sib_node.save()
 
         #move siblings if inserted
         if ref_node:
@@ -721,9 +726,9 @@ def move_navnode(request, tree):
             elif ref_pos == "after":
                 to_be_moved = sibling_nodes.filter(ordering__gt=ref_node.ordering)
                 node.ordering = ref_node.ordering + 1
-            for n in to_be_moved:
-                n.ordering += 1
-                n.save()
+            for ntbm in to_be_moved:
+                ntbm.ordering += 1
+                ntbm.save()
 
         else:
             #add at the end
@@ -780,24 +785,24 @@ def add_navnode(request, tree):
     object_type = request.POST['object_type']
     if object_type:
         app_label, model_name = object_type.split('.')
-        ct = ContentType.objects.get(app_label=app_label, model=model_name)
-        model_class = ct.model_class()
+        content_type = ContentType.objects.get(app_label=app_label, model=model_name)
+        model_class = content_type.model_class()
         object_id = request.POST['object_id']
         model_name = model_class._meta.verbose_name
         if not object_id:
             raise ValidationError(_(u"Please choose an existing {0}").format(model_name.lower()))
         try:
-            object = model_class.objects.get(id=object_id)
+            obj = model_class.objects.get(id=object_id)
         except model_class.DoesNotExist:
             raise ValidationError(_(u"{0} {1} not found").format(model_class._meta.verbose_name, object_id))
     
         #objects can not be added twice in the navigation tree
-        if models.NavNode.objects.filter(tree=tree, content_type=ct, object_id=object.id).count() > 0:
+        if models.NavNode.objects.filter(tree=tree, content_type=content_type, object_id=obj.id).count() > 0:
             raise ValidationError(_(u"The {0} is already in navigation").format(model_class._meta.verbose_name))
 
     else:
-        ct = None
-        object = None
+        content_type = None
+        obj = None
 
     #Create the node
     parent_id = request.POST.get('parent_id', 0)
@@ -805,7 +810,7 @@ def add_navnode(request, tree):
         parent = models.NavNode.objects.get(tree=tree, id=parent_id)
     else:
         parent = None
-    node = models.create_navigation_node(ct, object, tree, parent)
+    node = models.create_navigation_node(content_type, obj, tree, parent)
 
     response['label'] = node.label
     response['id'] = 'node_{0}'.format(node.id)
@@ -830,7 +835,7 @@ def get_suggest_list(request, tree):
         if nav_type.label_rule == models.NavType.LABEL_USE_SEARCH_FIELD:
             #Get the name of the default field for the current type (eg: Page->title, Url->url ...)
             lookup = {nav_type.search_field + '__icontains': term}
-            objects = ct.model_class().objects.filter(**lookup)
+            objects = content_type.model_class().objects.filter(**lookup)
         elif nav_type.label_rule == models.NavType.LABEL_USE_GET_LABEL:
             objects = [
                 obj for obj in content_type.model_class().objects.all() if term.lower() in obj.get_label().lower()
@@ -898,11 +903,14 @@ def process_nav_edition(request, tree_id):
             if not request.user.has_perm(perm_name):
                 raise PermissionDenied
 
+            functions = (
+                view_navnode, rename_navnode, remove_navnode, move_navnode,
+                add_navnode, get_suggest_list, navnode_in_navigation,
+            )
             supported_msg = {}
             #create a map between message name and handler
             #use the function name as message id
-            for fct in (view_navnode, rename_navnode, remove_navnode, move_navnode,
-                add_navnode, get_suggest_list, navnode_in_navigation):
+            for fct in functions:
                 supported_msg[fct.__name__] = fct
 
             #Call the handler corresponding to the requested message
@@ -920,7 +928,7 @@ def process_nav_edition(request, tree_id):
             response = {'status': 'error', 'message': u' - '.join(ex.messages)}
         except Exception, msg:
             logger.exception("process_nav_edition")
-            response = {'status': 'error', 'message': u"An error occured : %s" % msg }
+            response = {'status': 'error', 'message': u"An error occured : %s" % msg}
 
         #return the result as json object
         return HttpResponse(json.dumps(response), content_type='application/json')
@@ -946,7 +954,8 @@ def edit_newsletter(request, newsletter_id):
             newsletter = form.save()
 
             if djaloha_forms:
-                [f.save() for f in djaloha_forms]
+                for dj_form in djaloha_forms:
+                    dj_form.save()
 
             success_message(request, _(u'The newsletter has been saved properly'))
 
@@ -1023,13 +1032,16 @@ def test_newsletter(request, newsletter_id):
         try:
             nb_sent = send_newsletter(newsletter, dests)
 
-            messages.add_message(request, messages.SUCCESS,
-                _(u"The test email has been sent to {0} addresses: {1}").format(nb_sent, u', '.join(dests)))
+            messages.add_message(
+                request, messages.SUCCESS,
+                _(u"The test email has been sent to {0} addresses: {1}").format(nb_sent, u', '.join(dests))
+            )
             return HttpResponseRedirect(newsletter.get_absolute_url())
 
-        except Exception, msg:
+        except Exception:
             messages.add_message(request, messages.ERROR, _(u"An error occured! Please contact your support."))
-            logger.error('Internal Server Error: %s' % request.path,
+            logger.error(
+                'Internal Server Error: {0}'.format(request.path),
                 exc_info=sys.exc_info,
                 extra={
                     'status_code': 500,
@@ -1101,8 +1113,8 @@ def add_fragment(request):
 def edit_fragments(request):
     """edit fragments of the current template"""
     
-    ct = ContentType.objects.get_for_model(models.Fragment)
-    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+    content_type = ContentType.objects.get_for_model(models.Fragment)
+    perm = '{0}.add_{1}'.format(content_type.app_label, content_type.model)
     if not request.user.has_perm(perm):
         raise PermissionDenied
     
@@ -1190,9 +1202,8 @@ def change_language(request):
             
         if lang_code and check_for_language(lang_code):
             
-            #locale is the current language
             #path is the locale-independant url
-            locale, path = localeurl_utils.strip_path(next_url)
+            path = localeurl_utils.strip_path(next_url)[1]
             
             article_class = get_article_class()
             try:
@@ -1252,7 +1263,7 @@ class ArticleView(EditableObjectView):
         """context"""
         context_data = super(ArticleView, self).get_context_data()
         context_data.update({
-            'draft': self.object.publication==models.BaseArticle.DRAFT,
+            'draft': self.object.publication == models.BaseArticle.DRAFT,
             'headlines': self.get_headlines(), 
             'ARTICLE_PUBLISHED': models.BaseArticle.PUBLISHED
         })
@@ -1292,7 +1303,7 @@ def csrf_failure(request, reason=""):
     
     logger.warn(u"csrf_failure, reason: {0}".format(reason))
     
-    t = get_template('coop_cms/csrf_403.html')
+    template = get_template('coop_cms/csrf_403.html')
     
     context = Context({
         'DEBUG': settings.DEBUG,
@@ -1300,6 +1311,6 @@ def csrf_failure(request, reason=""):
         'no_referer': reason == REASON_NO_REFERER,
     })
 
-    html = t.render(RequestContext(request, context))
+    html = template.render(RequestContext(request, context))
     
     return HttpResponseForbidden(html, content_type='text/html')
