@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""package the lib"""
 
 try:
     from setuptools import setup, find_packages
@@ -16,11 +17,12 @@ import os
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
+
 setup(
-    name = 'apidev-coop_cms',
-    version = VERSION,
-    description = 'Small CMS built around a tree navigation open to any django models',
-    packages = [
+    name='apidev-coop_cms',
+    version=VERSION,
+    description='Small CMS built around a tree navigation open to any django models',
+    packages=[
         'coop_cms',
         'coop_cms.apps',
         'coop_cms.apps.basic_cms',
@@ -39,12 +41,12 @@ setup(
         'coop_cms.migrations',
         'coop_cms.templatetags',
     ],
-    include_package_data = True,
-    author = 'Luc Jean',
-    author_email = 'ljean@apidev.fr',
-    license = 'BSD',
-    zip_safe = False,
-    install_requires = [
+    include_package_data=True,
+    author='Luc Jean',
+    author_email='ljean@apidev.fr',
+    license='BSD',
+    zip_safe=False,
+    install_requires=[
         'django==1.6.6',
         'south',
         'django-floppyforms',
@@ -60,10 +62,10 @@ setup(
         'django-filetransfers',
         'model_mommy',
     ],
-    long_description = open('README.rst').read(),
-    url = 'https://github.com/ljean/coop_cms/',
-    download_url = 'https://github.com/ljean/coop_cms/tarball/master',
-    classifiers = [
+    long_description=open('README.rst').read(),
+    url='https://github.com/ljean/coop_cms/',
+    download_url='https://github.com/ljean/coop_cms/tarball/master',
+    classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
@@ -76,6 +78,4 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
     ],
-
 )
-

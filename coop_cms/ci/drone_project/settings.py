@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""project settings"""
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
@@ -14,12 +15,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'test',                      # Or path to database file if using sqlite3.
-        'USER': 'postgres',                      # Not used with sqlite3.
-        'PASSWORD': '',                # Not used with sqlite3.
-        'HOST': '127.0.0.1', # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'test',
+        'USER': 'postgres',
+        'PASSWORD': '',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
@@ -87,7 +88,6 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -97,7 +97,6 @@ SECRET_KEY = 'drone-ci'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -144,11 +143,11 @@ LOCALE_PATHS = (
     PROJECT_PATH+'/locale/',
 )
 
-LOCALE_INDEPENDENT_MEDIA_URL = True 
+LOCALE_INDEPENDENT_MEDIA_URL = True
 import re
 LOCALE_INDEPENDENT_PATHS = (
-  re.compile('^/sitemap\.xml$'),
-  #re.compile('^/crm/.*$'),
+    re.compile(r'^/sitemap\.xml$'),
+    #re.compile('^/crm/.*$'),
 )
 
 #SOUTH_SKIP_MIGRATIONS = True
@@ -183,7 +182,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
-    
+
     #3rd parties
     'south',
     'django_extensions',
@@ -199,13 +198,13 @@ INSTALLED_APPS = (
     'coop_bar',
     'coop_cms.apps.basic_cms',
     'coop_cms.apps.email_auth',
-    
+
     'django.contrib.admin',
     'django.contrib.admindocs',
 )
 
 
-if len(sys.argv)>1 and (not sys.argv[1] in ('schemamigration', 'datamigration')):
+if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration')):
     INSTALLED_APPS += (
         'modeltranslation',
     )

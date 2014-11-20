@@ -1,12 +1,11 @@
 # -*- coding:utf-8 -*-
+"""urls"""
 
 from django.conf import settings
 from django.conf.urls import patterns, include, url
-from django.views.generic.detail import DetailView
 
 from coop_cms import sitemap
 from coop_cms.settings import (
-    get_article_class,
     get_article_views,
     install_csrf_failure_view,
     keep_deprecated_func_views_for_article,
@@ -35,20 +34,36 @@ urlpatterns = patterns('coop_cms.views',
     url(r'^cms/newsletter/settings/(?P<newsletter_id>\d+)/$', 'new_newsletter', name='coop_cms_newsletter_settings'),
     url(r'^cms/newsletter/(?P<newsletter_id>\d+)/$', 'view_newsletter', name='coop_cms_view_newsletter'),
     url(r'^cms/newsletter/(?P<newsletter_id>\d+)/cms_edit/$', 'edit_newsletter', name='coop_cms_edit_newsletter'),
-    url(r'^cms/newsletter/change-template/(?P<newsletter_id>\d+)/$', 'change_newsletter_template', name="coop_cms_change_newsletter_template"),
+    url(
+        r'^cms/newsletter/change-template/(?P<newsletter_id>\d+)/$',
+        'change_newsletter_template',
+        name="coop_cms_change_newsletter_template"
+    ),
     url(r'^cms/newsletter/test/(?P<newsletter_id>\d+)/$', 'test_newsletter', name="coop_cms_test_newsletter"),
-    url(r'^cms/newsletter/schedule/(?P<newsletter_id>\d+)/$', 'schedule_newsletter_sending', name="coop_cms_schedule_newsletter_sending"),
+    url(
+        r'^cms/newsletter/schedule/(?P<newsletter_id>\d+)/$',
+        'schedule_newsletter_sending',
+        name="coop_cms_schedule_newsletter_sending"
+    ),
     url(r'sitemap/$', 'tree_map', name="default_site_map"),
     url(r'articles/(?P<slug>[-\w]+)/$', 'articles_category', name="coop_cms_articles_category"),
     url(r'cms/change-language/$', 'change_language', name='coop_cms_change_language'),
     url(r'^cms/fragments/add/$', 'add_fragment', name='coop_cms_add_fragment'),
     url(r'^cms/fragments/edit/$', 'edit_fragments', name='coop_cms_edit_fragments'),
-    url(r'^cms/hide-accept-cookies-message/', 'hide_accept_cookies_message', name='coop_cms_hide_accept_cookies_message')
+    url(
+        r'^cms/hide-accept-cookies-message/',
+        'hide_accept_cookies_message',
+        name='coop_cms_hide_accept_cookies_message'
+    )
 )
 
 if settings.DEBUG:
     urlpatterns += patterns('',
-        url(r'^cms/debug-error-code/((?P<error_code>\d{3}))/$', DebugErrorCodeView.as_view(), name='coop_cms_debug_404'),
+        url(
+            r'^cms/debug-error-code/((?P<error_code>\d{3}))/$',
+            DebugErrorCodeView.as_view(),
+            name='coop_cms_debug_404'
+        ),
     )
 
 if not getattr(settings, "COOP_CMS_DISABLE_DEFAULT_SITEMAP", False):

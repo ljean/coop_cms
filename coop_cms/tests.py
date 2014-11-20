@@ -34,7 +34,6 @@ from django.utils.translation import activate, get_language
 from model_mommy import mommy
 
 from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
-from coop_cms.html2text import html2text
 from coop_cms.models import (Link, NavNode, NavType, Document, Newsletter, NewsletterItem,
     Fragment, FragmentType, FragmentFilter, PieceOfHtml, NewsletterSending, BaseArticle, ArticleCategory,
     Alias, Image, MediaFilter, ImageSize, SiteSettings)

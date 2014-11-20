@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""views"""
 
 from datetime import datetime
 import itertools
@@ -27,7 +28,6 @@ from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, Context, Template, TemplateDoesNotExist
 from django.template.loader import get_template, select_template
-from django.utils.log import getLogger
 from django.utils.translation import ugettext as _, check_for_language, activate, get_language
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
@@ -38,14 +38,18 @@ from colorbox.decorators import popup_redirect, popup_close
 from coop_cms import forms
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
-from coop_cms.settings import (cms_no_homepage, get_article_class, get_article_form, get_article_settings_form,
-    get_navtree_class, get_new_article_form, get_newsletter_form)
+from coop_cms.settings import (
+    cms_no_homepage, get_article_class, get_article_form, get_article_settings_form,
+    get_navtree_class, get_new_article_form, get_newsletter_form
+)
 from coop_cms.shortcuts import get_article_or_404, get_headlines, redirect_if_alias
 from coop_cms.utils import send_newsletter
 
 logger = logging.getLogger("coop_cms")
 
+
 def get_article_template(article):
+    """get article template"""
     template = article.template
     if not template:
         template = 'coop_cms/article.html'
@@ -53,13 +57,16 @@ def get_article_template(article):
 
 
 def tree_map(request):
+    """tree map"""
     return render_to_response(
         'coop_cms/tree_map.html',
         #{'tree': models.get_navTree_class().objects.get(id=tree_id)},  # what is the default tree for the site
         RequestContext(request)
     )
 
+
 def homepage(request):
+    """view homepage"""
     try:
         if cms_no_homepage():
             raise Http404
@@ -80,8 +87,10 @@ def homepage(request):
     except get_article_class().DoesNotExist:
         return HttpResponseRedirect(reverse('coop_cms_view_all_articles'))
 
+
 @login_required
 def view_all_articles(request):
+    """all article"""
 
     articles_admin_url = newsletters_admin_url = add_article_url = add_newsletter_url = None
 
@@ -94,16 +103,16 @@ def view_all_articles(request):
 
         add_newsletter_url = reverse('admin:coop_cms_newsletter_add')
 
-    Article = get_article_class()
-    ct = ContentType.objects.get_for_model(Article)
-    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+    article_class = get_article_class()
+    content_type = ContentType.objects.get_for_model(article_class)
+    perm = '{0}.add_{1}'.format(content_type.app_label, content_type.model)
     if request.user.has_perm(perm):
         add_article_url = reverse('coop_cms_new_article')
 
     return render_to_response(
         'coop_cms/view_all_articles.html',
         {
-            'articles': get_article_class().objects.filter(sites__id=settings.SITE_ID).order_by('-id')[:10],
+            'articles': article_class.objects.filter(sites__id=settings.SITE_ID).order_by('-id')[:10],
             'newsletters': models.Newsletter.objects.all().order_by('-id')[:10],
             'editable': True,
             'articles_list_url': articles_admin_url,
@@ -113,6 +122,7 @@ def view_all_articles(request):
         },
         RequestContext(request)
     )
+
 
 @login_required
 @popup_redirect
@@ -138,6 +148,7 @@ def set_homepage(request, article_id):
         context_dict,
         context_instance=RequestContext(request)
     )
+
 
 def view_article(request, url, extra_context=None, force_template=None):
     """view the article"""
@@ -166,6 +177,7 @@ def view_article(request, url, extra_context=None, force_template=None):
         context_dict,
         context_instance=RequestContext(request)
     )
+
 
 @login_required
 def edit_article(request, url, extra_context=None, force_template=None):
@@ -223,6 +235,7 @@ def edit_article(request, url, extra_context=None, force_template=None):
         context_instance=RequestContext(request)
     )
 
+
 @login_required
 def cancel_edit_article(request, url):
     """if cancel_edit, delete the preview image"""
@@ -231,6 +244,7 @@ def cancel_edit_article(request, url):
         article.temp_logo = ''
         article.save()
     return HttpResponseRedirect(article.get_absolute_url())
+
 
 @login_required
 @popup_redirect
@@ -268,8 +282,10 @@ def publish_article(request, url):
         context_instance=RequestContext(request)
     )
 
+
 @login_required
 def show_media(request, media_type):
+    """show media library"""
     try:
         if not request.user.is_staff:
             raise PermissionDenied
@@ -282,14 +298,14 @@ def show_media(request, media_type):
             del request.session["coop_cms_media_doc"]
     
         if media_type == 'image':
-            qs = models.Image.objects.all().order_by("ordering", "-created")
+            queryset = models.Image.objects.all().order_by("ordering", "-created")
             context = {
                 'media_url': reverse('coop_cms_media_images'),
                 'media_slide_template': 'coop_cms/slide_images_content.html',
             }
         else:
             media_type = "document"
-            qs = models.Document.objects.all().order_by("ordering", "-created")
+            queryset = models.Document.objects.all().order_by("ordering", "-created")
             context = {
                 'media_url': reverse('coop_cms_media_documents'),
                 'media_slide_template': 'coop_cms/slide_docs_content.html',
@@ -298,16 +314,16 @@ def show_media(request, media_type):
         context['is_ajax'] = is_ajax
         context['media_type'] = media_type
         
-        media_filters = [media.filters.all() for media in qs.all()] # list of lists of media_filters
+        media_filters = [media.filters.all() for media in queryset.all()] # list of lists of media_filters
         media_filters = itertools.chain(*media_filters) #flat list of media_filters
         context['media_filters'] = sorted(
             list(set(media_filters)), key=lambda mf: mf.name.upper()
         )#flat list of unique media filters sorted by alphabetical order (ignore case)
         
         if int(media_filter):
-            qs = qs.filter(filters__id=media_filter)
+            queryset = queryset.filter(filters__id=media_filter)
             context['media_filter'] = int(media_filter)
-        context[media_type+'s'] = qs
+        context[media_type+'s'] = queryset
         
         t = get_template('coop_cms/slide_base.html')
         html = t.render(RequestContext(request, context))
@@ -324,10 +340,12 @@ def show_media(request, media_type):
         logger.exception("show_media")
         raise
 
+
 @login_required
 def upload_image(request):
+    """upload image"""
+
     try:
-        
         if not request.user.has_perm("coop_cms.add_image"):
             raise PermissionDenied()
         
@@ -364,6 +382,7 @@ def upload_image(request):
 
 @login_required
 def upload_doc(request):
+    """upload document"""
     try:
         if not request.user.has_perm("coop_cms.add_document"):
             raise PermissionDenied()
@@ -391,9 +410,12 @@ def upload_doc(request):
         logger.exception("upload_doc")
         raise
 
+
 @login_required
 @popup_redirect
 def change_template(request, article_id):
+    """change template"""
+
     article = get_object_or_404(get_article_class(), id=article_id)
     if request.method == "POST":
         form = forms.ArticleTemplateForm(article, request.user, request.POST, request.FILES)
@@ -409,24 +431,24 @@ def change_template(request, article_id):
         locals(),
         context_instance=RequestContext(request)
     )
-    
+
+
 @login_required
 @popup_redirect
 def article_settings(request, article_id):
     article = get_object_or_404(get_article_class(), id=article_id)
-    ArticleSettingsForm = get_article_settings_form()
+    article_settings_form_class = get_article_settings_form()
     
     if not request.user.has_perm('can_edit_article', article):
         raise PermissionDenied
     
     if request.method == "POST":
-        form = ArticleSettingsForm(request.user, request.POST, request.FILES, instance=article)
+        form = article_settings_form_class(request.user, request.POST, request.FILES, instance=article)
         if form.is_valid():
-            #article.template = form.cleaned_data['template']
             article = form.save()
             return HttpResponseRedirect(article.get_absolute_url())
     else:
-        form = ArticleSettingsForm(request.user, instance=article)
+        form = article_settings_form_class(request.user, instance=article)
 
     context = {
         'article': article,
@@ -438,27 +460,27 @@ def article_settings(request, article_id):
         context_instance=RequestContext(request)
     )
 
+
 @login_required
 @popup_redirect
 def new_article(request):
-    Article = get_article_class()
-    NewArticleForm = get_new_article_form()
+    article_class = get_article_class()
+    new_article_form = get_new_article_form()
     
-    ct = ContentType.objects.get_for_model(Article)
-    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+    content_type = ContentType.objects.get_for_model(article_class)
+    perm = '{0}.add_{1}'.format(content_type.app_label, content_type.model)
 
     if not request.user.has_perm(perm):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = NewArticleForm(request.user, request.POST, request.FILES)
+        form = new_article_form(request.user, request.POST, request.FILES)
         if form.is_valid():
-            #article.template = form.cleaned_data['template']
             article = form.save()
             success_message(request, _(u'The article has been created properly'))
             return HttpResponseRedirect(article.get_edit_url())
     else:
-        form = NewArticleForm(request.user)
+        form = new_article_form(request.user)
 
     return render_to_response(
         'coop_cms/popup_new_article.html',
@@ -466,11 +488,13 @@ def new_article(request):
         context_instance=RequestContext(request)
     )
 
+
 @login_required
 @popup_redirect
 def new_link(request):
-    ct = ContentType.objects.get_for_model(models.Link)
-    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+    """new link"""
+    content_type = ContentType.objects.get_for_model(models.Link)
+    perm = '{0}.add_{1}'.format(content_type.app_label, content_type.model)
 
     if not request.user.has_perm(perm):
         raise PermissionDenied
@@ -478,12 +502,11 @@ def new_link(request):
     if request.method == "POST":
         form = forms.NewLinkForm(request.POST)
         if form.is_valid():
-            link = form.save()
-            
+            form.save()
             homepage_url = reverse('coop_cms_homepage')
-            next = request.META.get('HTTP_REFERER', homepage_url)
+            next_url = request.META.get('HTTP_REFERER', homepage_url)
             success_message(request, _(u'The link has been created properly'))
-            return HttpResponseRedirect(next)
+            return HttpResponseRedirect(next_url)
     else:
         form = forms.NewLinkForm()
         
@@ -497,15 +520,12 @@ def new_link(request):
         context_instance=RequestContext(request)
     )
 
+
 @login_required
 @popup_redirect
 def new_newsletter(request, newsletter_id=None):
+    """new newsletter"""
 
-    #ct = ContentType.objects.get_for_model(Article)
-    #perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
-
-    #if not request.user.has_perm(perm):
-    #    raise PermissionDenied
     if newsletter_id:
         newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
     else:
@@ -514,7 +534,6 @@ def new_newsletter(request, newsletter_id=None):
     if request.method == "POST":
         form = forms.NewNewsletterForm(request.user, request.POST, instance=newsletter)
         if form.is_valid():
-            #article.template = form.cleaned_data['template']
             newsletter = form.save()
             return HttpResponseRedirect(newsletter.get_edit_url())
     else:
@@ -525,9 +544,11 @@ def new_newsletter(request, newsletter_id=None):
         locals(),
         context_instance=RequestContext(request)
     )
-    
+
+
 @login_required
 def update_logo(request, article_id):
+    """update logo"""
     try:
         article = get_object_or_404(get_article_class(), id=article_id)
         if request.method == "POST":
@@ -554,16 +575,17 @@ def update_logo(request, article_id):
     except Exception:
         logger.exception("update_logo")
         raise
-    
+
 
 @login_required
 def download_doc(request, doc_id):
+    """download a doc"""
     doc = get_object_or_404(models.Document, id=doc_id)
     if not request.user.has_perm('can_download_file', doc):
         raise PermissionDenied
     
     if 'filetransfers' in settings.INSTALLED_APPS:
-        from filetransfers.api import serve_file
+        from filetransfers.api import serve_file # pylint: disable=F0401
         return serve_file(request, doc.file)
     else:
         #legacy version just kept for compatibility if filetransfers is not installed
@@ -602,13 +624,13 @@ def view_navnode(request, tree):
             #try to load the corresponding template and if not found use the default one
             model_name = unicode(node.content_type)
             object_label = unicode(node.content_object)
-            tplt = select_template(["coop_cms/navtree_content/{0}.html".format(node.content_type.name),
+            template = select_template(["coop_cms/navtree_content/{0}.html".format(node.content_type.name),
                                     "coop_cms/navtree_content/default.html"])
         else:
             admin_url = u""
-            tplt = select_template(["coop_cms/navtree_content/default.html"])
+            template = select_template(["coop_cms/navtree_content/default.html"])
             
-        html = tplt.render(
+        html = template.render(
             RequestContext(request, {
                 "node": node, "admin_url": admin_url,
                 "model_name": model_name, "object_label": object_label
@@ -623,6 +645,7 @@ def view_navnode(request, tree):
     except Exception:
         logger.exception("view_navnode")
         raise
+
 
 def rename_navnode(request, tree):
     """change the name of a node when renamed in the tree"""
@@ -685,7 +708,7 @@ def move_navnode(request, tree):
 
         node.parent = parent_node
 
-        #restore exsiblings
+        #restore ex-siblings
         for n in ex_siblings.filter(ordering__gt=node.ordering):
             n.ordering -= 1
             n.save()
@@ -792,6 +815,7 @@ def add_navnode(request, tree):
 
 
 def get_suggest_list(request, tree):
+    """call by auto-complete"""
     response = {}
     suggestions = []
     term = request.POST["term"]  # the 1st chars entered in the autocomplete
@@ -801,27 +825,34 @@ def get_suggest_list(request, tree):
     else:
         nav_types = tree.types.all()
 
-    for nt in nav_types:
-        ct = nt.content_type
-        if nt.label_rule == models.NavType.LABEL_USE_SEARCH_FIELD:
+    for nav_type in nav_types:
+        content_type = nav_type.content_type
+        if nav_type.label_rule == models.NavType.LABEL_USE_SEARCH_FIELD:
             #Get the name of the default field for the current type (eg: Page->title, Url->url ...)
-            lookup = {nt.search_field + '__icontains': term}
+            lookup = {nav_type.search_field + '__icontains': term}
             objects = ct.model_class().objects.filter(**lookup)
-        elif nt.label_rule == models.NavType.LABEL_USE_GET_LABEL:
-            objects = [obj for obj in ct.model_class().objects.all() if term.lower() in obj.get_label().lower()]
+        elif nav_type.label_rule == models.NavType.LABEL_USE_GET_LABEL:
+            objects = [
+                obj for obj in content_type.model_class().objects.all() if term.lower() in obj.get_label().lower()
+            ]
         else:
-            objects = [obj for obj in ct.model_class().objects.all() if term.lower() in unicode(obj).lower()]
+            objects = [
+                obj for obj in content_type.model_class().objects.all() if term.lower() in unicode(obj).lower()
+            ]
 
-        already_in_navigation = [node.object_id for node in models.NavNode.objects.filter(tree=tree, content_type=ct)]
+        already_in_navigation = [
+            node.object_id for node in models.NavNode.objects.filter(tree=tree, content_type=content_type)
+        ]
+
         #Get suggestions as a list of {label: object.get_label() or unicode if no get_label, 'value':<object.id>}
-        for object in objects:
-            if object.id not in already_in_navigation:
+        for obj in objects:
+            if obj.id not in already_in_navigation:
                 #Suggest only articles which are not in navigation yet
                 suggestions.append({
-                    'label': models.get_object_label(ct, object),
-                    'value': object.id,
-                    'category': ct.model_class()._meta.verbose_name.capitalize(),
-                    'type': ct.app_label + u'.' + ct.model,
+                    'label': models.get_object_label(content_type, obj),
+                    'value': obj.id,
+                    'category': content_type.model_class()._meta.verbose_name.capitalize(),
+                    'type': content_type.app_label + u'.' + content_type.model,
                 })
 
     #Add suggestion for an empty node
@@ -890,8 +921,6 @@ def process_nav_edition(request, tree_id):
         except Exception, msg:
             logger.exception("process_nav_edition")
             response = {'status': 'error', 'message': u"An error occured : %s" % msg }
-        # except:
-        #     response = {'status': 'error', 'message': u"An error occured"}
 
         #return the result as json object
         return HttpResponse(json.dumps(response), content_type='application/json')
@@ -900,6 +929,7 @@ def process_nav_edition(request, tree_id):
 
 @login_required
 def edit_newsletter(request, newsletter_id):
+    """edit newsletter"""
     newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
     newsletter_form_class = get_newsletter_form()
 
@@ -938,6 +968,7 @@ def edit_newsletter(request, newsletter_id):
 
 
 def view_newsletter(request, newsletter_id):
+    """view newsletter"""
     newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
 
     context_dict = {
@@ -955,6 +986,7 @@ def view_newsletter(request, newsletter_id):
 @login_required
 @popup_redirect
 def change_newsletter_template(request, newsletter_id):
+    """change newsletter template"""
     newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
 
     if not request.user.has_perm('can_edit_newsletter', newsletter):
@@ -979,6 +1011,7 @@ def change_newsletter_template(request, newsletter_id):
 @login_required
 @popup_redirect
 def test_newsletter(request, newsletter_id):
+    """test newsletter"""
     newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
 
     if not request.user.has_perm('can_edit_newsletter', newsletter):
@@ -1011,9 +1044,11 @@ def test_newsletter(request, newsletter_id):
         context_instance=RequestContext(request)
     )
 
+
 @login_required
 @popup_redirect
 def schedule_newsletter_sending(request, newsletter_id):
+    """schedule sending"""
     newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
     instance = models.NewsletterSending(newsletter=newsletter)
 
@@ -1031,13 +1066,14 @@ def schedule_newsletter_sending(request, newsletter_id):
         context_instance=RequestContext(request)
     )
 
+
 @login_required
 @popup_close
 def add_fragment(request):
     """add a fragment to the current template"""
     
-    ct = ContentType.objects.get_for_model(models.Fragment)
-    perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+    content_type = ContentType.objects.get_for_model(models.Fragment)
+    perm = '{0}.add_{1}'.format(content_type.app_label, content_type.model)
     if not request.user.has_perm(perm):
         raise PermissionDenied
 
@@ -1059,6 +1095,7 @@ def add_fragment(request):
         context_instance=RequestContext(request)
     )
 
+
 @login_required
 @popup_close
 def edit_fragments(request):
@@ -1069,15 +1106,15 @@ def edit_fragments(request):
     if not request.user.has_perm(perm):
         raise PermissionDenied
     
-    EditFragmentFormset = modelformset_factory(models.Fragment, forms.EditFragmentForm, extra=0)
+    edit_fragment_formset = modelformset_factory(models.Fragment, forms.EditFragmentForm, extra=0)
 
     if request.method == "POST":
-        formset = EditFragmentFormset(request.POST, queryset=models.Fragment.objects.all())
+        formset = edit_fragment_formset(request.POST, queryset=models.Fragment.objects.all())
         if formset.is_valid():
             formset.save()
             return None #popup_close decorator will close and refresh
     else:
-        formset = EditFragmentFormset(queryset=models.Fragment.objects.all())
+        formset = edit_fragment_formset(queryset=models.Fragment.objects.all())
     
     context_dict = {
         'form': formset,
@@ -1090,16 +1127,19 @@ def edit_fragments(request):
         context_instance=RequestContext(request)
     )
 
+
 def articles_category(request, slug):
+    """view articles by category"""
     category = get_object_or_404(models.ArticleCategory, slug=slug, sites__id=settings.SITE_ID)
     
     if not request.user.has_perm('can_view_category', category):
         raise PermissionDenied()
     
     articles = category.get_articles_qs().filter(
-        publication=models.BaseArticle.PUBLISHED).order_by("-publication_date")
+        publication=models.BaseArticle.PUBLISHED
+    ).order_by("-publication_date")
     
-    if articles.count()==0:
+    if articles.count() == 0:
         raise Http404
     
     try:
@@ -1114,19 +1154,22 @@ def articles_category(request, slug):
         context_instance=RequestContext(request)
     )
 
+
 @csrf_exempt
 def hide_accept_cookies_message(request):
+    """force cookie warning message to be hidden"""
     if request.method == 'POST':
         request.session['hide_accept_cookie_message'] = True
         data = {"Ok": True}
         return HttpResponse(json.dumps(data), content_type="application/json")
     raise Http404
 
+
 @csrf_exempt
 def change_language(request):
-    
+    """change the language"""
     try:
-        from localeurl import utils as localeurl_utils
+        from localeurl import utils as localeurl_utils # pylint: disable=F0401
     except ImportError:
         raise Http404
     
@@ -1136,7 +1179,7 @@ def change_language(request):
             url = urlparse(request.META.get('HTTP_REFERER'))
             if url:
                 next_url = url.path
-        except:
+        except Exception:
             pass
     
     if request.method == 'POST':
@@ -1151,56 +1194,62 @@ def change_language(request):
             #path is the locale-independant url
             locale, path = localeurl_utils.strip_path(next_url)
             
-            Article = get_article_class()
+            article_class = get_article_class()
             try:
                 #get the translated slug of the current article
                 #If switching from French to English and path is /fr/accueil/
                 #The next should be : /en/home/
                 
                 #Get the article
-                next_article = Article.objects.get(slug=path.strip('/'))
+                next_article = article_class.objects.get(slug=path.strip('/'))
                 
-            except Article.DoesNotExist:
+            except article_class.DoesNotExist:
                 next_article = None
             
             if hasattr(request, 'session'):
                 request.session['django_language'] = lang_code
-            else:
-                response.set_cookie(settings.LANGUAGE_COOKIE_NAME, lang_code)
+            #else:
+                #response.set_cookie(settings.LANGUAGE_COOKIE_NAME, lang_code)
             activate(lang_code)
             
             if next_article:
                 next_url = next_article.get_absolute_url()
             else:
                 next_url = localeurl_utils.locale_path(path, lang_code)
-                    
-                    
+
     if not next_url:
         next_url = '/'
     
     return HttpResponseRedirect(next_url)
-    
+
+
 class ArticleView(EditableObjectView):
+    """Article view for edition"""
     model = get_article_class()
     form_class = get_article_form()
     field_lookup = "slug"
     varname = "article"
     
     def get_object(self):
+        """get object"""
         return get_article_or_404(slug=self.kwargs['slug'], sites=settings.SITE_ID)
     
     def can_access_object(self):
+        """perms -> 404 if no perms"""
         if self.object.is_archived():
             return super(ArticleView, self).can_view_object()
         return True
     
     def handle_object_not_found(self):
+        """go to alias if not found"""
         return redirect_if_alias(path=self.kwargs['slug'])
     
     def get_headlines(self):
+        """headline"""
         return get_headlines(self.object)
     
     def get_context_data(self):
+        """context"""
         context_data = super(ArticleView, self).get_context_data()
         context_data.update({
             'draft': self.object.publication==models.BaseArticle.DRAFT,
@@ -1210,22 +1259,29 @@ class ArticleView(EditableObjectView):
         return context_data
     
     def after_save(self, article):
+        """after save"""
         if article.temp_logo:
             article.logo = article.temp_logo
             article.temp_logo = ''
             article.save()
-    
-    
+
     def get_template(self):
+        """get template"""
         return get_article_template(self.object)
-    
+
+
 class EditArticleView(ArticleView):
+    """editable version"""
     edit_mode = True
-    
+
+
 class DebugErrorCodeView(TemplateView):
-    
+    """Debugging: view error page in debug"""
+
     def get_template_names(self):
+        """template to view"""
         return ("{0}.html".format(self.kwargs["error_code"]),)
+
 
 def csrf_failure(request, reason=""):
     """

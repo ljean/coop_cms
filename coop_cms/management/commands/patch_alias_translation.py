@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
+""""""
 
-from django.core.management.base import BaseCommand
-from datetime import datetime
-from coop_cms.models import Alias
-from coop_cms.settings import is_localized
 from django.conf import settings
+from django.core.management.base import BaseCommand
 from django.db import connection
 
+from coop_cms.models import Alias
+from coop_cms.settings import is_localized
+
+
 class Command(BaseCommand):
+    """patch alias redirect"""
     help = u"patch alias redirect"
 
+
     def handle(self, *args, **options):
+        """command"""
         #look for emailing to be sent
         verbose = options.get('verbosity', 1)
         
@@ -38,4 +43,3 @@ class Command(BaseCommand):
                 setattr(alias, path_field_name, path)
                 setattr(alias, redirect_url_field_name, redirect_url)
                 alias.save()
-            

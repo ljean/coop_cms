@@ -1,45 +1,62 @@
 # -*- coding: utf-8 -*-
-
-from django.contrib.contenttypes.models import ContentType
-from django.conf import settings as django_settings
-from django.utils.importlib import import_module
+"""
+Coop_cms settings : central place for coop_cms settings
+the settings should be accessed from here and not directly from django.conf.settings
+"""
 import logging
-logger = logging.getLogger("coop_cms")
+
+from django.conf import settings as django_settings
+from django.contrib.contenttypes.models import ContentType
+from django.utils.importlib import import_module
+
+LOGGER = logging.getLogger("coop_cms")
 
 COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'
 DEPRECATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'basic_cms.NavTree')
 
+
 def get_navigable_content_types():
+    """returns the list of content types of navigable (which can be used in navigation) models"""
     ct_choices = []
     try:
         content_apps = django_settings.COOP_CMS_CONTENT_APPS
     except AttributeError:
         content_apps = []
         not_to_be_mapped = ('south', 'django_extensions', 'd2rq')
-        for m in django_settings.INSTALLED_APPS:
-            if(not m.startswith('django.') and m not in not_to_be_mapped):
-                content_apps.append(m)
+        for module in django_settings.INSTALLED_APPS:
+            if (not module.startswith('django.')) and (module not in not_to_be_mapped):
+                content_apps.append(module)
     apps_labels = [app.rsplit('.')[-1] for app in content_apps]
     navigable_content_types = ContentType.objects.filter(app_label__in=apps_labels).order_by('app_label')
-    for ct in navigable_content_types:
-        is_navnode = ((ct.model == 'navnode') and (ct.app_label == 'coop_cms'))
-        if (not is_navnode) and 'get_absolute_url' in dir(ct.model_class()):
-            ct_choices.append((ct.id, ct.app_label + u'.' + ct.model))
+    for content_type in navigable_content_types:
+        is_navnode = ((content_type.model == 'navnode') and (content_type.app_label == 'coop_cms'))
+        if (not is_navnode) and 'get_absolute_url' in dir(content_type.model_class()):
+            ct_choices.append((content_type.id, content_type.app_label + u'.' + content_type.model))
     return ct_choices
 
+
 def get_navtree_class(defaut_class=None):
+    """
+    returns the custom navtree class
+    Warning : It is not recommend to define a custom NavTree. This feature is deprecated
+    """
     if hasattr(get_navtree_class, '_cache_class'):
         return getattr(get_navtree_class, '_cache_class')
     else:
         full_class_name = COOP_CMS_NAVTREE_CLASS
         app_label, model_name = full_class_name.split('.')
         model_name = model_name.lower()
-        ct = ContentType.objects.get(app_label=app_label, model=model_name)
-        navtree_class = ct.model_class()
+        content_type = ContentType.objects.get(app_label=app_label, model=model_name)
+        navtree_class = content_type.model_class()
         setattr(get_navtree_class, '_cache_class', navtree_class)
         return navtree_class
 
+
 def get_article_class():
+    """
+    returns the custom Article class
+    This makes possible to customize the Article model. However, It must inherit from BaseArticle
+    """
     if hasattr(get_article_class, '_cache_class'):
         return getattr(get_article_class, '_cache_class')
     else:
@@ -59,9 +76,12 @@ def get_article_class():
 
 
 def get_default_logo():
+    """returns the default logo"""
     return getattr(django_settings, 'COOP_CMS_DEFAULT_ARTICLE_LOGO', 'img/default-logo.png')
 
+
 def get_article_form():
+    """returns a form to be used for editing an article"""
     try:
         full_class_name = getattr(django_settings, 'COOP_CMS_ARTICLE_FORM')
         module_name, class_name = full_class_name.rsplit('.', 1)
@@ -74,7 +94,9 @@ def get_article_form():
 
     return article_form
 
+
 def get_article_settings_form():
+    """returns the form to use for editing article settings"""
     try:
         full_class_name = getattr(django_settings, 'COOP_CMS_ARTICLE_SETTINGS_FORM')
         module_name, class_name = full_class_name.rsplit('.', 1)
@@ -87,7 +109,9 @@ def get_article_settings_form():
 
     return article_form
 
+
 def get_new_article_form():
+    """returns the form to be used for creating a new article"""
     try:
         full_class_name = getattr(django_settings, 'COOP_CMS_NEW_ARTICLE_FORM')
         module_name, class_name = full_class_name.rsplit('.', 1)
@@ -100,13 +124,17 @@ def get_new_article_form():
 
     return article_form
 
+
 def get_newsletter_templates(newsletter, user):
+    """returns the list of newsletter templates"""
     try:
         return getattr(django_settings, 'COOP_CMS_NEWSLETTER_TEMPLATES')
     except AttributeError:
         return ()
 
+
 def get_newsletter_form():
+    """returns the form to use for editing a newsletter"""
     try:
         full_class_name = getattr(django_settings, 'COOP_CMS_NEWSLETTER_FORM')
     except AttributeError:
@@ -118,14 +146,16 @@ def get_newsletter_form():
         newsletter_form = getattr(module, class_name)
     return newsletter_form
 
+
 def get_article_templates(article, user):
+    """returns the list of article templates"""
     if hasattr(django_settings, 'COOP_CMS_ARTICLE_TEMPLATES'):
         coop_cms_article_templates = getattr(django_settings, 'COOP_CMS_ARTICLE_TEMPLATES')
 
         if type(coop_cms_article_templates) in (str, unicode):
             #COOP_CMS_ARTICLE_TEMPLATES is a string :
             # - a function name that will return a tuple
-            # - a variable name taht contains a tuple
+            # - a variable name that contains a tuple
 
             #extract module and function/var names
             module_name, object_name = coop_cms_article_templates.rsplit('.', 1)
@@ -145,7 +175,9 @@ def get_article_templates(article, user):
 
     return article_templates
 
+
 def _get_article_setting(article, setting_name, default_value):
+    """private function: access an article-dependant setting"""
     try:
         get_setting_name = getattr(django_settings, setting_name)
         try:
@@ -153,8 +185,10 @@ def _get_article_setting(article, setting_name, default_value):
             module = import_module(module_name)
             get_setting = getattr(module, fct_name)
             if callable(get_setting):
+                #If the setting is a function get the value as return value of the function call
                 value = get_setting(article)
             else:
+                #else Take the value as it is
                 value = get_setting
         except ValueError:
             value = get_setting_name
@@ -163,22 +197,34 @@ def _get_article_setting(article, setting_name, default_value):
         value = default_value
     return value
 
+
 def get_article_logo_size(article):
+    """get the article logo size"""
     return _get_article_setting(article, 'COOP_CMS_ARTICLE_LOGO_SIZE', '48x48')
 
+
 def get_article_logo_crop(article):
+    """get the article logo crop"""
     return _get_article_setting(article, 'COOP_CMS_ARTICLE_LOGO_CROP', 'center')
 
+
 def get_headline_image_size(article):
+    """get the headline image size"""
     return _get_article_setting(article, 'COOP_CMS_HEADLINE_IMAGE_SIZE', '900')
 
+
 def get_headline_image_crop(article):
+    """get the headline image crop"""
     return _get_article_setting(article, 'COOP_CMS_HEADLINE_IMAGE_CROP', None)
 
+
 def get_max_image_width(image):
+    """get the ax image width: avoid user to use very large image"""
     return _get_article_setting(image, 'COOP_CMS_MAX_IMAGE_WIDTH', None)
 
+
 def get_newsletter_item_classes():
+    """get items thant can be used in newsletter"""
     if hasattr(get_newsletter_item_classes, '_cache_class'):
         return getattr(get_newsletter_item_classes, '_cache_class')
     else:
@@ -200,8 +246,10 @@ def get_newsletter_item_classes():
 
         setattr(get_newsletter_item_classes, '_cache_class', item_classes)
         return item_classes
-    
+
+
 def get_newsletter_context_callbacks():
+    """get the context for newsletter template"""
     if hasattr(get_newsletter_context_callbacks, '_cache_func'):
         return getattr(get_newsletter_context_callbacks, '_cache_func')
     else:
@@ -220,38 +268,56 @@ def get_newsletter_context_callbacks():
         setattr(get_newsletter_context_callbacks, '_cache_func', callbacks)
         return callbacks
 
+
 def is_localized():
+    """return True if site is localized"""
     if ('localeurl' in django_settings.INSTALLED_APPS) and ('modeltranslation' in django_settings.INSTALLED_APPS):
         return True
     return False
 
+
 def is_multilang():
-    return len(django_settings.LANGUAGES)>1
+    """return true if several languages are set"""
+    return len(django_settings.LANGUAGES) > 1
+
 
 def install_csrf_failure_view():
+    """Make possible to customize csrf failure page"""
     dont_do_it = getattr(django_settings, 'COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW', False)
     if not dont_do_it:
         setattr(django_settings, 'CSRF_FAILURE_VIEW', 'coop_cms.views.csrf_failure')
 
+
 def cms_no_homepage():
+    """returns true if homepage is not managed by coop_cms"""
     return getattr(django_settings, 'COOP_CMS_NO_HOMEPAGE', False)
 
+
 def hide_media_library_menu():
+    """returns True if media is not displayed in coop_bar menu"""
     return getattr(django_settings, 'COOP_CMS_HIDE_MEDIA_LIBRARY_MENU', False)
 
+
 def is_requestprovider_installed():
+    """returns True if possible to get request from anywhere in the code"""
     is_installed = ('coop_cms.utils.RequestMiddleware' in django_settings.MIDDLEWARE_CLASSES)
     if not is_installed:
-        logger.warn("You should add coop_cms.utils.RequestMiddleware to the MIDDLEWARE_CLASSES settings")
+        LOGGER.warn("You should add coop_cms.utils.RequestMiddleware to the MIDDLEWARE_CLASSES settings")
     return is_installed
-    
+
+
 def can_rewrite_url():
+    """returns True if user is allowed to change article slugs"""
     return getattr(django_settings, 'COOP_CMS_CAN_EDIT_ARTICLE_SLUG', False)
-    
+
+
 def keep_deprecated_func_views_for_article():
+    """returns True to enable deprecated function views for article"""
     return getattr(django_settings, 'COOP_CMS_KEEP_DEPRECATED_ARTICLE_VIEWS', False)
-    
+
+
 def get_article_views():
+    """returns article views"""
     if keep_deprecated_func_views_for_article():
         raise Exception("coop_cms is configured with COOP_CMS_KEEP_DEPRECATED_ARTICLE_VIEWS=True")
     try:
@@ -271,35 +337,17 @@ def get_article_views():
             module = import_module(module_name)
             imported_class_views[view_name] = getattr(module, class_name)
         return imported_class_views
-    return newsletter_form
+
 
 def is_perm_middleware_installed():
+    """returns True if permission middleware is installed"""
     return 'coop_cms.middleware.PermissionsMiddleware' in django_settings.MIDDLEWARE_CLASSES
-    
-    if keep_deprecated_func_views_for_article():
-        raise Exception("coop_cms is configured with COOP_CMS_KEEP_DEPRECATED_ARTICLE_VIEWS=True")
-    try:
-        article_views = getattr(django_settings, 'COOP_CMS_ARTICLE_VIEWS')
-    except AttributeError:
-        from coop_cms.views import ArticleView, EditArticleView
-        return {
-            'article_view': ArticleView,
-            'edit_article_view': EditArticleView,
-        }
-    else:
-        expected_views = ('article_view', 'edit_article_view')
-        imported_class_views = {}
-        for view_name in expected_views:
-            full_class_name = article_views[view_name]
-            module_name, class_name = full_class_name.rsplit('.', 1)
-            module = import_module(module_name)
-            imported_class_views[view_name] = getattr(module, class_name)
-        return imported_class_views
-    return newsletter_form
 
+
+#Check that languages are correctly set
 if is_localized():
     if django_settings.LANGUAGE_CODE[:2] != django_settings.LANGUAGES[0][0]:
-        logger.warning(
+        LOGGER.warning(
             "coop_cms settings error: LANGUAGE_CODE ({0}) should be first in LANGUAGES (currently first is {1})".format(
                 django_settings.LANGUAGE_CODE[:2], django_settings.LANGUAGES[0][0]
             )

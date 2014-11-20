@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
+"""create newsletter item"""
 
 from django.core.management.base import BaseCommand
-from datetime import datetime
-from coop_cms.settings import get_newsletter_item_classes
+
 from coop_cms.models import create_newsletter_item
+from coop_cms.settings import get_newsletter_item_classes
+
 
 class Command(BaseCommand):
+    """force the creation of every newsletter items"""
     help = u"force the creation of every newsletter items"
 
     def handle(self, *args, **options):
+        """command"""
         #look for emailing to be sent
         verbose = options.get('verbosity', 1)
         

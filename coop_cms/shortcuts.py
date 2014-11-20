@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
+"""utilities for developpers"""
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
-from coop_cms.settings import get_article_class, is_localized, get_newsletter_context_callbacks
-from coop_cms.models import BaseArticle, Alias
-from django.utils.translation import get_language
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404
+from django.utils.translation import get_language
+
+from coop_cms.models import BaseArticle, Alias
+from coop_cms.settings import get_article_class, is_localized
+
 
 def get_article_slug(*args, **kwargs):
+    """slugify"""
     slug = reverse(*args, **kwargs)
     if 'localeurl' in settings.INSTALLED_APPS:
         #If localeurl is installed reverse is patched
@@ -17,11 +21,13 @@ def get_article_slug(*args, **kwargs):
         lang, slug = strip_path(slug)
     return slug.strip('/')
 
+
 def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwargs):
-    Article = get_article_class()
+    """get article"""
+    article_class = get_article_class()
     try:
-        return Article.objects.get(slug=slug, **kwargs)
-    except Article.DoesNotExist:
+        return article_class.objects.get(slug=slug, **kwargs)
+    except article_class.DoesNotExist:
         #if modeltranslation is installed,
         #if no article correspond to the current language article
         #try to look for slug in default language
@@ -36,41 +42,47 @@ def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwa
                         lang = default_lang
                 if lang:
                     kwargs.update({'slug_{0}'.format(lang): slug})
-                    return Article.objects.get(**kwargs)
+                    return article_class.objects.get(**kwargs)
                 else:
-                    raise Article.DoesNotExist()
-            except Article.DoesNotExist:
+                    raise article_class.DoesNotExist()
+            except article_class.DoesNotExist:
                 #Try to find in another lang
                 #The article might be created in another language than the default one
                 for (l, n) in settings.LANGUAGES:
                     key = 'slug_{0}'.format(l)
                     try:
                         kwargs.update({key: slug})
-                        return Article.objects.get(**kwargs)
-                    except Article.DoesNotExist:
+                        return article_class.objects.get(**kwargs)
+                    except article_class.DoesNotExist:
                         kwargs.pop(key)
-                raise Article.DoesNotExist()
+                raise article_class.DoesNotExist()
         raise #re-raise previous error
 
+
 def get_article_or_404(slug, **kwargs):
-    Article = get_article_class()
+    """get article or 404"""
+    article_class = get_article_class()
     try:
         return get_article(slug, **kwargs)
-    except Article.DoesNotExist:
+    except article_class.DoesNotExist:
         raise Http404
 
+
 def get_headlines(article, editable=False):
-    Article = get_article_class()
+    """get articles to display on homepage"""
+    article_class = get_article_class()
     if article.is_homepage:
-        qs = Article.objects.filter(headline=True)
+        queryset = article_class.objects.filter(headline=True)
         if editable:
-            qs = qs.filter(publication__in=(BaseArticle.PUBLISHED, BaseArticle.DRAFT))
+            queryset = queryset.filter(publication__in=(BaseArticle.PUBLISHED, BaseArticle.DRAFT))
         else:
-            qs = qs.filter(publication=BaseArticle.PUBLISHED)
-        return qs.order_by("-publication_date")
-    return Article.objects.none()
-    
+            queryset = queryset.filter(publication=BaseArticle.PUBLISHED)
+        return queryset.order_by("-publication_date")
+    return article_class.objects.none()
+
+
 def redirect_if_alias(path):
+    """redirect if path correspond to an alias"""
     alias = get_object_or_404(Alias, path=path)
     if alias.redirect_url:
         return HttpResponsePermanentRedirect(alias.redirect_url)

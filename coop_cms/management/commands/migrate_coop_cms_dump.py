@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-from django.core.management.base import BaseCommand
+"""dump"""
+
 import json
-import tempfile
+
+from django.core.management.base import BaseCommand
+
 
 class Command(BaseCommand):
+    """Rename coop_page.page into coop_tree.article and url into link in a json dump"""
     help = u"Rename coop_page.page into coop_tree.article and url into link in a json dump"
 
     def handle(self, *args, **options):
+        """command"""
         try:
             filename = args[0]
         except IndexError:
@@ -45,4 +50,3 @@ class Command(BaseCommand):
         dump_file = open(filename, 'w')
         dump_file.write(json.dumps(objects, indent=4))
         dump_file.close()
-        

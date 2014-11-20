@@ -1,40 +1,50 @@
 # -*- coding: utf-8 -*-
+"""
+coop_edition template tags
+used for magic form
+"""
+
+import logging
 
 from django import template
-register = template.Library()
-from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleEditNode
-from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
-from django.utils.translation import ugettext_lazy as _
 from django.core.context_processors import csrf
-from django.utils.safestring import mark_safe
-from coop_cms.widgets import ImageEdit
-from coop_cms.settings import get_article_class
 from django.template.loader import find_template, TemplateDoesNotExist
-import logging
-logger = logging.getLogger("coop_cms")
+from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
+
+from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleEditNode
+
+from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
+from coop_cms.settings import get_article_class
+
+LOGGER = logging.getLogger("coop_cms")
+
+
+register = template.Library()
+
 
 ################################################################################
 class PieceOfHtmlEditNode(DjalohaEditNode):
-    
-    #def __init__(self, *args, **kwargs):
-    #    extra_id = kwargs.pop('extra_id', None)
-    #    super(PieceOfHtmlEditNode, self).__init__(*args, **kwargs)    
-    
+    """Template node for editing a PieceOfHtml"""
+
     def render(self, context):
+        """convert to html"""
         if context.get('form', None) or context.get('formset', None):
             context.dicts[0]['djaloha_edit'] = True
         #context.dicts[0]['can_edit_template'] = True
         return super(PieceOfHtmlEditNode, self).render(context)
 
+
 @register.tag
 def coop_piece_of_html(parser, token):
+    """template tag"""
     args = token.split_contents()
     div_id = args[1]
     read_only = False
     extra_id = ""
-    if len(args)>2:
+    if len(args) > 2:
         for x in args[2:]:
-            if 0==x.find("extra_id="):
+            if 0 == x.find("extra_id="):
                 extra_id = x.replace("extra_id=", '')
         
         read_only = (args[2]=="read-only")
@@ -47,17 +57,21 @@ def coop_piece_of_html(parser, token):
 
 ################################################################################
 
+
 class FragmentEditNode(DjalohaMultipleEditNode):
+    """Template Node for Fragment edition"""
     
     def _get_objects(self, lookup):
+        """get the fragment"""
         self.fragment_type, _x = FragmentType.objects.get_or_create(name=lookup['name'])
-        qs = Fragment.objects.filter(type=self.fragment_type)
+        queryset = Fragment.objects.filter(type=self.fragment_type)
         if lookup.has_key('extra_id'):
             self.fragment_filter, _x = FragmentFilter.objects.get_or_create(extra_id=lookup['extra_id'])
-            qs = qs.filter(filter=self.fragment_filter)
-        return qs
+            queryset = queryset.filter(filter=self.fragment_filter)
+        return queryset
     
     def _get_object_lookup(self, obj):
+        """get object lookup"""
         return {"id": obj.id}
 
     def __init__(self, lookup, kwargs=None):
@@ -66,12 +80,15 @@ class FragmentEditNode(DjalohaMultipleEditNode):
         self.kwargs = kwargs or {}
     
     def _pre_object_render(self, obj):
+        """call before rendering an object"""
         return u'<div class="coop-fragment {0}" rel="{1}">'.format(obj.css_class, obj.id)
     
     def _post_object_render(self, obj):
+        """call after rendering an object"""
         return u'</div>'
     
     def _object_render(self, idx, obj, context):
+        """convert object to html"""
         value = getattr(obj, self._field_name)
         template_name = self.kwargs.get('template_name', '')
         if template_name:
@@ -90,19 +107,21 @@ class FragmentEditNode(DjalohaMultipleEditNode):
         return object_content
     
     def render(self, context):
+        """convert to html"""
         self._edit_mode = False
         if context.get('form', None) or context.get('formset', None):
             context.dicts[0]['djaloha_edit'] = True
             self._edit_mode = True
-        #context.dicts[0]['can_edit_template'] = True
         html = super(FragmentEditNode, self).render(context)
         filter_id = self.fragment_filter.id if self.fragment_filter else ""
         pre_html = u'<div style="display: none" class="coop-fragment-type" rel="{0}" data-filter="{2}">{1}</div>'.format(
             self.fragment_type.id, self.fragment_type.name, filter_id)
         return pre_html+html
 
+
 @register.tag
 def coop_fragments(parser, token):
+    """templatetag"""
     args = token.split_contents()
     lookup = {'name': args[1]}
     if len(args) > 2:
@@ -242,7 +261,7 @@ class SafeWrapper:
                 except TemplateDoesNotExist:
                     value = u'<img class="logo" src="{0}" />'.format(src.url)
                 except Exception, msg:
-                        logger.exception("coop_edition:SafeWrapper")
+                        LOGGER.exception("coop_edition:SafeWrapper")
             else:
                 value = u''
             return mark_safe(value)

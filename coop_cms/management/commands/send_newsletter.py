@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
+"""send newsletter"""
+
+from datetime import datetime
 
 from django.core.management.base import BaseCommand
-from datetime import datetime
+
 from coop_cms.utils import send_newsletter
 from coop_cms.models import NewsletterSending
 
+
 class Command(BaseCommand):
+    """send newsletter"""
     help = u"send newsletter"
 
     def handle(self, *args, **options):
+        """command"""
         #look for emailing to be sent
         verbose = options.get('verbosity', 1)
         
@@ -29,4 +35,3 @@ class Command(BaseCommand):
             
             sending.sending_dt = datetime.now()
             sending.save()
-        

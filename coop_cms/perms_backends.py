@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
-
-from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.models import User, AnonymousUser
-from django.utils.importlib import import_module
-
+"""permission backend"""
 
 class ArticlePermissionBackend(object):
     supports_object_permissions = True
     supports_anonymous_user = True
     supports_inactive_user = True
 
-    def authenticate(self, username, password):
+    def authenticate(self, *args, **kwargs):
         return None
 
     def has_perm(self, user_obj, perm, obj=None):

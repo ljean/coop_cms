@@ -1,4 +1,8 @@
 # -*- coding:utf-8 -*-
+"""
+urls
+"""
+
 from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('coop_cms.apps.rss_sync.views',

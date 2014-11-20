@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
+"""navigation tags"""
 
 from django import template
-from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
 from django.template import VariableDoesNotExist
 from django.template import Context
 from django.template.loader import get_template
@@ -15,6 +14,7 @@ from coop_cms.settings import get_navtree_class
 register = template.Library()
 
 def extract_kwargs(args):
+    """args from templatetag args"""
     kwargs = {}
     for arg in args:
         try:
@@ -26,25 +26,21 @@ def extract_kwargs(args):
 
 
 class NavigationTemplateNode(template.Node):
+    """Navigation templatetag"""
     def __init__(self, *args, **kwargs):
         super(NavigationTemplateNode, self).__init__()
         self._kwargs = {}
         for (k, v) in kwargs.items():
             self._kwargs[k] = template.Variable(v)
 
-    #def format_css_class(self, class_name):
-    #    return u' class="{0}"'.format(class_name) if class_name else u""
-
     def resolve_kwargs(self, context):
+        """resolve: get value from context or from string"""
         kwargs = {}
         for (k, v) in self._kwargs.items():
             try:
                 kwargs[k] = v.resolve(context)
             except VariableDoesNotExist:
                 kwargs[k] = v.var  # if the variable can not be resolved, thake the value as is
-
-            #if k == 'css_class':
-            #    kwargs[k] = self.format_css_class(v)
 
         if not 'tree' in kwargs:
             kwargs['tree'] = 'default'
@@ -59,12 +55,15 @@ class NavigationTemplateNode(template.Node):
 
 #----------------------------------------------------------
 
+
 class NavigationAsNestedUlNode(NavigationTemplateNode):
+    """NAvigation as nested ul"""
 
     def __init__(self, **kwargs):
         super(NavigationAsNestedUlNode, self).__init__(**kwargs)
 
     def render(self, context):
+        """to html"""
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
         root_nodes = NavNode.objects.filter(tree__name=tree_name, parent__isnull=True).order_by("ordering")
@@ -77,23 +76,27 @@ class NavigationAsNestedUlNode(NavigationTemplateNode):
 
 @register.tag
 def navigation_as_nested_ul(parser, token):
+    """template tag"""
     args = token.contents.split()
     kwargs = extract_kwargs(args)
     return NavigationAsNestedUlNode(**kwargs)
 
 #----------------------------------------------------------
 
+
 class NavigationBreadcrumbNode(NavigationTemplateNode):
+    """Navigation"""
     def __init__(self, object, **kwargs):
         super(NavigationBreadcrumbNode, self).__init__(**kwargs)
         self.object_var = template.Variable(object)
 
     def render(self, context):
-        object = self.object_var.resolve(context)
-        ct = ContentType.objects.get_for_model(object.__class__)
+        """to html"""
+        obj = self.object_var.resolve(context)
+        ct = ContentType.objects.get_for_model(obj.__class__)
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
-        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=ct, object_id=object.id)
+        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=ct, object_id=obj.id)
         if nav_nodes.count() > 0:
             return nav_nodes[0].as_breadcrumb(**kwargs)
         return u''
@@ -101,6 +104,7 @@ class NavigationBreadcrumbNode(NavigationTemplateNode):
 
 @register.tag
 def navigation_breadcrumb(parser, token):
+    """Navigation"""
     args = token.contents.split()
     kwargs = extract_kwargs(args)
     if len(args) < 2:
@@ -109,24 +113,28 @@ def navigation_breadcrumb(parser, token):
 
 #----------------------------------------------------------
 
+
 class NavigationChildrenNode(NavigationTemplateNode):
+    """Navigation"""
 
     def __init__(self, object, **kwargs):
         super(NavigationChildrenNode, self).__init__(**kwargs)
         self.object_var = template.Variable(object)
 
     def render(self, context):
-        object = self.object_var.resolve(context)
-        ct = ContentType.objects.get_for_model(object.__class__)
+        """to html"""
+        obj = self.object_var.resolve(context)
+        ct = ContentType.objects.get_for_model(obj.__class__)
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
-        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=ct, object_id=object.id)
+        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=ct, object_id=obj.id)
         if nav_nodes.exists():
             return nav_nodes[0].children_as_navigation(**kwargs)
         return u''
 
 @register.tag
 def navigation_children(parser, token):
+    """Navigation"""
     args = token.contents.split()
     kwargs = extract_kwargs(args)
     if len(args) < 2:
@@ -135,18 +143,20 @@ def navigation_children(parser, token):
 
 #----------------------------------------------------------
 
+
 class NavigationSiblingsNode(NavigationTemplateNode):
+    """Navigation"""
 
     def __init__(self, object, **kwargs):
         super(NavigationSiblingsNode, self).__init__(**kwargs)
         self.object_var = template.Variable(object)
 
     def render(self, context):
-        object = self.object_var.resolve(context)
-        ct = ContentType.objects.get_for_model(object.__class__)
+        obj = self.object_var.resolve(context)
+        ct = ContentType.objects.get_for_model(obj.__class__)
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
-        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=ct, object_id=object.id)
+        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=ct, object_id=obj.id)
         if nav_nodes.count() > 0:
             return nav_nodes[0].siblings_as_navigation(**kwargs)
         return u''
@@ -154,6 +164,7 @@ class NavigationSiblingsNode(NavigationTemplateNode):
 
 @register.tag
 def navigation_siblings(parser, token):
+    """Navigation"""
     args = token.contents.split()
     kwargs = extract_kwargs(args)
     if len(args) < 2:
@@ -162,17 +173,19 @@ def navigation_siblings(parser, token):
 
 #----------------------------------------------------------
 DEFAULT_NAVROOT_TEMPLATE = 'coop_cms/navigation_node.html'
+
+
 @register.filter
 def render_template_node(node, template_name=""):
+    """render to html"""
     t = get_template(template_name or DEFAULT_NAVROOT_TEMPLATE)
     return t.render(Context({'node': node}))
 
 class NavigationRootNode(NavigationTemplateNode):
-
-    #def __init__(self, **kwargs):
-    #    super(NavigationTreeNode, self).__init__(**kwargs)
+    """Navigation"""
 
     def render(self, context):
+        """to html"""
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
         template_name = kwargs.pop('template_name', DEFAULT_NAVROOT_TEMPLATE)
@@ -181,6 +194,7 @@ class NavigationRootNode(NavigationTemplateNode):
 
 @register.tag
 def navigation_root_nodes(parser, token):
+    """navigation"""
     args = token.contents.split()
     kwargs = extract_kwargs(args)
     return NavigationRootNode(**kwargs)
