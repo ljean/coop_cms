@@ -17,7 +17,7 @@ from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleE
 from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
 from coop_cms.settings import get_article_class
 
-LOGGER = logging.getLogger("coop_cms")
+logger = logging.getLogger("coop_cms")
 
 
 register = template.Library()
@@ -261,7 +261,7 @@ class SafeWrapper:
                 except TemplateDoesNotExist:
                     value = u'<img class="logo" src="{0}" />'.format(src.url)
                 except Exception, msg:
-                        LOGGER.exception("coop_edition:SafeWrapper")
+                        logger.exception("coop_edition:SafeWrapper")
             else:
                 value = u''
             return mark_safe(value)
