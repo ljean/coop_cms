@@ -9,7 +9,7 @@ from django.conf import settings as django_settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils.importlib import import_module
 
-LOGGER = logging.getLogger("coop_cms")
+logger = logging.getLogger("coop_cms")
 
 COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'
 DEPRECATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'basic_cms.NavTree')
@@ -302,7 +302,7 @@ def is_requestprovider_installed():
     """returns True if possible to get request from anywhere in the code"""
     is_installed = ('coop_cms.utils.RequestMiddleware' in django_settings.MIDDLEWARE_CLASSES)
     if not is_installed:
-        LOGGER.warn("You should add coop_cms.utils.RequestMiddleware to the MIDDLEWARE_CLASSES settings")
+        logger.warn("You should add coop_cms.utils.RequestMiddleware to the MIDDLEWARE_CLASSES settings")
     return is_installed
 
 
@@ -347,7 +347,7 @@ def is_perm_middleware_installed():
 #Check that languages are correctly set
 if is_localized():
     if django_settings.LANGUAGE_CODE[:2] != django_settings.LANGUAGES[0][0]:
-        LOGGER.warning(
+        logger.warning(
             "coop_cms settings error: LANGUAGE_CODE ({0}) should be first in LANGUAGES (currently first is {1})".format(
                 django_settings.LANGUAGE_CODE[:2], django_settings.LANGUAGES[0][0]
             )
