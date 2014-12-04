@@ -821,7 +821,8 @@ class Image(Media):
         """url"""
         if not self.size:
             max_width = get_max_image_width(self)
-            if max_width:
+            max_width = int(max_width) if max_width else 0
+            if max_width and (max_width < self.file.width):
                 try:
                     return sorl_thumbnail.backend.get_thumbnail(self.file.file, str(max_width), upscale=False).url
                 except Exception, msg:
@@ -1144,11 +1145,21 @@ class Fragment(models.Model):
 
 class SiteSettings(models.Model):
     """site settings"""
+
+    SITEMAP_ONLY_SITE = 1
+    SITEMAP_ALL = 2
+
+    SITEMAP_MODES = (
+        (SITEMAP_ONLY_SITE, _(u"Only site articles")),
+        (SITEMAP_ALL, _(u"All articles")),
+    )
+
     site = models.OneToOneField(Site, verbose_name=_(u'site settings'))
     homepage_url = models.CharField(
         max_length=256, blank=True, default="", verbose_name=_(u'homepage URL'),
         help_text=_(u"if set, the homepage will be redirected to the given URL")
     )
+    sitemap_mode = models.IntegerField(default=SITEMAP_ONLY_SITE, choices=SITEMAP_MODES)
     
     def __unicode__(self):
         return u"{0}".format(self.site)

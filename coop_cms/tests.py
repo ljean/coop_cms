@@ -18,6 +18,7 @@ from PIL import Image as PilImage
 from django.contrib.auth.models import User, Permission, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.contrib.sitemaps.views import sitemap as sitemap_view
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core import mail
@@ -40,6 +41,7 @@ from coop_cms.models import (Link, NavNode, NavType, Document, Newsletter, Newsl
 from coop_cms.settings import (is_localized, is_multilang, get_article_class, get_article_templates,
     get_navtree_class, is_perm_middleware_installed, cms_no_homepage)
 from coop_cms.shortcuts import get_headlines
+from coop_cms.sitemap import get_sitemaps
 from coop_cms.templatetags.coop_utils import get_part, get_parts
 from coop_cms.utils import make_links_absolute, RequestManager, RequestMiddleware, RequestNotFound
 from coop_cms.views import csrf_failure
@@ -2319,7 +2321,8 @@ class ImageUploadTest(MediaBaseTestCase):
         
         images = Image.objects.all()
         self.assertEquals(0, images.count())
-    
+
+
 class MediaLibraryTest(MediaBaseTestCase):
     
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="600")
@@ -6298,22 +6301,24 @@ class PartitionTemplateFilterTest(TestCase):
     
 class SitemapTest(TestCase):
     
+    def setUp(self):
+        self._site2 = mommy.make(Site, id=settings.SITE_ID+1)
+
     def test_sitemap_empty(self):
-        Article = get_article_class()
         url = reverse("coop_cms_sitemap")
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
     
     def test_sitemap(self):
         site = Site.objects.get_current()
-        site2 = mommy.make(Site, id=settings.SITE_ID+1)
+        site2 = self._site2
         
-        Article = get_article_class()
+        article_class = get_article_class()
         
-        article1 = mommy.make(Article, publication=BaseArticle.PUBLISHED)
-        article2 = mommy.make(Article, publication=BaseArticle.PUBLISHED)
-        article3 = mommy.make(Article, publication=BaseArticle.PUBLISHED)
-        article4 = mommy.make(Article, publication=BaseArticle.DRAFT)
+        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT)
         
         article2.sites.add(site2)
         article2.save()
@@ -6321,17 +6326,81 @@ class SitemapTest(TestCase):
         article3.sites.remove(site)
         article3.sites.add(site2)
         article3.save()
-        
-        
-        url = reverse("coop_cms_sitemap")
-        response = self.client.get(url)
+
+        factory = RequestFactory()
+        request = factory.get('/sitemap.xml')
+        response = sitemap_view(request, get_sitemaps())
+
         self.assertEqual(200, response.status_code)
         
         self.assertContains(response, article1.get_absolute_url())
         self.assertContains(response, article2.get_absolute_url())
         self.assertNotContains(response, article3.get_absolute_url())
         self.assertNotContains(response, article4.get_absolute_url())
-        
+
+    def test_sitemap_only_site(self):
+        site = Site.objects.get_current()
+        site2 = self._site2
+
+        site_settings = mommy.make(SiteSettings, site=site, sitemap_mode=SiteSettings.SITEMAP_ONLY_SITE)
+
+        article_class = get_article_class()
+
+        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT)
+
+        article2.sites.add(site2)
+        article2.save()
+
+        article3.sites.remove(site)
+        article3.sites.add(site2)
+        article3.save()
+
+        factory = RequestFactory()
+        request = factory.get('/sitemap.xml')
+        response = sitemap_view(request, get_sitemaps())
+
+        self.assertEqual(200, response.status_code)
+
+        self.assertContains(response, article1.get_absolute_url())
+        self.assertContains(response, article2.get_absolute_url())
+        self.assertNotContains(response, article3.get_absolute_url())
+        self.assertNotContains(response, article4.get_absolute_url())
+
+    def test_sitemap_all(self):
+        site = Site.objects.get_current()
+        site2 = self._site2
+
+        site_settings = mommy.make(SiteSettings, site=site, sitemap_mode=SiteSettings.SITEMAP_ALL)
+
+        article_class = get_article_class()
+
+        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT)
+
+        article2.sites.add(site2)
+        article2.save()
+
+        article3.sites.remove(site)
+        article3.sites.add(site2)
+        article3.save()
+
+        factory = RequestFactory()
+        request = factory.get('/sitemap.xml')
+        response = sitemap_view(request, get_sitemaps())
+
+        self.assertEqual(200, response.status_code)
+
+        self.assertContains(response, article1.get_absolute_url())
+        self.assertContains(response, article2.get_absolute_url())
+        self.assertContains(response, article3.get_absolute_url())
+        self.assertNotContains(response, article4.get_absolute_url())
+
+
 class HeadlineTest(TestCase):
     
     def test_get_headlines_no_edit_perms(self):
