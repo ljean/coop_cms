@@ -53,7 +53,6 @@ class BaseSitemap(base_sitemap_class):
         return self._current_site
 
 
-
 class ArticleSitemap(BaseSitemap):
     """article sitemap"""
     changefreq = "weekly"

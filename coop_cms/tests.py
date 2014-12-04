@@ -6306,7 +6306,9 @@ class SitemapTest(TestCase):
 
     def test_sitemap_empty(self):
         url = reverse("coop_cms_sitemap")
-        response = self.client.get(url)
+        factory = RequestFactory()
+        request = factory.get(url)
+        response = sitemap_view(request, get_sitemaps())
         self.assertEqual(200, response.status_code)
     
     def test_sitemap(self):
