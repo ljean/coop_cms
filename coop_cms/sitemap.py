@@ -34,27 +34,31 @@ class ViewSitemap(Sitemap):
         return [Klass(x) for x in self.view_names]
 
 
-class ArticleSitemap(base_sitemap_class):
-    """article sitemap"""
-    changefreq = "weekly"
-    priority = 0.5
+class BaseSitemap(base_sitemap_class):
     _current_site = None
-    _sitemap_mode = None
 
     def __init__(self, language, site):
         if is_localized():
-            super(ArticleSitemap, self).__init__(language)
+            super(BaseSitemap, self).__init__(language)
         else:
-            super(ArticleSitemap, self).__init__()
+            super(BaseSitemap, self).__init__()
         self._site = site
 
     def get_urls(self, page=1, site=None, protocol=None):
-        return super(ArticleSitemap, self).get_urls(page, site or self._site, protocol=protocol)
+        return super(BaseSitemap, self).get_urls(page, site or self._site, protocol=protocol)
 
     def get_current_site(self):
         if not self._current_site:
             self._current_site = Site.objects.get_current()
         return self._current_site
+
+
+
+class ArticleSitemap(BaseSitemap):
+    """article sitemap"""
+    changefreq = "weekly"
+    priority = 0.5
+    _sitemap_mode = None
 
     def get_sitemap_mode(self):
         site = self.get_current_site()
@@ -109,7 +113,7 @@ urlpatterns = (
     url(
         r'^sitemap\.xml$',
         'django.contrib.sitemaps.views.sitemap',
-        {'sitemaps': get_sitemaps()},
+        {'sitemaps': get_sitemaps},
         name="coop_cms_sitemap"
     ),
 )
