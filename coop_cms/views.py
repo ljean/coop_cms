@@ -448,6 +448,7 @@ def article_settings(request, article_id):
         form = article_settings_form_class(request.user, request.POST, request.FILES, instance=article)
         if form.is_valid():
             article = form.save()
+            form.save_m2m()
             return HttpResponseRedirect(article.get_absolute_url())
     else:
         form = article_settings_form_class(request.user, instance=article)
@@ -480,6 +481,7 @@ def new_article(request):
         form = new_article_form(request.user, request.POST, request.FILES)
         if form.is_valid():
             article = form.save()
+            form.save_m2m()
             success_message(request, _(u'The article has been created properly'))
             return HttpResponseRedirect(article.get_edit_url())
     else:

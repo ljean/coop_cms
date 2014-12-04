@@ -7,6 +7,7 @@ import logging
 
 from django.conf import settings as django_settings
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from django.utils.importlib import import_module
 
 logger = logging.getLogger("coop_cms")
@@ -347,8 +348,11 @@ def is_perm_middleware_installed():
 #Check that languages are correctly set
 if is_localized():
     if django_settings.LANGUAGE_CODE[:2] != django_settings.LANGUAGES[0][0]:
-        logger.warning(
-            "coop_cms settings error: LANGUAGE_CODE ({0}) should be first in LANGUAGES (currently first is {1})".format(
-                django_settings.LANGUAGE_CODE[:2], django_settings.LANGUAGES[0][0]
-            )
-        )
+        text = "coop_cms settings error: LANGUAGE_CODE ({0}) should be first in LANGUAGES (currently first is {1})"
+        text = text.format(django_settings.LANGUAGE_CODE[:2], django_settings.LANGUAGES[0][0])
+        logger.warning(text)
+
+
+def is_multi_site():
+    """returns True if several sites are configured"""
+    return Site.objects.count() > 1

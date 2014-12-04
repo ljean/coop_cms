@@ -1,4 +1,11 @@
 {% extends "colorbox/popup_form_base.html" %}
-{% load i18n %}{% load url from future %}
+{% load i18n %}
+{% block extra_head %}
+<style>
+form td ul {
+    list-style: none;
+}
+</style>
+{% endblock %}
 {% block title %}{% trans "Article settings" %}{% endblock %}
 {% block form_url %}{% url "coop_cms_article_settings" article.id %}{% endblock %}

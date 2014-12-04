@@ -310,7 +310,7 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(200, response.status_code)
         aloha_js = reverse('aloha_init')
         content = unicode(response.content, 'utf-8')
-        return (content.find(aloha_js)>0)
+        return content.find(aloha_js) > 0
         
     def test_edit_permission(self):
         initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
@@ -441,7 +441,7 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(article.publication, BaseArticle.DRAFT)
         
     def test_new_article(self):
-        Article = get_article_class()
+        article_class = get_article_class()
         
         self._log_as_editor()
         data = {
@@ -449,40 +449,110 @@ class ArticleTest(BaseArticleTest):
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': None,
+            'sites': [settings.SITE_ID]
         }
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         
-        self.assertEqual(Article.objects.count(), 1)
-        article = Article.objects.all()[0]
+        self.assertEqual(article_class.objects.count(), 1)
+        article = article_class.objects.all()[0]
         
         self.assertEqual(article.title, data['title'])
         self.assertEqual(article.publication, data['publication'])
         self.assertEqual(article.template, data['template'])
         self.assertEqual(article.navigation_parent, None)
         self.assertEqual(NavNode.objects.count(), 0)
-    
+        self.assertEqual([a.id for a in article.sites.order_by("id")], data['sites'])
+
+    def test_new_article_two_sites(self):
+        other_site = mommy.make(Site)
+        article_class = get_article_class()
+
+        self._log_as_editor()
+        data = {
+            'title': "Un titre",
+            'publication': BaseArticle.DRAFT,
+            'template': get_article_templates(None, self.user)[0][0],
+            'navigation_parent': None,
+            'sites': sorted([settings.SITE_ID, other_site.id])
+        }
+
+        response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(article_class.objects.count(), 1)
+        article = article_class.objects.all()[0]
+
+        self.assertEqual(article.title, data['title'])
+        self.assertEqual(article.publication, data['publication'])
+        self.assertEqual(article.template, data['template'])
+        self.assertEqual(article.navigation_parent, None)
+        self.assertEqual(NavNode.objects.count(), 0)
+        self.assertEqual([a.id for a in article.sites.order_by("id")], data['sites'])
+
+
+    def test_new_article_without_site(self):
+        article_class = get_article_class()
+
+        self._log_as_editor()
+        data = {
+            'title': "Un titre",
+            'publication': BaseArticle.DRAFT,
+            'template': get_article_templates(None, self.user)[0][0],
+            'navigation_parent': None,
+            'sites': []
+        }
+
+        response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(article_class.objects.count(), 0)
+
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select("ul.errorlist")), 1)
+
+    def test_new_article_invalid_site(self):
+        article_class = get_article_class()
+
+        self._log_as_editor()
+        data = {
+            'title': "Un titre",
+            'publication': BaseArticle.DRAFT,
+            'template': get_article_templates(None, self.user)[0][0],
+            'navigation_parent': None,
+            'sites': [settings.SITE_ID, 999]
+        }
+
+        response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(article_class.objects.count(), 0)
+
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select("ul.errorlist")), 1)
+
     def test_new_article_title_required(self):
-        Article = get_article_class()
-        
+        article_class = get_article_class()
+
         self._log_as_editor()
         data = {
             'title': "",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': None,
+            'sites': [settings.SITE_ID]
         }
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content)
         
-        self.assertEqual(Article.objects.count(), 0)
+        self.assertEqual(article_class.objects.count(), 0)
         self.assertEqual(len(soup.select("ul.errorlist")), 1)
         
     def test_new_article_published(self):
-        Article = get_article_class()
+        article_class = get_article_class()
         
         self._log_as_editor()
         data = {
@@ -490,13 +560,14 @@ class ArticleTest(BaseArticleTest):
             'publication': BaseArticle.PUBLISHED,
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': None,
+            'sites': [settings.SITE_ID]
         }
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         
-        self.assertEqual(Article.objects.count(), 1)
-        article = Article.objects.all()[0]
+        self.assertEqual(article_class.objects.count(), 1)
+        article = article_class.objects.all()[0]
         
         self.assertEqual(article.title, data['title'])
         self.assertEqual(article.publication, data['publication'])
@@ -505,7 +576,7 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(NavNode.objects.count(), 0)
         
     def test_new_article_anonymous(self):
-        Article = get_article_class()
+        article_class = get_article_class()
         
         self._log_as_editor() #create self.user
         self.client.logout()
@@ -514,6 +585,7 @@ class ArticleTest(BaseArticleTest):
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': None,
+            'sites': [settings.SITE_ID]
         }
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
@@ -522,10 +594,10 @@ class ArticleTest(BaseArticleTest):
         login_url = reverse('django.contrib.auth.views.login')
         self.assertTrue(login_url in next_url)
         
-        self.assertEqual(Article.objects.filter(title=data['title']).count(), 0)
+        self.assertEqual(article_class.objects.filter(title=data['title']).count(), 0)
         
     def test_new_article_no_perm(self):
-        Article = get_article_class()
+        article_class = get_article_class()
         
         self._log_as_editor_no_add()
         data = {
@@ -533,14 +605,15 @@ class ArticleTest(BaseArticleTest):
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': None,
+            'sites': [settings.SITE_ID]
         }
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
         self.assertEqual(403, response.status_code)
-        self.assertEqual(Article.objects.filter(title=data['title']).count(), 0)
+        self.assertEqual(article_class.objects.filter(title=data['title']).count(), 0)
         
     def test_new_article_navigation(self):
-        Article = get_article_class()
+        article_class = get_article_class()
         
         tree = get_navtree_class().objects.create()
         
@@ -550,13 +623,14 @@ class ArticleTest(BaseArticleTest):
             'publication': BaseArticle.PUBLISHED,
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': -tree.id,
+            'sites': [settings.SITE_ID]
         }
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         
-        self.assertEqual(Article.objects.count(), 1)
-        article = Article.objects.all()[0]
+        self.assertEqual(article_class.objects.count(), 1)
+        article = article_class.objects.all()[0]
         
         self.assertEqual(article.title, data['title'])
         self.assertEqual(article.publication, data['publication'])
@@ -571,11 +645,11 @@ class ArticleTest(BaseArticleTest):
         
     def test_new_article_navigation_leaf(self):
         initial_data = {'title': "test", 'content': "this is my article content"}
-        Article = get_article_class()
-        art1 = Article.objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+        article_class = get_article_class()
+        art1 = article_class.objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         
         tree = get_navtree_class().objects.create()
-        ct = ContentType.objects.get_for_model(Article)
+        ct = ContentType.objects.get_for_model(article_class)
         node1 = NavNode.objects.create(content_type=ct, object_id=art1.id, tree=tree, parent=None)
         
         self._log_as_editor()
@@ -584,12 +658,13 @@ class ArticleTest(BaseArticleTest):
             'publication': BaseArticle.PUBLISHED,
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': node1.id,
+            'sites': [settings.SITE_ID]
         }
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Article.objects.exclude(id=art1.id).count(), 1)
-        art2 = Article.objects.exclude(id=art1.id)[0]
+        self.assertEqual(article_class.objects.exclude(id=art1.id).count(), 1)
+        art2 = article_class.objects.exclude(id=art1.id)[0]
         
         self.assertEqual(art2.title, data['title'])
         self.assertEqual(art2.publication, data['publication'])
@@ -603,13 +678,13 @@ class ArticleTest(BaseArticleTest):
         
     def test_article_settings(self, move_nav=False):
         initial_data = {'title': "test", 'content': "this is my article content"}
-        Article = get_article_class()
-        art0 = mommy.make(Article)
+        article_class = get_article_class()
+        art0 = mommy.make(article_class)
         
-        art1 = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+        art1 = article_class.objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         
         tree = get_navtree_class().objects.create()
-        ct = ContentType.objects.get_for_model(Article)
+        ct = ContentType.objects.get_for_model(article_class)
         node1 = NavNode.objects.create(content_type=ct, object_id=art0.id, tree=tree, parent=None)
         node2 = NavNode.objects.create(content_type=ct, object_id=art0.id, tree=tree, parent=None)
         
@@ -625,13 +700,14 @@ class ArticleTest(BaseArticleTest):
             'in_newsletter': True,
             'summary': 'short summary',
             'navigation_parent': node1.id,
+            'sites': [settings.SITE_ID]
         }
         
         response = self.client.post(reverse('coop_cms_article_settings', args=[art1.id]), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         
-        self.assertEqual(Article.objects.exclude(id__in=(art1.id, art0.id)).count(), 0)
-        art1 = Article.objects.get(id=art1.id)
+        self.assertEqual(article_class.objects.exclude(id__in=(art1.id, art0.id)).count(), 0)
+        art1 = article_class.objects.get(id=art1.id)
         
         self.assertEqual(art1.title, initial_data['title'])
         self.assertEqual(art1.publication, data['publication'])
@@ -641,7 +717,7 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(art1.in_newsletter, data['in_newsletter'])
         self.assertEqual(art1.summary, data['summary'])
         self.assertEqual(art1.template, data['template'])
-        
+        self.assertEqual([a.id for a in art1.sites.all()], data['sites'])
         self.assertEqual(NavNode.objects.count(), 3)
         node = NavNode.objects.exclude(id__in=(node1.id, node2.id))[0]
         self.assertEqual(node.content_object, art1)
@@ -661,13 +737,14 @@ class ArticleTest(BaseArticleTest):
             'in_newsletter': False,
             'summary': 'another summary',
             'navigation_parent': node_id,
+            'sites': [settings.SITE_ID]
         }
         
         response = self.client.post(reverse('coop_cms_article_settings', args=[art1.id]), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         
-        self.assertEqual(Article.objects.exclude(id__in=(art1.id, art0.id)).count(), 0)
-        art1 = Article.objects.get(id=art1.id)
+        self.assertEqual(article_class.objects.exclude(id__in=(art1.id, art0.id)).count(), 0)
+        art1 = article_class.objects.get(id=art1.id)
         
         self.assertEqual(art1.title, initial_data['title'])
         self.assertEqual(art1.publication, data['publication'])
@@ -691,6 +768,103 @@ class ArticleTest(BaseArticleTest):
             
     def test_article_settings_move_nav(self):
         self.test_article_settings(True)
+
+    def test_article_settings_on_two_sites(self):
+        other_site = mommy.make(Site)
+
+        initial_data = {'title': "test", 'content': "this is my article content"}
+        article_class = get_article_class()
+
+        art1 = article_class.objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+
+        self._log_as_editor()
+        data = {
+            'template': get_article_templates(None, self.user)[0][0],
+            'category': '',
+            'publication': BaseArticle.PUBLISHED,
+            'publication_date': "2013-01-01 12:00:00",
+            'headline': True,
+            'in_newsletter': True,
+            'summary': 'short summary',
+            'navigation_parent': None,
+            'sites': [settings.SITE_ID, other_site.id]
+        }
+
+        response = self.client.post(reverse('coop_cms_article_settings', args=[art1.id]), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(article_class.objects.exclude(id=art1.id).count(), 0)
+        art1 = article_class.objects.get(id=art1.id)
+
+        self.assertEqual(art1.summary, data['summary'])
+        self.assertEqual(sorted([a.id for a in art1.sites.all()]), sorted(data['sites']))
+
+    def test_article_settings_unknown_sites(self):
+        other_site = mommy.make(Site)
+
+        initial_data = {'title': "test", 'content': "this is my article content"}
+        article_class = get_article_class()
+
+        art1 = article_class.objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+
+        self._log_as_editor()
+        data = {
+            'template': get_article_templates(None, self.user)[0][0],
+            'category': '',
+            'publication': BaseArticle.PUBLISHED,
+            'publication_date': "2013-01-01 12:00:00",
+            'headline': True,
+            'in_newsletter': True,
+            'summary': 'short summary',
+            'navigation_parent': None,
+            'sites': [settings.SITE_ID, 999]
+        }
+
+        response = self.client.post(reverse('coop_cms_article_settings', args=[art1.id]), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select("ul.errorlist")), 1)
+
+        self.assertEqual(article_class.objects.exclude(id=art1.id).count(), 0)
+        art1 = article_class.objects.get(id=art1.id)
+
+        self.assertNotEqual(art1.summary, data['summary'])
+        self.assertEqual(sorted([a.id for a in art1.sites.all()]), [settings.SITE_ID])
+
+    def test_article_settings_no_sites(self):
+        other_site = mommy.make(Site)
+
+        initial_data = {'title': "test", 'content': "this is my article content"}
+        article_class = get_article_class()
+
+        art1 = article_class.objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+
+        self._log_as_editor()
+        data = {
+            'template': get_article_templates(None, self.user)[0][0],
+            'category': '',
+            'publication': BaseArticle.PUBLISHED,
+            'publication_date': "2013-01-01 12:00:00",
+            'headline': True,
+            'in_newsletter': True,
+            'summary': 'short summary',
+            'navigation_parent': None,
+            'sites': []
+        }
+
+        response = self.client.post(reverse('coop_cms_article_settings', args=[art1.id]), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select("ul.errorlist")), 1)
+
+        self.assertEqual(article_class.objects.exclude(id=art1.id).count(), 0)
+        art1 = article_class.objects.get(id=art1.id)
+
+        self.assertNotEqual(art1.summary, data['summary'])
+        self.assertEqual(sorted([a.id for a in art1.sites.all()]), [settings.SITE_ID])
+
 
 class TemplateTest(BaseArticleTest):
     
@@ -746,6 +920,7 @@ class TemplateTest(BaseArticleTest):
         self.assertTrue(redirect_url.find(login_url)>0)
         article = klass.objects.get(id=article.id)#refresh
         self.assertEqual(article.template, '')
+
 
 class NavigationTest(BaseTestCase):
 

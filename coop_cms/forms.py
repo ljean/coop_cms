@@ -4,6 +4,7 @@
 from django import forms
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.utils.timezone import now as dt_now
@@ -18,7 +19,7 @@ from coop_cms.models import (
 )
 from coop_cms.settings import (
     get_navigable_content_types, get_article_class, get_article_templates, get_newsletter_templates, get_navtree_class,
-    is_localized, can_rewrite_url
+    is_localized, can_rewrite_url, is_multi_site
 )
 from coop_cms.utils import dehtml
 from coop_cms.widgets import ImageEdit, ChosenSelectMultiple, ReadOnlyInput
@@ -35,8 +36,8 @@ class NavTypeForm(forms.ModelForm):
         """validation of label_rule"""
         rule = self.cleaned_data['label_rule']
         if rule == NavType.LABEL_USE_GET_LABEL:
-            ct = self.cleaned_data['content_type']
-            if not 'get_label' in dir(ct.model_class()):
+            content_type = self.cleaned_data['content_type']
+            if not 'get_label' in dir(content_type.model_class()):
                 raise ValidationError(
                     _(u"Invalid rule for this content type: The object class doesn't have a get_label method")
                 )
@@ -64,7 +65,7 @@ class AlohaEditableModelForm(floppyforms.ModelForm):
             'js/jquery.form.js',
             'js/jquery.pageslide.js',
             'js/jquery.colorbox-min.js?v=2',
-            'js/colorbox.coop.js?v=2'
+            'js/colorbox.coop.js?v=2',
         )
 
 
@@ -89,9 +90,11 @@ class ArticleForm(AlohaEditableModelForm):
         if self.fields.has_key('logo'):
             thumbnail_src = self.logo_thumbnail(logo_size, logo_crop)
             update_url = reverse('coop_cms_update_logo', args=[self.article.id])
-            self.fields['logo'].widget = ImageEdit(update_url,
+            self.fields['logo'].widget = ImageEdit(
+                update_url,
                 thumbnail_src.url if thumbnail_src else '',
-                attrs={"class": "resizable"})
+                attrs={"class": "resizable"}
+            )
 
     def logo_thumbnail(self, logo_size=None, logo_crop=None):
         """transform logo into thumbnail"""
@@ -188,14 +191,14 @@ class ArticleAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(ArticleAdminForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
         self.article = kwargs.get('instance', None)
-        templates = get_article_templates(self.article, self.current_user)
+        templates = get_article_templates(self.article, getattr(self, "current_user", None))
         if templates:
             self.fields['template'].widget = forms.Select(choices=templates)
         
         self.slug_fields = []
         if is_localized():
-            for (lang, _name) in settings.LANGUAGES:
-                self.slug_fields.append('slug_'+lang)
+            for lang_and_name in settings.LANGUAGES:
+                self.slug_fields.append('slug_'+lang_and_name[0])
         else:
             self.slug_fields = ['slug']
         
@@ -218,13 +221,13 @@ class ArticleAdminForm(forms.ModelForm):
 class AddImageForm(floppyforms.Form):
     """Form for adding new image"""
 
-    image = floppyforms.ImageField(required=True, label = _('Image'),)
+    image = floppyforms.ImageField(required=True, label=_('Image'),)
     descr = floppyforms.CharField(
         required=False,
         widget=forms.TextInput(
             attrs={'size': '35', 'placeholder': _(u'Optional description'),}
         ),
-        label = _('Description'),
+        label=_('Description'),
     )
     filters = floppyforms.MultipleChoiceField(
         required=False, label=_(u"Filters"), help_text=_(u"Choose betwwen tags to find images more easily")
@@ -236,9 +239,9 @@ class AddImageForm(floppyforms.Form):
     def __init__(self, *args, **kwargs):
         super(AddImageForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
         #Media filters
-        qs = MediaFilter.objects.all()
-        if qs.count():
-            self.fields['filters'].choices = [(x.id, x.name) for x in qs]
+        queryset1 = MediaFilter.objects.all()
+        if queryset1.count():
+            self.fields['filters'].choices = [(x.id, x.name) for x in queryset1]
             try:
                 self.fields['filters'].widget = ChosenSelectMultiple(
                     choices=self.fields['filters'].choices, force_template=True,
@@ -250,13 +253,12 @@ class AddImageForm(floppyforms.Form):
             self.fields['filters'].widget = floppyforms.HiddenInput()
             
         #Image size
-        queryset = ImageSize.objects.all()
-        if queryset.count():
-            self.fields['size'].choices = [('', '')]+[(x.id, unicode(x)) for x in queryset]
+        queryset2 = ImageSize.objects.all()
+        if queryset2.count():
+            self.fields['size'].choices = [('', '')]+[(x.id, unicode(x)) for x in queryset2]
         else:
             self.fields['size'].widget = floppyforms.HiddenInput()
-            
-            
+
     def clean_filters(self):
         """validation"""
         filters = self.cleaned_data['filters']
@@ -295,21 +297,26 @@ class ArticleTemplateForm(forms.Form):
 
 class ArticleLogoForm(forms.Form):
     """article logo form"""
-    image = forms.ImageField(required=True, label = _('Logo'),)
+    image = forms.ImageField(required=True, label=_('Logo'),)
 
 
 class ArticleSettingsForm(WithNavigationModelForm):
     """article settings"""
     class Meta:
         model = get_article_class()
-        fields = ('template', 'category', 'publication', 'publication_date', 'headline', 'in_newsletter', 'summary',)
+        fields = (
+            'template', 'category', 'publication', 'publication_date', 'headline', 'in_newsletter', 'summary', 'sites',
+        )
+        widgets = {
+            'sites': forms.CheckboxSelectMultiple(),
+        }
 
     def __init__(self, user, *args, **kwargs):
         article = kwargs['instance']
 
         try:
             initials = kwargs['initial']
-        except:
+        except KeyError:
             initials = {}
         summary = article.summary
         if not summary:
@@ -328,12 +335,20 @@ class ArticleSettingsForm(WithNavigationModelForm):
         else:
             self.fields["template"] = forms.CharField()
 
+        if 'sites' in self.fields and not is_multi_site():
+            self.fields['sites'].widget = forms.MultipleHiddenInput()
+
 
 class NewArticleForm(WithNavigationModelForm):
     """New article form"""
     class Meta:
         model = get_article_class()
-        fields = ('title', 'template', 'category', 'headline', 'publication', 'in_newsletter')
+        fields = (
+            'title', 'template', 'category', 'headline', 'publication', 'in_newsletter', 'sites',
+        )
+        widgets = {
+            'sites': forms.CheckboxSelectMultiple(),
+        }
 
     def __init__(self, user, *args, **kwargs):
         super(NewArticleForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
@@ -345,6 +360,16 @@ class NewArticleForm(WithNavigationModelForm):
         self.fields["title"].required = True
         self.fields["title"].widget = forms.TextInput(attrs={'size': 30})
 
+        if 'sites' in self.fields:
+            self.fields['sites'].initial = [Site.objects.get_current()]
+            if not is_multi_site():
+                self.fields['sites'].widget = forms.MultipleHiddenInput()
+
+    def clean_site(self):
+        sites = self.cleaned_data['sites']
+        if Site.objects.get_current() not in sites:
+            raise ValidationError(_(u"It is recommended to keep the current site."))
+        return sites
 
 class NewLinkForm(WithNavigationModelForm):
     """New link form"""
@@ -424,7 +449,7 @@ class NewsletterAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(NewsletterAdminForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
         self.newsletter = kwargs.get('instance', None)
-        choices = get_newsletter_templates(self.newsletter, self.current_user)
+        choices = get_newsletter_templates(self.newsletter, getattr(self, "current_user", None))
         if choices:
             self.fields["template"] = forms.ChoiceField(choices=choices)
         else:

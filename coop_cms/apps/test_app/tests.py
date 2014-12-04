@@ -5,27 +5,29 @@ from django.conf import settings
 if 'localeurl' in settings.INSTALLED_APPS:
     from localeurl.models import patch_reverse
     patch_reverse()
-    
-from django.test import TestCase
+
+import logging
+from datetime import datetime
+from bs4 import BeautifulSoup
+
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
-from django.template import Template, Context
+from django.test import TestCase
+
 from model_mommy import mommy
-from django.conf import settings
-from models import TestClass
-import logging
+
+from coop_cms.apps.test_app.models import TestClass
 from coop_cms import settings as coop_settings
 from coop_cms.models import BaseArticle
-from bs4 import BeautifulSoup
-from datetime import datetime
 
 try:
     AUTH_LOGIN_NAME = "auth_login"
     reverse(AUTH_LOGIN_NAME)
 except:
     AUTH_LOGIN_NAME = "login"
-    
+
+
 class BaseTestCase(TestCase):
     
     def setUp(self):
@@ -508,6 +510,7 @@ class FormsetViewTestCase(BaseTestCase):
         self.assertNotEqual(data['form-0-field1'], obj.field1)
         self.assertNotEqual(data['form-0-field2'], obj.field2)
 
+
 class ArticleFormTest(BaseTestCase):
     
     def _log_as_viewer(self):
@@ -580,15 +583,15 @@ class ArticleFormTest(BaseTestCase):
 
     def test_view_article_not_allowed(self):
         self._log_as_viewer()
-        Article = coop_settings.get_article_class()
+        article_class = coop_settings.get_article_class()
         url = reverse('coop_cms_new_article')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(Article.objects.count(), 0)
+        self.assertEqual(article_class.objects.count(), 0)
     
     def test_new_article(self):
         self._log_as_editor()
-        Article = coop_settings.get_article_class()
+        article_class = coop_settings.get_article_class()
         url = reverse('coop_cms_new_article')
         data = {
             'title': 'test',
@@ -597,18 +600,21 @@ class ArticleFormTest(BaseTestCase):
             #'headline': '',
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
-            'navigation_parent': None
+            'navigation_parent': None,
+            'sites': [settings.SITE_ID]
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Article.objects.count(), 1)
-        article = Article.objects.all()[0]
+        self.assertEqual(article_class.objects.count(), 1)
+        article = article_class.objects.all()[0]
         for f in data:
-            self.assertEqual(getattr(article, f), data[f])
-        
-        
+            if f == "sites":
+                self.assertEqual([x.id for x in getattr(article, f).all()], data[f])
+            else:
+                self.assertEqual(getattr(article, f), data[f])
+
     def test_new_article_anoymous(self):
-        Article = coop_settings.get_article_class()
+        article_class = coop_settings.get_article_class()
         url = reverse('coop_cms_new_article')
         data = {
             'title': 'test',
@@ -617,18 +623,19 @@ class ArticleFormTest(BaseTestCase):
             #'headline': '',
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
-            'navigation_parent': None
+            'navigation_parent': None,
+            'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
         login_url = reverse(AUTH_LOGIN_NAME)
-        self.assertTrue(response['Location'].find(login_url)>0)
+        self.assertTrue(response['Location'].find(login_url) > 0)
         
-        self.assertEqual(Article.objects.count(), 0)
+        self.assertEqual(article_class.objects.count(), 0)
         
     def test_new_article_not_allowed(self):
         self._log_as_viewer()
-        Article = coop_settings.get_article_class()
+        article_class = coop_settings.get_article_class()
         url = reverse('coop_cms_new_article')
         data = {
             'title': 'test',
@@ -637,18 +644,18 @@ class ArticleFormTest(BaseTestCase):
             #'headline': '',
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
-            'navigation_parent': None
+            'navigation_parent': None,
+            'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 403)
         
-        self.assertEqual(Article.objects.count(), 0)
-        
+        self.assertEqual(article_class.objects.count(), 0)
         
     def test_view_article_settings(self):
         self._log_as_editor()
-        Article = coop_settings.get_article_class()
-        article = mommy.make(Article)
+        article_class = coop_settings.get_article_class()
+        article = mommy.make(article_class)
         url = reverse('coop_cms_article_settings', args=[article.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -656,28 +663,27 @@ class ArticleFormTest(BaseTestCase):
         self.assertEqual(1, len(soup.select("#id_dummy")))
     
     def test_view_article_settings_anonymous(self):
-        Article = coop_settings.get_article_class()
-        article = mommy.make(Article)
+        article_class = coop_settings.get_article_class()
+        article = mommy.make(article_class)
         url = reverse('coop_cms_article_settings', args=[article.id])
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
         auth_url = reverse(AUTH_LOGIN_NAME)
         self.assertRedirects(response, auth_url+'?next='+url)
         
-        
     def test_view_article_settings_not_allowed(self):
         self._log_as_viewer()
-        Article = coop_settings.get_article_class()
-        article = mommy.make(Article)
+        article_class = coop_settings.get_article_class()
+        article = mommy.make(article_class)
         url = reverse('coop_cms_article_settings', args=[article.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
-        self.assertEqual(Article.objects.count(), 1)
+        self.assertEqual(article_class.objects.count(), 1)
     
     def test_article_settings(self):
         self._log_as_editor()
-        Article = coop_settings.get_article_class()
-        article = mommy.make(Article)
+        article_class = coop_settings.get_article_class()
+        article = mommy.make(article_class)
         url = reverse('coop_cms_article_settings', args=[article.id])
         
         now = datetime.now()
@@ -689,17 +695,21 @@ class ArticleFormTest(BaseTestCase):
             'in_newsletter': False,
             'summary': 'Summary',
             'navigation_parent': None,
+            'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(Article.objects.count(), 1)
-        article = Article.objects.all()[0]
+        self.assertEqual(article_class.objects.count(), 1)
+        article = article_class.objects.all()[0]
         for f in data:
-            self.assertEqual(getattr(article, f), data[f])
+            if f == "sites":
+                self.assertEqual([x.id for x in getattr(article, f).all()], data[f])
+            else:
+                self.assertEqual(getattr(article, f), data[f])
         
     def test_article_settings_anoymous(self):
-        Article = coop_settings.get_article_class()
-        article = mommy.make(Article)
+        article_class = coop_settings.get_article_class()
+        article = mommy.make(article_class)
         url = reverse('coop_cms_article_settings', args=[article.id])
         
         data = {
@@ -709,20 +719,21 @@ class ArticleFormTest(BaseTestCase):
             'in_newsletter': False,
             'summary': 'Summary',
             'navigation_parent': None,
+            'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
         login_url = reverse(AUTH_LOGIN_NAME)
         self.assertTrue(response['Location'].find(login_url)>0)
         
-        self.assertEqual(Article.objects.count(), 1)
-        article = Article.objects.all()[0]
+        self.assertEqual(article_class.objects.count(), 1)
+        article = article_class.objects.all()[0]
         self.assertNotEqual(article.summary, data['summary'])
         
     def test_article_settings_not_allowed(self):
         self._log_as_viewer()
-        Article = coop_settings.get_article_class()
-        article = mommy.make(Article)
+        article_class = coop_settings.get_article_class()
+        article = mommy.make(article_class)
         url = reverse('coop_cms_article_settings', args=[article.id])
         
         data = {
@@ -732,10 +743,11 @@ class ArticleFormTest(BaseTestCase):
             'in_newsletter': False,
             'summary': 'Summary',
             'navigation_parent': None,
+            'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 403)
         
-        self.assertEqual(Article.objects.count(), 1)
-        article = Article.objects.all()[0]
+        self.assertEqual(article_class.objects.count(), 1)
+        article = article_class.objects.all()[0]
         self.assertNotEqual(article.summary, data['summary'])
