@@ -45,7 +45,7 @@ class BaseSitemap(base_sitemap_class):
         self._site = site
 
     def get_urls(self, page=1, site=None, protocol=None):
-        return super(BaseSitemap, self).get_urls(page, site or self._site, protocol=protocol)
+        return super(BaseSitemap, self).get_urls(page, self._site, protocol=protocol)
 
     def get_current_site(self):
         if not self._current_site:
@@ -84,7 +84,7 @@ class ArticleSitemap(BaseSitemap):
                 return article_class.objects.none()
             elif sitemap_mode == SiteSettings.SITEMAP_ALL:
                 #Articles of which are only on the site and not in current site
-                return queryset.filter(Q(sites=self._site) & ~Q(sites=self.get_current_site()))
+                return queryset.filter(sites=self._site).exclude(sites=self.get_current_site())
 
     def lastmod(self, obj):
         """item last modification"""

@@ -6335,8 +6335,8 @@ class SitemapTest(TestCase):
 
         self.assertEqual(200, response.status_code)
         
-        self.assertContains(response, article1.get_absolute_url())
-        self.assertContains(response, article2.get_absolute_url())
+        self.assertContains(response, site.domain+article1.get_absolute_url())
+        self.assertContains(response, site.domain+article2.get_absolute_url())
         self.assertNotContains(response, article3.get_absolute_url())
         self.assertNotContains(response, article4.get_absolute_url())
 
@@ -6366,8 +6366,8 @@ class SitemapTest(TestCase):
 
         self.assertEqual(200, response.status_code)
 
-        self.assertContains(response, article1.get_absolute_url())
-        self.assertContains(response, article2.get_absolute_url())
+        self.assertContains(response, site.domain+article1.get_absolute_url())
+        self.assertContains(response, site.domain+article2.get_absolute_url())
         self.assertNotContains(response, article3.get_absolute_url())
         self.assertNotContains(response, article4.get_absolute_url())
 
@@ -6397,9 +6397,9 @@ class SitemapTest(TestCase):
 
         self.assertEqual(200, response.status_code)
 
-        self.assertContains(response, article1.get_absolute_url())
-        self.assertContains(response, article2.get_absolute_url())
-        self.assertContains(response, article3.get_absolute_url())
+        self.assertContains(response, site.domain+article1.get_absolute_url())
+        self.assertContains(response, site.domain+article2.get_absolute_url())
+        self.assertContains(response, site2.domain+article3.get_absolute_url())
         self.assertNotContains(response, article4.get_absolute_url())
 
 
