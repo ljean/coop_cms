@@ -22,7 +22,7 @@ setup(
     name='apidev-coop_cms',
     version=VERSION,
     description='Small CMS built around a tree navigation open to any django models',
-    packages=find_packages()
+    packages=find_packages(),
     include_package_data=True,
     author='Luc Jean',
     author_email='ljean@apidev.fr',
