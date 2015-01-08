@@ -7,8 +7,10 @@
 <h1 id="site-name">{% trans 'Django administration' %}</h1>
 {% endblock %}
 
+{% block userlinks %}
+/ <a href="{% url "coop_cms_homepage" %}">{% trans "Site" %}</a> /
+{{ block.super }}
+{% endblock %}
+
 {% block nav-global %}
-<ul style="list-style: none;">
-    <li style="display: inline-block;"><a href="{% url "coop_cms_homepage" %}">{% trans "Site" %}</a></li>
-</ul>
 {% endblock %}
