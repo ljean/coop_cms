@@ -168,7 +168,7 @@ class EditableObjectView(View):
         else:
             error_text = u'<br />'.join([unicode(f.errors) for f in [self.form]+djaloha_forms if f.errors])
             error_message(request, _(u'An error occured: {0}').format(error_text))
-            logger.debug("error: {0}".format(error_text))
+            logger.debug(u"error: {0}".format(error_text))
     
         return render_to_response(
             self.get_template(),
