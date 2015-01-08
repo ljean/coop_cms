@@ -29,7 +29,7 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        'django==1.6.6',
+        'django==1.6.9',
         'south',
         'django-floppyforms',
         'django-extensions',
