@@ -938,63 +938,6 @@ def process_nav_edition(request, tree_id):
 
 
 @login_required
-def edit_newsletter(request, newsletter_id):
-    """edit newsletter"""
-    newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
-    newsletter_form_class = get_newsletter_form()
-
-    if not request.user.has_perm('can_edit_newsletter', newsletter):
-        raise PermissionDenied
-
-    if request.method == "POST":
-        form = newsletter_form_class(request.POST, instance=newsletter)
-
-        forms_args = djaloha_utils.extract_forms_args(request.POST)
-        djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)
-
-        if form.is_valid() and all([f.is_valid() for f in djaloha_forms]):
-            newsletter = form.save()
-
-            if djaloha_forms:
-                for dj_form in djaloha_forms:
-                    dj_form.save()
-
-            success_message(request, _(u'The newsletter has been saved properly'))
-
-            return HttpResponseRedirect(reverse('coop_cms_view_newsletter', args=[newsletter.id]))
-    else:
-        form = newsletter_form_class(instance=newsletter)
-
-    context_dict = {
-        'form': form, 'post_url': reverse('coop_cms_edit_newsletter', args=[newsletter.id]),
-        'editable': True, 'edit_mode': True, 'title': newsletter.subject,
-        'newsletter': newsletter,
-    }
-
-    return render_to_response(
-        newsletter.get_template_name(),
-        context_dict,
-        context_instance=RequestContext(request)
-    )
-
-
-def view_newsletter(request, newsletter_id):
-    """view newsletter"""
-    newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
-
-    context_dict = {
-        'title': newsletter.subject, 'newsletter': newsletter,
-        'editable': request.user.is_authenticated(), 'by_email': False,
-    }
-
-    return render_to_response(
-        newsletter.get_template_name(),
-        context_dict,
-        context_instance=RequestContext(request)
-    )
-
-
-@login_required
 @popup_redirect
 def change_newsletter_template(request, newsletter_id):
     """change newsletter template"""
@@ -1286,6 +1229,35 @@ class ArticleView(EditableObjectView):
 class EditArticleView(ArticleView):
     """editable version"""
     edit_mode = True
+
+
+class NewsletterView(EditableObjectView):
+    """newsletter view for edition"""
+    model = models.Newsletter
+    form_class = get_newsletter_form()
+    field_lookup = "id"
+    varname = "newsletter"
+
+    def can_view_object(self):
+        if self.object.is_public:
+            return True
+        return super(NewsletterView, self).can_edit_object()
+
+    def get_context_data(self):
+        """context"""
+        context_data = super(NewsletterView, self).get_context_data()
+        context_data.update({
+            'title': self.object.subject,
+        })
+        return context_data
+
+    def after_save(self, article):
+        """after save"""
+        pass
+
+    def get_template(self):
+        """get template"""
+        return self.object.get_template_name()
 
 
 class DebugErrorCodeView(TemplateView):

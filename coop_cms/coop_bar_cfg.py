@@ -19,13 +19,13 @@ def can_do(perm, object_names):
         """inner decorator"""
         def wrapper(request, context):
             """wrapper"""
-            editable = context.get('editable')
+            editable = context.get('editable', None)
             if not editable:
                 return
             for object_name in object_names:
                 obj = context.get(object_name, None)
 
-                if obj != None:
+                if obj is not None:
 
                     callback_name = u"coop_cms_{0}_callback".format(perm, object_name)
                     callback = context.get(callback_name, None)
@@ -39,7 +39,7 @@ def can_do(perm, object_names):
     return inner_decorator
 
 can_edit_article = can_do('can_edit', ['article'])
-can_edit_object = can_do('can_edit', ['article', 'object', 'objects'])
+can_edit_object = can_do('can_edit', ['article', 'object', 'objects', 'newsletter'])
 can_publish_article = can_do('can_publish', ['article'])
 can_edit_newsletter = can_do('can_edit', ['newsletter'])
 can_edit = can_do('can_edit', ['article', 'newsletter', 'object'])

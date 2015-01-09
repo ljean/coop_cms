@@ -10,7 +10,7 @@ from coop_cms.settings import (
     install_csrf_failure_view,
     keep_deprecated_func_views_for_article,
 )
-from coop_cms.views import DebugErrorCodeView
+from coop_cms.views import DebugErrorCodeView, NewsletterView
 
 install_csrf_failure_view()
 
@@ -32,8 +32,16 @@ urlpatterns = patterns('coop_cms.views',
     url(r'^cms/set-homepage/(?P<article_id>\d*)/$', 'set_homepage', name='coop_cms_set_homepage'),
     url(r'^cms/newsletter/new/$', 'new_newsletter', name='coop_cms_new_newsletter'),
     url(r'^cms/newsletter/settings/(?P<newsletter_id>\d+)/$', 'new_newsletter', name='coop_cms_newsletter_settings'),
-    url(r'^cms/newsletter/(?P<newsletter_id>\d+)/$', 'view_newsletter', name='coop_cms_view_newsletter'),
-    url(r'^cms/newsletter/(?P<newsletter_id>\d+)/cms_edit/$', 'edit_newsletter', name='coop_cms_edit_newsletter'),
+    url(
+        r'^cms/newsletter/(?P<id>\d+)/$',
+        NewsletterView.as_view(),
+        name='coop_cms_view_newsletter'
+    ),
+    url(
+        r'^cms/newsletter/(?P<id>\d+)/cms_edit/$',
+        NewsletterView.as_view(edit_mode=True),
+        name='coop_cms_edit_newsletter'),
+
     url(
         r'^cms/newsletter/change-template/(?P<newsletter_id>\d+)/$',
         'change_newsletter_template',

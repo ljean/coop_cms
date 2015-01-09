@@ -2757,15 +2757,19 @@ class NewsletterTest(UserBaseTestCase):
         item2 = NewsletterItem.objects.get(content_type=ct, object_id=art2.id)
 
     def test_view_newsletter(self):
-        Article = get_article_class()
-        ct = ContentType.objects.get_for_model(Article)
+        article_class = get_article_class()
+        ct = ContentType.objects.get_for_model(article_class)
         
-        art1 = mommy.make(Article, title="Art 1", in_newsletter=True)
-        art2 = mommy.make(Article, title="Art 2", in_newsletter=True)
-        art3 = mommy.make(Article, title="Art 3", in_newsletter=True)
+        art1 = mommy.make(article_class, title="Art 1", in_newsletter=True)
+        art2 = mommy.make(article_class, title="Art 2", in_newsletter=True)
+        art3 = mommy.make(article_class, title="Art 3", in_newsletter=True)
         
-        newsletter = mommy.make(Newsletter, content="a little intro for this newsletter",
-            template="test/newsletter_blue.html")
+        newsletter = mommy.make(
+            Newsletter,
+            content="a little intro for this newsletter",
+            template="test/newsletter_blue.html",
+            is_public=True
+        )
         newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art1.id))
         newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art2.id))
         newsletter.save()
@@ -2779,31 +2783,33 @@ class NewsletterTest(UserBaseTestCase):
         self.assertContains(response, art1.title)
         self.assertContains(response, art2.title)
         self.assertNotContains(response, art3.title)
+
+    def test_view_newsletter_not_public(self):
+
+        newsletter = mommy.make(
+            Newsletter,
+            content="a little intro for this newsletter",
+            template="test/newsletter_blue.html",
+        )
+
+        url = reverse('coop_cms_view_newsletter', args=[newsletter.id])
+        response = self.client.get(url)
+
+        self.assertEqual(403, response.status_code)
         
-    def test_edit_newsletter(self):
-        Article = get_article_class()
-        ct = ContentType.objects.get_for_model(Article)
-        
-        art1 = mommy.make(Article, title="Art 1", in_newsletter=True)
-        art2 = mommy.make(Article, title="Art 2", in_newsletter=True)
-        art3 = mommy.make(Article, title="Art 3", in_newsletter=True)
-        
-        newsletter = mommy.make(Newsletter, content="a little intro for this newsletter",
-            template="test/newsletter_blue.html")
-        newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art1.id))
-        newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art2.id))
-        newsletter.save()
-        
+    def test_edit_newsletter_is_public(self):
+        newsletter = mommy.make(
+            Newsletter,
+            content="a little intro for this newsletter",
+            template="test/newsletter_blue.html",
+            is_public=True
+        )
+
         self._log_as_editor()
         url = reverse('coop_cms_edit_newsletter', args=[newsletter.id])
         response = self.client.get(url)
         
         self.assertEqual(200, response.status_code)
-        
-        self.assertContains(response, newsletter.content)
-        self.assertContains(response, art1.title)
-        self.assertContains(response, art2.title)
-        self.assertNotContains(response, art3.title)
         
         data = {'content': 'A better intro'}
         response = self.client.post(url, data=data, follow=True)
@@ -2811,21 +2817,41 @@ class NewsletterTest(UserBaseTestCase):
         
         self.assertNotContains(response, newsletter.content)
         self.assertContains(response, data['content'])
-        self.assertContains(response, art1.title)
-        self.assertContains(response, art2.title)
-        self.assertNotContains(response, art3.title)
-        
+
+    def test_edit_newsletter_not_public(self):
+        newsletter = mommy.make(
+            Newsletter,
+            content="a little intro for this newsletter",
+            template="test/newsletter_blue.html",
+            is_public=False
+        )
+
+        self._log_as_editor()
+        url = reverse('coop_cms_edit_newsletter', args=[newsletter.id])
+        response = self.client.get(url)
+
+        self.assertEqual(200, response.status_code)
+
+        data = {'content': 'A better intro'}
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(200, response.status_code)
+
+        self.assertNotContains(response, newsletter.content)
+        self.assertContains(response, data['content'])
+
     def test_edit_newsletter_anonymous(self):
-        original_data = {'content': "a little intro for this newsletter",
-            'template': "test/newsletter_blue.html"}
+        original_data = {
+            'content': "a little intro for this newsletter",
+            'template': "test/newsletter_blue.html"
+        }
         newsletter = mommy.make(Newsletter, **original_data)
         
         url = reverse('coop_cms_edit_newsletter', args=[newsletter.id])
         response = self.client.get(url)
-        self.assertEqual(302, response.status_code)
+        self.assertEqual(403, response.status_code)
         
         response = self.client.post(url, data={'content': ':OP'})
-        self.assertEqual(302, response.status_code)
+        self.assertEqual(403, response.status_code)
         
         newsletter = Newsletter.objects.get(id=newsletter.id)
         self.assertEqual(newsletter.content, original_data['content'])
@@ -3055,7 +3081,7 @@ class NewsletterTest(UserBaseTestCase):
             'template': 'test/newsletter_blue.html',
         }
         newsletter = mommy.make(Newsletter, **newsletter_data)
-        
+        self.assertEqual(newsletter.is_public, False)
         sch_dt = timezone.now() - timedelta(1)
         sending = mommy.make(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
@@ -3068,9 +3094,12 @@ class NewsletterTest(UserBaseTestCase):
         email = mail.outbox[0]
         self.assertEqual(email.to, ['toto@toto.fr'])
         self.assertEqual(email.subject, newsletter_data['subject'])
-        self.assertTrue(email.body.find('Hello guys')>=0)
+        self.assertTrue(email.body.find('Hello guys') >= 0)
         self.assertTrue(email.alternatives[0][1], "text/html")
-        self.assertTrue(email.alternatives[0][0].find('Hello guys')>=0)
+        self.assertTrue(email.alternatives[0][0].find('Hello guys') >= 0)
+
+        newsletter = Newsletter.objects.get(id=newsletter.id)
+        self.assertEqual(newsletter.is_public, True)
         
         #check whet happens if command is called again
         mail.outbox = []
@@ -6573,5 +6602,3 @@ class AcceptCookieMessageTest(BaseTestCase):
         
         html = tpl.render(Context({'request': request}))
         self.assertEqual(html, "Accept cookies")
-
-    

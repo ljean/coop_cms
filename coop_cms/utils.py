@@ -89,8 +89,13 @@ def make_links_absolute(html_content, newsletter=None):
 
 def send_newsletter(newsletter, dests):
     """send newsletter"""
+    #Force the newsletter as public
+    newsletter.is_public = True
+    newsletter.save()
+
     lang = translation.get_language()[:2]
-    if not (lang in [c for (c, n) in settings.LANGUAGES]): # The current language is not defined in sttings.LANGUAGE
+    if not (lang in [c for (c, n) in settings.LANGUAGES]):
+        # The current language is not defined in sttings.LANGUAGE
         #force it to the defined language
         lang = settings.LANGUAGE_CODE[:2]
         translation.activate(lang)

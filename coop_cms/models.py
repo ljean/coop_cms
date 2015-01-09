@@ -990,6 +990,7 @@ class Newsletter(models.Model):
     template = models.CharField(_(u'template'), max_length=200, default='', blank=True)
     site = models.ForeignKey(Site, verbose_name=_(u'site'), default=settings.SITE_ID)
     source_url = models.URLField(verbose_name=_(u'source url'), default="", blank=True)
+    is_public = models.BooleanField(default=False, verbose_name=_(u'is_public'))
 
     def get_items(self):
         """associated items"""
@@ -1011,7 +1012,7 @@ class Newsletter(models.Model):
         return user.has_perm('coop_cms.change_newsletter')
         
     def get_site_prefix(self):
-        """site predix"""
+        """site prefix"""
         return "http://{0}".format(self.site.domain)
 
     def get_absolute_url(self):

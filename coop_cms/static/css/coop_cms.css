@@ -94,3 +94,14 @@ ul.coop-cms_user-messages li a.close-message:hover {
 .coop-bar-wrapper .coop-bar-sign.is-archived{
 	border-bottom: 20px solid #ccc;
 }
+
+.inline-checkboxes ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.inline-checkboxes ul li{
+    margin: 0;
+    padding: 0;
+}
