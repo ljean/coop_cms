@@ -15,7 +15,8 @@ import floppyforms
 from djaloha.widgets import AlohaInput
 
 from coop_cms.models import (
-    NavType, NavNode, Newsletter, NewsletterSending, Link, Document, Fragment, BaseArticle, MediaFilter, ImageSize
+    NavType, NavNode, Newsletter, NewsletterSending, Link, Document, Fragment, BaseArticle, MediaFilter, ImageSize,
+    NewsletterItem
 )
 from coop_cms.settings import (
     get_navigable_content_types, get_article_class, get_article_templates, get_newsletter_templates, get_navtree_class,
@@ -371,6 +372,7 @@ class NewArticleForm(WithNavigationModelForm):
             raise ValidationError(_(u"It is recommended to keep the current site."))
         return sites
 
+
 class NewLinkForm(WithNavigationModelForm):
     """New link form"""
     class Meta:
@@ -385,6 +387,14 @@ class NewNewsletterForm(forms.ModelForm):
         model = Newsletter
         fields = ('subject', 'template', 'items')
 
+    class Media:
+        css = {
+            'all': ('chosen/chosen.css', ),
+        }
+        js = (
+            'chosen/chosen.jquery.js',
+        )
+
     def __init__(self, user, *args, **kwargs):
         super(NewNewsletterForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
         tpl_choices = get_newsletter_templates(None, user)
@@ -393,6 +403,22 @@ class NewNewsletterForm(forms.ModelForm):
         else:
             self.fields["template"] = forms.CharField()
         self.fields["subject"].widget = forms.TextInput(attrs={'size': 30})
+        self.fields["items"].widget.attrs["class"] = "chosen-select"
+        choices = list(self.fields['items'].choices)
+        sites_choices = []
+        current_site = Site.objects.get_current()
+        for choice in choices:
+            obj_id = choice[0]
+            obj = NewsletterItem.objects.get(id=obj_id)
+            if getattr(obj.content_object, 'sites', None):
+                if current_site in obj.content_object.sites.all():
+                    sites_choices.append(choice)
+            else:
+                sites_choices.append(choice)
+        self.fields['items'].choices = sites_choices
+        self.fields['items'].widget = ChosenSelectMultiple(
+            choices=self.fields['items'].choices, force_template=True
+        )
 
 
 class PublishArticleForm(forms.ModelForm):
@@ -403,6 +429,7 @@ class PublishArticleForm(forms.ModelForm):
         widgets = {
             'publication': forms.HiddenInput(),
         }
+
 
 class NewsletterForm(AlohaEditableModelForm):
     """form for newsletter edition"""
@@ -454,24 +481,20 @@ class NewsletterAdminForm(forms.ModelForm):
             self.fields["template"] = forms.ChoiceField(choices=choices)
         else:
             self.fields["template"] = forms.CharField()
+        self.fields["items"].widget.attrs["class"] = "chosen-select"
 
     class Meta:
         model = Newsletter
         fields = ('subject', 'content', 'template', 'source_url', 'items')
         widgets = {}
-        try:
-            widgets.update({
-                'items': ChosenSelectMultiple(),
-            })
-        except NameError:
-            #print 'No ChosenSelectMultiple'
-            pass
 
     class Media:
         css = {
-            'all': ('css/admin-tricks.css',),
+            'all': ('css/admin-tricks.css', 'chosen/chosen.css', ),
         }
-        js = ()
+        js = (
+            'chosen/chosen.jquery.js',
+        )
 
 
 class AddFragmentForm(forms.ModelForm):

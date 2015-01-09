@@ -567,7 +567,7 @@ class BaseArticle(BaseNavigable):
         abstract = True
 
     def __unicode__(self):
-        return self.title
+        return dehtml(self.title)
 
     def save(self, *args, **kwargs):
         """save"""

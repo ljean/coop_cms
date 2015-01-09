@@ -47,18 +47,9 @@ class ChosenWidgetMixin(object):
             self._extra_context['super_template'] = self.template_name
             self.template_name = 'coop_cms/widgets/chosen.html'
 
-        
         if not attrs:
             attrs = {}
         attrs['data-placeholder'] = kwargs.pop('overlay', None)
-        #chosen_css = "chosen-select"
-        # css_class = u"{0}".format(attrs.get("class", ""))
-        # if css_class:
-        #     if not chosen_css in css_class:
-        #         css_class += (" " + chosen_css)
-        # else:
-        #     css_class = chosen_css
-        #
         super(ChosenWidgetMixin, self).__init__(attrs, *args, **kwargs)
 
 
