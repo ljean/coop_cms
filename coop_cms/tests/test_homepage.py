@@ -34,8 +34,8 @@ class NoHomepageTest(UserBaseTestCase):
     def test_view_article_set_homepage_no_homepage(self):
         settings.COOP_CMS_NO_HOMEPAGE = True
         self._log_as_editor(can_add=True)
-        Article = get_article_class()
-        art = mommy.make(Article, is_homepage=False, publication=BaseArticle.PUBLISHED)
+        article_class = get_article_class()
+        art = mommy.make(article_class, is_homepage=False, publication=BaseArticle.PUBLISHED)
         response = self.client.get(art.get_edit_url())
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content)
@@ -46,8 +46,8 @@ class NoHomepageTest(UserBaseTestCase):
     def test_view_article_set_homepage(self):
         settings.COOP_CMS_NO_HOMEPAGE = False
         self._log_as_editor(can_add=True)
-        Article = get_article_class()
-        art = mommy.make(Article, is_homepage=False, publication=BaseArticle.PUBLISHED)
+        article_class = get_article_class()
+        art = mommy.make(article_class, is_homepage=False, publication=BaseArticle.PUBLISHED)
         response = self.client.get(art.get_edit_url())
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content)
@@ -254,15 +254,15 @@ class HomepageTest(UserBaseTestCase):
 class HeadlineTest(TestCase):
 
     def test_get_headlines_no_edit_perms(self):
-        Article = get_article_class()
-        article1 = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=True)
-        article2 = mommy.make(Article, publication=BaseArticle.DRAFT, headline=True)
-        article3 = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=False)
-        article4 = mommy.make(Article, publication=BaseArticle.DRAFT, headline=False)
-        article5 = mommy.make(Article, publication=BaseArticle.ARCHIVED, headline=True)
-        article6 = mommy.make(Article, publication=BaseArticle.ARCHIVED, headline=False)
+        article_class = get_article_class()
+        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=True)
+        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=False)
+        article5 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=True)
+        article6 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=False)
 
-        homepage = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=False)
+        homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
         homepage.homepage_for_site = Site.objects.get_current()
         homepage.save()
 
@@ -270,15 +270,15 @@ class HeadlineTest(TestCase):
         self.assertEqual([article1], headlines)
 
     def test_get_headlines_edit_perms(self):
-        Article = get_article_class()
-        article1 = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=True)
-        article2 = mommy.make(Article, publication=BaseArticle.DRAFT, headline=True)
-        article3 = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=False)
-        article4 = mommy.make(Article, publication=BaseArticle.DRAFT, headline=False)
-        article5 = mommy.make(Article, publication=BaseArticle.ARCHIVED, headline=True)
-        article6 = mommy.make(Article, publication=BaseArticle.ARCHIVED, headline=False)
+        article_class = get_article_class()
+        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=True)
+        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=False)
+        article5 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=True)
+        article6 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=False)
 
-        homepage = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=False)
+        homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
         homepage.homepage_for_site = Site.objects.get_current()
         homepage.save()
 
@@ -286,31 +286,52 @@ class HeadlineTest(TestCase):
         self.assertEqual(sorted([article1, article2], key=lambda x: x.id), sorted(headlines, key=lambda x: x.id))
 
     def test_get_headlines_not_homepage(self):
-        Article = get_article_class()
-        article1 = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=True)
-        article2 = mommy.make(Article, publication=BaseArticle.DRAFT, headline=True)
-        article3 = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=False)
-        article4 = mommy.make(Article, publication=BaseArticle.DRAFT, headline=False)
-        article5 = mommy.make(Article, publication=BaseArticle.ARCHIVED, headline=True)
-        article6 = mommy.make(Article, publication=BaseArticle.ARCHIVED, headline=False)
+        article_class = get_article_class()
+        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=True)
+        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=False)
+        article5 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=True)
+        article6 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=False)
 
-        not_homepage = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=False)
+        not_homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
 
         headlines = list(get_headlines(not_homepage))
         self.assertEqual([], headlines)
 
     def test_get_headlines_other_homepage(self):
-        Article = get_article_class()
-        article1 = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=True)
-        article2 = mommy.make(Article, publication=BaseArticle.DRAFT, headline=True)
-        article3 = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=False)
-        article4 = mommy.make(Article, publication=BaseArticle.DRAFT, headline=False)
-        article5 = mommy.make(Article, publication=BaseArticle.ARCHIVED, headline=True)
-        article6 = mommy.make(Article, publication=BaseArticle.ARCHIVED, headline=False)
+        article_class = get_article_class()
+        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=True)
+        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=False)
+        article5 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=True)
+        article6 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=False)
 
-        other_homepage = mommy.make(Article, publication=BaseArticle.PUBLISHED, headline=False)
+        other_homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
         other_homepage.homepage_for_site = mommy.make(Site)
         other_homepage.save()
 
         headlines = list(get_headlines(other_homepage))
         self.assertEqual([], headlines)
+
+    def test_get_headlines_other_site(self):
+        article_class = get_article_class()
+        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
+        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
+
+        other_site = mommy.make(Site)
+        article2.sites.clear()
+        article2.sites.add(other_site)
+        article2.save()
+
+        article3.sites.clear()
+        article3.save()
+
+        homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        homepage.homepage_for_site = Site.objects.get_current()
+        homepage.save()
+
+        headlines = list(get_headlines(homepage))
+        self.assertEqual([article1], headlines)

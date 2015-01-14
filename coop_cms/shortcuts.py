@@ -3,6 +3,7 @@
 
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.contrib.sites.models import Site
 from django.http import Http404, HttpResponsePermanentRedirect
 from django.shortcuts import get_object_or_404
 from django.utils.translation import get_language
@@ -77,7 +78,7 @@ def get_headlines(article, editable=False):
             queryset = queryset.filter(publication__in=(BaseArticle.PUBLISHED, BaseArticle.DRAFT))
         else:
             queryset = queryset.filter(publication=BaseArticle.PUBLISHED)
-        return queryset.order_by("-publication_date")
+        return queryset.filter(sites=Site.objects.get_current()).order_by("-publication_date")
     return article_class.objects.none()
 
 
