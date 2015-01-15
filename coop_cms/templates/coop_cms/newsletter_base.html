@@ -6,9 +6,6 @@
   <title>{{newsletter.subject}}</title>
   {% if editable %}
     {% include "coop_cms/_js_includes.html" %}
-    {% if_cms_edition %}
-      {% cms_form_media %}
-    {% endif %}
     {% coop_bar_headers %}
   {% endif %}
   {% if_cms_edition %}
