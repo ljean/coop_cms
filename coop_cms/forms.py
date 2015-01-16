@@ -380,7 +380,7 @@ class NewLinkForm(WithNavigationModelForm):
         fields = ('title', 'url',)
     
 
-class NewNewsletterForm(forms.ModelForm):
+class NewsletterSettingsForm(forms.ModelForm):
     """Newsletter creation form"""
 
     class Meta:
@@ -396,7 +396,7 @@ class NewNewsletterForm(forms.ModelForm):
         )
 
     def __init__(self, user, *args, **kwargs):
-        super(NewNewsletterForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(NewsletterSettingsForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
         tpl_choices = get_newsletter_templates(None, user)
         if tpl_choices:
             self.fields["template"] = forms.ChoiceField(choices=tpl_choices)

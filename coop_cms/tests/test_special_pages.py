@@ -14,7 +14,7 @@ from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 from django.test.client import RequestFactory
 
 from coop_cms.tests import BaseTestCase
-from coop_cms.views import csrf_failure
+from coop_cms.views.webutils import csrf_failure
 
 
 @skipIf(getattr(settings, 'COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW', False), "coo_cms csrf failure disabled")

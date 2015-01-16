@@ -5,9 +5,9 @@ if 'localeurl' in settings.INSTALLED_APPS:
     from localeurl.models import patch_reverse
     patch_reverse()
 
-import logging
-from datetime import datetime
 from bs4 import BeautifulSoup
+from datetime import datetime
+import logging
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType

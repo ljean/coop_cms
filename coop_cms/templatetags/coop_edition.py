@@ -4,8 +4,6 @@ coop_edition template tags
 used for magic form
 """
 
-import logging
-
 from django import template
 from django.core.context_processors import csrf
 from django.template.loader import find_template, TemplateDoesNotExist
@@ -14,11 +12,9 @@ from django.utils.safestring import mark_safe
 
 from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleEditNode
 
+from coop_cms.logger import logger
 from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
 from coop_cms.settings import get_article_class
-
-logger = logging.getLogger("coop_cms")
-
 
 register = template.Library()
 
@@ -135,6 +131,7 @@ def coop_fragments(parser, token):
             kwargs[k] = v
     return FragmentEditNode(lookup, kwargs)
 
+
 ################################################################################
 class ArticleSummaryEditNode(DjalohaEditNode):
     def render(self, context):
@@ -143,11 +140,13 @@ class ArticleSummaryEditNode(DjalohaEditNode):
         #context.dicts[0]['can_edit_template'] = True
         return super(ArticleSummaryEditNode, self).render(context)
 
+
 @register.tag
 def article_summary_edit(parser, token):
     Article = get_article_class()
     id = token.split_contents()[1]
     return ArticleSummaryEditNode(Article, {'id': id}, 'summary')
+
 
 ################################################################################
 class ArticleTitleNode(template.Node):
@@ -160,6 +159,7 @@ class ArticleTitleNode(template.Node):
             _(u" [EDITION]") if is_edition_mode else u"",
             _(u" [DRAFT]") if article.publication == BaseArticle.PUBLISHED else u"",
         )
+
 
 @register.tag
 def article_title(parser, token):
@@ -186,8 +186,8 @@ class CmsFormMediaNode(template.Node):
 def cms_form_media(parser, token):
     return CmsFormMediaNode()
 
-
 ################################################################################
+
 
 def _extract_if_node_args(parser, token):
     nodelist_true = parser.parse(('else', 'endif'))
@@ -198,6 +198,7 @@ def _extract_if_node_args(parser, token):
     else:
         nodelist_false = template.NodeList()
     return nodelist_true, nodelist_false
+
 
 class IfCmsEditionNode(template.Node):
     def __init__(self, nodelist_true, nodelist_false):
@@ -219,20 +220,22 @@ class IfCmsEditionNode(template.Node):
         else:
             return self.nodelist_false.render(context)
 
+
 @register.tag
 def if_cms_edition(parser, token):
     nodelist_true, nodelist_false = _extract_if_node_args(parser, token)
     return IfCmsEditionNode(nodelist_true, nodelist_false)
 
+
 class IfNotCmsEditionNode(IfCmsEditionNode):
     def _check_condition(self, context):
         return not super(IfNotCmsEditionNode, self)._check_condition(context)
-        
+
+
 @register.tag
 def if_not_cms_edition(parser, token):
     nodelist_true, nodelist_false = _extract_if_node_args(parser, token)
     return IfNotCmsEditionNode(nodelist_true, nodelist_false)
-
 
 ################################################################################
 
@@ -242,6 +245,7 @@ CMS_FORM_TEMPLATE = """
     {% include "coop_cms/_form_error.html" with errs=form.non_field_errors %}
     {{inner}} <input type="submit" style="display: none"> </form>
 """
+
 
 class SafeWrapper:
 
@@ -271,6 +275,7 @@ class SafeWrapper:
             return mark_safe(value)
         return value
 
+
 class FormWrapper:
 
     def __init__(self, form, obj, logo_size=None, logo_crop=None):
@@ -282,11 +287,13 @@ class FormWrapper:
     def __getitem__(self, field, logo_size=None):
         if field in self._form.fields.keys():
             t = template.Template("""
-                    {%% with form.%s.errors as errs %%}{%% include "coop_cms/_form_error.html" %%}{%% endwith %%}{{form.%s}}
+                    {%% with form.%s.errors as errs %%}
+                    {%% include "coop_cms/_form_error.html" %%}{%% endwith %%}{{form.%s}}
                 """ % (field, field))
             return t.render(template.Context({'form': self._form}))
         else:
             return getattr(self._obj, field)
+
 
 class CmsEditNode(template.Node):
 
@@ -330,7 +337,7 @@ class CmsEditNode(template.Node):
             inner_context[self.var_name] = obj
         if formset:
             inner_context['formset'] = formset
-        if objects != None:
+        if objects is not None:
             inner_context['objects'] = objects
 
         safe_context = inner_context.copy()
@@ -383,6 +390,7 @@ class CmsEditNode(template.Node):
         outer_context['inner'] = mark_safe(inner_value) if (form or formset) else inner_value
         return t.render(template.Context(outer_context))
 
+
 @register.tag
 def cms_edit(parser, token):
     args = token.split_contents()[1:]
@@ -397,6 +405,7 @@ def cms_edit(parser, token):
 
 ################################################################################
 
+
 class CmsNoSpace(template.Node):
     def __init__(self, nodelist):
         self.nodelist = nodelist
@@ -404,6 +413,7 @@ class CmsNoSpace(template.Node):
     def render(self, context):
         html = self.nodelist.render(context).strip()
         return ' '.join(html.split())
+
 
 @register.tag
 def cms_nospace(parser, token):

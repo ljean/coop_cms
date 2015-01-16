@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """generic views"""
 
-import logging
-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message, error as error_message
 from django.core.exceptions import PermissionDenied
@@ -18,7 +16,7 @@ from django.views.generic.list import ListView as DjangoListView
 
 from djaloha import utils as djaloha_utils
 
-logger = logging.getLogger("coop_cms")
+from coop_cms.logger import logger
 
 
 class ListView(DjangoListView):
@@ -107,7 +105,18 @@ class EditableObjectView(View):
     def handle_object_not_found(self):
         """called if object not found"""
         pass
-    
+
+    def get_form_class(self):
+        return self.form_class
+
+    def get_form_kwargs(self):
+        return {}
+
+    def get_form(self, *args, **kwargs):
+        kwargs.update(self.get_form_kwargs())
+        form_class = self.get_form_class()
+        return form_class(*args, **kwargs)
+
     def get(self, request, *args, **kwargs):
         """handle http get -> view"""
         try:
@@ -126,7 +135,7 @@ class EditableObjectView(View):
             logger.warning("PermissionDenied")
             raise PermissionDenied
         
-        self.form = self.form_class(instance=self.object)
+        self.form = self.get_form(instance=self.object)
         
         return render_to_response(
             self.get_template(),
@@ -148,8 +157,8 @@ class EditableObjectView(View):
         if not self.can_edit_object():
             logger.warning("PermissionDenied")
             raise PermissionDenied
-        
-        self.form = self.form_class(request.POST, request.FILES, instance=self.object)
+
+        self.form = self.get_form(request.POST, request.FILES, instance=self.object)
 
         forms_args = djaloha_utils.extract_forms_args(request.POST)
         djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)

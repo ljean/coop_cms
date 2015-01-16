@@ -24,6 +24,141 @@ from coop_cms.tests import BaseTestCase, UserBaseTestCase
 from coop_cms.utils import make_links_absolute
 
 
+class NewsletterSettingsTest(UserBaseTestCase):
+
+    def setUp(self):
+        super(NewsletterSettingsTest, self).setUp()
+        self._COOP_CMS_NEWSLETTER_TEMPLATES = getattr(settings, 'COOP_CMS_NEWSLETTER_TEMPLATES', None)
+        settings.COOP_CMS_NEWSLETTER_TEMPLATES = (
+            ('test/newsletter_blue.html', 'Blue'),
+            ('test/newsletter_red.html', 'Blue'),
+        )
+
+    def tearDown(self):
+        super(NewsletterSettingsTest, self).tearDown()
+        settings.COOP_CMS_NEWSLETTER_TEMPLATES = self._COOP_CMS_NEWSLETTER_TEMPLATES
+
+    def test_view_create_newsletter(self):
+        self._log_as_editor()
+        url = reverse("coop_cms_new_newsletter")
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(Newsletter.objects.count(), 0)
+
+    def test_create_newsletter(self):
+        self._log_as_editor()
+        url = reverse("coop_cms_new_newsletter")
+
+        data = {
+            "subject": "test",
+            "template": "test/newsletter_blue.html",
+            'items': []
+        }
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(Newsletter.objects.count(), 1)
+        newsletter = Newsletter.objects.all()[0]
+
+        self.assertEqual(newsletter.subject, data["subject"])
+        self.assertEqual(newsletter.template, data["template"])
+
+    def test_view_edit_newsletter(self):
+        self._log_as_editor()
+        newsletter = mommy.make(
+            Newsletter,
+            subject="a little intro for this newsletter",
+            template="test/newsletter_blue.html",
+        )
+
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_edit_newsletter(self):
+        self._log_as_editor()
+        newsletter = mommy.make(
+            Newsletter,
+            subject="a little intro for this newsletter",
+            template="test/newsletter_red.html",
+        )
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        data = {
+            "subject": "test",
+            "template": "test/newsletter_blue.html",
+            'items': []
+        }
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(Newsletter.objects.count(), 1)
+        newsletter = Newsletter.objects.all()[0]
+
+        self.assertEqual(newsletter.subject, data["subject"])
+        self.assertEqual(newsletter.template, data["template"])
+
+    def test_view_create_newsletter_not_logged(self):
+        url = reverse("coop_cms_new_newsletter")
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_create_newsletter_not_logged(self):
+        url = reverse("coop_cms_new_newsletter")
+
+        data = {
+            "subject": "test",
+            "template": "test/newsletter_blue.html",
+            'items': []
+        }
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(Newsletter.objects.count(), 0)
+
+    def test_view_edit_newsletter_not_logged(self):
+        newsletter = mommy.make(
+            Newsletter,
+            subject="a little intro for this newsletter",
+            template="test/newsletter_blue.html",
+        )
+
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_edit_newsletter_not_logged(self):
+        subject = "a little intro for this newsletter"
+        newsletter = mommy.make(
+            Newsletter,
+            subject=subject,
+            template="test/newsletter_red.html",
+        )
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        data = {
+            "subject": "test",
+            "template": "test/newsletter_blue.html",
+            'items': []
+        }
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 302)
+
+        self.assertEqual(Newsletter.objects.count(), 1)
+        newsletter = Newsletter.objects.all()[0]
+
+        self.assertEqual(newsletter.subject, subject)
+
+
 class NewsletterTest(UserBaseTestCase):
 
     def test_create_article_for_newsletter(self):
@@ -165,8 +300,10 @@ class NewsletterTest(UserBaseTestCase):
         
     def test_edit_newsletter_no_articles(self):
         self._log_as_editor()
-        original_data = {'content': "a little intro for this newsletter",
-            'template': "test/newsletter_blue.html"}
+        original_data = {
+            'content': "a little intro for this newsletter",
+            'template': "test/newsletter_blue.html"
+        }
         newsletter = mommy.make(Newsletter, **original_data)
         
         url = reverse('coop_cms_edit_newsletter', args=[newsletter.id])

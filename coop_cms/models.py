@@ -2,7 +2,7 @@
 """models"""
 
 from datetime import datetime
-import logging
+import logger
 import os
 import os.path
 import shutil
@@ -29,6 +29,7 @@ from django.utils.translation import ugettext_lazy as _
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
 
+from coop_cms.logger import logger
 from coop_cms.settings import (
     get_article_class,
     get_article_logo_size,
@@ -48,7 +49,6 @@ from coop_cms.utils import dehtml, RequestManager, RequestNotFound
 
 
 ADMIN_THUMBS_SIZE = '60x60'
-logger = logging.getLogger("coop_cms")
 
 
 def get_object_label(content_type, object):

@@ -3,14 +3,13 @@
 Coop_cms settings : central place for coop_cms settings
 the settings should be accessed from here and not directly from django.conf.settings
 """
-import logging
-
 from django.conf import settings as django_settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.utils.importlib import import_module
 
-logger = logging.getLogger("coop_cms")
+from coop_cms.logger import logger
+
 
 COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'
 DEPRECATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'basic_cms.NavTree')
@@ -324,10 +323,10 @@ def get_article_views():
     try:
         article_views = getattr(django_settings, 'COOP_CMS_ARTICLE_VIEWS')
     except AttributeError:
-        from coop_cms.views import ArticleView, EditArticleView
+        from coop_cms.views.articles import ArticleView
         return {
             'article_view': ArticleView,
-            'edit_article_view': EditArticleView,
+            'edit_article_view': ArticleView,
         }
     else:
         expected_views = ('article_view', 'edit_article_view')
