@@ -62,7 +62,7 @@ def dehtml(text, allow_spaces=False):
         return text
 
 
-def make_links_absolute(html_content, newsletter=None):
+def make_links_absolute(html_content, newsletter=None, site_prefix=""):
     """replace all local url with site_prefixed url"""
     
     def make_abs(url):
@@ -73,8 +73,10 @@ def make_links_absolute(html_content, newsletter=None):
         if url.startswith('/'):
             url = '%s%s' % (site_prefix, url)
         return url
-    
-    site_prefix = newsletter.get_site_prefix() if newsletter else settings.COOP_CMS_SITE_PREFIX
+
+    if not site_prefix:
+        site_prefix = newsletter.get_site_prefix() if newsletter else settings.COOP_CMS_SITE_PREFIX
+
     soup = BeautifulSoup(html_content)
     for a_tag in soup.find_all("a"):
         if a_tag.get("href", None):
@@ -87,8 +89,14 @@ def make_links_absolute(html_content, newsletter=None):
     return soup.prettify()
         
 
-def send_newsletter(newsletter, dests):
-    """send newsletter"""
+def send_newsletter(newsletter, dests, list_unsubscribe=None):
+    """
+    send newsletter
+    newsletter : a newsletter object
+    dests : the list of recipients
+    list_unsubscribe : a list of url for unsubscribe
+    """
+
     #Force the newsletter as public
     newsletter.is_public = True
     newsletter.save()
@@ -119,7 +127,11 @@ def send_newsletter(newsletter, dests):
     connection = get_connection()
     from_email = settings.COOP_CMS_FROM_EMAIL
     reply_to = getattr(settings, 'COOP_CMS_REPLY_TO', None)
-    headers = {'Reply-To': reply_to} if reply_to else None
+    headers = {}
+    if reply_to:
+        headers['Reply-To'] = reply_to
+    if list_unsubscribe:
+        headers['List-Unsubscribe'] = ", ".join(["<{0}>".format(url) for url in list_unsubscribe])
 
     for address in dests:
         text = dehtml(html_text)
