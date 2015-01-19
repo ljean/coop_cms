@@ -754,9 +754,9 @@ class ArticleFormTest(BaseTestCase):
         self.assertNotEqual(article.summary, data['summary'])
 
 
-@override_settings(COOP_CMS_NEWSLETTER_SETTINGS_FORM="coop_cms.apps.test_app.forms.MyNewsletterSettingsForm")
 class MyNewsletterSettingsTest(NewsletterSettingsTest):
 
+    @override_settings(COOP_CMS_NEWSLETTER_SETTINGS_FORM="coop_cms.apps.test_app.forms.MyNewsletterSettingsForm")
     def test_additional_field_on_edit(self):
         self._log_as_editor()
         newsletter = mommy.make(
@@ -772,6 +772,7 @@ class MyNewsletterSettingsTest(NewsletterSettingsTest):
         soup = BeautifulSoup(response.content)
         self.assertEqual(1, len(soup.select("#id_dummy")))
 
+    @override_settings(COOP_CMS_NEWSLETTER_SETTINGS_FORM="coop_cms.apps.test_app.forms.MyNewsletterSettingsForm")
     def test_additional_field_on_create(self):
         self._log_as_editor()
 
