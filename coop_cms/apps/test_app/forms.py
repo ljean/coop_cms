@@ -6,7 +6,7 @@ import floppyforms as forms
 from djaloha.widgets import AlohaInput
 
 from coop_cms.apps.test_app.models import TestClass
-from coop_cms.forms import AlohaEditableModelForm, NewArticleForm, ArticleSettingsForm
+from coop_cms.forms import AlohaEditableModelForm, NewArticleForm, ArticleSettingsForm, NewsletterSettingsForm
 
 
 class TestClassForm(AlohaEditableModelForm):
@@ -26,5 +26,10 @@ class MyNewArticleForm(NewArticleForm):
 
 
 class MyArticleSettingsForm(ArticleSettingsForm):
+    """for unit-testing"""
+    dummy = forms.CharField(required=False)
+
+
+class MyNewsletterSettingsForm(NewsletterSettingsForm):
     """for unit-testing"""
     dummy = forms.CharField(required=False)

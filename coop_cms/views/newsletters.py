@@ -19,7 +19,7 @@ from coop_cms import forms
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
-from coop_cms.settings import get_newsletter_form
+from coop_cms.settings import get_newsletter_form, get_newsletter_settings_form
 from coop_cms.utils import send_newsletter
 
 
@@ -33,13 +33,15 @@ def newsletter_settings(request, newsletter_id=None):
     else:
         newsletter = None
 
+    form_class = get_newsletter_settings_form()
+
     if request.method == "POST":
-        form = forms.NewsletterSettingsForm(request.user, request.POST, instance=newsletter)
+        form = form_class(request.user, request.POST, instance=newsletter)
         if form.is_valid():
             newsletter = form.save()
             return HttpResponseRedirect(newsletter.get_edit_url())
     else:
-        form = forms.NewsletterSettingsForm(request.user, instance=newsletter)
+        form = form_class(request.user, instance=newsletter)
 
     return render_to_response(
         'coop_cms/popup_newsletter_settings.html',

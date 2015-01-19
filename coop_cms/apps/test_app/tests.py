@@ -13,12 +13,14 @@ from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.test.utils import override_settings
 
 from model_mommy import mommy
 
 from coop_cms.apps.test_app.models import TestClass
 from coop_cms import settings as coop_settings
-from coop_cms.models import BaseArticle
+from coop_cms.models import BaseArticle, Newsletter
+from coop_cms.tests.test_newsletter import NewsletterSettingsTest
 
 try:
     AUTH_LOGIN_NAME = "auth_login"
@@ -750,3 +752,33 @@ class ArticleFormTest(BaseTestCase):
         self.assertEqual(article_class.objects.count(), 1)
         article = article_class.objects.all()[0]
         self.assertNotEqual(article.summary, data['summary'])
+
+
+@override_settings(COOP_CMS_NEWSLETTER_SETTINGS_FORM="coop_cms.apps.test_app.forms.MyNewsletterSettingsForm")
+class MyNewsletterSettingsTest(NewsletterSettingsTest):
+
+    def test_additional_field_on_edit(self):
+        self._log_as_editor()
+        newsletter = mommy.make(
+            Newsletter,
+            subject="a little intro for this newsletter",
+            template="test/newsletter_blue.html",
+        )
+
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(1, len(soup.select("#id_dummy")))
+
+    def test_additional_field_on_create(self):
+        self._log_as_editor()
+
+        url = reverse("coop_cms_new_newsletter")
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(1, len(soup.select("#id_dummy")))
+
