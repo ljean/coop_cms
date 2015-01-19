@@ -14,6 +14,7 @@ from django.core import mail
 from django.core import management
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
+from django.test.utils import override_settings
 from django.utils import timezone
 
 from model_mommy import mommy
@@ -24,6 +25,7 @@ from coop_cms.tests import BaseTestCase, UserBaseTestCase
 from coop_cms.utils import make_links_absolute
 
 
+@override_settings(COOP_CMS_NEWSLETTER_SETTINGS_FORM='')
 class NewsletterSettingsTest(UserBaseTestCase):
 
     def setUp(self):
@@ -102,6 +104,196 @@ class NewsletterSettingsTest(UserBaseTestCase):
 
         self.assertEqual(newsletter.subject, data["subject"])
         self.assertEqual(newsletter.template, data["template"])
+
+    def test_view_newsletter_items(self):
+        self._log_as_editor()
+        article_class = get_article_class()
+
+        site = Site.objects.get_current()
+        other_site = mommy.make(Site)
+
+        article_1 = mommy.make(article_class, in_newsletter=True)
+        article_2 = mommy.make(article_class, in_newsletter=True, sites=[other_site])
+        article_3 = mommy.make(article_class, in_newsletter=True)
+        article_4 = mommy.make(article_class, in_newsletter=False)
+
+        article_2.sites.clear()
+        article_2.sites.add(other_site)
+        article_2.save()
+
+        ct = ContentType.objects.get_for_model(article_class)
+        self.assertEqual(3, NewsletterItem.objects.count())
+        item_1 = NewsletterItem.objects.get(content_type=ct, object_id=article_1.id)
+        item_2 = NewsletterItem.objects.get(content_type=ct, object_id=article_2.id)
+        item_3 = NewsletterItem.objects.get(content_type=ct, object_id=article_3.id)
+
+        newsletter = mommy.make(
+            Newsletter,
+            subject="a little intro for this newsletter",
+            template="test/newsletter_red.html",
+            items=[item_1]
+        )
+
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.content)
+
+        options = soup.select("#id_items option")
+        self.assertEqual(2, len(options))
+        self.assertEqual(
+            sorted([int(id_["value"]) for id_ in options]),
+            sorted([item.id for item in [item_1, item_3]])
+        )
+
+        options = soup.select("#id_items option[selected=selected]")
+        self.assertEqual(1, len(options))
+        self.assertEqual(
+            sorted([int(id_["value"]) for id_ in options]),
+            sorted([item.id for item in [item_1]])
+        )
+
+    def test_save_newsletter_items(self):
+        self._log_as_editor()
+        article_class = get_article_class()
+
+        site = Site.objects.get_current()
+        other_site = mommy.make(Site)
+
+        article_1 = mommy.make(article_class, in_newsletter=True)
+        article_2 = mommy.make(article_class, in_newsletter=True)
+        article_3 = mommy.make(article_class, in_newsletter=True)
+
+        ct = ContentType.objects.get_for_model(article_class)
+        self.assertEqual(3, NewsletterItem.objects.count())
+        item_1 = NewsletterItem.objects.get(content_type=ct, object_id=article_1.id)
+        item_2 = NewsletterItem.objects.get(content_type=ct, object_id=article_2.id)
+        item_3 = NewsletterItem.objects.get(content_type=ct, object_id=article_3.id)
+
+        newsletter = mommy.make(
+            Newsletter,
+            subject="a little intro for this newsletter",
+            template="test/newsletter_red.html",
+            items=[item_1]
+        )
+
+        data = {
+            "subject": "test",
+            "template": "test/newsletter_blue.html",
+            'items': [item_2.id, item_3.id]
+        }
+
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+
+        newsletter = Newsletter.objects.get(id=newsletter.id)
+        self.assertEqual(newsletter.subject, data["subject"])
+        self.assertEqual(newsletter.template, data["template"])
+        self.assertEqual(
+            list(sorted(n.id for n in newsletter.items.all())),
+            list(sorted(data["items"]))
+        )
+
+    def test_save_newsletter_items_other_site(self):
+        self._log_as_editor()
+        article_class = get_article_class()
+
+        site = Site.objects.get_current()
+        other_site = mommy.make(Site)
+
+        article_1 = mommy.make(article_class, in_newsletter=True)
+        article_2 = mommy.make(article_class, in_newsletter=True)
+        article_3 = mommy.make(article_class, in_newsletter=True)
+
+        article_2.sites.clear()
+        article_2.sites.add(other_site)
+        article_2.save()
+
+        ct = ContentType.objects.get_for_model(article_class)
+        self.assertEqual(3, NewsletterItem.objects.count())
+        item_1 = NewsletterItem.objects.get(content_type=ct, object_id=article_1.id)
+        item_2 = NewsletterItem.objects.get(content_type=ct, object_id=article_2.id)
+        item_3 = NewsletterItem.objects.get(content_type=ct, object_id=article_3.id)
+
+        newsletter = mommy.make(
+            Newsletter,
+            subject="a little intro for this newsletter",
+            template="test/newsletter_red.html",
+            items=[item_1]
+        )
+
+        data = {
+            "subject": "test",
+            "template": "test/newsletter_blue.html",
+            'items': [item_2.id, item_3.id]
+        }
+
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+
+        self.assertEqual(len(soup.select(".errorlist")), 1)
+        self.assertEqual(len(soup.select("#id_items")[0].parent.select(".errorlist")), 1)
+
+        newsletter = Newsletter.objects.get(id=newsletter.id)
+        self.assertNotEqual(newsletter.subject, data["subject"])
+        self.assertNotEqual(newsletter.template, data["template"])
+        self.assertEqual([item_1.id], [x.id for x in newsletter.items.all()])
+
+    def test_save_newsletter_items_no_newsletter(self):
+        self._log_as_editor()
+        article_class = get_article_class()
+
+        site = Site.objects.get_current()
+        other_site = mommy.make(Site)
+
+        article_1 = mommy.make(article_class, in_newsletter=True)
+        article_2 = mommy.make(article_class, in_newsletter=True)
+        article_3 = mommy.make(article_class, in_newsletter=True)
+
+        ct = ContentType.objects.get_for_model(article_class)
+        self.assertEqual(3, NewsletterItem.objects.count())
+        item_1 = NewsletterItem.objects.get(content_type=ct, object_id=article_1.id)
+        item_2 = NewsletterItem.objects.get(content_type=ct, object_id=article_2.id)
+        item_3 = NewsletterItem.objects.get(content_type=ct, object_id=article_3.id)
+
+        article_2.in_newsletter = False
+        article_2.save()
+
+        self.assertEqual(2, NewsletterItem.objects.count())
+
+        newsletter = mommy.make(
+            Newsletter,
+            subject="a little intro for this newsletter",
+            template="test/newsletter_red.html",
+            items=[item_1]
+        )
+
+        data = {
+            "subject": "test",
+            "template": "test/newsletter_blue.html",
+            'items': [item_2.id, item_3.id]
+        }
+
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+
+        self.assertEqual(len(soup.select(".errorlist")), 1)
+        self.assertEqual(len(soup.select("#id_items")[0].parent.select(".errorlist")), 1)
+
+        newsletter = Newsletter.objects.get(id=newsletter.id)
+        self.assertNotEqual(newsletter.subject, data["subject"])
+        self.assertNotEqual(newsletter.template, data["template"])
+        self.assertEqual([item_1.id], [x.id for x in newsletter.items.all()])
 
     def test_view_create_newsletter_not_logged(self):
         url = reverse("coop_cms_new_newsletter")

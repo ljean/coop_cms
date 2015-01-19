@@ -39,7 +39,7 @@ def newsletter_settings(request, newsletter_id=None):
         form = form_class(request.user, request.POST, instance=newsletter)
         if form.is_valid():
             newsletter = form.save()
-            return HttpResponseRedirect(newsletter.get_edit_url())
+            return HttpResponseRedirect(newsletter.get_absolute_url())
     else:
         form = form_class(request.user, instance=newsletter)
 

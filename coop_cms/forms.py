@@ -420,6 +420,14 @@ class NewsletterSettingsForm(forms.ModelForm):
             choices=self.fields['items'].choices, force_template=True
         )
 
+    def clean_items(self):
+        items = self.cleaned_data["items"]
+        choice_ids = [value for (value, label) in self.fields['items'].choices]
+        for item in items:
+            if item.id not in choice_ids:
+                raise ValidationError(_(u"Invalid choice"))
+        return items
+
 
 class PublishArticleForm(forms.ModelForm):
     """Publish article form"""
