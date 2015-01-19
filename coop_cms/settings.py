@@ -10,9 +10,22 @@ from django.utils.importlib import import_module
 
 from coop_cms.logger import logger
 
-
 COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'
 DEPRECATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'basic_cms.NavTree')
+
+
+def load_class(settings_key, default_value):
+    """returns the form to be used for creating a new article"""
+    full_class_name = getattr(django_settings, settings_key, '') or default_value
+    if full_class_name:
+        try:
+            module_name, class_name = full_class_name.rsplit('.', 1)
+        except ValueError:
+            raise ImportError("Unable to import {0}: full path is required".format(full_class_name))
+        module = import_module(module_name)
+        class_object = getattr(module, class_name)
+        return class_object
+    return None
 
 
 def get_navigable_content_types():
@@ -60,15 +73,12 @@ def get_article_class():
     if hasattr(get_article_class, '_cache_class'):
         return getattr(get_article_class, '_cache_class')
     else:
-        article_class = None
-        full_class_name = getattr(django_settings, 'COOP_CMS_ARTICLE_CLASS', None)
-        if not full_class_name and ('coop_cms.apps.basic_cms' in django_settings.INSTALLED_APPS):
-            full_class_name = 'coop_cms.apps.basic_cms.models.Article'
-        if full_class_name:
-            module_name, class_name = full_class_name.rsplit('.', 1)
-            module = import_module(module_name)
-            article_class = getattr(module, class_name)
-        else:
+        default_value = ""
+        if 'coop_cms.apps.basic_cms' in django_settings.INSTALLED_APPS:
+            default_value = 'coop_cms.apps.basic_cms.models.Article'
+
+        article_class = load_class('COOP_CMS_ARTICLE_CLASS', default_value)
+        if not article_class:
             raise Exception('No article class configured')
 
         setattr(get_article_class, '_cache_class', article_class)
@@ -82,47 +92,17 @@ def get_default_logo():
 
 def get_article_form():
     """returns a form to be used for editing an article"""
-    try:
-        full_class_name = getattr(django_settings, 'COOP_CMS_ARTICLE_FORM')
-        module_name, class_name = full_class_name.rsplit('.', 1)
-        module = import_module(module_name)
-        article_form = getattr(module, class_name)
-
-    except AttributeError:
-        from coop_cms.forms import ArticleForm
-        article_form = ArticleForm
-
-    return article_form
+    return load_class('COOP_CMS_ARTICLE_FORM', 'coop_cms.forms.ArticleForm')
 
 
 def get_article_settings_form():
     """returns the form to use for editing article settings"""
-    try:
-        full_class_name = getattr(django_settings, 'COOP_CMS_ARTICLE_SETTINGS_FORM')
-        module_name, class_name = full_class_name.rsplit('.', 1)
-        module = import_module(module_name)
-        article_form = getattr(module, class_name)
-
-    except AttributeError:
-        from coop_cms.forms import ArticleSettingsForm
-        article_form = ArticleSettingsForm
-
-    return article_form
+    return load_class('COOP_CMS_ARTICLE_SETTINGS_FORM', 'coop_cms.forms.ArticleSettingsForm')
 
 
 def get_new_article_form():
     """returns the form to be used for creating a new article"""
-    try:
-        full_class_name = getattr(django_settings, 'COOP_CMS_NEW_ARTICLE_FORM')
-        module_name, class_name = full_class_name.rsplit('.', 1)
-        module = import_module(module_name)
-        article_form = getattr(module, class_name)
-
-    except AttributeError:
-        from coop_cms.forms import NewArticleForm
-        article_form = NewArticleForm
-
-    return article_form
+    return load_class('COOP_CMS_NEW_ARTICLE_FORM', 'coop_cms.forms.NewArticleForm')
 
 
 def get_newsletter_templates(newsletter, user):
@@ -135,16 +115,12 @@ def get_newsletter_templates(newsletter, user):
 
 def get_newsletter_form():
     """returns the form to use for editing a newsletter"""
-    try:
-        full_class_name = getattr(django_settings, 'COOP_CMS_NEWSLETTER_FORM')
-    except AttributeError:
-        from coop_cms.forms import NewsletterForm
-        newsletter_form = NewsletterForm
-    else:
-        module_name, class_name = full_class_name.rsplit('.', 1)
-        module = import_module(module_name)
-        newsletter_form = getattr(module, class_name)
-    return newsletter_form
+    return load_class('COOP_CMS_NEWSLETTER_FORM', 'coop_cms.forms.NewsletterForm')
+
+
+def get_newsletter_settings_form():
+    """returns the form to use for for newsletter settings"""
+    return load_class('COOP_CMS_NEWSLETTER_SETTINGS_FORM', 'coop_cms.forms.NewsletterSettingsForm')
 
 
 def get_article_templates(article, user):
