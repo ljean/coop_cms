@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
+misc. templatetags
+"""
 
 import os.path
 import unicodedata
@@ -7,7 +10,7 @@ from bs4 import BeautifulSoup
 
 from django import template
 from django.conf import settings
-from django.template import Context, RequestContext
+from django.template import RequestContext
 from django.template.loader import get_template
 from django.utils.text import slugify
 
@@ -19,6 +22,7 @@ from coop_cms.shortcuts import get_article
 from coop_cms.utils import dehtml as do_dehtml
 
 register = template.Library()
+
 
 ################################################################################
 class ArticleLinkNode(template.Node):
@@ -33,8 +37,8 @@ class ArticleLinkNode(template.Node):
         article_class = get_article_class()
         
         try:
-            v = template.Variable(self.title)
-            title = v.resolve(context)
+            variable = template.Variable(self.title)
+            title = variable.resolve(context)
         except template.VariableDoesNotExist:
             title = self.title.strip("'").strip('"')
         
@@ -124,7 +128,7 @@ def nlf_css(parser, token):
 def normalize_utf8_to_ascii(ustr):
     """utf to ascii"""
     try:
-        return unicodedata.normalize('NFKD', ustr).encode('ascii','ignore')
+        return unicodedata.normalize('NFKD', ustr).encode('ascii', 'ignore')
     except TypeError:
         return ustr
     
@@ -149,6 +153,7 @@ def index(seq, index_val):
 class CoopCategoryNode(template.Node):
     """get category in template context"""
     def __init__(self, cat_slug, var_name):
+        self.category = None
         cat = cat_slug.strip("'").strip('"')
         self.cat_var, self.cat = None, None
         if cat_slug == cat:
@@ -188,12 +193,12 @@ def basename(fullname):
 def get_parts(list_of_objs, number_of_parts):
     """slice"""
     nb_objs = len(list_of_objs)
-    nb_by_part, extra_nb = nb_objs/number_of_parts, nb_objs % number_of_parts
+    nb_by_part, extra_nb = nb_objs / number_of_parts, nb_objs % number_of_parts
     parts = []
     stop_index = 0
     for which_part in range(number_of_parts):
-        start_index = 0 if (stop_index==0) else (stop_index)
-        stop_index = start_index + nb_by_part + (1 if (which_part<extra_nb) else 0)
+        start_index = 0 if (stop_index == 0) else (stop_index)
+        stop_index = start_index + nb_by_part + (1 if (which_part < extra_nb) else 0)
         parts.append(list_of_objs[start_index:stop_index])
     return parts
 
@@ -204,7 +209,13 @@ def get_part(list_of_objs, partionning):
     which_part, number_of_parts = [int(x) for x in partionning.split("/")]
     parts = get_parts(list_of_objs, number_of_parts)
     return parts[which_part-1]
-    
+
+
+@register.filter
+def group_in_sublists(list_of_objs, subslist_size):
+    """group_in_sublists([1, 2, 3, 4], 2) --> [[1, 2], [3, 4]]"""
+    return [list_of_objs[i:i+subslist_size] for i in range(0, len(list_of_objs), subslist_size)]
+
 
 ################################################################################
 class ImageListNode(template.Node):
@@ -231,7 +242,7 @@ def coop_image_list(parser, token):
     args = token.split_contents()
     try:
         filter_name = args[1]
-        as_name = args[2]
+        #as_name = args[2]
         var_name = args[3]
     except IndexError:
         raise Exception(u"coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
@@ -240,6 +251,7 @@ def coop_image_list(parser, token):
 
 ################################################################################
 DEFAULT_ACCEPT_COOKIE_MESSAGE_TEMPLATE = 'coop_cms/_accept_cookies_message.html'
+
 
 class ShowAcceptCookieMessageNode(template.Node):
     """accept cookie message"""
@@ -251,8 +263,8 @@ class ShowAcceptCookieMessageNode(template.Node):
         """to html"""
         request = context.get('request', None)
         if not request.session.get('hide_accept_cookie_message', False):
-            t = get_template(self.template_name)
-            return t.render(RequestContext(request, {}))
+            template_ = get_template(self.template_name)
+            return template_.render(RequestContext(request, {}))
         else:
             return ""
 
