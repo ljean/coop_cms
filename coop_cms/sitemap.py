@@ -1,7 +1,6 @@
 # -*- coding:utf-8 -*-
 """sitemaps"""
 
-from django.db.models import Q
 from django.conf import settings
 from django.conf.urls import url
 from django.contrib.sitemaps import Sitemap
@@ -13,9 +12,9 @@ from coop_cms.settings import get_article_class, is_localized
 
 if is_localized():
     from localeurl.sitemaps import LocaleurlSitemap # pylint: disable=F0401
-    base_sitemap_class = LocaleurlSitemap
+    BaseSitemapClass = LocaleurlSitemap
 else:
-    base_sitemap_class = Sitemap
+    BaseSitemapClass = Sitemap
 
 
 class ViewSitemap(Sitemap):
@@ -25,16 +24,19 @@ class ViewSitemap(Sitemap):
     def items(self):
         """get items"""
         class Klass(object):
+            """a klass wrapper"""
             def __init__(self, name):
                 self.name = name
             
             def get_absolute_url(self):
+                """get url"""
                 return reverse(self.name)
             
         return [Klass(x) for x in self.view_names]
 
 
-class BaseSitemap(base_sitemap_class):
+class BaseSitemap(BaseSitemapClass):
+    """Base class"""
     _current_site = None
 
     def __init__(self, language, site):
@@ -45,9 +47,11 @@ class BaseSitemap(base_sitemap_class):
         self._site = site
 
     def get_urls(self, page=1, site=None, protocol=None):
+        """get urls"""
         return super(BaseSitemap, self).get_urls(page, self._site, protocol=protocol)
 
     def get_current_site(self):
+        """get current site"""
         if not self._current_site:
             self._current_site = Site.objects.get_current()
         return self._current_site
@@ -60,6 +64,7 @@ class ArticleSitemap(BaseSitemap):
     _sitemap_mode = None
 
     def get_sitemap_mode(self):
+        """define which articles must be included in sitemap"""
         site = self.get_current_site()
         if not self._sitemap_mode:
             try:
@@ -96,7 +101,7 @@ def get_sitemaps(langs=None):
     sitemaps = {}
     sites = Site.objects.all()
     if is_localized():
-        lang_codes = langs or [code for (code, _x) in settings.LANGUAGES]
+        lang_codes = langs or [code[0] for code in settings.LANGUAGES]
         for code in lang_codes:
             for site in sites:
                 site_suffix = "_{0}_{1}".format(site.id, code)
@@ -112,7 +117,7 @@ urlpatterns = (
     url(
         r'^sitemap\.xml$',
         'django.contrib.sitemaps.views.sitemap',
-        {'sitemaps': get_sitemaps},
+        {'sitemaps': get_sitemaps()},
         name="coop_cms_sitemap"
     ),
 )
