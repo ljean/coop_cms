@@ -331,3 +331,13 @@ if is_localized():
 def is_multi_site():
     """returns True if several sites are configured"""
     return Site.objects.count() > 1
+
+
+def get_img_folder(instance, filename):
+    """image folder"""
+    try:
+        img_root = django_settings.IMAGE_FOLDER
+    except AttributeError:
+        img_root = 'img'
+
+    return u'{0}/{1}'.format(img_root, filename)

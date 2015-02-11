@@ -2,7 +2,6 @@
 """models"""
 
 from datetime import datetime
-import logger
 import os
 import os.path
 import shutil
@@ -28,45 +27,34 @@ from django.utils.translation import ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
+from sorl.thumbnail.parsers import ThumbnailParseError
 
-from coop_cms.logger import logger
 from coop_cms.settings import (
-    get_article_class,
-    get_article_logo_size,
-    get_article_logo_crop,
-    get_article_templates,
-    get_default_logo,
-    get_headline_image_size,
-    get_headline_image_crop,
-    get_newsletter_item_classes,
-    get_navtree_class,
-    get_max_image_width,
-    is_localized,
-    is_requestprovider_installed,
-    COOP_CMS_NAVTREE_CLASS,
+    get_article_class, get_article_logo_size, get_article_logo_crop, get_article_templates, get_default_logo,
+    get_headline_image_size, get_headline_image_crop, get_img_folder, get_newsletter_item_classes,
+    get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
 )
 from coop_cms.utils import dehtml, RequestManager, RequestNotFound
-
 
 ADMIN_THUMBS_SIZE = '60x60'
 
 
-def get_object_label(content_type, object):
+def get_object_label(content_type, obj):
     """
     returns the label used in navigation according to the configured rule
     """
-    if not object:
+    if not obj:
         return _(u"Node")
     try:
-        nt = NavType.objects.get(content_type=content_type)
-        if nt.label_rule == NavType.LABEL_USE_SEARCH_FIELD:
-            label = getattr(object, nt.search_field)
-        elif nt.label_rule == NavType.LABEL_USE_GET_LABEL:
-            label = object.get_label()
+        nav_type = NavType.objects.get(content_type=content_type)
+        if nav_type.label_rule == NavType.LABEL_USE_SEARCH_FIELD:
+            label = getattr(obj, nav_type.search_field)
+        elif nav_type.label_rule == NavType.LABEL_USE_GET_LABEL:
+            label = obj.get_label()
         else:
-            label = unicode(object)
+            label = unicode(obj)
     except NavType.DoesNotExist:
-        label = unicode(object)
+        label = unicode(obj)
     return label
 
 
@@ -82,14 +70,14 @@ def set_node_ordering(node, tree, parent):
     node.ordering = max_ordering + 1
 
 
-def create_navigation_node(content_type, object, tree, parent):
+def create_navigation_node(content_type, obj, tree, parent):
     """create navigation node"""
-    node = NavNode(tree=tree, label=get_object_label(content_type, object))
+    node = NavNode(tree=tree, label=get_object_label(content_type, obj))
     #add it as last child of the selected node
     set_node_ordering(node, tree, parent)
     #associate with a content object
     node.content_type = content_type
-    node.object_id = object.id if object else 0
+    node.object_id = obj.id if obj else 0
     node.save()
     return node
 
@@ -146,7 +134,9 @@ class BaseNavTree(models.Model):
 
 class NavTree(BaseNavTree):
     """Implementation of NavTree: Use this one. Don't create your own"""
-    pass
+
+    def __unicode__(self):
+        return self.name
 
 
 class NavNode(models.Model):
@@ -222,14 +212,13 @@ class NavNode(models.Model):
     def get_siblings(self, in_navigation=None):
         """other nodes at same level"""
         nodes = NavNode.objects.filter(parent=self.parent).order_by("ordering")
-        if in_navigation != None:
+        if in_navigation is not None:
             nodes = nodes.filter(in_navigation=in_navigation)
         return nodes
 
     def get_progeny(self, level=0):
         """children, grand-children ..."""
-        progeny = []
-        progeny.append((self, level))
+        progeny = [(self, level)]
         for child in NavNode.objects.filter(parent=self).order_by("ordering"):
             progeny.extend(child.get_progeny(level+1))
         return progeny
@@ -252,8 +241,8 @@ class NavNode(models.Model):
     def _get_li_content(self, li_template, node_pos=0, total_nodes=0):
         """content when displayed in li html tag"""
         if li_template:
-            t = li_template if hasattr(li_template, 'render') else get_template(li_template)
-            return t.render(
+            template_ = li_template if hasattr(li_template, 'render') else get_template(li_template)
+            return template_.render(
                 Context({
                     'node': self, 'STATIC_URL': settings.STATIC_URL,
                     'node_pos': node_pos, 'total_nodes': total_nodes,
@@ -261,7 +250,7 @@ class NavNode(models.Model):
             )
         else:
             url = self.get_absolute_url()
-            if url == None:
+            if url is None:
                 return u'<a>{0}</a>'.format(self.label)
             else:
                 return u'<a href="{0}">{1}</a>'.format(url, self.label)
@@ -269,21 +258,20 @@ class NavNode(models.Model):
     def _get_ul_format(self, ul_template):
         """format ul tag"""
         if ul_template:
-            t = ul_template if hasattr(ul_template, 'render') else get_template(ul_template)
-            return t.render(Context({'node': self}))
+            template_ = ul_template if hasattr(ul_template, 'render') else get_template(ul_template)
+            return template_.render(Context({'node': self}))
         else:
             return u'<ul>{0}</ul>'
 
     def _get_li_args(self, li_args):
         """li tag arguments"""
         if li_args:
-            t = li_args if hasattr(li_args, 'render') else get_template(li_args)
-            return t.render(Context({'node': self}))
+            template_ = li_args if hasattr(li_args, 'render') else get_template(li_args)
+            return template_.render(Context({'node': self}))
         else:
             return u''
 
-    def as_navigation(self, li_node=None, li_template=None, css_class="",
-        ul_template=None, li_args=None, active_class="active-node", node_pos=0, total_nodes=0):
+    def as_navigation(self, **kwargs):
         """
         Display the node and his children as nested ul and li html tags.
         li_template is a custom template that can be passed
@@ -292,23 +280,38 @@ class NavNode(models.Model):
         if not self.in_navigation:
             return ""
         
-        children = self.get_children(in_navigation=True)
-        children_count = self.get_children_count()
+        li_node = kwargs.get("li_node", None)
+        li_template = kwargs.get("li_template", None)
+        css_class = kwargs.get("css_class", "")
+        ul_template = kwargs.get("ul_template", None)
+        li_args = kwargs.get("li_args", None)
+        active_class = kwargs.get("active_class", "active-node")
+        node_pos = kwargs.get("node_pos", 0)
+        total_nodes = kwargs.get("total_nodes", 0)
 
         children_li = [
-            child.as_navigation(li_node, li_template, css_class, node_pos=i+1, total_nodes=children_count)
-            for (i, child) in enumerate(children)
+            child.as_navigation(
+                li_node=li_node,
+                li_template=li_template,
+                css_class=css_class,
+                node_pos=node_pos + 1,
+                total_nodes=self.get_children_count()
+            )
+            for child in self.get_children(in_navigation=True)
         ]
         ul_format = self._get_ul_format(ul_template)
         children_html = ul_format.format(u''.join(children_li)) if children_li else ""
+
         args = self._get_li_args(li_args)
-        if args.find("class=")<0:
+        if args.find("class=") < 0:
             css_class = u'class="{0} {1}"'.format(css_class, active_class if self.is_active_node() else "")
         else:
-            css_class=""
+            css_class = ""
+
         if not li_node:
             return u'<li {0} {1}>{2}{3}</li>'.format(
-                css_class, args, self._get_li_content(li_template), children_html)
+                css_class, args, self._get_li_content(li_template), children_html
+            )
         else:
             return self._get_li_content(li_node, node_pos, total_nodes)
 
@@ -319,15 +322,19 @@ class NavNode(models.Model):
 
     def children_as_navigation(self, li_template=None, css_class=""):
         """get children as navigation"""
-        children_li = [u'<li class="{0}">{1}</li>'.format(css_class, child._get_li_content(li_template))
-            for child in self.get_children(in_navigation=True)]
-        return  u''.join(children_li)
+        children_li = [
+            u'<li class="{0}">{1}</li>'.format(css_class, child._get_li_content(li_template))
+            for child in self.get_children(in_navigation=True)
+        ]
+        return u''.join(children_li)
 
     def siblings_as_navigation(self, li_template=None, css_class=""):
         """get siblings as navigation"""
-        siblings_li = [u'<li class="{0}">{1}</li>'.format(css_class, sibling._get_li_content(li_template))
-            for sibling in self.get_siblings(in_navigation=True)]
-        return  u''.join(siblings_li)
+        siblings_li = [
+            u'<li class="{0}">{1}</li>'.format(css_class, sibling._get_li_content(li_template))
+            for sibling in self.get_siblings(in_navigation=True)
+        ]
+        return u''.join(siblings_li)
 
     def check_new_navigation_parent(self, parent_id):
         """check if parent is valid"""
@@ -347,8 +354,10 @@ class ArticleCategory(models.Model):
     name = models.CharField(_(u'name'), max_length=100)
     slug = AutoSlugField(populate_from='name', max_length=100, unique=True)
     ordering = models.IntegerField(_(u'ordering'), default=0)
-    in_rss = models.BooleanField(_(u'in rss'), default=False,
-        help_text=_(u"The articles of this category will be listed in the main rss feed"))
+    in_rss = models.BooleanField(
+        _(u'in rss'), default=False,
+        help_text=_(u"The articles of this category will be listed in the main rss feed")
+    )
     sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
 
     def __unicode__(self):
@@ -380,7 +389,9 @@ class ArticleCategory(models.Model):
         if is_new:
             site = Site.objects.get(id=settings.SITE_ID)
             self.sites.add(site)
-            ret = super(ArticleCategory, self).save()
+            super(ArticleCategory, self).save()
+
+        return ret
 
 
 class BaseNavigable(TimeStampedModel):
@@ -405,7 +416,7 @@ class BaseNavigable(TimeStampedModel):
     def _set_navigation_parent(self, value):
         """setter for parent"""
         content_type = ContentType.objects.get_for_model(self.__class__)
-        if value != None:
+        if value is not None:
             if value < 0:
                 tree_id = -value
                 tree = get_navtree_class().objects.get(id=tree_id)
@@ -451,7 +462,6 @@ class BaseArticle(BaseNavigable):
             img_root = 'cms_logos'
         basename = os.path.basename(filename)   
         return u'{0}/{1}/{2}'.format(img_root, self.id, basename)
-        
 
     slug = models.CharField(max_length=100, unique=True, db_index=True, blank=False)
     title = models.TextField(_(u'title'), default='', blank=True)
@@ -462,10 +472,22 @@ class BaseArticle(BaseNavigable):
     logo = models.ImageField(upload_to=get_logo_folder, blank=True, null=True, default='')
     temp_logo = models.ImageField(upload_to=get_logo_folder, blank=True, null=True, default='')
     summary = models.TextField(_(u'Summary'), blank=True, default='')
-    category = models.ForeignKey(ArticleCategory, verbose_name=_(u'Category'), blank=True, null=True, default=None, related_name="%(app_label)s_%(class)s_rel")
-    in_newsletter = models.BooleanField(_(u'In newsletter'), default=True, help_text=_(u'Make this article available for newsletters.'))
-    homepage_for_site = models.ForeignKey(Site, verbose_name=_(u'Homepage for site'), blank=True, null=True, default=None, related_name="homepage_article")
-    headline = models.BooleanField(_(u"Headline"), default=False, help_text=_(u'Make this article appear on the home page'))
+    category = models.ForeignKey(
+        ArticleCategory, verbose_name=_(u'Category'), blank=True, null=True, default=None,
+        related_name="%(app_label)s_%(class)s_rel"
+    )
+    in_newsletter = models.BooleanField(
+        _(u'In newsletter'), default=True,
+        help_text=_(u'Make this article available for newsletters.')
+    )
+    homepage_for_site = models.ForeignKey(
+        Site, verbose_name=_(u'Homepage for site'), blank=True, null=True, default=None,
+        related_name="homepage_article"
+    )
+    headline = models.BooleanField(
+        _(u"Headline"), default=False,
+        help_text=_(u'Make this article appear on the home page')
+    )
     publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now())
     sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
     
@@ -528,8 +550,7 @@ class BaseArticle(BaseNavigable):
         crop = logo_crop or get_article_logo_crop(self)
         try:
             return sorl_thumbnail.backend.get_thumbnail(logo_file, size, crop=crop)
-        except Exception, msg:
-            print "#### ERR", msg
+        except IOError:
             return logo_file
         
     def get_headline_image(self):
@@ -544,9 +565,9 @@ class BaseArticle(BaseNavigable):
         filename = get_default_logo()
         media_filename = os.path.normpath(settings.MEDIA_ROOT + '/coop_cms/' + filename)
         if not os.path.exists(media_filename):
-            dir = os.path.dirname(media_filename)
-            if not os.path.exists(dir):
-                os.makedirs(dir)
+            file_dir = os.path.dirname(media_filename)
+            if not os.path.exists(file_dir):
+                os.makedirs(file_dir)
             static_filename = finders.find(filename)
             shutil.copyfile(static_filename, media_filename)
         return File(open(media_filename, 'r'))
@@ -571,7 +592,8 @@ class BaseArticle(BaseNavigable):
 
     def save(self, *args, **kwargs):
         """save"""
-        if hasattr(self, "_cache_slug"): delattr(self, "_cache_slug")
+        if hasattr(self, "_cache_slug"):
+            delattr(self, "_cache_slug")
         
         #autoslug localized title for creating locale_slugs
         if (not self.title) and (not self.slug):
@@ -579,7 +601,7 @@ class BaseArticle(BaseNavigable):
             
         if is_localized():
             from modeltranslation.utils import build_localized_fieldname # pylint: disable=F0401
-            for (lang_code, lang_name) in settings.LANGUAGES:
+            for lang_code in [lang[0] for lang in settings.LANGUAGES]:
                 loc_title_var = build_localized_fieldname('title', lang_code)
                 locale_title = getattr(self, loc_title_var, '')
             
@@ -603,52 +625,62 @@ class BaseArticle(BaseNavigable):
             ret = super(BaseArticle, self).save(do_not_create_nav=True)
         
         if self.homepage_for_site and (self.homepage_for_site.id == settings.SITE_ID):
-            for a in get_article_class().objects.filter(homepage_for_site__id=settings.SITE_ID).exclude(id=self.id):
-                a.homepage_for_site = None
-                a.save()
+            for art in get_article_class().objects.filter(homepage_for_site__id=settings.SITE_ID).exclude(id=self.id):
+                art.homepage_for_site = None
+                art.save()
         
         return ret
-    
+
+    def _does_slug_exist(self, slug):
+        """generate slug"""
+        article_class = get_article_class()
+
+        if is_localized():
+            from modeltranslation.utils import build_localized_fieldname # pylint: disable=F0401
+            slug_fields = []
+            for lang_code in [lang[0] for lang in settings.LANGUAGES]:
+                loc_slug_var = build_localized_fieldname('slug', lang_code)
+                slug_fields.append(loc_slug_var)
+        else:
+            slug_fields = ('slug',)
+
+        for slug_field in slug_fields:
+            try:
+                lookup = {slug_field: slug}
+                if self.id:
+                    article_class.objects.get(Q(**lookup) & ~Q(id=self.id))
+                else:
+                    article_class.objects.get(**lookup)
+                #the slug exists in one language: we can not use it, try another one
+                return True
+
+            except article_class.DoesNotExist:
+                #Ok this slug is not used: try next language
+                pass
+
+        return False
+
     def get_unique_slug(self, slug_field, title):
         """unique slug"""
         #no html in title
         title = dehtml(title)
         slug = slugify(title)
         next_suffix, origin_slug = 2, slug
-        Article = get_article_class()
         slug_exists = True
+
         while slug_exists:
             #Check that this slug doesn't already exist
             #The slug must be unique for all sites
-            if is_localized():
-                from modeltranslation.utils import build_localized_fieldname # pylint: disable=F0401
-                slug_fields = []
-                for (lang_code, lang_name) in settings.LANGUAGES:
-                    loc_slug_var = build_localized_fieldname('slug', lang_code)
-                    slug_fields.append(loc_slug_var)
-            else:
-                slug_fields = ('slug',)
-            
-            slug_exists = False
-            for slug_field in slug_fields:
-                try:
-                    attrs = {slug_field: slug}
-                    if self.id:
-                        Article.objects.get(Q(**attrs) & ~Q(id=self.id))
-                    else:
-                        Article.objects.get(**attrs)
-                    #the slug exists in one language: we can not use it, try another one
-                    slug_exists = True
-                    break
-                except Article.DoesNotExist:
-                    pass #Ok this slug is not used: break the loop and return
+
+            slug_exists = self._does_slug_exist(slug)
             
             if slug_exists:
                 #oups the slug is already used: change it and try again
                 next_suffix_len = len(str(next_suffix))
-                safe_slug = origin_slug[:(100-next_suffix_len)]
+                safe_slug = origin_slug[:(100 - next_suffix_len)]
                 slug = u"{0}{1}".format(safe_slug, next_suffix)
                 next_suffix += 1
+
         return slug
         
     def template_name(self):
@@ -670,8 +702,8 @@ class BaseArticle(BaseNavigable):
             return slug
         slug = self.slug
         if not slug:
-            for (l, n) in settings.LANGUAGES:
-                key = 'slug_{0}'.format(l)
+            for lang_code in [lang[0] for lang in settings.LANGUAGES]:
+                key = 'slug_{0}'.format(lang_code)
                 slug = getattr(self, key)
                 if slug:
                     break
@@ -715,6 +747,7 @@ class BaseArticle(BaseNavigable):
         """publish perm"""
         return self._can_change(user)
 
+
 class Link(BaseNavigable):
     """Link to a given url"""
     title = models.CharField(_(u'Title'), max_length=200, default=_(u"title"))
@@ -723,7 +756,9 @@ class Link(BaseNavigable):
     def get_absolute_url(self):
         """url"""
         if is_localized():
-            scheme, netloc, path, params, query, fragment = urlparse.urlparse(self.url)
+            #parsed_url = scheme, netloc, path, params, query, fragment
+            parsed_url = urlparse.urlparse(self.url)
+            scheme = parsed_url[0]
             if not scheme:
                 #the urls doesn't starts with http://, so it's a url managed by the site
                 from localeurl.utils import locale_path # pylint: disable=F0401
@@ -733,7 +768,9 @@ class Link(BaseNavigable):
 
     def get_label(self):
         """label for navigation"""
-        scheme, netloc, path, params, query, fragment = urlparse.urlparse(self.url)
+        #parsed_url = scheme, netloc, path, params, query, fragment
+        parsed_url = urlparse.urlparse(self.url)
+        scheme, netloc, path = parsed_url[0], parsed_url[1], parsed_url[2]
         if scheme:
             return u"{0}{1}".format(netloc, path)
         return self.url
@@ -744,16 +781,6 @@ class Link(BaseNavigable):
     class Meta:
         verbose_name = _(u"link")
         verbose_name_plural = _(u"links")
-
-
-def get_img_folder(instance, filename):
-    """image folder"""
-    try:
-        img_root = settings.IMAGE_FOLDER
-    except AttributeError:
-        img_root = 'img'
-    
-    return u'{0}/{1}'.format(img_root, filename)
 
 
 class MediaFilter(models.Model):
@@ -799,7 +826,10 @@ class Image(Media):
     """An image in media library"""
     file = models.ImageField(_(u'file'), upload_to=get_img_folder)
     size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_(u"size"))
-    
+
+    def __unicode__(self):
+        return self.name
+
     def clear_thumbnails(self):
         """clear thumbnails"""
         sorl_delete(self.file.file, delete_file=False)    
@@ -808,7 +838,7 @@ class Image(Media):
         """convert to thumbnail"""
         try:
             return sorl_thumbnail.backend.get_thumbnail(self.file.file, "64x64", crop='center')
-        except Exception, msg:
+        except IOError:
             return self.file
         
     def admin_image(self):
@@ -825,16 +855,14 @@ class Image(Media):
             if max_width and (max_width < self.file.width):
                 try:
                     return sorl_thumbnail.backend.get_thumbnail(self.file.file, str(max_width), upscale=False).url
-                except Exception, msg:
-                    logger.error("Image can not resize: {0}".format(max_width))
+                except (IOError, ThumbnailParseError):
                     return self.file.url
             else:
                 return self.file.url
         try:
             crop = self.size.crop or None
             return sorl_thumbnail.backend.get_thumbnail(self.file.file, self.size.size, crop=crop).url
-        except Exception, msg:
-            logger.error("Image can not resize: {0}".format(self.size))
+        except (IOError, ThumbnailParseError):
             return self.file.url
 
     class Meta:
@@ -844,6 +872,9 @@ class Image(Media):
 
 class Document(Media):
     """file in media library"""
+
+    def __unicode__(self):
+        return self.name
 
     def get_doc_folder(self, filename):
         """where to store this file. If private in a different folder which must be protected by web server"""
@@ -879,7 +910,7 @@ class Document(Media):
 
     def get_ico_url(self, icotype):
         """icon associated to the document"""
-        root, ext = os.path.splitext(self.file.name)
+        ext = os.path.splitext(self.file.name)[1]
         ext = ext[1:].lower()  # remove leading dot
         supported_ext = (
             'pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'png', 'jpg', 'gif', 'ppt', 'pps', 'mp3', 'ogg', 'html',
@@ -902,11 +933,14 @@ class Document(Media):
         verbose_name = _(u'document')
         verbose_name_plural = _(u'documents')
 
+
 class PieceOfHtml(models.Model):
     """This is a block of text thant can be added to a page and edited on it"""
     div_id = models.CharField(verbose_name=_(u"identifier"), max_length=100, db_index=True)
     content = models.TextField(_(u"content"), default="", blank=True)
-    extra_id = models.CharField(verbose_name=_(u"extra identifier"), blank=True, default="", max_length=100, db_index=True)
+    extra_id = models.CharField(
+        verbose_name=_(u"extra identifier"), blank=True, default="", max_length=100, db_index=True
+    )
 
     def __unicode__(self):
         return u" ".join([self.div_id, self.extra_id])
@@ -923,8 +957,9 @@ def remove_from_navigation(sender, instance, **kwargs):
             content_type = ContentType.objects.get_for_model(instance)
             nodes = NavNode.objects.filter(content_type=content_type, object_id=instance.id)
             nodes.delete()
-        except (ContentType.DoesNotExist):
+        except ContentType.DoesNotExist:
             pass
+
 pre_delete.connect(remove_from_navigation)
 
 
@@ -979,6 +1014,7 @@ def on_create_newsletterable_instance(sender, instance, created, raw, **kwargs):
     """create automatically a newsletter item for every objects configured as newsletter_item"""
     if sender in get_newsletter_item_classes():
         create_newsletter_item(instance)
+
 post_save.connect(on_create_newsletterable_instance)
 
 
@@ -999,11 +1035,14 @@ class Newsletter(models.Model):
     def get_items_by_category(self):
         """items by category"""
         items = self.get_items()
+
         def sort_by_category(item):
+            """sort function"""
             category = getattr(item, 'category', None)
             if category:
                 return category.ordering
             return 0
+
         items.sort(key=sort_by_category)
         return items
 

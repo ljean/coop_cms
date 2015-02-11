@@ -30,22 +30,22 @@ class NavigationTemplateNode(template.Node):
     def __init__(self, *args, **kwargs):
         super(NavigationTemplateNode, self).__init__()
         self._kwargs = {}
-        for (k, v) in kwargs.items():
-            self._kwargs[k] = template.Variable(v)
+        for (key, value) in kwargs.items():
+            self._kwargs[key] = template.Variable(value)
 
     def resolve_kwargs(self, context):
         """resolve: get value from context or from string"""
         kwargs = {}
-        for (k, v) in self._kwargs.items():
+        for (key, value) in self._kwargs.items():
             try:
-                kwargs[k] = v.resolve(context)
+                kwargs[key] = value.resolve(context)
             except VariableDoesNotExist:
-                kwargs[k] = v.var  # if the variable can not be resolved, thake the value as is
+                kwargs[key] = value.var  # if the variable can not be resolved, take the value as is
 
         if not 'tree' in kwargs:
             kwargs['tree'] = 'default'
 
-        tree, _is_new = get_navtree_class().objects.get_or_create(name=kwargs['tree'])
+        tree = get_navtree_class().objects.get_or_create(name=kwargs['tree'])[0]
         if 'coop_cms_navtrees' in context.dicts[0]:
             context.dicts[0]['coop_cms_navtrees'].append(tree)
         else:
@@ -70,7 +70,7 @@ class NavigationAsNestedUlNode(NavigationTemplateNode):
         total_nodes = root_nodes.count()    
         return u''.join([
             node.as_navigation(node_pos=i+1, total_nodes=total_nodes, **kwargs)
-                for (i, node) in enumerate(root_nodes)
+            for (i, node) in enumerate(root_nodes)
         ])
 
 
@@ -86,17 +86,17 @@ def navigation_as_nested_ul(parser, token):
 
 class NavigationBreadcrumbNode(NavigationTemplateNode):
     """Navigation"""
-    def __init__(self, object, **kwargs):
+    def __init__(self, obj, **kwargs):
         super(NavigationBreadcrumbNode, self).__init__(**kwargs)
-        self.object_var = template.Variable(object)
+        self.object_var = template.Variable(obj)
 
     def render(self, context):
         """to html"""
         obj = self.object_var.resolve(context)
-        ct = ContentType.objects.get_for_model(obj.__class__)
+        content_type = ContentType.objects.get_for_model(obj.__class__)
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
-        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=ct, object_id=obj.id)
+        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=content_type, object_id=obj.id)
         if nav_nodes.count() > 0:
             return nav_nodes[0].as_breadcrumb(**kwargs)
         return u''
@@ -117,17 +117,17 @@ def navigation_breadcrumb(parser, token):
 class NavigationChildrenNode(NavigationTemplateNode):
     """Navigation"""
 
-    def __init__(self, object, **kwargs):
+    def __init__(self, obj, **kwargs):
         super(NavigationChildrenNode, self).__init__(**kwargs)
-        self.object_var = template.Variable(object)
+        self.object_var = template.Variable(obj)
 
     def render(self, context):
         """to html"""
         obj = self.object_var.resolve(context)
-        ct = ContentType.objects.get_for_model(obj.__class__)
+        content_type = ContentType.objects.get_for_model(obj.__class__)
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
-        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=ct, object_id=obj.id)
+        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=content_type, object_id=obj.id)
         if nav_nodes.exists():
             return nav_nodes[0].children_as_navigation(**kwargs)
         return u''
@@ -138,7 +138,9 @@ def navigation_children(parser, token):
     args = token.contents.split()
     kwargs = extract_kwargs(args)
     if len(args) < 2:
-        raise template.TemplateSyntaxError(_("navigation_children requires object as argument and optionally tree={{tree_name}}"))
+        raise template.TemplateSyntaxError(
+            _("navigation_children requires object as argument and optionally tree={{tree_name}}")
+        )
     return NavigationChildrenNode(args[1], **kwargs)
 
 #----------------------------------------------------------
@@ -147,16 +149,16 @@ def navigation_children(parser, token):
 class NavigationSiblingsNode(NavigationTemplateNode):
     """Navigation"""
 
-    def __init__(self, object, **kwargs):
+    def __init__(self, obj, **kwargs):
         super(NavigationSiblingsNode, self).__init__(**kwargs)
-        self.object_var = template.Variable(object)
+        self.object_var = template.Variable(obj)
 
     def render(self, context):
         obj = self.object_var.resolve(context)
-        ct = ContentType.objects.get_for_model(obj.__class__)
+        content_type = ContentType.objects.get_for_model(obj.__class__)
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
-        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=ct, object_id=obj.id)
+        nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=content_type, object_id=obj.id)
         if nav_nodes.count() > 0:
             return nav_nodes[0].siblings_as_navigation(**kwargs)
         return u''
@@ -178,8 +180,9 @@ DEFAULT_NAVROOT_TEMPLATE = 'coop_cms/navigation_node.html'
 @register.filter
 def render_template_node(node, template_name=""):
     """render to html"""
-    t = get_template(template_name or DEFAULT_NAVROOT_TEMPLATE)
-    return t.render(Context({'node': node}))
+    the_template = get_template(template_name or DEFAULT_NAVROOT_TEMPLATE)
+    return the_template.render(Context({'node': node}))
+
 
 class NavigationRootNode(NavigationTemplateNode):
     """Navigation"""
@@ -189,8 +192,11 @@ class NavigationRootNode(NavigationTemplateNode):
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
         template_name = kwargs.pop('template_name', DEFAULT_NAVROOT_TEMPLATE)
-        root_nodes = NavNode.objects.filter(tree__name=tree_name, parent__isnull=True, in_navigation=True).order_by("ordering")
+        root_nodes = NavNode.objects.filter(
+            tree__name=tree_name, parent__isnull=True, in_navigation=True
+        ).order_by("ordering")
         return u''.join([render_template_node(node, template_name) for node in root_nodes])
+
 
 @register.tag
 def navigation_root_nodes(parser, token):

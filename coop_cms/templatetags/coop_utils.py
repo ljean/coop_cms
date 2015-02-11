@@ -278,3 +278,20 @@ def show_accept_cookie_message(parser, token):
     else:
         template_name = ""
     return ShowAcceptCookieMessageNode(template_name)
+
+#########
+
+@register.filter
+def open_tag_if(index_, args):
+    """open_tag if condition"""
+    tag, nb_per_block = args.split("/")
+    nb_per_block = int(nb_per_block)
+    return "<{0}>".format(tag) if (index_ % nb_per_block) == 0 else ""
+
+
+@register.filter
+def close_tag_if(index_, args):
+    """close_tag if condition"""
+    tag, nb_per_block = args.split("/")
+    nb_per_block = int(nb_per_block)
+    return "</{0}>".format(tag) if (index_ % nb_per_block) == nb_per_block else ""

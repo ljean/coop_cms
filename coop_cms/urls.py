@@ -2,13 +2,16 @@
 """urls"""
 
 from django.conf import settings
+
+if 'localeurl' in settings.INSTALLED_APPS:
+    from localeurl.models import patch_reverse
+    patch_reverse()
+
 from django.conf.urls import patterns, include, url
 
 from coop_cms import sitemap
 from coop_cms.settings import (
-    get_article_views,
-    install_csrf_failure_view,
-    keep_deprecated_func_views_for_article,
+    get_article_views, install_csrf_failure_view
 )
 from coop_cms.views.newsletters import NewsletterView
 from coop_cms.views.webutils import DebugErrorCodeView
@@ -24,7 +27,6 @@ urlpatterns = patterns('coop_cms.views.articles',
     url(r'^cms/articles/$', 'view_all_articles', name="coop_cms_view_all_articles"),
     url(r'^cms/$', 'view_all_articles'),
     url(r'articles/(?P<slug>[-\w]+)/$', 'articles_category', name="coop_cms_articles_category"),
-
 )
 
 urlpatterns += patterns('coop_cms.views.fragments',
@@ -83,7 +85,6 @@ urlpatterns += patterns('coop_cms.views.medialib',
 )
 
 urlpatterns += patterns('coop_cms.views.webutils',
-    url(r'sitemap/$', 'tree_map', name="default_site_map"),
     url(r'cms/change-language/$', 'change_language', name='coop_cms_change_language'),
     url(
         r'^cms/hide-accept-cookies-message/',

@@ -39,16 +39,19 @@ class BaseSitemap(BaseSitemapClass):
     """Base class"""
     _current_site = None
 
-    def __init__(self, language, site):
+    def __init__(self, language):
         if is_localized():
             super(BaseSitemap, self).__init__(language)
         else:
             super(BaseSitemap, self).__init__()
-        self._site = site
+        #self._site = site
 
     def get_urls(self, page=1, site=None, protocol=None):
         """get urls"""
-        return super(BaseSitemap, self).get_urls(page, self._site, protocol=protocol)
+        urls = []
+        for site in Site.objects.all():
+            urls.extend(super(BaseSitemap, self).get_urls(page, site, protocol=protocol))
+        return urls
 
     def get_current_site(self):
         """get current site"""
@@ -81,15 +84,18 @@ class ArticleSitemap(BaseSitemap):
 
         queryset = article_class.objects.filter(publication=BaseArticle.PUBLISHED)
 
-        if self._site == self.get_current_site():
-            return queryset.filter(sites=self._site)
-        else:
-            if sitemap_mode == SiteSettings.SITEMAP_ONLY_SITE:
-                #Only the articles of current sites
-                return article_class.objects.none()
-            elif sitemap_mode == SiteSettings.SITEMAP_ALL:
-                #Articles of which are only on the site and not in current site
-                return queryset.filter(sites=self._site).exclude(sites=self.get_current_site())
+        items = []
+        for site in Site.objects.all():
+            if site == self.get_current_site():
+                items.extend(queryset.filter(sites=site))
+            else:
+                if sitemap_mode == SiteSettings.SITEMAP_ONLY_SITE:
+                    #Only the articles of current sites. Don't add anything
+                    pass
+                elif sitemap_mode == SiteSettings.SITEMAP_ALL:
+                    #Articles of which are only on the site and not in current site
+                    items.extend(queryset.filter(sites=site).exclude(sites=self.get_current_site()))
+        return items
 
     def lastmod(self, obj):
         """item last modification"""
@@ -99,17 +105,13 @@ class ArticleSitemap(BaseSitemap):
 def get_sitemaps(langs=None):
     """return sitemaps"""
     sitemaps = {}
-    sites = Site.objects.all()
     if is_localized():
         lang_codes = langs or [code[0] for code in settings.LANGUAGES]
         for code in lang_codes:
-            for site in sites:
-                site_suffix = "_{0}_{1}".format(site.id, code)
-                sitemaps['coop_cms{0}'.format(site_suffix)] = ArticleSitemap(code, site)
+            site_key = "coop_cms_articles_{0}".format(code)
+            sitemaps[site_key] = ArticleSitemap(code)
     else:
-        for site in sites:
-            site_suffix = "_{0}".format(site.id)
-            sitemaps['coop_cms{0}'.format(site_suffix)] = ArticleSitemap(None, site)
+        sitemaps['coop_cms_articles'] = ArticleSitemap(None)
     return sitemaps
 
 

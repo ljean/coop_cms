@@ -3,7 +3,10 @@
 
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
-import os.path, sys
+import os.path
+import re
+import sys
+
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
 ADMINS = (
@@ -144,7 +147,6 @@ LOCALE_PATHS = (
 )
 
 LOCALE_INDEPENDENT_MEDIA_URL = True
-import re
 LOCALE_INDEPENDENT_PATHS = (
     re.compile(r'^/sitemap\.xml$'),
     #re.compile('^/crm/.*$'),
@@ -166,7 +168,7 @@ COOP_CMS_ARTICLE_TEMPLATES = (
     ('standard.html', u'Standard'),
 )
 COOP_CMS_FROM_EMAIL = u'""'
-COOP_CMS_TEST_EMAILS = ('"Luc JEAN - Apidev" <ljean@apidev.fr>',)# 'luc.jean@gmail.com')
+COOP_CMS_TEST_EMAILS = ('"Luc JEAN - Apidev" <ljean@apidev.fr>', )
 COOP_CMS_SITE_PREFIX = ''
 COOP_CMS_REPLY_TO = 'ljean@apidev.fr'
 COOP_CMS_TITLE_OPTIONAL = True
@@ -204,13 +206,13 @@ INSTALLED_APPS = (
 )
 
 
-if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration')):
+if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration', )):
     INSTALLED_APPS += (
         'modeltranslation',
     )
 
-if len(sys.argv)>1 and 'test' == sys.argv[1]:
-    INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app',)
+if len(sys.argv) > 1 and 'test' == sys.argv[1]:
+    INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app', )
 
 import warnings
 warnings.filterwarnings('ignore', r"django.contrib.localflavor is deprecated")
@@ -225,9 +227,9 @@ LOGGING = {
         },
     },
     'handlers': {
-        'console':{
-            'level':'DEBUG',
-            'class':'logging.StreamHandler',
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },
     },
@@ -243,3 +245,7 @@ LOGGING = {
     }
 }
 
+try:
+    from local_settings import * #pylint: disable=W0401,W0614
+except ImportError:
+    pass

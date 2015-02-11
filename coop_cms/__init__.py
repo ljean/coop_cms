@@ -3,6 +3,12 @@
 coop_cms is a Content Management System for Django
 """
 
+from django.conf import settings
+if 'localeurl' in settings.INSTALLED_APPS:
+    from localeurl.models import patch_reverse
+    patch_reverse()
+
+
 VERSION = (1, 0, 10)
 
 

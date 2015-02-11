@@ -3,7 +3,7 @@
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 
@@ -27,7 +27,7 @@ def can_do(perm, object_names):
 
                 if obj is not None:
 
-                    callback_name = u"coop_cms_{0}_callback".format(perm, object_name)
+                    callback_name = u"coop_cms_{0}_callback".format(perm)
                     callback = context.get(callback_name, None)
 
                     if callback and request and callback():
@@ -62,14 +62,13 @@ def can_add_link(func):
     """decorator checking if user can add link"""
     def wrapper(request, context):
         """wrapper"""
-        ct = ContentType.objects.get_for_model(Link)
-        perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+        content_type = ContentType.objects.get_for_model(Link)
+        perm = '{0}.add_{1}'.format(content_type.app_label, content_type.model)
         if request and request.user.has_perm(perm):
             return func(request, context)
         return None
     return wrapper
 
-## menus
 
 def django_admin(request, context):
     """show admin"""
@@ -85,7 +84,7 @@ def django_admin_edit_article(request, context):
     if request and request.user.is_staff and 'article' in context:
         article_class = get_article_class()
         article = context['article']
-        view_name = 'admin:%s_%s_change' % (article_class._meta.app_label,  article_class._meta.module_name)
+        view_name = 'admin:{0}_{1}_change'.format(article_class._meta.app_label, article_class._meta.module_name)
         return make_link(
             reverse(view_name, args=[article.id]), _(u'Article admin'), 'fugue/table.png',
             classes=['icon', 'alert_on_click']
@@ -97,14 +96,14 @@ def django_admin_edit_object(request, context):
     if request and request.user.is_staff and context.get('object', None):
         obj = context['object']
         object_class = obj.__class__
-        view_name = 'admin:%s_%s_change' % (object_class._meta.app_label,  object_class._meta.module_name)
+        view_name = 'admin:{0}_{1}_change'.format(object_class._meta.app_label, object_class._meta.module_name)
         try:
             return make_link(
-                reverse(view_name, args=[object.id]),
+                reverse(view_name, args=[obj.id]),
                 _(u'Admin {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
                 classes=['icon', 'alert_on_click']
             )
-        except Exception:
+        except NoReverseMatch:
             pass
 
 
@@ -115,14 +114,14 @@ def django_admin_add_object(request, context):
         object_class = context.get('model', None)
         if not object_class:
             object_class = context['object'].__class__
-        view_name = 'admin:%s_%s_add' % (object_class._meta.app_label,  object_class._meta.module_name)
+        view_name = 'admin:{0}_{1}_add'.format(object_class._meta.app_label, object_class._meta.module_name)
         try:
             return make_link(
                 reverse(view_name),
                 _(u'Add {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
                 classes=['icon', 'alert_on_click']
             )
-        except Exception:
+        except NoReverseMatch:
             pass
 
 
@@ -133,13 +132,13 @@ def django_admin_list_objects(request, context):
         if not object_class:
             object_class = context['object'].__class__
         try:
-            view_name = 'admin:%s_%s_changelist' % (object_class._meta.app_label,  object_class._meta.module_name)
+            view_name = 'admin:{0}_{1}_changelist'.format(object_class._meta.app_label, object_class._meta.module_name)
             return make_link(
                 reverse(view_name),
                 _(u'List {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
                 classes=['icon', 'alert_on_click']
             )
-        except:
+        except NoReverseMatch:
             pass
 
 
@@ -161,6 +160,7 @@ def django_admin_navtree(request, context):
                 url, label, 'fugue/leaf-plant.png',
                 classes=['icon', 'alert_on_click']
             )
+
 
 def view_all_articles(request, context):
     """show menu"""
@@ -295,7 +295,7 @@ def cms_edit(request, context):
 def cms_publish(request, context):
     """show menu"""
     article = context.get('article')
-    if article and ('draft' in context) :
+    if article and ('draft' in context):
         if context['draft']:
             return make_link(
                 article.get_publish_url(), _(u'Draft'), 'fugue/lock.png',
@@ -310,8 +310,8 @@ def cms_publish(request, context):
 
 def cms_extra_js(request, context):
     """add javascript code"""
-    t = get_template("coop_cms/_coop_bar_js.html")
-    return t.render(context)
+    template_ = get_template("coop_cms/_coop_bar_js.html")
+    return template_.render(context)
 
 
 def log_out(request, context):
@@ -336,26 +336,18 @@ def cms_new_newsletter(request, context):
 
 
 @can_edit_newsletter
-def edit_newsletter(request, context):
-    """show menu"""
-    if not context.get('edit_mode'):
-        newsletter = context.get('newsletter')
-        return make_link(newsletter.get_edit_url(), _(u'Edit'), 'fugue/document--pencil.png', classes=['icon'])
-
-
-@can_edit_newsletter
 def newsletter_admin(request, context):
     """show menu"""
     newsletter = context.get('newsletter')
     object_class = newsletter.__class__
-    view_name = 'admin:%s_%s_change' % (object_class._meta.app_label,  object_class._meta.module_name)
+    view_name = 'admin:{0}_{1}_change'.format(object_class._meta.app_label, object_class._meta.module_name)
     try:
         return make_link(
             reverse(view_name, args=[newsletter.id]),
             _(u'Admin {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
             classes=['icon', 'alert_on_click']
         )
-    except Exception:
+    except NoReverseMatch:
         pass
 
 
@@ -369,27 +361,8 @@ def newsletter_articles(request, context):
             _(u'Articles ordering'), 'fugue/table.png',
             classes=['icon', 'alert_on_click']
         )
-    except Exception:
+    except NoReverseMatch:
         pass
-
-
-@can_edit_newsletter
-def cancel_edit_newsletter(request, context):
-    """show menu"""
-    if context.get('edit_mode'):
-        newsletter = context.get('newsletter')
-        return make_link(newsletter.get_absolute_url(), _(u'Cancel'), 'fugue/cross.png', classes=['icon'])
-
-
-@can_edit_newsletter
-def save_newsletter(request, context):
-    """show menu"""
-    post_url = context.get('post_url')
-    if context.get('edit_mode') and post_url:
-        return make_link(
-            post_url, _(u'Save'), 'fugue/disk-black.png',
-            classes=['icon', 'post-form']
-        )
 
 
 @can_edit_newsletter
@@ -404,20 +377,6 @@ def change_newsletter_settings(request, context):
         )
 
 
-#DEPRECATED
-@can_edit_newsletter
-def change_newsletter_template(request, context):
-    """show menu"""
-    if context.get('edit_mode'):
-        newsletter = context.get('newsletter')
-        url = reverse('coop_cms_change_newsletter_template', args=[newsletter.id])
-        return make_link(
-            url, _(u'Newsletter template'), 'fugue/application-blog.png',
-            classes=['alert_on_click', 'colorbox-form', 'icon']
-        )
-###############
-
-
 @can_edit_newsletter
 def test_newsletter(request, context):
     """show menu"""
@@ -430,11 +389,12 @@ def test_newsletter(request, context):
         )
 
 
+@can_edit_object
 def cms_add_fragment(request, context):
     """show menu"""
     if request:
-        ct = ContentType.objects.get_for_model(Fragment)
-        perm = '{0}.add_{1}'.format(ct.app_label, ct.model)
+        content_type = ContentType.objects.get_for_model(Fragment)
+        perm = '{0}.add_{1}'.format(content_type.app_label, content_type.model)
         if request.user.has_perm(perm):
             url = reverse("coop_cms_add_fragment")
             return make_link(
@@ -443,11 +403,12 @@ def cms_add_fragment(request, context):
             )
 
 
+@can_edit_object
 def cms_edit_fragments(request, context):
     """show menu"""
     if request:
-        ct = ContentType.objects.get_for_model(Fragment)
-        perm = '{0}.change_{1}'.format(ct.app_label, ct.model)
+        content_type = ContentType.objects.get_for_model(Fragment)
+        perm = '{0}.change_{1}'.format(content_type.app_label, content_type.model)
         if request.user.has_perm(perm):
             url = reverse("coop_cms_edit_fragments")
             return make_link(
@@ -460,7 +421,6 @@ def publication_css_classes(request, context):
     """define coop_bar css_class"""
     variable = context.get('article', None) or context.get('object', None)
     if variable:
-        css_classes = []
         if hasattr(variable, 'is_draft') and callable(variable.is_draft) and variable.is_draft():
             return 'is-draft'
         elif hasattr(variable, 'is_archived') and callable(variable.is_archived) and variable.is_archived():
@@ -471,19 +431,46 @@ def load_commands(coop_bar):
     """load commandes"""
     
     coop_bar.register([
-        [log_out],
         [
-            django_admin, django_admin_edit_article, django_admin_edit_object, django_admin_navtree, view_all_articles
+            log_out,
         ],
-        [cms_add_fragment, cms_edit_fragments],
-        [cms_media_library, cms_upload_image, cms_upload_doc],
         [
-            cms_new_newsletter, edit_newsletter, cancel_edit_newsletter, save_newsletter,
-            change_newsletter_settings, newsletter_admin, newsletter_articles, test_newsletter
+            django_admin,
+            django_admin_edit_article,
+            django_admin_edit_object,
+            django_admin_navtree,
+            view_all_articles,
         ],
-        [cms_edit, cms_save, cms_cancel,],
-        [cms_new_article, cms_new_link, cms_article_settings, cms_set_homepage],
-        [cms_publish],
+        [
+            cms_add_fragment,
+            cms_edit_fragments,
+        ],
+        [
+            cms_media_library,
+            cms_upload_image,
+            cms_upload_doc,
+        ],
+        [
+            cms_new_newsletter,
+            change_newsletter_settings,
+            newsletter_admin,
+            newsletter_articles,
+            test_newsletter
+        ],
+        [
+            cms_edit,
+            cms_save,
+            cms_cancel,
+        ],
+        [
+            cms_new_article,
+            cms_new_link,
+            cms_article_settings,
+            cms_set_homepage
+        ],
+        [
+            cms_publish,
+        ],
     ])
     
     coop_bar.register_css_classes(publication_css_classes)

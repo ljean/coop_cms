@@ -7,7 +7,6 @@ from urlparse import urlparse
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
-from django.shortcuts import render_to_response
 from django.template import RequestContext, Context
 from django.template.loader import get_template
 from django.utils.translation import check_for_language, activate
@@ -16,15 +15,6 @@ from django.views.generic import TemplateView
 
 from coop_cms.logger import logger
 from coop_cms.settings import get_article_class
-
-
-def tree_map(request):
-    """tree map"""
-    return render_to_response(
-        'coop_cms/tree_map.html',
-        #{'tree': models.get_navTree_class().objects.get(id=tree_id)},  # what is the default tree for the site
-        RequestContext(request)
-    )
 
 
 @csrf_exempt
@@ -47,12 +37,9 @@ def change_language(request):
 
     next_url = request.REQUEST.get('next', None)
     if not next_url:
-        try:
-            url = urlparse(request.META.get('HTTP_REFERER'))
-            if url:
-                next_url = url.path
-        except Exception:
-            pass
+        url = urlparse(request.META.get('HTTP_REFERER', ''))
+        if url:
+            next_url = url.path
 
     if request.method == 'POST':
         lang_code = request.POST.get('language', None)
@@ -111,7 +98,8 @@ def csrf_failure(request, reason=""):
     ENABLED by default by coop_cms unless you set COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW=True in settings.py
     """
 
-    logger.warn(u"csrf_failure, reason: {0}".format(reason))
+    warn_text = u"csrf_failure, reason: {0}".format(reason)
+    logger.warn(warn_text)
 
     template = get_template('coop_cms/csrf_403.html')
 

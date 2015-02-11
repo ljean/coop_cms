@@ -29,7 +29,11 @@ if settings.DEBUG or ('test' in sys.argv) or getattr(settings, 'SERVE_STATIC', T
             (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
         )
     urlpatterns += patterns('',
-        (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes':True}),
+        (
+            r'^media/(?P<path>.*)$',
+            'django.views.static.serve',
+            {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}
+        ),
     )
     
 urlpatterns += patterns('',
