@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""test fragments feature"""
 
 from django.conf import settings
 if 'localeurl' in settings.INSTALLED_APPS:
@@ -17,153 +18,236 @@ from coop_cms.models import BaseArticle, Fragment, FragmentType, FragmentFilter
 from coop_cms.settings import get_article_class
 from coop_cms.tests import BaseTestCase
 
-class FragmentsTest(BaseTestCase):
-    
-    editable_field_tpl = '<div class="djaloha-editable" id="djaloha_djaloha__coop_cms__Fragment__id__{0}__content">' + \
-        '{1}</div>\n<input type="hidden" id="djaloha_djaloha__coop_cms__Fragment__id__{0}__content_hidden" ' + \
-        'name="djaloha__coop_cms__Fragment__id__{0}__content" value="{1}">'
-    
+
+class BaseFragmentTest(BaseTestCase):
+
+    def __init__(self, *args, **kwargs):
+        super(BaseFragmentTest, self).__init__(*args, **kwargs)
+        self.user = None
+
     def setUp(self):
-        super(FragmentsTest, self).setUp()
+        """before each test"""
+        super(BaseFragmentTest, self).setUp()
         self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
         settings.COOP_CMS_ARTICLE_TEMPLATES = (
             ('test/article_with_fragments.html', 'Article with fragments'),
             ('test/article_with_fragments_extra_id.html', 'Article with fragments extra id'),
             ('test/article_with_fragments_template.html', 'Article with fragments template'),
         )
-        
+
     def tearDown(self):
-        super(FragmentsTest, self).tearDown()
+        """after each test"""
+        super(BaseFragmentTest, self).tearDown()
         #restore
         settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
 
+    def _log_as_editor(self):
+        """_log as editor"""
+        self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
+
+        content_type1 = ContentType.objects.get_for_model(get_article_class())
+        content_type2 = ContentType.objects.get_for_model(Fragment)
+
+        for content_type in (content_type1, content_type2):
+
+            perm = 'change_{0}'.format(content_type.model)
+            can_edit = Permission.objects.get(content_type=content_type, codename=perm)
+            user.user_permissions.add(can_edit)
+
+            perm = 'add_{0}'.format(content_type.model)
+            can_add = Permission.objects.get(content_type=content_type, codename=perm)
+            user.user_permissions.add(can_add)
+
+        user.is_active = True
+        user.save()
+        return self.client.login(username='toto', password='toto')
+
+    def _log_as_regular_user(self):
+        """log a reguar user"""
+        user = User.objects.create_user('titi', 'titi@toto.fr', 'titi')
+
+        #ContentType.objects.get_for_model(get_article_class())
+
+        user.is_active = True
+        user.save()
+        return self.client.login(username='titi', password='titi')
+
+
+class FragmentsTest(BaseFragmentTest):
+    """Test ragments"""
+
+    editable_field_tpl = '<div class="djaloha-editable" id="djaloha_djaloha__coop_cms__Fragment__id__{0}__content">' + \
+        '{1}</div>\n<input type="hidden" id="djaloha_djaloha__coop_cms__Fragment__id__{0}__content_hidden" ' + \
+        'name="djaloha__coop_cms__Fragment__id__{0}__content" value="{1}">'
+    
+
     def test_fragment_position(self):
-        ft1 = mommy.make(FragmentType)
-        ft2 = mommy.make(FragmentType)
+        """test position is taken into account"""
+
+        fragment_type1 = mommy.make(FragmentType)
+        fragment_type2 = mommy.make(FragmentType)
         
-        f1 = mommy.make(Fragment, type=ft1)
-        f2 = mommy.make(Fragment, type=ft1)
-        f3 = mommy.make(Fragment, type=ft1)
-        f4 = mommy.make(Fragment, type=ft1)
+        fragment1 = mommy.make(Fragment, type=fragment_type1)
+        fragment2 = mommy.make(Fragment, type=fragment_type1)
+        fragment3 = mommy.make(Fragment, type=fragment_type1)
+        fragment4 = mommy.make(Fragment, type=fragment_type1)
         
-        g1 = mommy.make(Fragment, type=ft2)
-        g2 = mommy.make(Fragment, type=ft2)
-        g3 = mommy.make(Fragment, type=ft2)
+        fragment_g1 = mommy.make(Fragment, type=fragment_type2)
+        fragment_g2 = mommy.make(Fragment, type=fragment_type2)
+        fragment_g3 = mommy.make(Fragment, type=fragment_type2)
         
-        f5 = mommy.make(Fragment, type=ft1)
+        fragment5 = mommy.make(Fragment, type=fragment_type1)
         
-        for idx, elt in enumerate([f1, f2, f3, f4, f5]):
+        for idx, elt in enumerate([fragment1, fragment2, fragment3, fragment4, fragment5]):
             self.assertEqual(idx+1, elt.position)
         
-        for idx, elt in enumerate([g1, g2, g3]):
+        for idx, elt in enumerate([fragment_g1, fragment_g2, fragment_g3]):
             self.assertEqual(idx+1, elt.position)
             
     def test_fragment_position_extra_id(self):
-        ft1 = mommy.make(FragmentType)
-        ft2 = mommy.make(FragmentType)
-        ff1 = mommy.make(FragmentFilter)
-        ff2 = mommy.make(FragmentFilter)
+        """test position is taken into account when extra id is defined"""
+
+        fragment_type1 = mommy.make(FragmentType)
+        fragment_type2 = mommy.make(FragmentType)
+        fragment_filter1 = mommy.make(FragmentFilter)
+        fragment_filter2 = mommy.make(FragmentFilter)
         
-        f1 = mommy.make(Fragment, type=ft1, filter=ff1)
-        f2 = mommy.make(Fragment, type=ft1, filter=ff1)
-        f3 = mommy.make(Fragment, type=ft1, filter=ff1)
-        
-        f4 = mommy.make(Fragment, type=ft1, filter=ff2)
-        
-        g1 = mommy.make(Fragment, type=ft2, filter=ff1)
-        g2 = mommy.make(Fragment, type=ft2, filter=ff2)
-        g3 = mommy.make(Fragment, type=ft2, filter=ff2)
-        
-        f5 = mommy.make(Fragment, type=ft1, filter=ff1)
-        
-        f6 = mommy.make(Fragment, type=ft1)
-        f7 = mommy.make(Fragment, type=ft1)
-        
-        for idx, elt in enumerate([f1, f2, f3, f5]):
+        fragments_1 = [
+            mommy.make(Fragment, type=fragment_type1, filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, filter=fragment_filter2),
+            mommy.make(Fragment, type=fragment_type1, filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1),
+            mommy.make(Fragment, type=fragment_type1),
+        ]
+
+        fragments_2 = [
+            mommy.make(Fragment, type=fragment_type2, filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type2, filter=fragment_filter2),
+            mommy.make(Fragment, type=fragment_type2, filter=fragment_filter2),
+        ]
+
+        for idx, elt in enumerate([fragments_1[0], fragments_1[1], fragments_1[2], fragments_1[4]]):
             self.assertEqual(idx+1, elt.position)
             
-        for idx, elt in enumerate([f4]):
+        for idx, elt in enumerate([fragments_1[3]]):
             self.assertEqual(idx+1, elt.position)
         
-        for idx, elt in enumerate([g1]):
+        for idx, elt in enumerate([fragments_2[0]]):
             self.assertEqual(idx+1, elt.position)
             
-        for idx, elt in enumerate([g2, g3]):
+        for idx, elt in enumerate([fragments_2[1], fragments_2[2]]):
             self.assertEqual(idx+1, elt.position)
             
-        for idx, elt in enumerate([f6, f7]):
+        for idx, elt in enumerate([fragments_1[5], fragments_1[6]]):
             self.assertEqual(idx+1, elt.position)
             
     def test_fragment_position_update(self):
-        ft1 = mommy.make(FragmentType)
-        ft2 = mommy.make(FragmentType)
+        """test position can be modified"""
+
+        fragment_type1 = mommy.make(FragmentType)
+        mommy.make(FragmentType)
         
-        f1 = mommy.make(Fragment, type=ft1)
-        f2 = mommy.make(Fragment, type=ft1)
-        f3 = mommy.make(Fragment, type=ft1)
+        fragment1 = mommy.make(Fragment, type=fragment_type1)
+        fragment2 = mommy.make(Fragment, type=fragment_type1)
+        fragment3 = mommy.make(Fragment, type=fragment_type1)
         
-        f1.save()
-        f2.save()
-        f3.save()
+        fragment1.save()
+        fragment2.save()
+        fragment3.save()
         
-        for idx, elt in enumerate([f1, f2, f3]):
+        for idx, elt in enumerate([fragment1, fragment2, fragment3]):
             self.assertEqual(idx+1, elt.position)
             
     def test_view_fragments(self):
+        """test view fragments"""
+
         ft_name = u"contacts"
-        ft1 = mommy.make(FragmentType, name=ft_name)
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
         
-        f1 = mommy.make(Fragment, type=ft1, content="Azerty")
-        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh")
-        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn")
+        fragment1 = mommy.make(Fragment, type=fragment_type1, content="Azerty")
+        fragment2 = mommy.make(Fragment, type=fragment_type1, content="Qsdfgh")
+        fragment3 = mommy.make(Fragment, type=fragment_type1, content="Wxcvbn")
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name %}')
         html = tpl.render(Context({"ft_name": ft_name}))
         
-        positions = [html.find('{0}'.format(f.content)) for f in [f1, f2, f3]]
+        positions = [html.find('{0}'.format(f.content)) for f in [fragment1, fragment2, fragment3]]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         sorted_positions = positions[:]
         sorted_positions.sort()
         self.assertEqual(positions, sorted_positions)
         
-    def test_view_fragments_extra_id(self):
+    def test_view_fragments_extra_id_in_edit_mode(self):
+        """in edit mode: coop-fragment-type"""
         ft_name = u"contacts"
-        ft1 = mommy.make(FragmentType, name=ft_name)
-        ff1 = mommy.make(FragmentFilter, extra_id="1")
-        ff2 = mommy.make(FragmentFilter, extra_id="2")
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
+        fragment_filter1 = mommy.make(FragmentFilter, extra_id="1")
+        fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
         
-        f1 = mommy.make(Fragment, type=ft1, content="Azerty", filter=ff1)
-        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh", filter=ff1)
-        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn", filter=ff2)
-        f4 = mommy.make(Fragment, type=ft1, content="Zsxdrg", filter=None)
+        fragments = [
+            mommy.make(Fragment, type=fragment_type1, content="Azerty", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Qsdfgh", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Wxcvbn", filter=fragment_filter2),
+            mommy.make(Fragment, type=fragment_type1, content="Zsxdrg", filter=None),
+        ]
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name x %}')
-        html = tpl.render(Context({"ft_name": ft_name, "x": 1}))
+        html = tpl.render(Context({"ft_name": ft_name, "x": 1, "form": "dummy_form"}))
         
-        positions = [html.find('{0}'.format(f.content)) for f in [f1, f2]]
+        positions = [html.find('{0}'.format(f.content)) for f in [fragments[0], fragments[1]]]
         for pos in positions:
-            self.assertTrue(pos>=0)
-        sorted_positions = positions[:]
-        sorted_positions.sort()
-        self.assertEqual(positions, sorted_positions)
+            self.assertTrue(pos >= 0)
+        self.assertEqual(positions, sorted(positions))
         
         soup = BeautifulSoup(html)
         ft_tags = soup.select(".coop-fragment-type")
         self.assertEqual(len(ft_tags), 1)
         ft_tag = ft_tags[0]
-        self.assertEqual(ft_tag['rel'], str(ft1.id))
-        self.assertEqual(ft_tag['data-filter'], str(ff1.id))
-        
-        
-        for f in [f3, f4]:
-            self.assertTrue(html.find(f.content)<0)
-        
+        self.assertEqual(ft_tag['rel'], str(fragment_type1.id))
+        self.assertEqual(ft_tag['data-filter'], str(fragment_filter1.id))
+
+        for frag in [fragments[2], fragments[3]]:
+            self.assertTrue(html.find(frag.content) < 0)
+
+    def test_view_fragments_extra_id_in_view_mode(self):
+        """in view mode: no coop-fragment-type"""
+        ft_name = u"contacts"
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
+        fragment_filter1 = mommy.make(FragmentFilter, extra_id="1")
+        fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
+
+        fragments = [
+            mommy.make(Fragment, type=fragment_type1, content="Azerty", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Qsdfgh", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Wxcvbn", filter=fragment_filter2),
+            mommy.make(Fragment, type=fragment_type1, content="Zsxdrg", filter=None),
+        ]
+
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name x %}')
+        html = tpl.render(Context({"ft_name": ft_name, "x": 1}))
+
+        positions = [html.find('{0}'.format(f.content)) for f in [fragments[0], fragments[1]]]
+        for pos in positions:
+            self.assertTrue(pos >= 0)
+        self.assertEqual(positions, sorted(positions))
+
+        soup = BeautifulSoup(html)
+        ft_tags = soup.select(".coop-fragment-type")
+        self.assertEqual(len(ft_tags), 0)
+
+        for frag in [fragments[2], fragments[3]]:
+            self.assertTrue(html.find(frag.content) < 0)
+
     def test_fragments_with_extra_id(self):
+        """test fragments with extra id"""
+
         ft_name = u"contacts"
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name x %}')
-        html = tpl.render(Context({"ft_name": ft_name, 'x': 2}))
+        tpl.render(Context({"ft_name": ft_name, 'x': 2}))
         
         self.assertEqual(FragmentType.objects.count(), 1)
         self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
@@ -172,166 +256,187 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(FragmentFilter.objects.filter(extra_id='2').count(), 1)
         
     def test_view_fragments_name_as_string(self):
-        ft1 = mommy.make(FragmentType, name="contacts")
+        """test fragments name hardcode in templatetag"""
+
+        fragment_type1 = mommy.make(FragmentType, name="contacts")
         
-        f1 = mommy.make(Fragment, type=ft1, content="Azerty")
-        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh")
-        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn")
+        fragment1 = mommy.make(Fragment, type=fragment_type1, content="Azerty")
+        fragment2 = mommy.make(Fragment, type=fragment_type1, content="Qsdfgh")
+        fragment3 = mommy.make(Fragment, type=fragment_type1, content="Wxcvbn")
         
         tpl = Template('{% load coop_edition %}{% coop_fragments "contacts" %}')
         html = tpl.render(Context({"ft_name": "contacts"}))
         
-        positions = [html.find('{0}'.format(f.content)) for f in [f1, f2, f3]]
+        positions = [html.find('{0}'.format(f.content)) for f in [fragment1, fragment2, fragment3]]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         sorted_positions = positions[:]
         sorted_positions.sort()
         self.assertEqual(positions, sorted_positions)
         
-    def test_view_fragments_name_and_extra_id_as_string(self):
-        ft1 = mommy.make(FragmentType, name="contacts")
-        ff1 = mommy.make(FragmentFilter, extra_id="hello")
-        ff2 = mommy.make(FragmentFilter, extra_id="2")
+    def test_view_fragments_args_as_string(self):
+        """test name and extra id hardcoded"""
+
+        fragment_type1 = mommy.make(FragmentType, name="contacts")
+        fragment_filter1 = mommy.make(FragmentFilter, extra_id="hello")
+        fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
         
-        f1 = mommy.make(Fragment, type=ft1, content="Azerty", filter=ff1)
-        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh", filter=ff1)
-        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn", filter=ff2)
-        f4 = mommy.make(Fragment, type=ft1, content="Zsxdrg", filter=None)
+        fragment1 = mommy.make(Fragment, type=fragment_type1, content="Azerty", filter=fragment_filter1)
+        fragment2 = mommy.make(Fragment, type=fragment_type1, content="Qsdfgh", filter=fragment_filter1)
+        fragment3 = mommy.make(Fragment, type=fragment_type1, content="Wxcvbn", filter=fragment_filter2)
+        fragment4 = mommy.make(Fragment, type=fragment_type1, content="Zsxdrg", filter=None)
         
         tpl = Template('{% load coop_edition %}{% coop_fragments "contacts" "hello" %}')
         html = tpl.render(Context({"ft_name": "contacts"}))
         
-        positions = [html.find('{0}'.format(f.content)) for f in [f1, f2]]
+        positions = [html.find('{0}'.format(f.content)) for f in [fragment1, fragment2]]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         sorted_positions = positions[:]
         sorted_positions.sort()
         self.assertEqual(positions, sorted_positions)
         
-        for f in [f3, f4]:
-            self.assertTrue(html.find(f.content)<0)
+        for frag in [fragment3, fragment4]:
+            self.assertTrue(html.find(frag.content) < 0)
         
     def test_view_fragments_order(self):
+        """test fragments displayed in position order"""
+
         ft_name = u"contacts"
-        ft1 = mommy.make(FragmentType, name=ft_name)
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
         
-        f1 = mommy.make(Fragment, type=ft1, content="Azerty", position=3)
-        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh", position=1)
-        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn", position=2)
+        fragment1 = mommy.make(Fragment, type=fragment_type1, content="Azerty", position=3)
+        fragment2 = mommy.make(Fragment, type=fragment_type1, content="Qsdfgh", position=1)
+        fragment3 = mommy.make(Fragment, type=fragment_type1, content="Wxcvbn", position=2)
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name %}')
         html = tpl.render(Context({"ft_name": ft_name}))
         
-        positions = [html.find('{0}'.format(f.content)) for f in [f2, f3, f1]]
+        positions = [html.find('{0}'.format(f.content)) for f in [fragment2, fragment3, fragment1]]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         sorted_positions = positions[:]
         sorted_positions.sort()
         self.assertEqual(positions, sorted_positions)
         
     def test_view_only_specified_fragments(self):
+        """test display only right fragements"""
+
         ft_name = u"contacts"
-        ft1 = mommy.make(FragmentType, name=ft_name)
-        ft2 = mommy.make(FragmentType, name="AAAA")
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
+        fragment_type2 = mommy.make(FragmentType, name="AAAA")
         
-        f1 = mommy.make(Fragment, type=ft1, content="Azerty")
-        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh")
-        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn")
+        fragment1 = mommy.make(Fragment, type=fragment_type1, content="Azerty")
+        fragment2 = mommy.make(Fragment, type=fragment_type1, content="Qsdfgh")
+        fragment3 = mommy.make(Fragment, type=fragment_type1, content="Wxcvbn")
         
-        g1 = mommy.make(Fragment, type=ft2, content="POIUYT")
+        fragment_g1 = mommy.make(Fragment, type=fragment_type2, content="POIUYT")
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name %}')
         html = tpl.render(Context({"ft_name": ft_name}))
         
-        positions = [html.find('{0}'.format(f.content)) for f in [f2, f3, f1]]
+        positions = [html.find('{0}'.format(f.content)) for f in [fragment2, fragment3, fragment1]]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         
-        positions = [html.find('{0}'.format(f.content)) for f in [g1]]
+        positions = [html.find('{0}'.format(f.content)) for f in [fragment_g1]]
         for pos in positions:
-            self.assertTrue(pos==-1)
+            self.assertTrue(pos == -1)
             
-    def test_view_only_specified_fragments_extra_id(self):
+    def test_view_only_specified_extra_id(self):
+        """text extra_id is taken into account"""
         ft_name = u"contacts"
-        ft1 = mommy.make(FragmentType, name=ft_name)
-        ft2 = mommy.make(FragmentType, name="AAAA")
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
+        fragment_type2 = mommy.make(FragmentType, name="AAAA")
         
-        ff1 = mommy.make(FragmentFilter, extra_id="hello")
-        ff2 = mommy.make(FragmentFilter, extra_id="2")
+        fragment_filter1 = mommy.make(FragmentFilter, extra_id="hello")
+        fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
         
-        f1 = mommy.make(Fragment, type=ft1, content="Azerty", filter=ff1)
-        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh", filter=ff1)
-        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn", filter=ff2)
-        f4 = mommy.make(Fragment, type=ft1, content="Zsxdrg", filter=None)
-        
-        g1 = mommy.make(Fragment, type=ft2, content="POIUYT", filter=ff1)
+        fragments = [
+            mommy.make(Fragment, type=fragment_type1, content="Azerty", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Qsdfgh", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Wxcvbn", filter=fragment_filter2),
+            mommy.make(Fragment, type=fragment_type1, content="Zsxdrg", filter=None),
+            mommy.make(Fragment, type=fragment_type2, content="POIUYT", filter=fragment_filter1),
+        ]
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name "hello" %}')
         html = tpl.render(Context({"ft_name": ft_name}))
         
-        positions = [html.find('{0}'.format(f.content)) for f in [f2, f1]]
+        positions = [html.find('{0}'.format(f.content)) for f in [fragments[1], fragments[0]]]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         
-        positions = [html.find('{0}'.format(f.content)) for f in [g1, f3, f4]]
+        positions = [html.find('{0}'.format(f.content)) for f in [fragments[4], fragments[2], fragments[3]]]
         for pos in positions:
-            self.assertTrue(pos==-1)
+            self.assertTrue(pos == -1)
             
     def test_view_fragments_edit_mode(self):
+        """test view in edit mode"""
+
         ft_name = u"contacts"
-        ft1 = mommy.make(FragmentType, name=ft_name)
-        ft2 = mommy.make(FragmentType, name="AAAA")
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
+        fragment_type2 = mommy.make(FragmentType, name="AAAA")
         
-        f1 = mommy.make(Fragment, type=ft1, content="Azerty")
-        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh")
-        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn")
-        
-        g1 = mommy.make(Fragment, type=ft2, content="POIUYT")
-        
+        fragments = [
+            mommy.make(Fragment, type=fragment_type1, content="Azerty"),
+            mommy.make(Fragment, type=fragment_type1, content="Qsdfgh"),
+            mommy.make(Fragment, type=fragment_type1, content="Wxcvbn"),
+            mommy.make(Fragment, type=fragment_type2, content="POIUYT"),
+        ]
+
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name %}')
         html = tpl.render(Context({"ft_name": ft_name, "form": True}))
         
-        positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [f1, f2, f3]]
+        positions = [
+            html.find(self.editable_field_tpl.format(f.id, f.content))
+            for f in [fragments[0], fragments[1], fragments[2]]
+        ]
         for pos in positions:
-            self.assertTrue(pos>=0)
-        sorted_positions = positions[:]
-        sorted_positions.sort()
-        self.assertEqual(positions, sorted_positions)
+            self.assertTrue(pos >= 0)
+        self.assertEqual(positions, sorted(positions))
         
-        positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [g1]]
+        positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [fragments[3]]]
         for pos in positions:
-            self.assertTrue(pos==-1)
+            self.assertTrue(pos == -1)
             
     def test_view_fragments_extra_id_edit_mode(self):
+        """test view with extra id in edit mode"""
         ft_name = u"contacts"
-        ft1 = mommy.make(FragmentType, name=ft_name)
-        ft2 = mommy.make(FragmentType, name="AAAA")
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
+        fragment_type2 = mommy.make(FragmentType, name="AAAA")
         
-        ff1 = mommy.make(FragmentFilter, extra_id="hello")
-        ff2 = mommy.make(FragmentFilter, extra_id="2")
+        fragment_filter1 = mommy.make(FragmentFilter, extra_id="hello")
+        fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
         
-        f1 = mommy.make(Fragment, type=ft1, content="Azerty", filter=ff1)
-        f2 = mommy.make(Fragment, type=ft1, content="Qsdfgh", filter=ff1)
-        f3 = mommy.make(Fragment, type=ft1, content="Wxcvbn", filter=ff2)
-        f4 = mommy.make(Fragment, type=ft1, content="Zsxdrg", filter=None)
-        
-        g1 = mommy.make(Fragment, type=ft2, content="POIUYT")
+        fragments = [
+            mommy.make(Fragment, type=fragment_type1, content="Azerty", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Qsdfgh", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Wxcvbn", filter=fragment_filter2),
+            mommy.make(Fragment, type=fragment_type1, content="Zsxdrg", filter=None),
+            mommy.make(Fragment, type=fragment_type2, content="POIUYT")
+        ]
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name "hello" %}')
         html = tpl.render(Context({"ft_name": ft_name, "form": True}))
         
-        positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [f1, f2]]
+        positions = [
+            html.find(self.editable_field_tpl.format(f.id, f.content))
+            for f in [fragments[0], fragments[1]]
+        ]
         for pos in positions:
-            self.assertTrue(pos>=0)
-        sorted_positions = positions[:]
-        sorted_positions.sort()
-        self.assertEqual(positions, sorted_positions)
+            self.assertTrue(pos >= 0)
+        self.assertEqual(positions, sorted(positions))
         
-        positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [g1, f3, f4]]
+        positions = [
+            html.find(self.editable_field_tpl.format(f.id, f.content))
+            for f in [fragments[4], fragments[2], fragments[3]]
+        ]
         for pos in positions:
-            self.assertTrue(pos==-1)
+            self.assertTrue(pos == -1)
             
     def test_fragments_with_template(self):
+        """test template_name argument of the template tag"""
         ft_name = u"contacts"
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
@@ -344,10 +449,11 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(0, len(soup.select('.panel')))
         
     def test_view_fragments_with_template(self):
+        """test view with template_name arguement"""
         ft_name = u"contacts"
-        ft = mommy.make(FragmentType, name=ft_name)
+        fragment_type = mommy.make(FragmentType, name=ft_name)
         
-        f = mommy.make(Fragment, type=ft)
+        mommy.make(Fragment, type=fragment_type)
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
         html = tpl.render(Context({"ft_name": ft_name}))
@@ -358,11 +464,12 @@ class FragmentsTest(BaseTestCase):
         soup = BeautifulSoup(html)
         self.assertEqual(1, len(soup.select('.panel')))
         
-    def test_view_fragments_with_template_edit_mode(self):
+    def test_view_fragments_template_edit_mode(self):
+        """test with template_name in edit_mode"""
         ft_name = u"contacts"
-        ft = mommy.make(FragmentType, name=ft_name)
+        fragment_type = mommy.make(FragmentType, name=ft_name)
         
-        f = mommy.make(Fragment, type=ft)
+        mommy.make(Fragment, type=fragment_type)
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
         html = tpl.render(Context({"ft_name": ft_name, 'form': True}))
@@ -376,11 +483,12 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(1, len(soup.select('.panel .djaloha-editable')))
     
     def test_view_fragments_with_template2(self):
+        """test with another template"""
         ft_name = u"contacts"
-        ft = mommy.make(FragmentType, name=ft_name)
+        fragment_type = mommy.make(FragmentType, name=ft_name)
         
-        f = mommy.make(Fragment, type=ft)
-        f = mommy.make(Fragment, type=ft)
+        mommy.make(Fragment, type=fragment_type)
+        mommy.make(Fragment, type=fragment_type)
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
         html = tpl.render(Context({"ft_name": ft_name}))
@@ -391,11 +499,12 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(2, len(soup.select('.panel')))
         
     def test_view_fragments_with_template3(self):
+        """test with another other template"""
         ft_name = u"contacts"
-        ft = mommy.make(FragmentType, name=ft_name)
+        fragment_type = mommy.make(FragmentType, name=ft_name)
         
-        f = mommy.make(Fragment, type=ft)
-        f = mommy.make(Fragment, type=ft)
+        mommy.make(Fragment, type=fragment_type)
+        mommy.make(Fragment, type=fragment_type)
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
         html = tpl.render(Context({"ft_name": ft_name, 'form': True}))
@@ -404,51 +513,18 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
         soup = BeautifulSoup(html)
         self.assertEqual(3, len(soup.select('.panel'))) # 1 extra panel if_cms_edition and fragment index > 0
-    
-    def _log_as_editor(self):
-        self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
-        
-        ct1 = ContentType.objects.get_for_model(get_article_class())
-        ct2 = ContentType.objects.get_for_model(Fragment)
-        
-        for ct in (ct1, ct2):
-            
-            perm = 'change_{0}'.format(ct.model)
-            can_edit = Permission.objects.get(content_type=ct, codename=perm)
-            user.user_permissions.add(can_edit)
-            
-            perm = 'add_{0}'.format(ct.model)
-            can_add = Permission.objects.get(content_type=ct, codename=perm)
-            user.user_permissions.add(can_add)
-        
-        user.is_active = True
-        user.save()
-        return self.client.login(username='toto', password='toto')
-    
-    def _log_as_regular_user(self):
-        user = User.objects.create_user('titi', 'titi@toto.fr', 'titi')
-        
-        ct = ContentType.objects.get_for_model(get_article_class())
-        
-        user.is_active = True
-        user.save()
-        return self.client.login(username='titi', password='titi')
-        
-    
+
+
+class FragmentsInArticleTest(BaseFragmentTest):
+    """Articles related tests"""
+
     def _check_article(self, response, data):
-        for (key, value) in data.items():
+        """check page content"""
+        for value in data.values():
             self.assertContains(response, value)
-    #        
-    #def _check_article_not_changed(self, article, data, initial_data):
-    #    article = get_article_class().objects.get(id=article.id)
-    #
-    #    for (key, value) in data.items():
-    #        self.assertNotEquals(getattr(article, key), value)
-    #        
-    #    for (key, value) in initial_data.items():
-    #        self.assertEquals(getattr(article, key), value)
 
     def test_view_article_no_fragments(self):
+        """view article with no Fragment"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         response = self.client.get(article.get_absolute_url())
@@ -457,51 +533,57 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual("parts", FragmentType.objects.all()[0].name)
         
     def test_view_article_with_fragments(self):
+        """view article with Fragment"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft = mommy.make(FragmentType, name="parts")
-        f1 = mommy.make(Fragment, type=ft, content="Azertyuiop")
+        fragment_type = mommy.make(FragmentType, name="parts")
+        fragment1 = mommy.make(Fragment, type=fragment_type, content="Azertyuiop")
         
         response = self.client.get(article.get_absolute_url())
         
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, f1.content)
+        self.assertContains(response, fragment1.content)
         
     def test_view_article_with_fragments_extra_id(self):
+        """view article with Fragment and extra_id"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[1][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft = mommy.make(FragmentType, name="parts")
-        ff1 = mommy.make(FragmentFilter, extra_id=str(article.id))
-        ff2 = mommy.make(FragmentFilter, extra_id="hello")
-        f1 = mommy.make(Fragment, type=ft, content="Azertyuiop", filter=ff1)
-        f2 = mommy.make(Fragment, type=ft, content="QSDFGHJKLM", filter=ff2)
-        f3 = mommy.make(Fragment, type=ft, content="Wxcvbn,;:=", filter=None)
+        fragment_type = mommy.make(FragmentType, name="parts")
+        fragment_filter1 = mommy.make(FragmentFilter, extra_id=str(article.id))
+        fragment_filter2 = mommy.make(FragmentFilter, extra_id="hello")
+        fragment1 = mommy.make(Fragment, type=fragment_type, content="Azertyuiop", filter=fragment_filter1)
+        fragment2 = mommy.make(Fragment, type=fragment_type, content="QSDFGHJKLM", filter=fragment_filter2)
+        fragment3 = mommy.make(Fragment, type=fragment_type, content="Wxcvbn,;:=", filter=None)
         
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, f1.content)
-        self.assertNotContains(response, f2.content)
-        self.assertNotContains(response, f3.content)
+        self.assertContains(response, fragment1.content)
+        self.assertNotContains(response, fragment2.content)
+        self.assertNotContains(response, fragment3.content)
         
     def test_view_article_with_fragment_with_css(self):
+        """view article with Fragment and css"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft = mommy.make(FragmentType, name="parts")
-        f1 = mommy.make(Fragment, type=ft, content="Azertyuiop", css_class="this-is-my-fragment")
+        fragment_type = mommy.make(FragmentType, name="parts")
+        fragment1 = mommy.make(Fragment, type=fragment_type, content="Azertyuiop", css_class="this-is-my-fragment")
         
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, f1.content)
+        self.assertContains(response, fragment1.content)
         
         soup = BeautifulSoup(response.content)
-        fragment = soup.select("div."+f1.css_class)[0]
-        self.assertEqual(f1.content, fragment.text)
+        fragment = soup.select("div."+fragment1.css_class)[0]
+        self.assertEqual(fragment1.content, fragment.text)
         
     def test_edit_article_no_fragments(self):
+        """edit article with no Fragment"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
@@ -518,17 +600,19 @@ class FragmentsTest(BaseTestCase):
         self._check_article(response, data)
         
     def test_edit_article_with_fragments(self):
+        """edit article with Fragment"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft = mommy.make(FragmentType, name="parts")
-        f1 = mommy.make(Fragment, type=ft, content="Azertyuiop")
+        fragment_type = mommy.make(FragmentType, name="parts")
+        fragment1 = mommy.make(Fragment, type=fragment_type, content="Azertyuiop")
         
-        new_f1_content = u"Qsdfghjklm"
+        new_fragment1_content = u"Qsdfghjklm"
         data = {
             "title": 'salut',
             'content': 'bonjour!',
-            'djaloha__coop_cms__Fragment__id__{0}__content'.format(f1.id): new_f1_content,
+            'djaloha__coop_cms__Fragment__id__{0}__content'.format(fragment1.id): new_fragment1_content,
         }
         
         self._log_as_editor()
@@ -536,21 +620,23 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, data['title'])
         self.assertContains(response, data['content'])
-        self.assertContains(response, new_f1_content)
+        self.assertContains(response, new_fragment1_content)
         
     def test_edit_article_with_fragments_extra_id(self):
+        """edit article with Fragment and extra_id"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[1][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft = mommy.make(FragmentType, name="parts")
-        ff = mommy.make(FragmentFilter, extra_id=str(article.id))
-        f1 = mommy.make(Fragment, type=ft, content="Azertyuiop", filter=ff)
+        fragment_type = mommy.make(FragmentType, name="parts")
+        fragment_filter = mommy.make(FragmentFilter, extra_id=str(article.id))
+        fragment1 = mommy.make(Fragment, type=fragment_type, content="Azertyuiop", filter=fragment_filter)
         
-        new_f1_content = u"Qsdfghjklm"
+        new_fragment1_content = u"Qsdfghjklm"
         data = {
             "title": 'salut',
             'content': 'bonjour!',
-            'djaloha__coop_cms__Fragment__id__{0}__content'.format(f1.id): new_f1_content,
+            'djaloha__coop_cms__Fragment__id__{0}__content'.format(fragment1.id): new_fragment1_content,
         }
         
         self._log_as_editor()
@@ -558,11 +644,12 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, data['title'])
         self.assertContains(response, data['content'])
-        self.assertContains(response, new_f1_content)
+        self.assertContains(response, new_fragment1_content)
         
     def test_view_add_fragment(self):
+        """can view add fragment"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
         self._log_as_editor()
         
@@ -572,12 +659,12 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         
     def test_view_add_fragment_check_filters(self):
+        """add fragment check filters"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[1][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
         self._log_as_editor()
         
-        #url = reverse("coop_cms_add_fragment")
         url = article.get_edit_url()
         response = self.client.get(url)
         
@@ -598,14 +685,13 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(ft_tags[0]["data-filter"], '')
         self.assertEqual(ft_tags[1]["data-filter"], str(ff_objs[0].id))
         
-        
-    def test_view_add_fragment_no_filter_check_filters(self):
+    def test_view_add_fragment_no_filter_check(self):
+        """view add fragment"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
         self._log_as_editor()
         
-        #url = reverse("coop_cms_add_fragment")
         url = article.get_edit_url()
         response = self.client.get(url)
         
@@ -625,8 +711,9 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(ft_tags[0]["data-filter"], '')
         
     def test_view_add_fragment_permission_denied(self):
+        """view add fragment not allowed"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
         url = reverse("coop_cms_add_fragment")
         response = self.client.get(url)
@@ -637,8 +724,9 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(403, response.status_code)
         
     def _add_fragment(self, data, errors_count=0):
+        """helper"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
         self._log_as_editor()
         
@@ -658,96 +746,101 @@ class FragmentsTest(BaseTestCase):
         return response        
         
     def test_add_fragment(self):
-        ft = mommy.make(FragmentType, name="parts")
+        """add fragment"""
+        fragment_type = mommy.make(FragmentType, name="parts")
         data = {
-            'type': ft.id,
+            'type': fragment_type.id,
             'name': 'abcd',
             'position': 0,
             'filter': '',
         }
         
-        response = self._add_fragment(data)
-        f = Fragment.objects.all()[0]
+        self._add_fragment(data)
+        fragment = Fragment.objects.all()[0]
         
-        self.assertEqual(f.type, ft)
-        self.assertEqual(f.name, data['name'])
-        self.assertEqual(f.css_class, '')   
-        self.assertEqual(f.position, 1)
-        self.assertEqual(f.filter, None)
-
+        self.assertEqual(fragment.type, fragment_type)
+        self.assertEqual(fragment.name, data['name'])
+        self.assertEqual(fragment.css_class, '')
+        self.assertEqual(fragment.position, 1)
+        self.assertEqual(fragment.filter, None)
         
     def test_add_fragment_filter(self):
-        ft = mommy.make(FragmentType, name="parts")
-        ff = mommy.make(FragmentFilter, extra_id="2")
+        """add fragment with filter"""
+        fragment_type = mommy.make(FragmentType, name="parts")
+        fragment_filter = mommy.make(FragmentFilter, extra_id="2")
         data = {
-            'type': ft.id,
+            'type': fragment_type.id,
             'name': 'abcd',
             'position': 0,
-            'filter': ff.id
+            'filter': fragment_filter.id
         }
         
-        response = self._add_fragment(data)
-        f = Fragment.objects.all()[0]
+        self._add_fragment(data)
+        fragment = Fragment.objects.all()[0]
         
-        self.assertEqual(f.type, ft)
-        self.assertEqual(f.name, data['name'])
-        self.assertEqual(f.css_class, '')   
-        self.assertEqual(f.position, 1)
-        self.assertEqual(f.filter, ff)
+        self.assertEqual(fragment.type, fragment_type)
+        self.assertEqual(fragment.name, data['name'])
+        self.assertEqual(fragment.css_class, '')
+        self.assertEqual(fragment.position, 1)
+        self.assertEqual(fragment.filter, fragment_filter)
         
     def test_add_fragment_position(self):
-        ft = mommy.make(FragmentType, name="parts")
+        """add fragment with position"""
+        fragment_type = mommy.make(FragmentType, name="parts")
         data = {
-            'type': ft.id,
+            'type': fragment_type.id,
             'name': 'abcd',
             'position': 2,
             'filter': '',
         }
         
-        response = self._add_fragment(data)
-        f = Fragment.objects.all()[0]
+        self._add_fragment(data)
+        fragment = Fragment.objects.all()[0]
         
-        self.assertEqual(f.type, ft)
-        self.assertEqual(f.name, data['name'])
-        self.assertEqual(f.css_class, '')
-        self.assertEqual(f.position, 2)
+        self.assertEqual(fragment.type, fragment_type)
+        self.assertEqual(fragment.name, data['name'])
+        self.assertEqual(fragment.css_class, '')
+        self.assertEqual(fragment.position, 2)
         
     def test_add_fragment_invalid_filter(self):
-        ft = mommy.make(FragmentType, name="parts")
+        """add fragment invalid filter"""
+        fragment_type = mommy.make(FragmentType, name="parts")
         data = {
-            'type': ft.id,
+            'type': fragment_type.id,
             'name': 'abcd',
             'position': 2,
             'filter': '0',
         }
         
-        response = self._add_fragment(data, 1)
+        self._add_fragment(data, 1)
         self.assertEqual(0, Fragment.objects.count())
         
     def test_add_fragment_css(self):
-        ft = mommy.make(FragmentType, name="parts")
+        """add fragment css"""
+        fragment_type = mommy.make(FragmentType, name="parts")
         data = {
-            'type': ft.id,
+            'type': fragment_type.id,
             'name': 'abcd',
             'css_class': 'okidki',
             'position': 0,
         }
         
-        response = self._add_fragment(data)
-        f = Fragment.objects.all()[0]
+        self._add_fragment(data)
+        fragment = Fragment.objects.all()[0]
         
-        self.assertEqual(f.type, ft)
-        self.assertEqual(f.name, data['name'])
-        self.assertEqual(f.css_class, '')   
-        self.assertEqual(f.position, 1)
+        self.assertEqual(fragment.type, fragment_type)
+        self.assertEqual(fragment.name, data['name'])
+        self.assertEqual(fragment.css_class, '')
+        self.assertEqual(fragment.position, 1)
             
-    def test_view_add_fragment_permission_denied(self):
+    def test_view_add_fragment_no_perm(self):
+        """add fragment not allowed"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft = mommy.make(FragmentType, name="parts")
+        fragment_type = mommy.make(FragmentType, name="parts")
         data = {
-            'type': ft,
+            'type': fragment_type,
             'name': 'abcd',
             'css_class': 'okidoki',
             'position': 0,
@@ -766,8 +859,9 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(0, Fragment.objects.count())
         
     def test_view_edit_fragments_empty(self):
+        """view edit fragment form: no fragments yet"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
         self._log_as_editor()
         
@@ -777,11 +871,13 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         
     def test_view_edit_fragments(self):
+        """view edit fragment form"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        f1 = mommy.make(Fragment, name="azerty")
-        f2 = mommy.make(Fragment, name="qwerty")
+        fragment1 = mommy.make(Fragment, name="azerty")
+        fragment2 = mommy.make(Fragment, name="qwerty")
         
         self._log_as_editor()
         
@@ -789,12 +885,14 @@ class FragmentsTest(BaseTestCase):
         response = self.client.get(url)
         
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, f1.name)
-        self.assertContains(response, f2.name)
+        self.assertContains(response, fragment1.name)
+        self.assertContains(response, fragment2.name)
         
-    def test_view_edit_fragments_permission_denied(self):
+    def test_view_edit_fragments_perms(self):
+        """view edit fragment form: not allowed"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
         url = reverse("coop_cms_edit_fragments")
         response = self.client.get(url)
@@ -806,25 +904,27 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(403, response.status_code)    
     
     def test_edit_fragment(self):
+        """edit fragment"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft1 = mommy.make(FragmentType)
-        ft2 = mommy.make(FragmentType)
-        f1 = mommy.make(Fragment, name="azerty", type=ft1)
-        f2 = mommy.make(Fragment, name="qwerty", type=ft2)
+        fragment_type1 = mommy.make(FragmentType)
+        fragment_type2 = mommy.make(FragmentType)
+        fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
+        fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
         
         data = {
-            'form-0-id': f1.id,
-            'form-0-type': f1.type.id,
-            'form-0-name': f1.name+"!",
+            'form-0-id': fragment1.id,
+            'form-0-type': fragment1.type.id,
+            'form-0-name': fragment1.name+"!",
             'form-0-css_class': "",
             'form-0-position': 5,
             'form-0-delete_me': False,
             
-            'form-1-id': f2.id,
-            'form-1-type': f2.type.id,
-            'form-1-name': f2.name+"+",
+            'form-1-id': fragment2.id,
+            'form-1-type': fragment2.type.id,
+            'form-1-name': fragment2.name+"+",
             'form-1-css_class': "",
             'form-1-position': 2,
             'form-1-delete_me': False,
@@ -848,40 +948,41 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(response.content, expected)
         
         self.assertEqual(2, Fragment.objects.count())
-        f1 = Fragment.objects.get(id=f1.id)
-        f2 = Fragment.objects.get(id=f2.id)
+        fragment1 = Fragment.objects.get(id=fragment1.id)
+        fragment2 = Fragment.objects.get(id=fragment2.id)
 
-        self.assertEqual(f1.type, ft1)
-        self.assertEqual(f1.name, "azerty!")
-        self.assertEqual(f1.css_class, "")   
-        self.assertEqual(f1.position, 5)
-    
-    
-        self.assertEqual(f2.type, ft2)
-        self.assertEqual(f2.name, "qwerty+")
-        self.assertEqual(f2.css_class, "")   
-        self.assertEqual(f2.position, 2)
+        self.assertEqual(fragment1.type, fragment_type1)
+        self.assertEqual(fragment1.name, "azerty!")
+        self.assertEqual(fragment1.css_class, "")
+        self.assertEqual(fragment1.position, 5)
+
+        self.assertEqual(fragment2.type, fragment_type2)
+        self.assertEqual(fragment2.name, "qwerty+")
+        self.assertEqual(fragment2.css_class, "")
+        self.assertEqual(fragment2.position, 2)
 
     def test_edit_fragment_css_allowed(self):
+        """edit fragment: css"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft1 = mommy.make(FragmentType, allowed_css_classes="oups")
-        ft2 = mommy.make(FragmentType, allowed_css_classes="aaa,bbb")
-        f1 = mommy.make(Fragment, name="azerty", type=ft1)
-        f2 = mommy.make(Fragment, name="qwerty", type=ft2)
+        fragment_type1 = mommy.make(FragmentType, allowed_css_classes="oups")
+        fragment_type2 = mommy.make(FragmentType, allowed_css_classes="aaa,bbb")
+        fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
+        fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
         
         data = {
-            'form-0-id': f1.id,
-            'form-0-type': f1.type.id,
-            'form-0-name': f1.name+"!",
+            'form-0-id': fragment1.id,
+            'form-0-type': fragment1.type.id,
+            'form-0-name': fragment1.name+"!",
             'form-0-css_class': "oups",
             'form-0-position': 5,
             'form-0-delete_me': False,
             
-            'form-1-id': f2.id,
-            'form-1-type': f2.type.id,
-            'form-1-name': f2.name+"+",
+            'form-1-id': fragment2.id,
+            'form-1-type': fragment2.type.id,
+            'form-1-name': fragment2.name+"+",
             'form-1-css_class': "aaa",
             'form-1-position': 2,
             'form-1-delete_me': False,
@@ -905,40 +1006,41 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(response.content, expected)
         
         self.assertEqual(2, Fragment.objects.count())
-        f1 = Fragment.objects.get(id=f1.id)
-        f2 = Fragment.objects.get(id=f2.id)
+        fragment1 = Fragment.objects.get(id=fragment1.id)
+        fragment2 = Fragment.objects.get(id=fragment2.id)
 
-        self.assertEqual(f1.type, ft1)
-        self.assertEqual(f1.name, "azerty!")
-        self.assertEqual(f1.css_class, "oups")   
-        self.assertEqual(f1.position, 5)
-    
-    
-        self.assertEqual(f2.type, ft2)
-        self.assertEqual(f2.name, "qwerty+")
-        self.assertEqual(f2.css_class, "aaa")   
-        self.assertEqual(f2.position, 2)
+        self.assertEqual(fragment1.type, fragment_type1)
+        self.assertEqual(fragment1.name, "azerty!")
+        self.assertEqual(fragment1.css_class, "oups")
+        self.assertEqual(fragment1.position, 5)
+
+        self.assertEqual(fragment2.type, fragment_type2)
+        self.assertEqual(fragment2.name, "qwerty+")
+        self.assertEqual(fragment2.css_class, "aaa")
+        self.assertEqual(fragment2.position, 2)
   
     def test_edit_fragment_css_not_allowed(self):
+        """edit fragment: invalid css"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft1 = mommy.make(FragmentType, allowed_css_classes="")
-        ft2 = mommy.make(FragmentType)
-        f1 = mommy.make(Fragment, name="azerty", type=ft1)
-        f2 = mommy.make(Fragment, name="qwerty", type=ft2)
+        fragment_type1 = mommy.make(FragmentType, allowed_css_classes="")
+        fragment_type2 = mommy.make(FragmentType)
+        fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
+        fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
         
         data = {
-            'form-0-id': f1.id,
-            'form-0-type': f1.type.id,
-            'form-0-name': f1.name+"!",
+            'form-0-id': fragment1.id,
+            'form-0-type': fragment1.type.id,
+            'form-0-name': fragment1.name+"!",
             'form-0-css_class': "oups",
             'form-0-position': 5,
             'form-0-delete_me': False,
             
-            'form-1-id': f2.id,
-            'form-1-type': f2.type.id,
-            'form-1-name': f2.name+"+",
+            'form-1-id': fragment2.id,
+            'form-1-type': fragment2.type.id,
+            'form-1-name': fragment2.name+"+",
             'form-1-css_class': "aaa",
             'form-1-position': 2,
             'form-1-delete_me': False,
@@ -962,41 +1064,40 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(response.content, expected)
         
         self.assertEqual(2, Fragment.objects.count())
-        f1 = Fragment.objects.get(id=f1.id)
-        f2 = Fragment.objects.get(id=f2.id)
+        fragment1 = Fragment.objects.get(id=fragment1.id)
+        fragment2 = Fragment.objects.get(id=fragment2.id)
 
-        self.assertEqual(f1.type, ft1)
-        self.assertEqual(f1.name, "azerty!")
-        self.assertEqual(f1.css_class, "")   
-        self.assertEqual(f1.position, 5)
-    
-    
-        self.assertEqual(f2.type, ft2)
-        self.assertEqual(f2.name, "qwerty+")
-        self.assertEqual(f2.css_class, "")   
-        self.assertEqual(f2.position, 2)
-  
-      
+        self.assertEqual(fragment1.type, fragment_type1)
+        self.assertEqual(fragment1.name, "azerty!")
+        self.assertEqual(fragment1.css_class, "")
+        self.assertEqual(fragment1.position, 5)
+
+        self.assertEqual(fragment2.type, fragment_type2)
+        self.assertEqual(fragment2.name, "qwerty+")
+        self.assertEqual(fragment2.css_class, "")
+        self.assertEqual(fragment2.position, 2)
+
     def test_edit_fragment_delete(self):
+        """delete fragment"""
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft1 = mommy.make(FragmentType)
-        ft2 = mommy.make(FragmentType)
-        f1 = mommy.make(Fragment, name="azerty", type=ft1)
-        f2 = mommy.make(Fragment, name="qwerty", type=ft2)
+        fragment_type1 = mommy.make(FragmentType)
+        fragment_type2 = mommy.make(FragmentType)
+        fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
+        fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
         
         data = {
-            'form-0-id': f1.id,
-            'form-0-type': f1.type.id,
-            'form-0-name': f1.name+"!",
+            'form-0-id': fragment1.id,
+            'form-0-type': fragment1.type.id,
+            'form-0-name': fragment1.name+"!",
             'form-0-css_class': "",
             'form-0-position': 5,
             'form-0-delete_me': False,
             
-            'form-1-id': f2.id,
-            'form-1-type': f2.type.id,
-            'form-1-name': f2.name+"+",
+            'form-1-id': fragment2.id,
+            'form-1-type': fragment2.type.id,
+            'form-1-name': fragment2.name+"+",
             'form-1-css_class': "",
             'form-1-position': 2,
             'form-1-delete_me': True,
@@ -1020,34 +1121,36 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(response.content, expected)
         
         self.assertEqual(1, Fragment.objects.count())
-        f1 = Fragment.objects.get(id=f1.id)
-        self.assertEqual(Fragment.objects.filter(id=f2.id).count(), 0)
+        fragment1 = Fragment.objects.get(id=fragment1.id)
+        self.assertEqual(Fragment.objects.filter(id=fragment2.id).count(), 0)
 
-        self.assertEqual(f1.type, ft1)
-        self.assertEqual(f1.name, "azerty!")
-        self.assertEqual(f1.css_class, "")   
-        self.assertEqual(f1.position, 5)
+        self.assertEqual(fragment1.type, fragment_type1)
+        self.assertEqual(fragment1.name, "azerty!")
+        self.assertEqual(fragment1.css_class, "")
+        self.assertEqual(fragment1.position, 5)
         
     def test_edit_fragment_invalid_position(self):
+        """edit fragment: invalid pos"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft1 = mommy.make(FragmentType)
-        ft2 = mommy.make(FragmentType)
-        f1 = mommy.make(Fragment, name="azerty", type=ft1)
-        f2 = mommy.make(Fragment, name="qwerty", type=ft2)
+        fragment_type1 = mommy.make(FragmentType)
+        fragment_type2 = mommy.make(FragmentType)
+        fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
+        fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
         
         data = {
-            'form-0-id': f1.id,
-            'form-0-type': f1.type.id,
-            'form-0-name': f1.name+"!",
+            'form-0-id': fragment1.id,
+            'form-0-type': fragment1.type.id,
+            'form-0-name': fragment1.name+"!",
             'form-0-css_class': "oups",
             'form-0-position': "AAA",
             'form-0-delete_me': False,
             
-            'form-1-id': f2.id,
-            'form-1-type': f2.type.id,
-            'form-1-name': f2.name+"+",
+            'form-1-id': fragment2.id,
+            'form-1-type': fragment2.type.id,
+            'form-1-name': fragment2.name+"+",
             'form-1-css_class': "aaa",
             'form-1-position': 2,
             'form-1-delete_me': False,
@@ -1068,25 +1171,27 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(1, len(errs))
     
     def test_edit_fragment_empty_name(self):
+        """edit fragment empty name"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft1 = mommy.make(FragmentType)
-        ft2 = mommy.make(FragmentType)
-        f1 = mommy.make(Fragment, name="azerty", type=ft1)
-        f2 = mommy.make(Fragment, name="qwerty", type=ft2)
+        fragment_type1 = mommy.make(FragmentType)
+        fragment_type2 = mommy.make(FragmentType)
+        fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
+        fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
         
         data = {
-            'form-0-id': f1.id,
-            'form-0-type': f1.type.id,
+            'form-0-id': fragment1.id,
+            'form-0-type': fragment1.type.id,
             'form-0-name': "",
             'form-0-css_class': "oups",
             'form-0-position': 1,
             'form-0-delete_me': False,
             
-            'form-1-id': f2.id,
-            'form-1-type': f2.type.id,
-            'form-1-name': f2.name+"+",
+            'form-1-id': fragment2.id,
+            'form-1-type': fragment2.type.id,
+            'form-1-name': fragment2.name+"+",
             'form-1-css_class': "aaa",
             'form-1-position': 2,
             'form-1-delete_me': False,
@@ -1105,28 +1210,29 @@ class FragmentsTest(BaseTestCase):
         soup = BeautifulSoup(response.content)
         errs = soup.select("ul.errorlist li")
         self.assertEqual(1, len(errs))
-        
-    
+
     def test_edit_fragment_permission_denied(self):
+        """edit fragment: not allowed"""
+
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
-        article = get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
         
-        ft1 = mommy.make(FragmentType)
-        ft2 = mommy.make(FragmentType)
-        f1 = mommy.make(Fragment, name="azerty", type=ft1)
-        f2 = mommy.make(Fragment, name="qwerty", type=ft2)
+        fragment_type1 = mommy.make(FragmentType)
+        fragment_type2 = mommy.make(FragmentType)
+        fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
+        fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
         
         data = {
-            'form-0-id': f1.id,
-            'form-0-type': f1.type.id,
-            'form-0-name': f1.name+"!",
+            'form-0-id': fragment1.id,
+            'form-0-type': fragment1.type.id,
+            'form-0-name': fragment1.name+"!",
             'form-0-css_class': "oups",
             'form-0-position': 5,
             'form-0-delete_me': False,
             
-            'form-1-id': f2.id,
-            'form-1-type': f2.type.id,
-            'form-1-name': f2.name+"+",
+            'form-1-id': fragment2.id,
+            'form-1-type': fragment2.type.id,
+            'form-1-name': fragment2.name+"+",
             'form-1-css_class': "aaa",
             'form-1-position': 2,
             'form-1-delete_me': False,
@@ -1142,33 +1248,33 @@ class FragmentsTest(BaseTestCase):
         self.assertEqual(302, response.status_code)
         
         self.assertEqual(2, Fragment.objects.count())
-        f1 = Fragment.objects.get(id=f1.id)
-        f2 = Fragment.objects.get(id=f2.id)
+        fragment1 = Fragment.objects.get(id=fragment1.id)
+        fragment2 = Fragment.objects.get(id=fragment2.id)
 
-        self.assertEqual(f1.type, ft1)
-        self.assertEqual(f1.name, "azerty")
-        self.assertEqual(f1.css_class, "")   
-        self.assertEqual(f1.position, 1)
+        self.assertEqual(fragment1.type, fragment_type1)
+        self.assertEqual(fragment1.name, "azerty")
+        self.assertEqual(fragment1.css_class, "")
+        self.assertEqual(fragment1.position, 1)
     
-        self.assertEqual(f2.type, ft2)
-        self.assertEqual(f2.name, "qwerty")
-        self.assertEqual(f2.css_class, "")   
-        self.assertEqual(f2.position, 1)
+        self.assertEqual(fragment2.type, fragment_type2)
+        self.assertEqual(fragment2.name, "qwerty")
+        self.assertEqual(fragment2.css_class, "")
+        self.assertEqual(fragment2.position, 1)
 
         self._log_as_regular_user()
         response = self.client.post(url, data=data)
         self.assertEqual(403, response.status_code)  
         
         self.assertEqual(2, Fragment.objects.count())
-        f1 = Fragment.objects.get(id=f1.id)
-        f2 = Fragment.objects.get(id=f2.id)
+        fragment1 = Fragment.objects.get(id=fragment1.id)
+        fragment2 = Fragment.objects.get(id=fragment2.id)
 
-        self.assertEqual(f1.type, ft1)
-        self.assertEqual(f1.name, "azerty")
-        self.assertEqual(f1.css_class, "")   
-        self.assertEqual(f1.position, 1)
+        self.assertEqual(fragment1.type, fragment_type1)
+        self.assertEqual(fragment1.name, "azerty")
+        self.assertEqual(fragment1.css_class, "")
+        self.assertEqual(fragment1.position, 1)
     
-        self.assertEqual(f2.type, ft2)
-        self.assertEqual(f2.name, "qwerty")
-        self.assertEqual(f2.css_class, "")   
-        self.assertEqual(f2.position, 1)
+        self.assertEqual(fragment2.type, fragment_type2)
+        self.assertEqual(fragment2.name, "qwerty")
+        self.assertEqual(fragment2.css_class, "")
+        self.assertEqual(fragment2.position, 1)
