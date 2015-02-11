@@ -113,10 +113,14 @@ class FragmentEditNode(DjalohaMultipleEditNode):
             self._edit_mode = True
         html = super(FragmentEditNode, self).render(context)
         filter_id = self.fragment_filter.id if self.fragment_filter else ""
-        html_layout = u'<div style="display: none" class="coop-fragment-type" rel="{0}" data-filter="{2}">{1}</div>'
-        pre_html = html_layout.format(
-            self.fragment_type.id, self.fragment_type.name, filter_id
-        )
+        if self._edit_mode:
+            html_layout = u'<div style="display: none; visibility: hidden;" class="coop-fragment-type" '
+            html_layout += u'rel="{0}" data-filter="{2}">{1}</div>'
+            pre_html = html_layout.format(
+                self.fragment_type.id, self.fragment_type.name, filter_id
+            )
+        else:
+            pre_html = u''
         return pre_html + html
 
 

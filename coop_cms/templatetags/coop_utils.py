@@ -12,6 +12,7 @@ from django import template
 from django.conf import settings
 from django.template import RequestContext
 from django.template.loader import get_template
+from django.utils.safestring import mark_safe
 from django.utils.text import slugify
 
 from floppyforms import CheckboxInput
@@ -286,7 +287,7 @@ def open_tag_if(index_, args):
     """open_tag if condition"""
     tag, nb_per_block = args.split("/")
     nb_per_block = int(nb_per_block)
-    return "<{0}>".format(tag) if (index_ % nb_per_block) == 0 else ""
+    return mark_safe(u"<{0}>".format(tag) if (index_ % nb_per_block) == 0 else "")
 
 
 @register.filter
@@ -294,4 +295,4 @@ def close_tag_if(index_, args):
     """close_tag if condition"""
     tag, nb_per_block = args.split("/")
     nb_per_block = int(nb_per_block)
-    return "</{0}>".format(tag) if (index_ % nb_per_block) == nb_per_block else ""
+    return mark_safe(u"</{0}>".format(tag) if (index_ % nb_per_block) == nb_per_block else "")
