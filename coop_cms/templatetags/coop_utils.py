@@ -19,7 +19,7 @@ from django.utils.text import slugify
 from floppyforms import CheckboxInput
 
 from coop_cms.models import ArticleCategory, Image
-from coop_cms.settings import get_article_class
+from coop_cms.settings import get_article_class, logger
 from coop_cms.shortcuts import get_article
 from coop_cms.utils import dehtml as do_dehtml
 
@@ -103,8 +103,8 @@ class NewsletterFriendlyCssNode(template.Node):
             try:
                 soup = BeautifulSoup(content)
             except HTMLParseError, msg:
-                print "HTMLParseError", msg
-                print content
+                logger.error("HTMLParseError: {0}".format(msg))
+                logger.error(content)
                 raise
             for tag, css in self.css.items():
                 for html_tag in soup.select(tag):
