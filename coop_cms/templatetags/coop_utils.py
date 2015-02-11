@@ -7,6 +7,7 @@ import os.path
 import unicodedata
 
 from bs4 import BeautifulSoup
+from HTMLParser import HTMLParseError
 
 from django import template
 from django.conf import settings
@@ -99,7 +100,12 @@ class NewsletterFriendlyCssNode(template.Node):
         """to html"""
         content = self.nodelist_content.render(context)
         if context.get('by_email', False):
-            soup = BeautifulSoup(content)
+            try:
+                soup = BeautifulSoup(content)
+            except HTMLParseError, msg:
+                print "HTMLParseError", msg
+                print content
+                raise
             for tag, css in self.css.items():
                 for html_tag in soup.select(tag):
                     html_tag["style"] = css
