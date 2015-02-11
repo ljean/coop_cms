@@ -31,14 +31,13 @@ ul.coop-cms_user-messages a.close-message{
 	text-align: right;
 	display: block;
 	color: #000;
-	background: #fff;
+	background: transparent;
 }
 
 ul.coop-cms_user-messages a.close-message:hover{
 	color: #555;
 }
 
-	
 ul.coop-cms_user-messages {
 	position: absolute;
 	top: 25px;

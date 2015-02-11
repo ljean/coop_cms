@@ -6,6 +6,7 @@
   <title>{{newsletter.subject}}</title>
   {% if editable %}
     {% include "coop_cms/_js_includes.html" %}
+    <link type="text/css" href="{{ STATIC_URL }}css/coop_cms.css?v=1" rel="stylesheet">
     {% coop_bar_headers %}
   {% endif %}
   {% if_cms_edition %}
