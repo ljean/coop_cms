@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 """models"""
 
+from django.conf import settings
+if 'localeurl' in settings.INSTALLED_APPS:
+    from localeurl.models import patch_reverse
+    patch_reverse()
+
 from datetime import datetime
 import os
 import os.path
@@ -11,7 +16,6 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.signals import pre_delete, post_save
-from django.conf import settings
 from django.contrib.contenttypes import generic
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
