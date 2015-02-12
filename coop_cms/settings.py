@@ -261,7 +261,7 @@ def install_csrf_failure_view():
     """Make possible to customize csrf failure page"""
     dont_do_it = getattr(django_settings, 'COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW', False)
     if not dont_do_it:
-        setattr(django_settings, 'CSRF_FAILURE_VIEW', 'coop_cms.views.csrf_failure')
+        setattr(django_settings, 'CSRF_FAILURE_VIEW', 'coop_cms.views.webutils.csrf_failure')
 
 
 def cms_no_homepage():

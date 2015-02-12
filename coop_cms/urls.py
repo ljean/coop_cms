@@ -16,6 +16,7 @@ from coop_cms.settings import (
 from coop_cms.views.newsletters import NewsletterView
 from coop_cms.views.webutils import DebugErrorCodeView
 
+
 install_csrf_failure_view()
 
 urlpatterns = patterns('coop_cms.views.articles',
