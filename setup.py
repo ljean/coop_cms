@@ -9,7 +9,7 @@ except ImportError:
     ez_setup.use_setuptools()
     from setuptools import setup, find_packages
 
-VERSION = "1.0.10"
+VERSION = __import__('coop_cms').__version__
 
 import os
 
