@@ -371,6 +371,64 @@ class FragmentsTest(BaseFragmentTest):
         positions = [html.find('{0}'.format(f.content)) for f in [fragments[4], fragments[2], fragments[3]]]
         for pos in positions:
             self.assertTrue(pos == -1)
+
+    def test_view_extra_id_named_args(self):
+        """text extra_id is taken into account extra_id is given as named arg"""
+        ft_name = u"contacts"
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
+        fragment_type2 = mommy.make(FragmentType, name="AAAA")
+
+        fragment_filter1 = mommy.make(FragmentFilter, extra_id="hello")
+        fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
+
+        fragments = [
+            mommy.make(Fragment, type=fragment_type1, content="Azerty", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Qsdfgh", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Wxcvbn", filter=fragment_filter2),
+            mommy.make(Fragment, type=fragment_type1, content="Zsxdrg", filter=None),
+            mommy.make(Fragment, type=fragment_type2, content="POIUYT", filter=fragment_filter1),
+        ]
+
+        tpl = Template('{% load coop_edition %}{% coop_fragments ft_name extra_id="hello" %}')
+        html = tpl.render(Context({"ft_name": ft_name}))
+
+        positions = [html.find('{0}'.format(f.content)) for f in [fragments[1], fragments[0]]]
+        for pos in positions:
+            self.assertTrue(pos >= 0)
+
+        positions = [html.find('{0}'.format(f.content)) for f in [fragments[4], fragments[2], fragments[3]]]
+        for pos in positions:
+            self.assertTrue(pos == -1)
+
+    def test_view_extra_id_named_args_end(self):
+        """text extra_id is taken into account extra_id is given as named arg in last position"""
+        ft_name = u"contacts"
+        fragment_type1 = mommy.make(FragmentType, name=ft_name)
+        fragment_type2 = mommy.make(FragmentType, name="AAAA")
+
+        fragment_filter1 = mommy.make(FragmentFilter, extra_id="hello")
+        fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
+
+        fragments = [
+            mommy.make(Fragment, type=fragment_type1, content="Azerty", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Qsdfgh", filter=fragment_filter1),
+            mommy.make(Fragment, type=fragment_type1, content="Wxcvbn", filter=fragment_filter2),
+            mommy.make(Fragment, type=fragment_type1, content="Zsxdrg", filter=None),
+            mommy.make(Fragment, type=fragment_type2, content="POIUYT", filter=fragment_filter1),
+        ]
+
+        tpl = Template(
+            '{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" extra_id="hello" %}'
+        )
+        html = tpl.render(Context({"ft_name": ft_name}))
+
+        positions = [html.find('{0}'.format(f.content)) for f in [fragments[1], fragments[0]]]
+        for pos in positions:
+            self.assertTrue(pos >= 0)
+
+        positions = [html.find('{0}'.format(f.content)) for f in [fragments[4], fragments[2], fragments[3]]]
+        for pos in positions:
+            self.assertTrue(pos == -1)
             
     def test_view_fragments_edit_mode(self):
         """test view in edit mode"""

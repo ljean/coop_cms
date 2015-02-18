@@ -567,6 +567,9 @@ class AddFragmentForm(BaseFragmentForm):
     class Meta:
         model = Fragment
         fields = ('type', 'name', 'css_class', 'position', 'filter', )
+        widgets = {
+            "filter": forms.HiddenInput(),
+        }
 
     def __init__(self, data=None, *args, **kwargs):
         super(AddFragmentForm, self).__init__(data, *args, **kwargs) # pylint: disable=E1002

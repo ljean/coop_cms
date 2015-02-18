@@ -129,15 +129,23 @@ def coop_fragments(parser, token):
     """templatetag"""
     args = token.split_contents()
     lookup = {'name': args[1]}
+    extra_id_found = False
     if len(args) > 2:
         args2 = args[2]
         if args2.find("=") < 0:
             lookup["extra_id"] = args2
+            extra_id_found = True
+
     kwargs = {}
-    for arg in args[2:]:
+    start_index = 2 if extra_id_found else 1
+    for arg in args[start_index:]:
         if arg.find("=") > 0:
             key, value = arg.split('=')
-            kwargs[key] = value
+            if key == "extra_id" and not extra_id_found:
+                lookup["extra_id"] = value
+                extra_id_found = True
+            else:
+                kwargs[key] = value
     return FragmentEditNode(lookup, kwargs)
 
 
