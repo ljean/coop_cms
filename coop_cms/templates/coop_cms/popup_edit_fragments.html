@@ -6,35 +6,37 @@
 {% block extra_head %}
     <script type="text/javascript">
     $(function() {
-        var extra_ids = {};
-        parent.$(".coop-fragment-type").each(function(idx, elt) {
-            $("select#fragment-types").append('<option value="'+$(elt).attr("rel")+'">'+$(elt).text()+'</option>');;
-            extra_ids[$(elt).attr('rel')] = $(elt).attr('data-filter');
-        });
-        $("select#fragment-types").change(function() {
-            var type_id = $(this).val();
-            var extra_id = extra_ids[type_id];
-            $("tr.field-row").hide();
-            $("tr td.ft-id").each(function(idx, elt) {
-                var ff_id = $(elt).closest("tr").find("td.ff-id input").val();
-                if (extra_id && extra_id!='0') {
-                    if ($(elt).find("input").val() == type_id && (extra_id == ff_id)) {
-                        $(elt).closest("tr").show();
+        $(document).bind('cbox_complete', function() {
+            var extra_ids = {};
+            parent.$(".coop-fragment-type").each(function (idx, elt) {
+                $("select#fragment-types").append('<option value="' + $(elt).attr("rel") + '">' + $(elt).text() + '</option>');
+                ;
+                extra_ids[$(elt).attr('rel')] = $(elt).attr('data-filter');
+            });
+            $("select#fragment-types").change(function () {
+                var type_id = $(this).val();
+                var extra_id = extra_ids[type_id];
+                $("tr.field-row").hide();
+                $("tr td.ft-id").each(function (idx, elt) {
+                    var ff_id = $(elt).closest("tr").find("td.ff-id input").val();
+                    if (extra_id && extra_id != '0') {
+                        if ($(elt).find("input").val() == type_id && (extra_id == ff_id)) {
+                            $(elt).closest("tr").show();
+                        }
+                    } else {
+                        if ($(elt).find("input").val() == type_id) {
+                            $(elt).closest("tr").show();
+                        }
                     }
-                } else {
-                    if ($(elt).find("input").val() == type_id) {
-                        $(elt).closest("tr").show();
-                    }   
-                }
-            })
-            parent.$.colorbox.resize();
+                })
+                parent.$.colorbox.resize();
+            });
+            $("select#fragment-types").change();
+
+            $("select").chosen();
+            $(".chosen-container").css({width: '140px'});
+            //$(".chosen-container input").css({width: '140px'});
         });
-        $("select#fragment-types").change();
-
-        $("select").chosen();
-        $(".chosen-container").css({width: '140px'});
-        //$(".chosen-container input").css({width: '140px'});
-
     });
     </script>
 {% endblock %}

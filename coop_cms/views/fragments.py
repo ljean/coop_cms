@@ -9,7 +9,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.utils.translation import ugettext as _
 
-from colorbox.decorators import popup_redirect, popup_close
+from colorbox.decorators import popup_close
 
 from coop_cms import forms
 from coop_cms import models

@@ -367,6 +367,7 @@ class NewArticleForm(WithNavigationModelForm):
                 self.fields['sites'].widget = forms.MultipleHiddenInput()
 
     def clean_site(self):
+        """check that the current site is selected"""
         sites = self.cleaned_data['sites']
         if Site.objects.get_current() not in sites:
             raise ValidationError(_(u"It is recommended to keep the current site."))
@@ -421,8 +422,9 @@ class NewsletterSettingsForm(forms.ModelForm):
         )
 
     def clean_items(self):
+        """check items"""
         items = self.cleaned_data["items"]
-        choice_ids = [value for (value, label) in self.fields['items'].choices]
+        choice_ids = [choice[0] for choice in self.fields['items'].choices]
         for item in items:
             if item.id not in choice_ids:
                 raise ValidationError(_(u"Invalid choice"))
@@ -535,13 +537,6 @@ class BaseFragmentForm(floppyforms.ModelForm):
                             css_classes.append(css_class)
             if css_classes:
                 choices = [('', '')] + [(x, x) for x in css_classes]
-                # self.fields['css_class'] = floppyforms.MultipleChoiceField(
-                #     choices=choices,
-                #     widget=floppyforms.SelectMultiple(
-                #         choices=choices,
-                #         attrs={"class": "chosen-select", "data-placeholder": _(u"Select CSS classes to apply")}
-                #     )
-                # )
                 self.fields['css_class'].widget = floppyforms.SelectMultiple(
                     choices=choices,
                     attrs={"class": "chosen-select", "data-placeholder": _(u"Select CSS classes to apply")}

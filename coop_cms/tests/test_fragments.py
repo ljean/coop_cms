@@ -20,6 +20,7 @@ from coop_cms.tests import BaseTestCase
 
 
 class BaseFragmentTest(BaseTestCase):
+    """base class for fragments test"""
 
     def __init__(self, *args, **kwargs):
         super(BaseFragmentTest, self).__init__(*args, **kwargs)
@@ -816,7 +817,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
         self.assertEqual(0, Fragment.objects.count())
         
     def test_add_fragment_one_css(self):
-        """add fragment css"""
+        """add fragment css."""
         fragment_type = mommy.make(FragmentType, name="parts", allowed_css_classes="col-1,first-line")
         data = {
             'type': fragment_type.id,
