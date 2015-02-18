@@ -18,7 +18,7 @@ from django.test.client import RequestFactory
 
 from coop_cms.models import Link, NavNode, BaseArticle
 from coop_cms.settings import is_localized, is_multilang, get_article_class, get_navtree_class
-from coop_cms.templatetags.coop_utils import get_part, get_parts, group_in_sublists
+from coop_cms.templatetags.coop_utils import get_part, get_parts, group_in_sublists, find_css
 from coop_cms.tests import BaseTestCase
 
 
@@ -344,3 +344,24 @@ class GroupInSublistsTest(TestCase):
     def test_group_in_sublists_not_exact_only_1(self):
         """when only 1 not-full sublist"""
         self.assertEqual([[1, 2, 3, 4, 5]], group_in_sublists([1, 2, 3, 4, 5], 6))
+
+
+class FindCssTestCase(TestCase):
+    """find_css template tag"""
+
+    def test_find_css_one(self):
+        """check template filter returns true if in css_classes : equal to css_classes"""
+        self.assertTrue(find_css("col1", "col1"))
+
+    def test_find_css_several(self):
+        """check template filter returns true if in css_classes: in css_classes"""
+        self.assertTrue(find_css("col1 ligne", "col1"))
+        self.assertTrue(find_css("col1 ligne", "ligne"))
+
+    def test_dont_find(self):
+        """check template filter returns false if different"""
+        self.assertFalse(find_css("col1", "col2"))
+
+    def test_dont_find_several(self):
+        """check template filter returns false if not in css_classes"""
+        self.assertFalse(find_css("col1 ligne", "col2"))

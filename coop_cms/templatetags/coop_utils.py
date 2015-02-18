@@ -103,7 +103,8 @@ class NewsletterFriendlyCssNode(template.Node):
             try:
                 soup = BeautifulSoup(content)
             except HTMLParseError, msg:
-                logger.error("HTMLParseError: {0}".format(msg))
+                text = "HTMLParseError: {0}".format(msg)
+                logger.error(text)
                 logger.error(content)
                 raise
             for tag, css in self.css.items():
@@ -302,3 +303,11 @@ def close_tag_if(index_, args):
     tag, nb_per_block = args.split("/")
     nb_per_block = int(nb_per_block)
     return mark_safe(u"</{0}>".format(tag) if (index_ % nb_per_block) == nb_per_block else "")
+
+##########
+@register.filter
+def find_css(value, css_class):
+    """open_tag if condition"""
+    if css_class in value.split(" "):
+        return True
+    return False
