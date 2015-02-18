@@ -20,6 +20,9 @@
             $("#id_filter").val(extra_ids[$(this).val()]);
         });
         $("select#id_type").change();
+        $("#id_css_class").chosen();
+        $("#id_css_class_chosen").css({width: '140px'});
+        $("#id_css_class_chosen input").css({width: '140px', height: '28px'});
       });
     });
     </script>

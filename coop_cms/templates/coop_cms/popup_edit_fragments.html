@@ -30,6 +30,11 @@
             parent.$.colorbox.resize();
         });
         $("select#fragment-types").change();
+
+        $("select").chosen();
+        $(".chosen-container").css({width: '140px'});
+        //$(".chosen-container input").css({width: '140px'});
+
     });
     </script>
 {% endblock %}

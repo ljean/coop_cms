@@ -815,7 +815,55 @@ class FragmentsInArticleTest(BaseFragmentTest):
         self._add_fragment(data, 1)
         self.assertEqual(0, Fragment.objects.count())
         
-    def test_add_fragment_css(self):
+    def test_add_fragment_one_css(self):
+        """add fragment css"""
+        fragment_type = mommy.make(FragmentType, name="parts", allowed_css_classes="col-1,first-line")
+        data = {
+            'type': fragment_type.id,
+            'name': 'abcd',
+            'css_class': ['col-1'],
+            'position': 0,
+        }
+
+        self._add_fragment(data)
+        fragment = Fragment.objects.all()[0]
+
+        self.assertEqual(fragment.type, fragment_type)
+        self.assertEqual(fragment.name, data['name'])
+        self.assertEqual(fragment.css_class, 'col-1')
+        self.assertEqual(fragment.position, 1)
+
+    def test_add_fragment_two_css(self):
+        """add fragment css"""
+        fragment_type = mommy.make(FragmentType, name="parts", allowed_css_classes="col-1,first-line")
+        data = {
+            'type': fragment_type.id,
+            'name': 'abcd',
+            'css_class': ['col-1', 'first-line'],
+            'position': 0,
+        }
+
+        self._add_fragment(data)
+        fragment = Fragment.objects.all()[0]
+
+        self.assertEqual(fragment.type, fragment_type)
+        self.assertEqual(fragment.name, data['name'])
+        self.assertEqual(fragment.css_class, 'col-1 first-line')
+        self.assertEqual(fragment.position, 1)
+
+    def test_add_fragment_invalid_css(self):
+        """add fragment css"""
+        fragment_type = mommy.make(FragmentType, name="parts", allowed_css_classes="col-1")
+        data = {
+            'type': fragment_type.id,
+            'name': 'abcd',
+            'css_class': ['col-1', 'first-line'],
+            'position': 0,
+        }
+
+        self._add_fragment(data, errors_count=1)
+
+    def test_add_fragment_unknown_css(self):
         """add fragment css"""
         fragment_type = mommy.make(FragmentType, name="parts")
         data = {
@@ -825,13 +873,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
             'position': 0,
         }
         
-        self._add_fragment(data)
-        fragment = Fragment.objects.all()[0]
-        
-        self.assertEqual(fragment.type, fragment_type)
-        self.assertEqual(fragment.name, data['name'])
-        self.assertEqual(fragment.css_class, '')
-        self.assertEqual(fragment.position, 1)
+        self._add_fragment(data, errors_count=1)
             
     def test_view_add_fragment_no_perm(self):
         """add fragment not allowed"""
@@ -918,14 +960,14 @@ class FragmentsInArticleTest(BaseFragmentTest):
             'form-0-id': fragment1.id,
             'form-0-type': fragment1.type.id,
             'form-0-name': fragment1.name+"!",
-            'form-0-css_class': "",
+            'form-0-css_class': [],
             'form-0-position': 5,
             'form-0-delete_me': False,
             
             'form-1-id': fragment2.id,
             'form-1-type': fragment2.type.id,
             'form-1-name': fragment2.name+"+",
-            'form-1-css_class': "",
+            'form-1-css_class': [],
             'form-1-position': 2,
             'form-1-delete_me': False,
             
@@ -962,49 +1004,49 @@ class FragmentsInArticleTest(BaseFragmentTest):
         self.assertEqual(fragment2.position, 2)
 
     def test_edit_fragment_css_allowed(self):
-        """edit fragment: css"""
+        """edit fragment: css is allowed"""
 
         template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
         get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
-        
+
         fragment_type1 = mommy.make(FragmentType, allowed_css_classes="oups")
         fragment_type2 = mommy.make(FragmentType, allowed_css_classes="aaa,bbb")
         fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
         fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
-        
+
         data = {
             'form-0-id': fragment1.id,
             'form-0-type': fragment1.type.id,
             'form-0-name': fragment1.name+"!",
-            'form-0-css_class': "oups",
+            'form-0-css_class': ["oups"],
             'form-0-position': 5,
             'form-0-delete_me': False,
-            
+
             'form-1-id': fragment2.id,
             'form-1-type': fragment2.type.id,
             'form-1-name': fragment2.name+"+",
-            'form-1-css_class': "aaa",
+            'form-1-css_class': ["aaa", "bbb"],
             'form-1-position': 2,
             'form-1-delete_me': False,
-            
+
             'form-TOTAL_FORMS': 2,
             'form-INITIAL_FORMS': 2,
             'form-MAX_NUM_FORMS': 2
         }
-        
+
         self._log_as_editor()
-        
+
         url = reverse("coop_cms_edit_fragments")
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(200, response.status_code)
-        
+
         soup = BeautifulSoup(response.content)
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
-        
+
         expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
         self.assertEqual(response.content, expected)
-        
+
         self.assertEqual(2, Fragment.objects.count())
         fragment1 = Fragment.objects.get(id=fragment1.id)
         fragment2 = Fragment.objects.get(id=fragment2.id)
@@ -1016,9 +1058,9 @@ class FragmentsInArticleTest(BaseFragmentTest):
 
         self.assertEqual(fragment2.type, fragment_type2)
         self.assertEqual(fragment2.name, "qwerty+")
-        self.assertEqual(fragment2.css_class, "aaa")
+        self.assertEqual(fragment2.css_class, "aaa bbb")
         self.assertEqual(fragment2.position, 2)
-  
+
     def test_edit_fragment_css_not_allowed(self):
         """edit fragment: invalid css"""
 
@@ -1058,24 +1100,125 @@ class FragmentsInArticleTest(BaseFragmentTest):
         
         soup = BeautifulSoup(response.content)
         errs = soup.select("ul.errorlist li")
-        self.assertEqual([], errs)
-        
-        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-        self.assertEqual(response.content, expected)
+        self.assertEqual(2, len(errs))
         
         self.assertEqual(2, Fragment.objects.count())
         fragment1 = Fragment.objects.get(id=fragment1.id)
         fragment2 = Fragment.objects.get(id=fragment2.id)
 
         self.assertEqual(fragment1.type, fragment_type1)
-        self.assertEqual(fragment1.name, "azerty!")
+        self.assertEqual(fragment1.name, "azerty")
         self.assertEqual(fragment1.css_class, "")
-        self.assertEqual(fragment1.position, 5)
 
         self.assertEqual(fragment2.type, fragment_type2)
-        self.assertEqual(fragment2.name, "qwerty+")
+        self.assertEqual(fragment2.name, "qwerty")
         self.assertEqual(fragment2.css_class, "")
-        self.assertEqual(fragment2.position, 2)
+
+    def test_edit_fragment_css_not_allowed2(self):
+        """edit fragment: invalid css for only 1"""
+
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+
+        fragment_type1 = mommy.make(FragmentType, allowed_css_classes="aaa")
+        fragment_type2 = mommy.make(FragmentType)
+        fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
+        fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
+
+        data = {
+            'form-0-id': fragment1.id,
+            'form-0-type': fragment1.type.id,
+            'form-0-name': fragment1.name+"!",
+            'form-0-css_class': "oups",
+            'form-0-position': 5,
+            'form-0-delete_me': False,
+
+            'form-1-id': fragment2.id,
+            'form-1-type': fragment2.type.id,
+            'form-1-name': fragment2.name+"+",
+            'form-1-css_class': "aaa",
+            'form-1-position': 2,
+            'form-1-delete_me': False,
+
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 2,
+            'form-MAX_NUM_FORMS': 2
+        }
+
+        self._log_as_editor()
+
+        url = reverse("coop_cms_edit_fragments")
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(200, response.status_code)
+
+        soup = BeautifulSoup(response.content)
+        errs = soup.select("ul.errorlist li")
+        self.assertEqual(2, len(errs))
+
+        self.assertEqual(2, Fragment.objects.count())
+        fragment1 = Fragment.objects.get(id=fragment1.id)
+        fragment2 = Fragment.objects.get(id=fragment2.id)
+
+        self.assertEqual(fragment1.type, fragment_type1)
+        self.assertEqual(fragment1.name, "azerty")
+        self.assertEqual(fragment1.css_class, "")
+
+        self.assertEqual(fragment2.type, fragment_type2)
+        self.assertEqual(fragment2.name, "qwerty")
+        self.assertEqual(fragment2.css_class, "")
+
+    def test_edit_fragment_css_not_allowed3(self):
+        """edit fragment: one invalid css """
+
+        template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+        get_article_class().objects.create(title="test", template=template, publication=BaseArticle.PUBLISHED)
+
+        fragment_type1 = mommy.make(FragmentType, allowed_css_classes="aaa,bbb")
+        fragment_type2 = mommy.make(FragmentType)
+        fragment1 = mommy.make(Fragment, name="azerty", type=fragment_type1)
+        fragment2 = mommy.make(Fragment, name="qwerty", type=fragment_type2)
+
+        data = {
+            'form-0-id': fragment1.id,
+            'form-0-type': fragment1.type.id,
+            'form-0-name': fragment1.name+"!",
+            'form-0-css_class': ["bbb", "oups"],
+            'form-0-position': 5,
+            'form-0-delete_me': False,
+
+            'form-1-id': fragment2.id,
+            'form-1-type': fragment2.type.id,
+            'form-1-name': fragment2.name+"+",
+            'form-1-css_class': "aaa",
+            'form-1-position': 2,
+            'form-1-delete_me': False,
+
+            'form-TOTAL_FORMS': 2,
+            'form-INITIAL_FORMS': 2,
+            'form-MAX_NUM_FORMS': 2
+        }
+
+        self._log_as_editor()
+
+        url = reverse("coop_cms_edit_fragments")
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(200, response.status_code)
+
+        soup = BeautifulSoup(response.content)
+        errs = soup.select("ul.errorlist li")
+        self.assertEqual(2, len(errs))
+
+        self.assertEqual(2, Fragment.objects.count())
+        fragment1 = Fragment.objects.get(id=fragment1.id)
+        fragment2 = Fragment.objects.get(id=fragment2.id)
+
+        self.assertEqual(fragment1.type, fragment_type1)
+        self.assertEqual(fragment1.name, "azerty")
+        self.assertEqual(fragment1.css_class, "")
+
+        self.assertEqual(fragment2.type, fragment_type2)
+        self.assertEqual(fragment2.name, "qwerty")
+        self.assertEqual(fragment2.css_class, "")
 
     def test_edit_fragment_delete(self):
         """delete fragment"""
@@ -1144,14 +1287,14 @@ class FragmentsInArticleTest(BaseFragmentTest):
             'form-0-id': fragment1.id,
             'form-0-type': fragment1.type.id,
             'form-0-name': fragment1.name+"!",
-            'form-0-css_class': "oups",
+            'form-0-css_class': "",
             'form-0-position': "AAA",
             'form-0-delete_me': False,
             
             'form-1-id': fragment2.id,
             'form-1-type': fragment2.type.id,
             'form-1-name': fragment2.name+"+",
-            'form-1-css_class': "aaa",
+            'form-1-css_class': "",
             'form-1-position': 2,
             'form-1-delete_me': False,
             
@@ -1185,14 +1328,14 @@ class FragmentsInArticleTest(BaseFragmentTest):
             'form-0-id': fragment1.id,
             'form-0-type': fragment1.type.id,
             'form-0-name': "",
-            'form-0-css_class': "oups",
+            'form-0-css_class': "",
             'form-0-position': 1,
             'form-0-delete_me': False,
             
             'form-1-id': fragment2.id,
             'form-1-type': fragment2.type.id,
             'form-1-name': fragment2.name+"+",
-            'form-1-css_class': "aaa",
+            'form-1-css_class': "",
             'form-1-position': 2,
             'form-1-delete_me': False,
             
@@ -1226,14 +1369,14 @@ class FragmentsInArticleTest(BaseFragmentTest):
             'form-0-id': fragment1.id,
             'form-0-type': fragment1.type.id,
             'form-0-name': fragment1.name+"!",
-            'form-0-css_class': "oups",
+            'form-0-css_class': "",
             'form-0-position': 5,
             'form-0-delete_me': False,
             
             'form-1-id': fragment2.id,
             'form-1-type': fragment2.type.id,
             'form-1-name': fragment2.name+"+",
-            'form-1-css_class': "aaa",
+            'form-1-css_class': "",
             'form-1-position': 2,
             'form-1-delete_me': False,
             
