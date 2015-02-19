@@ -1,0 +1,29 @@
+{% load i18n pagination_tags %}
+{% spaceless %}
+  {% if galleries %}
+  <div class="media-filters" style="font-size: 10px;">
+    <a {% if not gallery_filter %}class="active"{% endif %} href="{{media_url}}?page=1&gallery_filter=0">{% trans "All" %}</a>
+    {% for gallery in galleries %}
+      <a {% if gallery_filter == gallery.id %}class="active" {% endif %}href="{{media_url}}?page=1&gallery_filter={{ gallery.id }}">{{ gallery.title }}</a>
+    {% endfor %}
+  </div>
+  <div>
+      <a href class="hide-media-filters">{% trans "Hide galleries" %}</a>
+      <a href class="show-media-filters" style="display: none;">{% trans "Show galleries" %}</a>
+  </div>
+  {% endif %}
+
+  <div class="library-items library-images">
+  {% autopaginate photologues 12 %}
+  {% for photo in photologues %}
+      <div class="library-image">
+        <img class="library-thumbnail" src="{{ photo.get_thumbnail_url }}" title="{{photo.title}}" rel="{{photo.get_display_url}}" />
+        <div class="library-image-controls" style="">
+          {{ photo.name }}<br />
+          <a href="{% url 'admin:photologue_photo_change' photo.id %}" target="_blank">{% trans "Edit" %}</a>
+        </div>
+      </div>
+  {% endfor %}
+  {% paginate %}  
+  </div>
+{% endspaceless %}

@@ -12,6 +12,7 @@ from HTMLParser import HTMLParseError
 from django import template
 from django.conf import settings
 from django.template import RequestContext
+from django.template.base import TemplateSyntaxError
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 from django.utils.text import slugify
@@ -253,7 +254,7 @@ def coop_image_list(parser, token):
         #as_name = args[2]
         var_name = args[3]
     except IndexError:
-        raise Exception(u"coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
+        raise TemplateSyntaxError(u"coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
     return ImageListNode(filter_name, var_name)
 
 

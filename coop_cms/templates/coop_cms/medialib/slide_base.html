@@ -7,9 +7,11 @@
     $(function() {
       $('.pagination a').live('click', function(e) {
         try {
+          var media_url = $("media_url").text();
           e.preventDefault();
+          alert(media_url+$(this).attr('href'));
           $.ajax({
-            url: "{{ media_url }}"+$(this).attr('href'),
+            url: media_url+$(this).attr('href'),
             success: function(data) {
               $("#media_slide_content").html(data["html"]);
             }
@@ -49,17 +51,30 @@
           dataType: 'json',
           success: function(data) {
             $("#media_slide_content").html(data["html"]);
-            }
-          });
-        //if (!$(this).hasClass('active')){ $(".media-filters a").toggleClass('active'); }
+            $("#media_url").text(data["media_url"]);
+          }
+        });
       });
       
       active_link('{{media_type}}');
+
+      $("a.hide-media-filters").live('click', function() {
+          $(".media-filters, .hide-media-filters").hide();
+          $(".show-media-filters").show();
+          return false;
+      });
+
+       $("a.show-media-filters").live('click', function() {
+          $(".media-filters, .hide-media-filters").show();
+          $(".show-media-filters").hide();
+          return false;
+      });
 
     });
     </script>
   </head>
   <body>
+  <div id="media_url" style="display: none">{{ media_url }}</div>
   {% endif %}
     {% if is_ajax %}
       {% include media_slide_template %}
@@ -69,7 +84,9 @@
         <div class="media-selector">
           {% url "coop_cms_media_images" as images_url %}
           {% url "coop_cms_media_documents" as docs_url %}
+          {% url "coop_cms_media_photologue" as photologue_url %}
           <a class="image-sel" href="{{images_url}}?page=1">{% trans "Images" %}</a>
+          <a class="document-sel" href="{{photologue_url}}?page=1">{% trans "Galleries" %}</a>
           <a class="document-sel" href="{{docs_url}}?page=1">{% trans "Documents" %}</a>
         </div>
         <div id="media_slide_content">

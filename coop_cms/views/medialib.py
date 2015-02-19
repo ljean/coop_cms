@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
@@ -20,6 +20,27 @@ from django.template.loader import get_template
 from coop_cms import forms
 from coop_cms.logger import logger
 from coop_cms import models
+
+
+def _get_photologue_media(request):
+    """get photologue media"""
+    #Only if django-photologue is installed
+    if "photologue" in settings.INSTALLED_APPS:
+        from photologue.models import Photo, Gallery
+        gallery_filter = request.GET.get('gallery_filter', 0)
+        queryset = Photo.objects.all().order_by("-date_added")
+        if gallery_filter:
+            queryset = queryset.filter(galleries__id=gallery_filter)
+
+        context = {
+            'media_url': reverse('coop_cms_media_photologue'),
+            'media_slide_template': 'coop_cms/medialib/slide_photologue_content.html',
+            'gallery_filter': int(gallery_filter),
+            'galleries': Gallery.objects.all(),
+        }
+        return queryset, context
+    else:
+        raise Http404
 
 
 @login_required
@@ -31,46 +52,60 @@ def show_media(request, media_type):
 
         is_ajax = request.GET.get('page', 0)
         media_filter = request.GET.get('media_filter', 0)
+        skip_media_filter = False
 
         if request.session.get("coop_cms_media_doc", False):
-            media_type = 'document' #force the doc
+            #force the doc
+            media_type = 'document'
             del request.session["coop_cms_media_doc"]
 
         if media_type == 'image':
             queryset = models.Image.objects.all().order_by("ordering", "-created")
             context = {
                 'media_url': reverse('coop_cms_media_images'),
-                'media_slide_template': 'coop_cms/slide_images_content.html',
+                'media_slide_template': 'coop_cms/medialib/slide_images_content.html',
             }
+
+        elif media_type == 'photologue':
+            queryset, context = _get_photologue_media(request)
+            skip_media_filter = True
+
         else:
             media_type = "document"
             queryset = models.Document.objects.all().order_by("ordering", "-created")
             context = {
                 'media_url': reverse('coop_cms_media_documents'),
-                'media_slide_template': 'coop_cms/slide_docs_content.html',
+                'media_slide_template': 'coop_cms/medialib/slide_docs_content.html',
             }
 
         context['is_ajax'] = is_ajax
         context['media_type'] = media_type
 
-        media_filters = [media.filters.all() for media in queryset.all()] # list of lists of media_filters
-        media_filters = itertools.chain(*media_filters) #flat list of media_filters
-        context['media_filters'] = sorted(
-            list(set(media_filters)), key=lambda mf: mf.name.upper()
-        )#flat list of unique media filters sorted by alphabetical order (ignore case)
+        if not skip_media_filter:
+            # list of lists of media_filters
+            media_filters = [media.filters.all() for media in queryset.all()]
+            #flat list of media_filters
+            media_filters = itertools.chain(*media_filters)
+            #flat list of unique media filters sorted by alphabetical order (ignore case)
+            context['media_filters'] = sorted(
+                list(set(media_filters)), key=lambda mf: mf.name.upper()
+            )
 
-        if int(media_filter):
-            queryset = queryset.filter(filters__id=media_filter)
-            context['media_filter'] = int(media_filter)
+            if int(media_filter):
+                queryset = queryset.filter(filters__id=media_filter)
+                context['media_filter'] = int(media_filter)
+
         context[media_type+'s'] = queryset
+        context["allow_photologue"] = "photologue" in settings.INSTALLED_APPS
 
-        template = get_template('coop_cms/slide_base.html')
+        template = get_template('coop_cms/medialib/slide_base.html')
         html = template.render(RequestContext(request, context))
 
         if is_ajax:
             data = {
                 'html': html,
                 'media_type': media_type,
+                'media_url': context["media_url"],
             }
             return HttpResponse(json.dumps(data), content_type="application/json")
         else:
