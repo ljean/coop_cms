@@ -40,7 +40,6 @@ setup(
         'django-pagination',
         'feedparser',
         'beautifulsoup4',
-        "django-contrib-requestprovider",
         'django-filetransfers',
         'model_mommy',
     ],
