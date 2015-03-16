@@ -3,7 +3,7 @@
 
 from modeltranslation.translator import translator, TranslationOptions # pylint: disable=F0401
 
-from coop_cms.models import NavNode, ArticleCategory, PieceOfHtml, Fragment, SiteSettings, Alias
+from coop_cms.models import Alias, ArticleCategory, Fragment, NavNode, Newsletter, PieceOfHtml, SiteSettings
 
 
 class PieceOfHtmlTranslationOptions(TranslationOptions):
@@ -40,3 +40,9 @@ class AliasTranslationOptions(TranslationOptions):
     """translation"""
     fields = ('path', 'redirect_url',)
 translator.register(Alias, AliasTranslationOptions)
+
+
+class NewsletterTranslationOptions(TranslationOptions):
+    """translation"""
+    fields = ('subject', 'content',)
+translator.register(Newsletter, NewsletterTranslationOptions)

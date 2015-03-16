@@ -43,6 +43,11 @@ from coop_cms.utils import dehtml, RequestManager, RequestNotFound
 ADMIN_THUMBS_SIZE = '60x60'
 
 
+class InvalidArticleError(Exception):
+    """The exception can be raised when article is not valid"""
+    pass
+
+
 def get_object_label(content_type, obj):
     """
     returns the label used in navigation according to the configured rule
@@ -601,7 +606,7 @@ class BaseArticle(BaseNavigable):
         
         #autoslug localized title for creating locale_slugs
         if (not self.title) and (not self.slug):
-            raise Exception(u"coop_cms.Article: slug can not be empty")
+            raise InvalidArticleError(u"coop_cms.Article: slug can not be empty")
             
         if is_localized():
             from modeltranslation.utils import build_localized_fieldname # pylint: disable=F0401
