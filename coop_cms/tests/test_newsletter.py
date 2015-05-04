@@ -886,7 +886,9 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         self.assertEqual(0, html.count(u'<a style="color: red;">'))
         
     def test_several_args_email_mode_is_inline(self):
-        template = self.template_content.format('a="color: red; background: blue;" td="border: none;" img="width: 100px;"')
+        template = self.template_content.format(
+            'a="color: red; background: blue;" td="border: none;" img="width: 100px;"'
+        )
         tpl = Template(template)
         html = tpl.render(Context({'by_email': True}))
         self.assertEqual(0, html.count(u'<style>'))
@@ -895,7 +897,9 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         self.assertEqual(4, html.count(u'<td style="border: none;">'))
         
     def test_several_args_edit_mode_is_in_style(self):
-        template = self.template_content.format('a="color: red; background: blue;" td="border: none;" img="width: 100px;"')
+        template = self.template_content.format(
+            'a="color: red; background: blue;" td="border: none;" img="width: 100px;"'
+        )
         tpl = Template(template)
         html = tpl.render(Context({'by_email': False}))
         self.assertEqual(1, html.count(u'<style>'))
@@ -915,14 +919,50 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         self.assertEqual(0, html.count(u'<img style="width: 100px;"/>'))
         self.assertEqual(2, html.count(u'<td style="border: none;">'))
 
+    def test_dont_overwrite_inline(self):
 
+        template_content = """
+            {{% load coop_utils %}}
+            {{% nlf_css {0} %}}
+                <a style="color: #fff">One</a>
+                <a>Two</a>
+            {{% end_nlf_css %}}
+        """
 
+        template = template_content.format('a="color: red; background: blue;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(1, html.count(u'<a style="color: red; background: blue;">'))
+        self.assertEqual(1, html.count(u'<a style="color: #fff; background: blue;">'))
 
+    def test_keep_order_inline(self):
 
-    
+        template_content = """
+            {{% load coop_utils %}}
+            {{% nlf_css {0} %}}
+                <a style="background: #000; color: #fff;">One</a>
+                <a>Two</a>
+            {{% end_nlf_css %}}
+        """
 
+        template = template_content.format('a="color: red; background: blue; padding: 0;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(1, html.count(u'<a style="background: #000; color: #fff; padding: 0;">'))
+        self.assertEqual(1, html.count(u'<a style="color: red; background: blue; padding: 0;">'))
 
+    def test_accept_quote(self):
 
+        template_content = """
+            {{% load coop_utils %}}
+            {{% nlf_css {0} %}}
+                <a style="font-family: 'Arial';">One</a>
+                <a>Two</a>
+            {{% end_nlf_css %}}
+        """
 
-    
-
+        template = template_content.format('''a="font-family: 'Tahoma';"''')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(1, html.count(u'''<a style="font-family: 'Arial';">'''))
+        self.assertEqual(1, html.count(u'''<a style="font-family: 'Tahoma';">'''))

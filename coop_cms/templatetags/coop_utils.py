@@ -97,6 +97,36 @@ class NewsletterFriendlyCssNode(template.Node):
         self.css = css
         self.nodelist_content = nodelist_content
 
+    def _style_to_dict(self, style):
+        """
+        convert a style string ('color: #fff; background: #000') into a dict {'color': ''#fff', 'background': '#000'}
+        """
+        css_values = [elt for elt in style.strip().split(";") if elt]
+        css_values = [elt.split(":") for elt in css_values]
+        return dict([(key.strip(), value.strip()) for (key, value) in css_values])
+
+    def _style_to_list(self, style):
+        """
+        convert a style string ('color: #fff; background: #000') into a list ['color', 'background']
+        """
+        css_values = [elt for elt in style.strip().split(";") if elt]
+        css_values = [elt.split(":") for elt in css_values]
+        return [key.strip() for (key, value) in css_values]
+
+    def _dict_to_style(self, style_dict, order_of_items):
+        """
+        convert a dict {'color': ''#fff', 'background': '#000'} into a style string ('color: #fff; background: #000')
+        """
+        values = []
+        for elt in order_of_items:
+            value = style_dict.pop(elt, '')
+            if value:
+                values.append(u"{0}: {1}".format(elt, value))
+        values.extend([u"{0}: {1}".format(key, value) for (key, value) in style_dict.items()])
+        if values:
+            return u"; ".join(values) + ";"
+        return u""
+
     def render(self, context):
         """to html"""
         content = self.nodelist_content.render(context)
@@ -109,8 +139,20 @@ class NewsletterFriendlyCssNode(template.Node):
                 logger.error(content)
                 raise
             for tag, css in self.css.items():
+                key_and_values = self._style_to_dict(css)
                 for html_tag in soup.select(tag):
-                    html_tag["style"] = css
+                    try:
+                        #do not overwrite an inline css value
+                        style = html_tag["style"]
+                        style_list = self._style_to_list(style)
+                        style_dict = self._style_to_dict(style)
+                        for key, value in key_and_values.items():
+                            if key not in style_dict:
+                                style_dict[key] = value
+                        #keep items in order
+                        html_tag["style"] = self._dict_to_style(style_dict, style_list)
+                    except KeyError:
+                        html_tag["style"] = css
             content = soup.prettify(formatter="minimal")
         else:
             style = ""

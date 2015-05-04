@@ -154,6 +154,7 @@ class NewsletterView(EditableObjectView):
         context_data = super(NewsletterView, self).get_context_data()
         context_data.update({
             'title': self.object.subject,
+            'by_email': self.request.GET.get('by_email', False)
         })
         return context_data
 
