@@ -38,7 +38,6 @@ class ImageUploadTest(MediaBaseTestCase):
         url = reverse('coop_cms_upload_image')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        print response.content
         soup = BeautifulSoup(response.content)
         id_filters = soup.select("input#id_filters")
         self.assertEqual(1, len(id_filters))

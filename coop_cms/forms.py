@@ -231,7 +231,7 @@ class AddImageForm(floppyforms.Form):
         label=_('Description'),
     )
     filters = floppyforms.MultipleChoiceField(
-        required=False, label=_(u"Filters"), help_text=_(u"Choose betwwen tags to find images more easily")
+        required=False, label=_(u"Filters"), help_text=_(u"Choose between tags to find images more easily")
     )
     size = floppyforms.ChoiceField(
         required=False, label=_(u"Size"), help_text=_(u"Define a size if you want to resize the image")
@@ -254,9 +254,13 @@ class AddImageForm(floppyforms.Form):
             self.fields['filters'].widget = floppyforms.HiddenInput()
             
         #Image size
-        queryset2 = ImageSize.objects.all()
-        if queryset2.count():
-            self.fields['size'].choices = [('', '')]+[(x.id, unicode(x)) for x in queryset2]
+        img_size_queryset = ImageSize.objects.all()
+        if img_size_queryset.count():
+            self.fields['size'].choices = [
+                (u'', u'')
+            ] + [
+                (img_size.id, unicode(img_size)) for img_size in img_size_queryset
+            ]
         else:
             self.fields['size'].widget = floppyforms.HiddenInput()
 
