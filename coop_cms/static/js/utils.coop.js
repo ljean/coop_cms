@@ -3,8 +3,8 @@ $(function() {
     $.fn.rolloverify = function(options) {
         
         var idx = 0;
-		var images = [];
-		var elt0 = null;
+        var images = [];
+        var elt0 = null;
         
         //fill an array with the src of images to display
         $(this).find('img').each(function(index, elt) {

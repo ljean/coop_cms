@@ -10,7 +10,7 @@
 </ul>
 <script>
     $(function() {
-        $('a.close-message').live('click', function() {
+        $(document).on('click', 'a.close-message', function() {
             $(this).parent().hide('slow');
 			return false;
         })

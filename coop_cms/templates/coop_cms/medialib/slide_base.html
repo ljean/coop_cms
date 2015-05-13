@@ -1,11 +1,9 @@
-{% load i18n %}{% load url from future %}
-{% if not is_ajax %}
-<html>
+{% if not is_ajax %}<html>{% load i18n %}
   <head>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}/css/mediatheque.css?v=1.1">
     <script>
     $(function() {
-      $('.pagination a').live('click', function(e) {
+      $(document).on('click', '.pagination a', function(e) {
         try {
           var media_url = $("media_url").text();
           e.preventDefault();
@@ -96,5 +94,4 @@
     {% endif %}
 {% if not is_ajax %}
   </body>
-</html>
-{% endif %}
+</html>{% endif %}
