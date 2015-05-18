@@ -10,12 +10,14 @@ from unittest import skipIf
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
-from django.utils.translation import activate
+from django.utils.translation import activate, get_language
 
 from coop_cms.models import BaseArticle, InvalidArticleError
 from coop_cms.settings import is_localized, is_multilang, get_article_class
 from coop_cms.tests import BaseTestCase
+from coop_cms.utils import redirect_to_language
 
 
 class UrlLocalizationTest(BaseTestCase):
@@ -426,3 +428,33 @@ class UrlLocalizationTest(BaseTestCase):
         response = self.client.get(art1.get_absolute_url())
         self.assertEqual(200, response.status_code)
         self.assertContains(response, art1.content)
+
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    def test_redirect_to_language(self):
+        """check redirect_to_language utility"""
+        article_class = get_article_class()
+
+        #default_lang = settings.LANGUAGES[0][0]
+        other_lang = settings.LANGUAGES[1][0]
+
+        art1 = article_class.objects.create(title=u"abcd", publication=BaseArticle.PUBLISHED)
+
+        response = redirect_to_language(art1.get_absolute_url(), other_lang)
+
+        self.assertTrue(response.url.find("/"+other_lang+"/") == 0)
+        self.assertEqual(get_language(), other_lang)
+
+
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    def test_redirect_to_invalid_language(self):
+        """check redirect_to_language uitiliy raise error if ImproperlyConfigured"""
+
+        article_class = get_article_class()
+
+        #default_lang = settings.LANGUAGES[0][0]
+        #other_lang = settings.LANGUAGES[1][0]
+
+        art1 = article_class.objects.create(title=u"abcd", publication=BaseArticle.PUBLISHED)
+
+        self.assertRaises(ImproperlyConfigured, redirect_to_language, art1.get_absolute_url(), "zz")
+

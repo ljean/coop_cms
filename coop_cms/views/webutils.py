@@ -31,7 +31,7 @@ def hide_accept_cookies_message(request):
 def change_language(request):
     """change the language"""
     try:
-        from localeurl import utils as localeurl_utils # pylint: disable=F0401
+        from localeurl import utils as localeurl_utils  # pylint: disable=F0401
     except ImportError:
         raise Http404
 
