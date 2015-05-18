@@ -200,17 +200,22 @@ class RequestMiddleware(object):
         RequestManager().set_request(request)
 
 
-def redirect_to_language(url, lang_code):
-    """change the language"""
+def get_url_in_language(url, lang_code):
+    """returns the url in another language"""
     from localeurl import utils as localeurl_utils  # pylint: disable=F0401
-
     if lang_code and translation.check_for_language(lang_code):
-
         #path is the locale-independant url
         path = localeurl_utils.strip_path(url)[1]
-        translation.activate(lang_code)
-        url = localeurl_utils.locale_path(path, lang_code)
-
-        return HttpResponseRedirect(url)
+        new_url = localeurl_utils.locale_path(path, lang_code)
+        return new_url
     else:
         raise ImproperlyConfigured("{0} is not a valid language".format(lang_code))
+
+
+def redirect_to_language(url, lang_code):
+    """change the language"""
+    new_url = get_url_in_language(url, lang_code)
+    translation.activate(lang_code)
+    return HttpResponseRedirect(new_url)
+
+
