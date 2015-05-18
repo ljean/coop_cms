@@ -93,8 +93,9 @@ def sp_rt_lb(value):
 ################################################################################
 class NewsletterFriendlyCssNode(template.Node):
     """css in tags attributes"""
-    def __init__(self, nodelist_content, css):
+    def __init__(self, nodelist_content, css, css_order):
         self.css = css
+        self.css_order = css_order
         self.nodelist_content = nodelist_content
 
     def _style_to_dict(self, style):
@@ -138,25 +139,32 @@ class NewsletterFriendlyCssNode(template.Node):
                 logger.error(text)
                 logger.error(content)
                 raise
-            for tag, css in self.css.items():
+
+            for tag in self.css_order:
+                css = self.css[tag]
                 key_and_values = self._style_to_dict(css)
+                key_order = self._style_to_list(css)
                 for html_tag in soup.select(tag):
                     try:
                         #do not overwrite an inline css value
                         style = html_tag["style"]
                         style_list = self._style_to_list(style)
                         style_dict = self._style_to_dict(style)
-                        for key, value in key_and_values.items():
-                            if key not in style_dict:
-                                style_dict[key] = value
-                        #keep items in order
-                        html_tag["style"] = self._dict_to_style(style_dict, style_list)
                     except KeyError:
-                        html_tag["style"] = css
+                        style_dict = {}
+                        style_list = key_order
+                    for key in key_order:
+                        if key not in style_dict:
+                            value = key_and_values[key]
+                            style_dict[key] = value
+                    #keep items in order
+                    html_tag["style"] = self._dict_to_style(style_dict, style_list)
+
             content = soup.prettify(formatter="minimal")
         else:
             style = ""
-            for tag, value in self.css.items():
+            for tag in reversed(self.css.keys()):
+                value = self.css[tag]
                 style += u"{0} {{ {1} }}\n".format(tag, value)
             content = u"<style>\n{0}</style>\n".format(style) + content
         return content
@@ -166,13 +174,15 @@ def nlf_css(parser, token):
     """Newsletter friendly CSS"""
     args = token.split_contents()
     css = {}
+    css_order = []
     for item in args[1:]:
         tag, value = item.split("=")
         tag, value = tag.strip('"'), value.strip('"')
         css[tag] = value
+        css_order.append(tag)
     nodelist = parser.parse(('end_nlf_css',))
     token = parser.next_token()
-    return NewsletterFriendlyCssNode(nodelist, css)
+    return NewsletterFriendlyCssNode(nodelist, css, css_order)
 
 
 @register.filter

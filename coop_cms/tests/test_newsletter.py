@@ -948,6 +948,7 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         template = template_content.format('a="color: red; background: blue; padding: 0;"')
         tpl = Template(template)
         html = tpl.render(Context({'by_email': True}))
+
         self.assertEqual(1, html.count(u'<a style="background: #000; color: #fff; padding: 0;">'))
         self.assertEqual(1, html.count(u'<a style="color: red; background: blue; padding: 0;">'))
 
@@ -966,3 +967,25 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'by_email': True}))
         self.assertEqual(1, html.count(u'''<a style="font-family: 'Arial';">'''))
         self.assertEqual(1, html.count(u'''<a style="font-family: 'Tahoma';">'''))
+
+    def test_css_order(self):
+
+        template_content = """
+            {{% load coop_utils %}}
+            {{% nlf_css {0} %}}
+                <a>One</a>
+                <div class="blue">
+                <a>Two</a>
+                </div>
+            {{% end_nlf_css %}}
+        """
+
+        tpl = Template(template_content.format('a="color: #000" ".blue a"="color: #fff"'))
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(2, html.count(u'''<a style="color: #000;">'''))
+        self.assertEqual(0, html.count(u'''<a style="color: #fff';">'''))
+
+        tpl = Template(template_content.format('".blue a"="color: #fff" a="color: #000"'))
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(1, html.count(u'''<a style="color: #000;">'''))
+        self.assertEqual(1, html.count(u'''<a style="color: #fff;">'''))

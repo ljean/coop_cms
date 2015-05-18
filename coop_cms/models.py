@@ -1065,7 +1065,8 @@ class Newsletter(models.Model):
 
     def get_absolute_url(self):
         """url for viewing"""
-        return reverse('coop_cms_view_newsletter', args=[self.id])
+        #force inline style
+        return reverse('coop_cms_view_newsletter', args=[self.id]) + "?by_email=1"
 
     def get_edit_url(self):
         """url for editing"""
