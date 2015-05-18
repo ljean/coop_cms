@@ -27,7 +27,6 @@ from coop_cms.utils import dehtml as do_dehtml
 register = template.Library()
 
 
-################################################################################
 class ArticleLinkNode(template.Node):
     """create an article and returns a link into template"""
 
@@ -90,7 +89,6 @@ def sp_rt_lb(value):
     return value.replace("\n", " ").replace("\r", "")
 
 
-################################################################################
 class NewsletterFriendlyCssNode(template.Node):
     """css in tags attributes"""
     def __init__(self, nodelist_content, css, css_order):
@@ -112,7 +110,7 @@ class NewsletterFriendlyCssNode(template.Node):
         """
         css_values = [elt for elt in style.strip().split(";") if elt]
         css_values = [elt.split(":") for elt in css_values]
-        return [key.strip() for (key, value) in css_values]
+        return [key_and_value[0].strip() for key_and_value in css_values]
 
     def _dict_to_style(self, style_dict, order_of_items):
         """
@@ -135,8 +133,7 @@ class NewsletterFriendlyCssNode(template.Node):
             try:
                 soup = BeautifulSoup(content)
             except HTMLParseError, msg:
-                text = "HTMLParseError: {0}".format(msg)
-                logger.error(text)
+                logger.error("HTMLParseError: %s", msg)
                 logger.error(content)
                 raise
 
@@ -168,6 +165,7 @@ class NewsletterFriendlyCssNode(template.Node):
                 style += u"{0} {{ {1} }}\n".format(tag, value)
             content = u"<style>\n{0}</style>\n".format(style) + content
         return content
+
 
 @register.tag
 def nlf_css(parser, token):
@@ -210,7 +208,6 @@ def index(seq, index_val):
         return None
 
 
-################################################################################
 class CoopCategoryNode(template.Node):
     """get category in template context"""
     def __init__(self, cat_slug, var_name):
@@ -234,6 +231,7 @@ class CoopCategoryNode(template.Node):
             self.category = ArticleCategory.objects.create(name=self.cat)
         context.dicts[0][self.var_name] = self.category
         return ""
+
 
 @register.tag
 def coop_category(parser, token):
@@ -278,7 +276,6 @@ def group_in_sublists(list_of_objs, subslist_size):
     return [list_of_objs[i:i+subslist_size] for i in range(0, len(list_of_objs), subslist_size)]
 
 
-################################################################################
 class ImageListNode(template.Node):
     """image list"""
     def __init__(self, filter_name, var_name):
@@ -297,6 +294,7 @@ class ImageListNode(template.Node):
         context.dicts[1][self.var_name] = images
         return ""
 
+
 @register.tag
 def coop_image_list(parser, token):
     """image list"""
@@ -310,7 +308,6 @@ def coop_image_list(parser, token):
     return ImageListNode(filter_name, var_name)
 
 
-################################################################################
 DEFAULT_ACCEPT_COOKIE_MESSAGE_TEMPLATE = 'coop_cms/_accept_cookies_message.html'
 
 
@@ -340,7 +337,6 @@ def show_accept_cookie_message(parser, token):
         template_name = ""
     return ShowAcceptCookieMessageNode(template_name)
 
-#########
 
 @register.filter
 def open_tag_if(index_, args):
@@ -357,7 +353,7 @@ def close_tag_if(index_, args):
     nb_per_block = int(nb_per_block)
     return mark_safe(u"</{0}>".format(tag) if (index_ % nb_per_block) == nb_per_block else "")
 
-##########
+
 @register.filter
 def find_css(value, css_class):
     """open_tag if condition"""

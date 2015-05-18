@@ -30,7 +30,7 @@ class NavTypeForm(forms.ModelForm):
     """Navigation Type Form"""
 
     def __init__(self, *args, **kwargs):
-        super(NavTypeForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(NavTypeForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.fields['content_type'].widget = forms.Select(choices=get_navigable_content_types())
 
     def clean_label_rule(self):
@@ -52,7 +52,7 @@ class AlohaEditableModelForm(floppyforms.ModelForm):
     """Base class for form with Aloha editor fields"""
 
     def __init__(self, *args, **kwargs):
-        super(AlohaEditableModelForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(AlohaEditableModelForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         for field_name in self.Meta.fields:
             no_aloha_widgets = getattr(self.Meta, 'no_aloha_widgets', ())
             if not field_name in no_aloha_widgets: 
@@ -74,7 +74,7 @@ class ArticleForm(AlohaEditableModelForm):
     """frontend edition of an article"""
 
     def __init__(self, *args, **kwargs):
-        super(ArticleForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(ArticleForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.article = kwargs.get('instance', None)
         self.set_logo_size()
         if getattr(settings, 'COOP_CMS_TITLE_OPTIONAL', False):
@@ -140,7 +140,7 @@ class NewsletterItemAdminForm(forms.ModelForm):
     """admin form for NewsletterItem"""
 
     def __init__(self, *args, **kwargs):
-        super(NewsletterItemAdminForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(NewsletterItemAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.item = kwargs.get('instance', None)
         article_choices = [(a.id, unicode(a)) for a in get_article_class().objects.all()]
         self.fields['object_id'] = forms.ChoiceField(
@@ -159,7 +159,7 @@ class WithNavigationModelForm(forms.ModelForm):
     navigation_parent = forms.ChoiceField()
     
     def __init__(self, *args, **kwargs):
-        super(WithNavigationModelForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(WithNavigationModelForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.fields['navigation_parent'] = forms.ChoiceField(
             choices=get_node_choices(), required=False, help_text=get_navigation_parent_help_text()
         )
@@ -174,7 +174,7 @@ class WithNavigationModelForm(forms.ModelForm):
 
     def save(self, commit=True):
         """save: manage navigation field"""
-        instance = super(WithNavigationModelForm, self).save(commit=False) # pylint: disable=E1002
+        instance = super(WithNavigationModelForm, self).save(commit=False)  # pylint: disable=E1002
         parent_id = self.cleaned_data['navigation_parent']
         if instance.id:
             if instance.navigation_parent != parent_id:
@@ -190,7 +190,7 @@ class ArticleAdminForm(forms.ModelForm):
     """admin form for article"""
 
     def __init__(self, *args, **kwargs):
-        super(ArticleAdminForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(ArticleAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.article = kwargs.get('instance', None)
         templates = get_article_templates(self.article, getattr(self, "current_user", None))
         if templates:
@@ -238,7 +238,7 @@ class AddImageForm(floppyforms.Form):
     )
 
     def __init__(self, *args, **kwargs):
-        super(AddImageForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(AddImageForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         #Media filters
         queryset1 = MediaFilter.objects.all()
         if queryset1.count():
@@ -291,7 +291,7 @@ class ArticleTemplateForm(forms.Form):
     """article template form"""
 
     def __init__(self, article, user, *args, **kwargs):
-        super(ArticleTemplateForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(ArticleTemplateForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         choices = get_article_templates(article, user)
         if choices:
             self.fields["template"] = forms.ChoiceField(choices=choices)
@@ -330,7 +330,7 @@ class ArticleSettingsForm(WithNavigationModelForm):
         initials.update({'publication_date': article.publication_date.strftime("%Y-%m-%d %H:%M:%S")})
         
         kwargs['initial'] = initials
-        super(ArticleSettingsForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(ArticleSettingsForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
 
         self.fields['category'].queryset = self.fields['category'].queryset.filter(sites=settings.SITE_ID)
 
@@ -356,7 +356,7 @@ class NewArticleForm(WithNavigationModelForm):
         }
 
     def __init__(self, user, *args, **kwargs):
-        super(NewArticleForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(NewArticleForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         choices = get_article_templates(None, user)
         if choices:
             self.fields["template"] = forms.ChoiceField(choices=choices)
@@ -401,7 +401,7 @@ class NewsletterSettingsForm(forms.ModelForm):
         )
 
     def __init__(self, user, *args, **kwargs):
-        super(NewsletterSettingsForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(NewsletterSettingsForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         tpl_choices = get_newsletter_templates(None, user)
         if tpl_choices:
             self.fields["template"] = forms.ChoiceField(choices=tpl_choices)
@@ -476,7 +476,7 @@ class NewsletterTemplateForm(forms.Form):
     """Newsletter template"""
 
     def __init__(self, newsletter, user, *args, **kwargs):
-        super(NewsletterTemplateForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(NewsletterTemplateForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         choices = get_newsletter_templates(newsletter, user)
         if choices:
             self.fields["template"] = forms.ChoiceField(choices=choices)
@@ -488,7 +488,7 @@ class NewsletterTemplateForm(forms.Form):
 class NewsletterAdminForm(forms.ModelForm):
     """newsletter admin form"""
     def __init__(self, *args, **kwargs):
-        super(NewsletterAdminForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(NewsletterAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.newsletter = kwargs.get('instance', None)
         choices = get_newsletter_templates(self.newsletter, getattr(self, "current_user", None))
         if choices:
@@ -576,7 +576,7 @@ class AddFragmentForm(BaseFragmentForm):
         }
 
     def __init__(self, data=None, *args, **kwargs):
-        super(AddFragmentForm, self).__init__(data, *args, **kwargs) # pylint: disable=E1002
+        super(AddFragmentForm, self).__init__(data, *args, **kwargs)  # pylint: disable=E1002
         self.post_init(all_classes=True)
 
 
@@ -596,7 +596,7 @@ class EditFragmentForm(BaseFragmentForm):
         instance = kwargs.get('instance', None)
         if instance:
             instance.css_class = instance.css_class.split(" ")
-        super(EditFragmentForm, self).__init__(*args, **kwargs) # pylint: disable=E1002
+        super(EditFragmentForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.post_init()
 
     def save(self, *args, **kwargs):
@@ -604,4 +604,4 @@ class EditFragmentForm(BaseFragmentForm):
         if self.cleaned_data['delete_me']:
             self.instance.delete()
             return None
-        return super(EditFragmentForm, self).save(*args, **kwargs) # pylint: disable=E1002
+        return super(EditFragmentForm, self).save(*args, **kwargs)  # pylint: disable=E1002
