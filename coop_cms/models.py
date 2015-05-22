@@ -384,7 +384,7 @@ class ArticleCategory(models.Model):
         """articles of category as queryset"""
         return get_article_class().objects.filter(
             sites__id=settings.SITE_ID, category=self, publication=BaseArticle.PUBLISHED
-        ).order_by('publication_date')
+        ).distinct().order_by('publication_date')
 
     class Meta:
         verbose_name = _(u'article category')
