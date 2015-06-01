@@ -94,6 +94,7 @@ class FragmentEditNode(DjalohaMultipleEditNode):
             objects_count = self.get_objects_to_render_count()
             object_content = template_.render(template.Context({
                 'css_class': obj.css_class,
+                'name': obj.name,
                 'index': idx,
                 'objects_count': objects_count,
                 'fragment': self._render_value(context, self._get_object_lookup(obj), value),

@@ -13,6 +13,7 @@ from coop_cms.settings import get_navtree_class
 
 register = template.Library()
 
+
 def extract_kwargs(args):
     """args from templatetag args"""
     kwargs = {}
