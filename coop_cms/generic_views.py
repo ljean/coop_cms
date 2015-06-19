@@ -219,8 +219,8 @@ class EditableFormsetView(TemplateView):
             'coop_cms_cancel_url': self.get_cancel_url(),
             'coop_cms_can_view_callback': self.can_view_objects,
             'coop_cms_can_edit_callback': self.can_edit_objects,
-            'objects': self.get_queryset(),
-            'raw_objects': self.get_queryset(),
+            'objects': self.get_objects(),
+            'raw_objects': self.get_objects(),
         }
         if self.edit_mode:
             context['formset'] = self.formset
@@ -229,9 +229,25 @@ class EditableFormsetView(TemplateView):
     def get_form_class(self):
         """get form class"""
         return self.form_class
-    
+
+    def get_empty_object_kwargs(self):
+        """get argument to use for creating an empty object"""
+        return {}
+
+    def get_empty_object(self, kwargs):
+        """get an empty objects to be used if extra is set"""
+        return self.model(**kwargs)
+
+    def get_objects(self):
+        """get objects from queryset + required extra objects"""
+        kwargs = self.get_empty_object_kwargs()
+        objects = list(self.get_queryset())
+        for i in xrange(self.extra):
+            objects.append(self.model(kwargs))
+        return objects
+
     def get_queryset(self):
-        """get objects"""
+        """get queryset for creating objects"""
         return self.model.objects.all()
     
     def get_template(self):
@@ -256,8 +272,8 @@ class EditableFormsetView(TemplateView):
     
     def get_formset(self, *args, **kwargs):
         """formset"""
-        Formset = self.get_formset_class()
-        return Formset(queryset=self.get_queryset(), *args, **kwargs)
+        formset_class = self.get_formset_class()
+        return formset_class(queryset=self.get_queryset(), *args, **kwargs)
     
     def get(self, request, *args, **kwargs):
         """handle http get --> view"""
