@@ -5,8 +5,10 @@ from django import forms
 from django.contrib.auth import authenticate
 from django.utils.translation import ugettext as _, ugettext_lazy as __
 
+from coop_cms.bs_forms import Form
 
-class EmailAuthForm(forms.Form):
+
+class EmailAuthForm(Form):
     """Email form"""
     email = forms.EmailField(required=True, label=__(u"Email"))
     password = forms.CharField(label=__("Password"), widget=forms.PasswordInput)
