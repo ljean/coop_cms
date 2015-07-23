@@ -4,13 +4,12 @@
 {% else %}
     {% if debug %}
     <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery-1.11.3.js"></script>
-    <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery-migrate-1.2.1.js"></script>
     {% else %}
     <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery-1.11.3.min.js"></script>
-    <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery-migrate-1.2.1.min.js"></script>
     {% endif %}
 {% endif %}
 {% if_cms_edition %}
+    <!--- <script type="text/javascript" charset="utf-8" src="{{ STATIC_URL }}js/jquery-migrate-1.2.1.min.js"></script>--->
     {% cms_form_media %}
 {% else %}
     {% if request.user.is_authenticated %}
