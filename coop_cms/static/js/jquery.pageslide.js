@@ -131,7 +131,7 @@
 	  };
 
 	  // fixes an annoying horizontal scrollbar.
-	  function _overflowFixAdd(){($.browser.msie) ? $("body, html").css({overflowX:'hidden'}) : $("body").css({overflowX:'hidden'});}
+	  function _overflowFixAdd(){$("body").css({overflowX:'hidden'});}
 		
     // Initalize pageslide, if it hasn't already been done.
     _initialize(this);
@@ -166,7 +166,7 @@
       $("#pageslide-blanket").animate({opacity:'0.0'}, 'fast','linear',function(){$(this).hide();});
     }}
     
-    function _overflowFixRemove(){($.browser.msie) ? $("body, html").css({overflowX:''}) : $("body").css({overflowX:''});}
+    function _overflowFixRemove(){$("body").css({overflowX:''});}
 		
     _hideBlanket();
     direction = ($("#pageslide-slide-wrap").css("left") != "0px") ? {left: "0"} : {right: "0"};
