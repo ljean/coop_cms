@@ -4,6 +4,7 @@ misc. templatetags
 """
 
 import os.path
+import time
 import unicodedata
 
 from bs4 import BeautifulSoup
@@ -11,6 +12,7 @@ from HTMLParser import HTMLParseError
 
 from django import template
 from django.conf import settings
+from django.contrib.staticfiles import finders
 from django.template import RequestContext
 from django.template.base import TemplateSyntaxError
 from django.template.loader import get_template
@@ -360,3 +362,30 @@ def find_css(value, css_class):
     if css_class in value.split(" "):
         return True
     return False
+
+
+class VersionedStaticFileNode(template.Node):
+    """return static path with ?v=dateoflastchange"""
+    def __init__(self, static_path):
+        self.static_path = static_path.strip("'").strip('"')
+        self.is_string = self.static_path == static_path
+
+    def render(self, context):
+        if settings.DEBUG:
+            version = time.time()
+        else:
+            static_file_path = os.path.join(settings.STATIC_URL, self.static_path)
+            version = time.ctime(os.path.getmtime(static_file_path))
+
+        return u"{0}{1}?v={2}".format(settings.STATIC_URL, self.static_path, version)
+
+
+@register.tag
+def versioned_static_file(parser, token):
+    """image list"""
+    args = token.split_contents()
+    try:
+        static_path = args[1]
+    except IndexError:
+        raise TemplateSyntaxError(u"coop_image_list: usage --> {% versioned_static_file 'static_path' %}")
+    return VersionedStaticFileNode(static_path)
