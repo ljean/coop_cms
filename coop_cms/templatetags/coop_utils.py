@@ -374,9 +374,11 @@ class VersionedStaticFileNode(template.Node):
         if settings.DEBUG:
             version = time.time()
         else:
-            static_file_path = os.path.join(settings.STATIC_URL, self.static_path)
-            version = time.ctime(os.path.getmtime(static_file_path))
-
+            static_file_path = os.path.join(settings.STATIC_ROOT, self.static_path)
+            try:
+                version = time.ctime(os.path.getmtime(static_file_path))
+            except OSError:
+                version = 'x'
         return u"{0}{1}?v={2}".format(settings.STATIC_URL, self.static_path, version)
 
 
