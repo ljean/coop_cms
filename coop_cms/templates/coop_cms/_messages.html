@@ -2,18 +2,18 @@
 {% if messages %}
 <ul class="coop-cms_user-messages">
 	<a href="" class="close-message">{% trans "close" %}</a>
-    {% for m in messages %}
-      <li class="{{m.tags}}">
-        <span class="{{m.tags}}">{{m}}</a>
-      </li>
-    {% endfor %}
+  {% for msg in messages %}
+    <li class="{{msg.tags}}">
+      <span class="{{msg.tags}}">{{m}}</span>
+    </li>
+  {% endfor %}
 </ul>
 <script>
     $(function() {
         $(document).on('click', 'a.close-message', function() {
             $(this).parent().hide('slow');
 			return false;
-        })
+        });
         setTimeout(function() {$('ul.coop-cms_user-messages').hide('slow')}, 5000);
     });
 </script>

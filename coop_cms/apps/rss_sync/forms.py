@@ -17,6 +17,7 @@ class RssSourceAdminForm(forms.ModelForm):
 
     class Meta:
         model = models.RssSource
+        fields = ('url', 'title', 'last_collect')
 
     class Media:
         css = {
@@ -30,6 +31,7 @@ class RssItemAdminForm(forms.ModelForm):
 
     class Meta:
         model = models.RssItem
+        fields = ('id', 'source', 'link', 'title', 'summary', 'author', 'updated', 'processed')
         widgets = {
             'id': widgets.AdminCreateArticleWidget,
         }

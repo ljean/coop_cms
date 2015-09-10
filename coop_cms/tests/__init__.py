@@ -63,6 +63,13 @@ class MediaBaseTestCase(BaseTestCase):
         full_name = os.path.normpath(os.path.dirname(__file__) + '/fixtures/' + file_name)
         return open(full_name, 'rb')
 
+    def get_safe_content(self, response):
+        if hasattr(response, 'content'):
+            return response.content.read()
+        elif hasattr(response, 'streaming_content'):
+            return "".join(response.streaming_content)
+        return None
+
     def _log_as_mediamgr(self, is_staff=True, perm=None):
         u = User.objects.create(username='toto', is_staff=is_staff)
         u.set_password('toto')
@@ -118,7 +125,6 @@ class UserBaseTestCase(BaseTestCase):
         return self.client.login(username='titi', password='titi')
 
 
-
 class BaseArticleTest(MediaBaseTestCase):
     def _log_as_editor(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
@@ -162,4 +168,3 @@ class BaseArticleTest(MediaBaseTestCase):
         user.save()
         
         return self.client.login(username='toto', password='toto')
-

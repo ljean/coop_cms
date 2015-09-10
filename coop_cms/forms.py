@@ -46,6 +46,7 @@ class NavTypeForm(forms.ModelForm):
 
     class Meta:
         model = NavType
+        fields = ('content_type', 'search_field', 'label_rule')
 
 
 class AlohaEditableModelForm(floppyforms.ModelForm):
@@ -169,7 +170,7 @@ class WithNavigationModelForm(forms.ModelForm):
     def clean_navigation_parent(self):
         """validation"""
         parent_id = self.cleaned_data['navigation_parent']
-        parent_id = int(parent_id) if parent_id != 'None' else None
+        parent_id = int(parent_id) if (parent_id != '' and parent_id != 'None') else None
         return parent_id
 
     def save(self, commit=True):
@@ -214,6 +215,10 @@ class ArticleAdminForm(forms.ModelForm):
 
     class Meta:
         model = get_article_class()
+        fields = (
+            'slug', 'title', 'subtitle', 'content', 'template', 'publication', 'logo', 'temp_logo',
+            'summary', 'category', 'in_newsletter', 'homepage_for_site', 'headline', 'publication_date', 'sites',
+        )
         widgets = {
             'title': forms.TextInput(attrs={'size': 100})
         }
@@ -225,8 +230,8 @@ class AddImageForm(floppyforms.Form):
     image = floppyforms.ImageField(required=True, label=_('Image'),)
     descr = floppyforms.CharField(
         required=False,
-        widget=forms.TextInput(
-            attrs={'size': '35', 'placeholder': _(u'Optional description'),}
+        widget=floppyforms.TextInput(
+            attrs={'size': '35', 'placeholder': _(u'Optional description'), }
         ),
         label=_('Description'),
     )
@@ -240,18 +245,19 @@ class AddImageForm(floppyforms.Form):
     def __init__(self, *args, **kwargs):
         super(AddImageForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         #Media filters
-        queryset1 = MediaFilter.objects.all()
-        if queryset1.count():
-            self.fields['filters'].choices = [(x.id, x.name) for x in queryset1]
+        media_filter_queryset = MediaFilter.objects.all()
+        if media_filter_queryset.count():
+            self.fields['filters'].choices = [(x.id, x.name) for x in media_filter_queryset]
             try:
                 self.fields['filters'].widget = ChosenSelectMultiple(
                     choices=self.fields['filters'].choices, force_template=True,
                 )
             except NameError:
-                #print 'No ChosenSelectMultiple'
                 pass
         else:
-            self.fields['filters'].widget = floppyforms.HiddenInput()
+            self.fields['filters'] = floppyforms.CharField(
+                required=False, widget=floppyforms.HiddenInput()
+            )
             
         #Image size
         img_size_queryset = ImageSize.objects.all()
@@ -267,6 +273,8 @@ class AddImageForm(floppyforms.Form):
     def clean_filters(self):
         """validation"""
         filters = self.cleaned_data['filters']
+        if not filters:
+            return []
         return [MediaFilter.objects.get(id=pk) for pk in filters]
     
     def clean_size(self):

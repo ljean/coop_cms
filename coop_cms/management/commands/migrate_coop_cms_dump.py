@@ -9,6 +9,7 @@ from django.core.management.base import BaseCommand
 class Command(BaseCommand):
     """Rename coop_page.page into coop_tree.article and url into link in a json dump"""
     help = u"Rename coop_page.page into coop_tree.article and url into link in a json dump"
+    use_argparse = False
 
     def handle(self, *args, **options):
         """command"""

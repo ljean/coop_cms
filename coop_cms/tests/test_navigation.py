@@ -18,6 +18,7 @@ from model_mommy import mommy
 from coop_cms.models import Link, NavNode, NavType
 from coop_cms.settings import get_article_class, get_navtree_class
 from coop_cms.tests import BaseTestCase
+from coop_cms.utils import get_model_app, get_model_name
 
 
 class NavigationTest(BaseTestCase):
@@ -37,8 +38,8 @@ class NavigationTest(BaseTestCase):
             self.editor.is_staff = True
             tree_class = get_navtree_class()
             can_edit_tree = Permission.objects.get(
-                content_type__app_label=tree_class._meta.app_label,
-                codename='change_{0}'.format(tree_class._meta.module_name)
+                content_type__app_label=get_model_app(tree_class),
+                codename='change_{0}'.format(get_model_name(tree_class))
             )
             self.editor.user_permissions.add(can_edit_tree)
             self.editor.is_active
@@ -59,12 +60,12 @@ class NavigationTest(BaseTestCase):
         self._log_as_editor()
         tree_class = get_navtree_class()
         
-        reverse_name = "admin:{0}_{1}_changelist".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        reverse_name = "admin:{0}_{1}_changelist".format(get_model_app(tree_class), get_model_name(tree_class))
         url = reverse(reverse_name)
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         
-        reverse_name = "admin:{0}_{1}_change".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        reverse_name = "admin:{0}_{1}_change".format(get_model_app(tree_class), get_model_name(tree_class))
         tree = tree_class.objects.create(name='another_tree')
         url = reverse(reverse_name, args=[tree.id])
         response = self.client.get(url)

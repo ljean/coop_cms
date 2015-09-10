@@ -4,7 +4,7 @@ Email authentication Unit tests
 """
 
 from django.conf import settings
-from django.utils.importlib import import_module
+from coop_cms.settings import import_module
 
 if 'localeurl' in settings.INSTALLED_APPS:
     LOCALE_URL_MODULE = import_module('localeurl.models')

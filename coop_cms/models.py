@@ -38,7 +38,7 @@ from coop_cms.settings import (
     get_headline_image_size, get_headline_image_crop, get_img_folder, get_newsletter_item_classes,
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
 )
-from coop_cms.utils import dehtml, RequestManager, RequestNotFound
+from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label
 
 ADMIN_THUMBS_SIZE = '60x60'
 
@@ -104,7 +104,7 @@ class NavType(models.Model):
         (LABEL_USE_GET_LABEL, _(u'Use get_label')),
     )
 
-    content_type = models.ForeignKey(ContentType, unique=True, verbose_name=_(u'django model'))
+    content_type = models.OneToOneField(ContentType, verbose_name=_(u'django model'))
     search_field = models.CharField(max_length=200, blank=True, default="", verbose_name=_(u'search field'))
     label_rule = models.IntegerField(
         verbose_name=_(u'How to generate the label'), choices=LABEL_RULE_CHOICES, default=LABEL_USE_UNICODE
@@ -188,7 +188,7 @@ class NavNode(models.Model):
 
     def get_content_name(self):
         """friendly name of the object model"""
-        return self.content_type.model_class()._meta.verbose_name
+        return get_model_label(self.content_type.model_class())
 
     def __unicode__(self):
         return self.label
@@ -450,6 +450,16 @@ class BaseNavigable(TimeStampedModel):
         return ret
 
 
+def get_logo_folder(article, filename):
+    """where to put logo image file"""
+    try:
+        img_root = settings.CMS_ARTICLE_LOGO_FOLDER
+    except AttributeError:
+        img_root = 'cms_logos'
+    basename = os.path.basename(filename)
+    return u'{0}/{1}/{2}'.format(img_root, article.id, basename)
+
+
 class BaseArticle(BaseNavigable):
     """An article : static page, blog item, ..."""
 
@@ -462,15 +472,6 @@ class BaseArticle(BaseNavigable):
         (PUBLISHED, _(u'Published')),
         (ARCHIVED, _(u'Archived')),
     )
-
-    def get_logo_folder(self, filename):
-        """where to put logo image file"""
-        try:
-            img_root = settings.CMS_ARTICLE_LOGO_FOLDER
-        except AttributeError:
-            img_root = 'cms_logos'
-        basename = os.path.basename(filename)   
-        return u'{0}/{1}/{2}'.format(img_root, self.id, basename)
 
     slug = models.CharField(max_length=100, unique=True, db_index=True, blank=False)
     title = models.TextField(_(u'title'), default='', blank=True)
@@ -497,7 +498,7 @@ class BaseArticle(BaseNavigable):
         _(u"Headline"), default=False,
         help_text=_(u'Make this article appear on the home page')
     )
-    publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now())
+    publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now)
     sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
     
     @property
@@ -609,7 +610,7 @@ class BaseArticle(BaseNavigable):
             raise InvalidArticleError(u"coop_cms.Article: slug can not be empty")
             
         if is_localized():
-            from modeltranslation.utils import build_localized_fieldname # pylint: disable=F0401
+            from modeltranslation.utils import build_localized_fieldname  # pylint: disable=F0401
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
                 loc_title_var = build_localized_fieldname('title', lang_code)
                 locale_title = getattr(self, loc_title_var, '')
@@ -645,7 +646,7 @@ class BaseArticle(BaseNavigable):
         article_class = get_article_class()
 
         if is_localized():
-            from modeltranslation.utils import build_localized_fieldname # pylint: disable=F0401
+            from modeltranslation.utils import build_localized_fieldname  # pylint: disable=F0401
             slug_fields = []
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
                 loc_slug_var = build_localized_fieldname('slug', lang_code)
@@ -770,7 +771,7 @@ class Link(BaseNavigable):
             scheme = parsed_url[0]
             if not scheme:
                 #the urls doesn't starts with http://, so it's a url managed by the site
-                from localeurl.utils import locale_path # pylint: disable=F0401
+                from localeurl.utils import locale_path  # pylint: disable=F0401
                 locale = translation.get_language()                
                 return locale_path(self.url, locale)
         return self.url
@@ -863,7 +864,8 @@ class Image(Media):
             max_width = int(max_width) if max_width else 0
             if max_width and (max_width < self.file.width):
                 try:
-                    return sorl_thumbnail.backend.get_thumbnail(self.file.file, str(max_width), upscale=False).url
+                    url = sorl_thumbnail.backend.get_thumbnail(self.file.file, str(max_width), upscale=False).url
+                    return url
                 except (IOError, ThumbnailParseError):
                     return self.file.url
             else:
@@ -879,25 +881,26 @@ class Image(Media):
         verbose_name_plural = _(u'images')
 
 
+def get_doc_folder(document, filename):
+    """where to store this file. If private in a different folder which must be protected by web server"""
+    if not document.is_private:
+        doc_root = getattr(settings, 'DOCUMENT_FOLDER', 'documents/public')
+    else:
+        doc_root = getattr(settings, 'PRIVATE_DOCUMENT_FOLDER', 'documents/private')
+
+    filename = os.path.basename(filename)
+    #This is required for x-sendfile
+    name, ext = os.path.splitext(filename)
+    filename = slugify(name) + ext
+
+    return u'{0}/{1}'.format(doc_root, filename)
+
+
 class Document(Media):
     """file in media library"""
 
     def __unicode__(self):
         return self.name
-
-    def get_doc_folder(self, filename):
-        """where to store this file. If private in a different folder which must be protected by web server"""
-        if not self.is_private:
-            doc_root = getattr(settings, 'DOCUMENT_FOLDER', 'documents/public')
-        else:
-            doc_root = getattr(settings, 'PRIVATE_DOCUMENT_FOLDER', 'documents/private')
-
-        filename = os.path.basename(filename)
-        #This is required for x-sendfile
-        name, ext = os.path.splitext(filename)
-        filename = slugify(name) + ext
-        
-        return u'{0}/{1}'.format(doc_root, filename)
 
     file = models.FileField(_('file'), upload_to=get_doc_folder)
     is_private = models.BooleanField(

@@ -348,7 +348,6 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(NavNode.objects.count(), 0)
         self.assertEqual([a.id for a in article.sites.order_by("id")], data['sites'])
 
-
     def test_new_article_without_site(self):
         article_class = get_article_class()
 

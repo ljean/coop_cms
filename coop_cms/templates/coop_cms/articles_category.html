@@ -1,5 +1,5 @@
 {% extends "coop_cms/base.html" %}
-{% load i18n static pagination_tags coop_edition %}
+{% load i18n static coop_edition %}
 
 {% block meta_title %}
     {{ category.name }}
@@ -11,12 +11,10 @@
         <h2 id="title">{{ category.name }}</h2>
     {% endblock %}
     
-    {% autopaginate articles 10 %}
-
     {% for item in articles %}
         {% include "coop_cms/article_list_item.html" %}
     {% endfor %}
-    
-    {% paginate %}
+
+    {% include "coop_cms/_pagination.html" with page=articles pages=pages %}
 
 {% endblock %}

@@ -5,7 +5,11 @@ if 'localeurl' in settings.INSTALLED_APPS:
     from localeurl.models import patch_reverse
     patch_reverse()
 
-from django.utils.unittest import SkipTest
+try:
+    from unittest import SkipTest
+except ImportError:
+    # Deprecated in Django 1.9
+    from django.utils.unittest import SkipTest
 
 from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
 

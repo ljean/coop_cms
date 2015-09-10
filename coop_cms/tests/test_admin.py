@@ -13,6 +13,7 @@ from model_mommy import mommy
 from coop_cms.models import BaseArticle
 from coop_cms.settings import is_localized, get_article_class
 from coop_cms.tests import BaseArticleTest
+from coop_cms.utils import get_model_app, get_model_name
 
 
 class ArticleAdminTest(BaseArticleTest):
@@ -28,11 +29,11 @@ class ArticleAdminTest(BaseArticleTest):
         
         self._log_as_staff_editor()
         
-        Article = get_article_class()
+        article_class = get_article_class()
         
-        article = mommy.make(Article, publication=BaseArticle.DRAFT)
-        
-        view_name = 'admin:%s_%s_change' % (Article._meta.app_label,  Article._meta.module_name)
+        article = mommy.make(article_class, publication=BaseArticle.DRAFT)
+
+        view_name = 'admin:%s_%s_change' % (get_model_app(article_class), get_model_name(article_class))
         url = reverse(view_name, args=[article.id])
         
         response = self.client.get(url)
@@ -51,11 +52,11 @@ class ArticleAdminTest(BaseArticleTest):
         
         self._log_as_staff_editor()
         
-        Article = get_article_class()
+        article_class = get_article_class()
         
-        article = mommy.make(Article, publication=BaseArticle.PUBLISHED)
+        article = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
         
-        view_name = 'admin:%s_%s_change' % (Article._meta.app_label,  Article._meta.module_name)
+        view_name = 'admin:%s_%s_change' % (get_model_app(article_class), get_model_name(article_class))
         url = reverse(view_name, args=[article.id])
         
         response = self.client.get(url)
@@ -74,11 +75,11 @@ class ArticleAdminTest(BaseArticleTest):
         
         self._log_as_staff_editor()
         
-        Article = get_article_class()
+        article_class = get_article_class()
         
-        article = mommy.make(Article, publication=BaseArticle.PUBLISHED)
+        article = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
         
-        view_name = 'admin:%s_%s_change' % (Article._meta.app_label,  Article._meta.module_name)
+        view_name = 'admin:%s_%s_change' % (get_model_app(article_class), get_model_name(article_class))
         url = reverse(view_name, args=[article.id])
         
         response = self.client.get(url)

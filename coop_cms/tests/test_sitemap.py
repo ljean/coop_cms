@@ -53,7 +53,7 @@ class SitemapTest(TestCase):
         response = sitemap_view(request, get_sitemaps())
 
         self.assertEqual(200, response.status_code)
-        
+
         self.assertContains(response, site.domain+article1.get_absolute_url())
         self.assertContains(response, site.domain+article2.get_absolute_url())
         self.assertNotContains(response, article3.get_absolute_url())

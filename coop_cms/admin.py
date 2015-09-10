@@ -5,12 +5,11 @@ Admin pages for coop_cms
 
 from django.conf import settings
 from django.contrib import admin
-from django.utils.importlib import import_module
 from django.utils.translation import ugettext_lazy as _
 
 from coop_cms.forms import NavTypeForm, ArticleAdminForm, NewsletterItemAdminForm, NewsletterAdminForm
 from coop_cms import models
-from coop_cms.settings import get_article_class, get_navtree_class
+from coop_cms.settings import get_article_class, get_navtree_class, import_module
 
 #The BASE_ADMIN_CLASS can be a Translation admin if needed or regular modelAdmin if not
 if 'modeltranslation' in settings.INSTALLED_APPS:
@@ -68,9 +67,10 @@ class NavTreeAdmin(admin.ModelAdmin):
         extra_context['navtree_nodes'] = self.nodes_li(tree)
         return super(NavTreeAdmin, self).change_view(
             request, object_id, extra_context=extra_context, *args, **kwargs
-        ) # pylint: disable=E1002
+        )  # pylint: disable=E1002
 
-admin.site.register(get_navtree_class(), NavTreeAdmin)
+if get_navtree_class():
+    admin.site.register(get_navtree_class(), NavTreeAdmin)
 
 
 class ArticleAdmin(BASE_ADMIN_CLASS):

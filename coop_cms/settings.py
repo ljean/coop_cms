@@ -6,7 +6,11 @@ the settings should be accessed from here and not directly from django.conf.sett
 from django.conf import settings as django_settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.utils.importlib import import_module
+try:
+    from importlib import import_module
+except ImportError:
+    # Deprecated in Django 1.9
+    from django.utils.importlib import import_module
 
 from coop_cms.logger import logger
 
@@ -59,7 +63,10 @@ def get_navtree_class(defaut_class=None):
         full_class_name = COOP_CMS_NAVTREE_CLASS
         app_label, model_name = full_class_name.split('.')
         model_name = model_name.lower()
-        content_type = ContentType.objects.get(app_label=app_label, model=model_name)
+        try:
+            content_type = ContentType.objects.get(app_label=app_label, model=model_name)
+        except ContentType.DoesNotExist:
+            return None
         navtree_class = content_type.model_class()
         setattr(get_navtree_class, '_cache_class', navtree_class)
         return navtree_class
@@ -341,3 +348,8 @@ def get_img_folder(instance, filename):
         img_root = 'img'
 
     return u'{0}/{1}'.format(img_root, filename)
+
+
+def get_articles_category_page_size():
+    """returns number of articles for pagination"""
+    return getattr(django_settings, 'COOP_CMS_ARTICLES_CATEGORY_PAGINATION', 10)

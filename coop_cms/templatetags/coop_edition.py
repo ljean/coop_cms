@@ -6,9 +6,17 @@ used for magic form
 
 from django import template
 from django.core.context_processors import csrf
-from django.template.loader import find_template, TemplateDoesNotExist
+from django.template import Context
+from django.template.loader import get_template, TemplateDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
+try:
+    # Django 1.8
+    from django.template.base import TextNode, VariableNode
+    from django.template.loader_tags import IncludeNode
+except ImportError:
+    # Django 1.6
+    from template import TextNode, VariableNode
 
 from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleEditNode
 
@@ -16,6 +24,12 @@ from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, Fr
 from coop_cms.settings import get_article_class
 
 register = template.Library()
+
+
+class DummyEngine(object):
+    """Used for monkey patching Context"""
+    debug = False
+
 
 
 ################################################################################
@@ -90,7 +104,7 @@ class FragmentEditNode(DjalohaMultipleEditNode):
         template_name = self.kwargs.get('template_name', '')
         if template_name:
             template_name = self._resolve_arg(template_name, context)
-            template_ = find_template(template_name)[0]
+            template_ = get_template(template_name)
             objects_count = self.get_objects_to_render_count()
             object_content = template_.render(template.Context({
                 'css_class': obj.css_class,
@@ -297,7 +311,7 @@ class SafeWrapper(object):
             src = getattr(self._wrapped, 'logo_thumbnail')(False, self._logo_size, self._logo_crop)
             if src:
                 try:
-                    template_ = find_template("coop_cms/widgets/_img_logo.html")[0]
+                    template_ = get_template("coop_cms/widgets/_img_logo.html")
                     value = template_.render(template.Context({'url': src.url}))
                 except TemplateDoesNotExist:
                     value = u'<img class="logo" src="{0}" />'.format(src.url)
@@ -351,28 +365,41 @@ class CmsEditNode(template.Node):
     def _render_nodes(self, context, inner_context, safe_context):
         """Replace nested nodes with proper content"""
         managed_node_types = [
-            template.TextNode, template.defaulttags.IfNode, template.defaulttags.ForNode,
-            IfCmsEditionNode, IfNotCmsEditionNode,
+            TextNode,
+            template.defaulttags.IfNode,
+            template.defaulttags.ForNode,
+            IfCmsEditionNode,
+            IfNotCmsEditionNode,
         ]
 
         nodes_content = ""
         for node in self.nodelist_content:
             if any([isinstance(node, node_type) for node_type in managed_node_types]):
-                content = node.render(template.Context(safe_context))
+                content = node.render(Context(safe_context))
+
+            elif isinstance(node, IncludeNode):
+                #monkey patching for django 1.8
+                template_name = node.template.resolve(context)
+                node.template = get_template(template_name)
+                node.template.resolve = lambda s, c: s
+                the_context = Context(inner_context)
+                the_context.template = node.template
+                the_context.template.engine = DummyEngine()
+                content = node.template.render(the_context)
 
             elif isinstance(node, template.loader_tags.BlockNode):
-                safe_context_var = template.Context(safe_context)
+                safe_context_var = Context(safe_context)
                 safe_context_var.render_context['block_context'] = context.render_context.get('block_context', None)
                 content = node.render(safe_context_var)
 
-            elif isinstance(node, template.VariableNode):
+            elif isinstance(node, VariableNode):
                 if node.filter_expression.filters:
-                    content = node.render(context)
+                    content = node.render(Context(context))
                 else:
-                    content = node.render(template.Context(safe_context))
+                    content = node.render(Context(safe_context))
 
             else:
-                content = node.render(template.Context(inner_context))
+                content = node.render(Context(inner_context))
 
             nodes_content += content
         return nodes_content
@@ -459,7 +486,7 @@ class CmsEditNode(template.Node):
 
         outer_context['inner'] = mark_safe(inner_value) if (form or formset) else inner_value
 
-        return node_template.render(template.Context(outer_context))
+        return node_template.render(Context(outer_context))
 
 
 @register.tag
