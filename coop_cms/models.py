@@ -9,11 +9,15 @@ import os.path
 import shutil
 import urlparse
 
+from django import VERSION
 from django.db import models
 from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.signals import pre_delete, post_save
-from django.contrib.contenttypes import generic
+if VERSION < (1, 7):
+    from django.contrib.contenttypes.generic import GenericForeignKey
+else:
+    from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.staticfiles import finders
@@ -23,7 +27,6 @@ from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template.defaultfilters import slugify, escape
 from django.template.loader import get_template
-from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
@@ -160,7 +163,7 @@ class NavNode(models.Model):
     #generic relation
     content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"), blank=True, null=True)
     object_id = models.PositiveIntegerField(verbose_name=_("object id"), blank=True, null=True)
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     in_navigation = models.BooleanField(_("in navigation"), default=True)
 
     def get_absolute_url(self):
@@ -980,7 +983,7 @@ class NewsletterItem(models.Model):
     """Something which is in a newsletter"""
     content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"))
     object_id = models.PositiveIntegerField(verbose_name=_("object id"))
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     ordering = models.IntegerField(verbose_name=_("ordering"), default=0)
 
     class Meta:

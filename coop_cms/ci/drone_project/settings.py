@@ -2,7 +2,6 @@
 """project settings"""
 
 import os.path
-import re
 import sys
 
 
@@ -194,7 +193,6 @@ INSTALLED_APPS = (
     'floppyforms',
     'sorl.thumbnail',
     'pagination',
-    #'localeurl',
 
     #externals
     'djaloha',

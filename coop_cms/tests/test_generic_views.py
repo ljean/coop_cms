@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 
-try:
+if DJANGO_VERSION >= (1, 8, 0):
     from unittest import SkipTest
-except ImportError:
+else:
     # Deprecated in Django 1.9
     from django.utils.unittest import SkipTest
 

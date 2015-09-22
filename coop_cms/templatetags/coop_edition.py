@@ -4,19 +4,19 @@ coop_edition template tags
 used for magic form
 """
 
+from django import VERSION as DJANGO_VERSION
 from django import template
 from django.core.context_processors import csrf
 from django.template import Context
 from django.template.loader import get_template, TemplateDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
-try:
-    # Django 1.8
+if DJANGO_VERSION >= (1, 8, 0):
     from django.template.base import TextNode, VariableNode
     from django.template.loader_tags import IncludeNode
-except ImportError:
+else:
     # Django 1.6
-    from template import TextNode, VariableNode
+    from django.template import TextNode, VariableNode
 
 from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleEditNode
 
@@ -385,7 +385,7 @@ class CmsEditNode(template.Node):
                 local_context.template = context.template
                 content = node.render(local_context)
 
-            elif isinstance(node, IncludeNode):
+            elif DJANGO_VERSION >= (1, 8, 0) and isinstance(node, IncludeNode):
                 #monkey patching for django 1.8
                 template_name = node.template.resolve(context)
                 node.template = get_template(template_name)

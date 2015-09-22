@@ -11,13 +11,10 @@ from django.conf.urls import patterns
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-try:
-    from importlib import import_module
-except ImportError:
-    # Deprecated in Django 1.9
-    from django.utils.importlib import import_module
+from importlib import import_module
 
 from coop_cms.logger import logger
+
 
 COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'
 DEPRECATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'basic_cms.NavTree')
