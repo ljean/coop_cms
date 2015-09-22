@@ -2,9 +2,6 @@
 """media library unit testing"""
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 import json
 from datetime import datetime
@@ -719,6 +716,7 @@ class DownloadDocTest(MediaBaseTestCase):
         
         #login and download
         self._log_as_mediamgr()
+
         response = self.client.get(doc.get_download_url())
         self.assertEqual(response.status_code, 200)
 

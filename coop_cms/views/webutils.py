@@ -14,7 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from coop_cms.logger import logger
-from coop_cms.settings import get_article_class
+from coop_cms.settings import get_article_class, is_localized
+from coop_cms.utils import strip_locale_path, make_locale_path
 
 
 @csrf_exempt
@@ -30,9 +31,8 @@ def hide_accept_cookies_message(request):
 @csrf_exempt
 def change_language(request):
     """change the language"""
-    try:
-        from localeurl import utils as localeurl_utils  # pylint: disable=F0401
-    except ImportError:
+
+    if not is_localized():
         raise Http404
 
     next_url = request.REQUEST.get('next', None)
@@ -49,8 +49,8 @@ def change_language(request):
 
         if lang_code and check_for_language(lang_code):
 
-            #path is the locale-independant url
-            path = localeurl_utils.strip_path(next_url)[1]
+            #path is the locale-independent url
+            path = strip_locale_path(next_url)[1]
 
             article_class = get_article_class()
             try:
@@ -73,7 +73,7 @@ def change_language(request):
             if next_article:
                 next_url = next_article.get_absolute_url()
             else:
-                next_url = localeurl_utils.locale_path(path, lang_code)
+                next_url = make_locale_path(path, lang_code)
 
     if not next_url:
         next_url = '/'

@@ -367,15 +367,23 @@ class CmsEditNode(template.Node):
         managed_node_types = [
             TextNode,
             template.defaulttags.IfNode,
-            template.defaulttags.ForNode,
             IfCmsEditionNode,
             IfNotCmsEditionNode,
+        ]
+
+        managed_node_types_with_template = [
+            template.defaulttags.ForNode,
         ]
 
         nodes_content = ""
         for node in self.nodelist_content:
             if any([isinstance(node, node_type) for node_type in managed_node_types]):
                 content = node.render(Context(safe_context))
+
+            elif any([isinstance(node, node_type) for node_type in managed_node_types_with_template]):
+                local_context = Context(safe_context)
+                local_context.template = context.template
+                content = node.render(local_context)
 
             elif isinstance(node, IncludeNode):
                 #monkey patching for django 1.8

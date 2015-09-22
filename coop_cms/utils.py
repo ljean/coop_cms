@@ -3,7 +3,7 @@
 
 from bs4 import BeautifulSoup
 from HTMLParser import HTMLParser
-from re import sub
+from re import sub, match
 from sys import stderr
 from threading import current_thread
 from traceback import print_exc
@@ -121,6 +121,7 @@ def get_language():
     else:
         return settings.LANGUAGE_CODE[:2]
 
+
 def send_newsletter(newsletter, dests, list_unsubscribe=None):
     """
     send newsletter
@@ -214,14 +215,28 @@ class RequestMiddleware(object):
 
 def get_url_in_language(url, lang_code):
     """returns the url in another language"""
-    from localeurl import utils as localeurl_utils  # pylint: disable=F0401
     if lang_code and translation.check_for_language(lang_code):
-        #path is the locale-independant url
-        path = localeurl_utils.strip_path(url)[1]
-        new_url = localeurl_utils.locale_path(path, lang_code)
+        path = strip_locale_path(url)[1]
+        new_url = make_locale_path(path, lang_code)
         return new_url
     else:
         raise ImproperlyConfigured("{0} is not a valid language".format(lang_code))
+
+
+def strip_locale_path(locale_path):
+    """returns language independent url - /en/home/ --> /home/"""
+    elements = locale_path.split('/')
+    if len(elements) > 2:
+        lang = elements[1]
+        if lang in [lang_and_name[0] for lang_and_name in settings.LANGUAGES]:
+            del elements[1]
+            return lang, '/'.join(elements)
+    return '', locale_path
+
+
+def make_locale_path(path, lang):
+    """returns locale url - /home/ --> /en/home/"""
+    return u'/{0}{1}'.format(lang, path)
 
 
 def redirect_to_language(url, lang_code):

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from django.contrib.auth.views import redirect_to_login
+import sys
+
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.core.urlresolvers import reverse, resolve, NoReverseMatch
+from django.contrib.auth.views import redirect_to_login
 
 
 class PermissionsMiddleware(object):

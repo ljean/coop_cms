@@ -2,9 +2,6 @@
 """test fragments feature"""
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 from bs4 import BeautifulSoup
 

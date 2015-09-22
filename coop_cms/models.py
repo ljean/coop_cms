@@ -2,9 +2,6 @@
 """models"""
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 from datetime import datetime
 import os
@@ -771,9 +768,13 @@ class Link(BaseNavigable):
             scheme = parsed_url[0]
             if not scheme:
                 #the urls doesn't starts with http://, so it's a url managed by the site
-                from localeurl.utils import locale_path  # pylint: disable=F0401
-                locale = translation.get_language()                
-                return locale_path(self.url, locale)
+                # TODO ????
+
+                #from localeurl.utils import locale_path  # pylint: disable=F0401
+                #locale = translation.get_language()
+                #return locale_path(self.url, locale)
+                pass
+
         return self.url
 
     def get_label(self):

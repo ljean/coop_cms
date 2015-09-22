@@ -15,11 +15,12 @@ from coop_cms.settings import get_article_class, is_localized
 def get_article_slug(*args, **kwargs):
     """slugify"""
     slug = reverse(*args, **kwargs)
-    if 'localeurl' in settings.INSTALLED_APPS:
-        #If localeurl is installed reverse is patched
+    # TODO
+    #if 'localeurl' in settings.INSTALLED_APPS:
+    #    #If localeurl is installed reverse is patched
         #We must remove the lang prefix
-        from localeurl.utils import strip_path
-        lang, slug = strip_path(slug)
+    #    from localeurl.utils import strip_path
+    #    lang, slug = strip_path(slug)
     return slug.strip('/')
 
 

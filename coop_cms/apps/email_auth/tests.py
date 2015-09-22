@@ -6,10 +6,6 @@ Email authentication Unit tests
 from django.conf import settings
 from coop_cms.settings import import_module
 
-if 'localeurl' in settings.INSTALLED_APPS:
-    LOCALE_URL_MODULE = import_module('localeurl.models')
-    LOCALE_URL_MODULE.patch_reverse()
-
 from bs4 import BeautifulSoup
 
 from django.contrib.auth.models import User
@@ -126,7 +122,7 @@ class UserLoginTest(BaseTest):
         self.assertEqual(response.status_code, 302)
 
         user_id = self.client.session.get("_auth_user_id", 0)
-        self.assertEqual(user_id, user.id)
+        self.assertEqual(int(user_id), user.id)
 
     def test_post_login_wrong_password(self):
         """test error if user login from the login page: wrong password"""

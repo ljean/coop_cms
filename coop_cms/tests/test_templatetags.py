@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 """unitesting of templatetags"""
 
-from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
-
 import json
 from unittest import skipIf
 
+from django.conf import settings
 from django.contrib.auth.models import User, Permission, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
-from django.test import TestCase
 from django.test.client import RequestFactory
 
 from coop_cms.models import Link, NavNode, BaseArticle
@@ -206,7 +201,7 @@ class ArticleTemplateTagsTest(BaseTestCase):
         self.assertEqual(getattr(article, "slug_"+cur_lang), "test_"+cur_lang)
 
 
-class PartitionTemplateFilterTest(TestCase):
+class PartitionTemplateFilterTest(BaseTestCase):
     """test get_part template tags"""
 
     def test_get_part_exact(self):
@@ -322,7 +317,7 @@ class AcceptCookieMessageTest(BaseTestCase):
         self.assertEqual(html, "Accept cookies")
 
 
-class GroupInSublistsTest(TestCase):
+class GroupInSublistsTest(BaseTestCase):
     """test group_in_sublists template tags"""
 
     def test_group_in_sublists_empty(self):
@@ -346,7 +341,7 @@ class GroupInSublistsTest(TestCase):
         self.assertEqual([[1, 2, 3, 4, 5]], group_in_sublists([1, 2, 3, 4, 5], 6))
 
 
-class FindCssTestCase(TestCase):
+class FindCssTestCase(BaseTestCase):
     """find_css template tag"""
 
     def test_find_css_one(self):

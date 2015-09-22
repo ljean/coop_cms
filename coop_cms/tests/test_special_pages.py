@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 """"test special pages"""
 
-from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
-
 from bs4 import BeautifulSoup
 from unittest import skipIf
 
+from django.conf import settings
 from django.contrib.auth.models import AnonymousUser
 from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 from django.test.client import RequestFactory

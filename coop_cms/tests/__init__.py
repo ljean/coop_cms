@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 import logging
 import os.path
@@ -11,17 +8,19 @@ import shutil
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from coop_cms.settings import get_article_class
+from coop_cms.settings import get_article_class, get_unit_test_media_root, DEFAULT_MEDIA_ROOT
 
 try:
     AUTH_LOGIN_NAME = "auth_login"
     reverse(AUTH_LOGIN_NAME)
-except:
+except NoReverseMatch:
     AUTH_LOGIN_NAME = "login"
+
 
 def make_dt(dt):
     if settings.USE_TZ:
@@ -29,24 +28,22 @@ def make_dt(dt):
     else:
         return dt
 
-default_media_root = settings.MEDIA_ROOT
-
 
 #Used by a test below
 def dummy_image_width(img):
     return 20
 
 
-@override_settings(MEDIA_ROOT=os.path.join(default_media_root, '_unit_tests'))
+@override_settings(MEDIA_ROOT=get_unit_test_media_root())
 class BaseTestCase(TestCase):
     def _clean_files(self):
-        if default_media_root != settings.MEDIA_ROOT:
+        if DEFAULT_MEDIA_ROOT != settings.MEDIA_ROOT:
             try:
                 shutil.rmtree(settings.MEDIA_ROOT)
             except OSError:
                 pass
         else:
-            raise Exception("Warning! wrong media root for unittesting")
+            raise Exception("Warning! wrong media root for unit-testing")
     
     def setUp(self):
         logging.disable(logging.CRITICAL)

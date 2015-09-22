@@ -2,9 +2,6 @@
 """unit test i18n support"""
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 from unittest import skipIf
 
@@ -17,11 +14,58 @@ from django.utils.translation import activate, get_language
 from coop_cms.models import BaseArticle, InvalidArticleError
 from coop_cms.settings import is_localized, is_multilang, get_article_class
 from coop_cms.tests import BaseTestCase
-from coop_cms.utils import redirect_to_language
+from coop_cms.utils import redirect_to_language, strip_locale_path, get_url_in_language, make_locale_path
+
+
+@skipIf(not is_localized(), "not localized")
+class LocalePathTest(BaseTestCase):
+    """test that url is parsed correctly when using locale prefix"""
+
+    def test_get_locale_article(self):
+        """it should return lang and locale-independent-path"""
+        result = strip_locale_path('/en/home/')
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0], 'en')
+        self.assertEqual(result[1], '/home/')
+
+    def test_get_locale_article_no_trailing(self):
+        """it should return lang and locale-independent-path"""
+        result = strip_locale_path('/en/home')
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0], 'en')
+        self.assertEqual(result[1], '/home')
+
+    def test_get_locale_article_no_prefix(self):
+        """it should returns empty locale and path"""
+        result = strip_locale_path('/home/')
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0], '')
+        self.assertEqual(result[1], '/home/')
+
+    def test_get_locale_article_no_prefix_no_trailing(self):
+        """it should returns empty locale and path"""
+        result = strip_locale_path('/home')
+        self.assertEqual(len(result), 2)
+        self.assertEqual(result[0], '')
+        self.assertEqual(result[1], '/home')
+
+    @skipIf(not is_multilang(), "not multi lang")
+    def test_get_url_in_language(self):
+        """it should return url in another language"""
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+
+        activate(origin_lang)
+        path = '/this-is-test/'
+        origin_url = make_locale_path(path, origin_lang)
+
+        trans_url = get_url_in_language(origin_url, trans_lang)
+        self.assertEqual(trans_url, make_locale_path(path, trans_lang))
 
 
 class UrlLocalizationTest(BaseTestCase):
-    """compatibilty with localeurl"""
+    """localize url"""
     
     def setUp(self):
         self.user = None
@@ -75,15 +119,17 @@ class UrlLocalizationTest(BaseTestCase):
     def test_change_lang(self):
         """change language"""
 
-        original_text = '*!-+' * 10
-        translated_text = ':%@/' * 9
+        original_text = u'*!-+' * 10
+        translated_text = u':%@/' * 9
         
         art1 = get_article_class().objects.create(title="Home", content=original_text)
         
         origin_lang = settings.LANGUAGES[0][0]
         trans_lang = settings.LANGUAGES[1][0]
-        
-        setattr(art1, 'title_'+trans_lang, 'Accueil')
+
+        activate(origin_lang)
+
+        setattr(art1, 'title_'+trans_lang, u'Accueil')
         setattr(art1, 'content_'+trans_lang, translated_text)
         
         art1.save()

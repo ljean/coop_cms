@@ -7,7 +7,6 @@
         try {
           var media_url = $("media_url").text();
           e.preventDefault();
-          alert(media_url+$(this).attr('href'));
           $.ajax({
             url: media_url+$(this).attr('href'),
             success: function(data) {
