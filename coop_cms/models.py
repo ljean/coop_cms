@@ -27,7 +27,7 @@ from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template.defaultfilters import slugify, escape
 from django.template.loader import get_template
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import get_language, ugettext, ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
@@ -38,7 +38,7 @@ from coop_cms.settings import (
     get_headline_image_size, get_headline_image_crop, get_img_folder, get_newsletter_item_classes,
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
 )
-from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label
+from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path
 
 ADMIN_THUMBS_SIZE = '60x60'
 
@@ -771,13 +771,8 @@ class Link(BaseNavigable):
             scheme = parsed_url[0]
             if not scheme:
                 #the urls doesn't starts with http://, so it's a url managed by the site
-                # TODO ????
-
-                #from localeurl.utils import locale_path  # pylint: disable=F0401
-                #locale = translation.get_language()
-                #return locale_path(self.url, locale)
-                pass
-
+                locale = get_language()
+                return make_locale_path(self.url, locale)
         return self.url
 
     def get_label(self):

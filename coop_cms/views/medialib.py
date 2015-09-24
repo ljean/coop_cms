@@ -112,7 +112,6 @@ def show_media(request, media_type):
             items = paginator.page(paginator.num_pages)
 
         context[media_type+'s'] = items
-        #TODO
         context['pages'] = paginator
 
         context['pages_count'] = xrange(paginator.count)

@@ -52,14 +52,13 @@ class ArticleListNode(template.Node):
             category = self.category.resolve(context)
             all_articles = all_articles.filter(category=category)
         all_articles = all_articles[:self.number]
-        for a in all_articles:
-            if a.navigation_parent == None:
-                article_list.append(a)
+        for article in all_articles:
+            if article.navigation_parent is None:
+                article_list.append(article)
         return article_list
-
 
     def render(self, context):
         """convert to html"""
-        the_template = resolve(self.the_template, context)
-        t = template.loader.get_template(the_template)
-        return ''.join([t.render(template.Context({'item': item})) for item in self.last_articles(context)])
+        template_name = resolve(self.the_template, context)
+        the_template = template.loader.get_template(template_name)
+        return ''.join([the_template.render(template.Context({'item': item})) for item in self.last_articles(context)])
