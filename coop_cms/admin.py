@@ -77,15 +77,19 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
     """Article admin"""
     form = ArticleAdminForm
     list_display = [
-        'slug', 'title', 'category', 'template_name', 'publication', 'headline', 'in_newsletter', 'modified'
+        'slug', 'title', 'category', 'template_name', 'publication', 'headline', 'in_newsletter', 'modified',
+        'login_required',
     ]
     list_editable = ['publication', 'headline', 'in_newsletter', 'category']
     readonly_fields = ['created', 'modified', 'is_homepage']
-    list_filter = ['publication', 'headline', 'in_newsletter', 'sites', 'homepage_for_site', 'category', 'template']
+    list_filter = [
+        'publication', 'login_required', 'headline', 'in_newsletter', 'sites', 'homepage_for_site',
+        'category', 'template'
+    ]
     date_hierarchy = 'publication_date'
     fieldsets = (
         #(_('Navigation'), {'fields': ('navigation_parent',)}),
-        (_(u'General'), {'fields': ('slug', 'title', 'subtitle', 'publication', )}),
+        (_(u'General'), {'fields': ('slug', 'title', 'subtitle', 'publication', 'login_required', )}),
         (_(u'Settings'), {
             'fields': ('sites', 'template', 'category', 'headline', 'is_homepage', 'logo', 'in_newsletter', )
         }),
@@ -96,7 +100,7 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
 
     def get_form(self, request, obj=None, **kwargs):
         """return custom form: It adds the current user"""
-        form = super(ArticleAdmin, self).get_form(request, obj, **kwargs) # pylint: disable=E1002
+        form = super(ArticleAdmin, self).get_form(request, obj, **kwargs)  # pylint: disable=E1002
         form.current_user = request.user
         return form
 
@@ -118,7 +122,7 @@ class MediaFilterFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         """return values after taken the filter into account"""
         value = self.value()
-        if value == None:
+        if value is None:
             return queryset
         return queryset.filter(filters__id=value)
 

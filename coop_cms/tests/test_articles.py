@@ -28,16 +28,15 @@ class ArticleTest(BaseArticleTest):
             ('test/newsletter_blue.html', 'Blue'),
         )
         self._DJALOHA_LINK_MODELS = getattr(settings, 'DJALOHA_LINK_MODELS', [])
-        Article = get_article_class()
-        ct = ContentType.objects.get_for_model(Article)
-        settings.DJALOHA_LINK_MODELS = ['{0}.{1}'.format(ct.app_label, ct.model)]
+        article_class = get_article_class()
+        content_type = ContentType.objects.get_for_model(article_class)
+        settings.DJALOHA_LINK_MODELS = ['{0}.{1}'.format(content_type.app_label, content_type.model)]
         
     def tearDown(self):
         super(ArticleTest, self).tearDown()
         #restore
         settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
         settings.DJALOHA_LINK_MODELS = self._DJALOHA_LINK_MODELS
-    
 
     def _check_article(self, response, data):
         for (key, value) in data.items():
@@ -73,6 +72,31 @@ class ArticleTest(BaseArticleTest):
     def test_publication_flag_draft(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
         self.assertEqual(article.is_draft(), True)
+        url = article.get_absolute_url()
+        response = self.client.get(url)
+        if is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = reverse(AUTH_LOGIN_NAME)
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
+
+    def test_login_required_authenticated(self):
+        """show page if permission required and authenticated"""
+        self._log_as_non_editor()
+        article = get_article_class().objects.create(
+            title="test", publication=BaseArticle.PUBLISHED, login_required=True
+        )
+        url = article.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+
+    def test_login_required_not_authenticated(self):
+        """raise permission denied if permission required not authenticated"""
+        self.client.logout()
+        article = get_article_class().objects.create(
+            title="test", publication=BaseArticle.PUBLISHED, login_required=True
+        )
         url = article.get_absolute_url()
         response = self.client.get(url)
         if is_perm_middleware_installed():

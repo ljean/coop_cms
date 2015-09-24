@@ -379,6 +379,10 @@ class ArticleView(EditableObjectView):
 
     def can_access_object(self):
         """perms -> 404 if no perms"""
+
+        if self.object.login_required and not self.request.user.is_authenticated():
+            raise PermissionDenied
+
         if self.object.is_archived():
             return super(ArticleView, self).can_view_object()
         return True

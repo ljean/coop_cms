@@ -500,6 +500,11 @@ class BaseArticle(BaseNavigable):
     )
     publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now)
     sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
+    login_required = models.BooleanField(
+        default=False,
+        verbose_name=_(u'login required'),
+        help_text=_(u'If true, only user with login/password will able to access the article')
+    )
     
     @property
     def is_homepage(self):

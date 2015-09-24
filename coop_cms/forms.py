@@ -218,6 +218,7 @@ class ArticleAdminForm(forms.ModelForm):
         fields = (
             'slug', 'title', 'subtitle', 'content', 'template', 'publication', 'logo', 'temp_logo',
             'summary', 'category', 'in_newsletter', 'homepage_for_site', 'headline', 'publication_date', 'sites',
+            'login_required',
         )
         widgets = {
             'title': forms.TextInput(attrs={'size': 100})
@@ -319,6 +320,7 @@ class ArticleSettingsForm(WithNavigationModelForm):
         model = get_article_class()
         fields = (
             'template', 'category', 'publication', 'publication_date', 'headline', 'in_newsletter', 'summary', 'sites',
+            'login_required',
         )
         widgets = {
             'sites': forms.CheckboxSelectMultiple(),
@@ -357,7 +359,7 @@ class NewArticleForm(WithNavigationModelForm):
     class Meta:
         model = get_article_class()
         fields = (
-            'title', 'template', 'category', 'headline', 'publication', 'in_newsletter', 'sites',
+            'title', 'template', 'category', 'headline', 'publication', 'in_newsletter', 'sites', 'login_required',
         )
         widgets = {
             'sites': forms.CheckboxSelectMultiple(),
