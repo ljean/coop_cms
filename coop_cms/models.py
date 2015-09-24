@@ -27,7 +27,7 @@ from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template.defaultfilters import slugify, escape
 from django.template.loader import get_template
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext, ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
@@ -53,7 +53,7 @@ def get_object_label(content_type, obj):
     returns the label used in navigation according to the configured rule
     """
     if not obj:
-        return _(u"Node")
+        return ugettext(u"Node")
     try:
         nav_type = NavType.objects.get(content_type=content_type)
         if nav_type.label_rule == NavType.LABEL_USE_SEARCH_FIELD:
@@ -202,7 +202,7 @@ class NavNode(models.Model):
         """children of the node"""
         nodes = NavNode.objects.filter(parent=self).order_by("ordering")
         #Be carful : in_navigation can be False
-        if in_navigation != None:
+        if in_navigation is not None:
             nodes = nodes.filter(in_navigation=in_navigation)
         return nodes
 
@@ -236,7 +236,7 @@ class NavNode(models.Model):
         """formatted for jstree -> displayed as tree view in admin"""
         url = self.get_absolute_url()
         label = escape(self.label)
-        if url == None:
+        if url is None:
             li_content = u'<a>{0}</a>'.format(label)
         else:
             li_content = u'<a href="{0}">{1}</a>'.format(url, label)
