@@ -96,14 +96,10 @@ def move_navnode(request, tree):
     """move a node in the tree"""
     response = {}
 
-    print request.POST
-
     node_id = request.POST['node_id']
     ref_pos = request.POST['ref_pos']
     parent_id = request.POST.get('parent_id', 0)
     ref_id = request.POST.get('ref_id', 0)
-
-    print node_id, ref_pos, parent_id, ref_id
 
     node = models.NavNode.objects.get(tree=tree, id=node_id)
 
@@ -155,8 +151,6 @@ def move_navnode(request, tree):
         #Update pos if changed
         if ref_node:
             if ref_node.ordering > node.ordering:
-                print "forward!", ref_node.ordering, node.ordering, ref_pos
-
                 #move forward
                 to_be_moved = sibling_nodes.filter(ordering__lt=ref_node.ordering, ordering__gt=node.ordering)
                 for next_sibling_node in to_be_moved:
@@ -171,7 +165,6 @@ def move_navnode(request, tree):
 
             elif ref_node.ordering < node.ordering:
                 #move backward
-
                 to_be_moved = sibling_nodes.filter(ordering__gt=ref_node.ordering, ordering__lt=node.ordering)
                 for next_sibling_node in to_be_moved:
                     next_sibling_node.ordering += 1
@@ -346,8 +339,6 @@ def process_nav_edition(request, tree_id):
         except Exception, msg:
             logger.exception("process_nav_edition")
             response = {'status': 'error', 'message': u"An error occured : {0}".format(msg)}
-
-        print response
 
         #return the result as json object
         return HttpResponse(json.dumps(response), content_type='application/json')
