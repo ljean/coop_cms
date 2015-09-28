@@ -73,7 +73,7 @@ class NavTreeAdmin(admin.ModelAdmin):
         extra_context['navtree'] = tree
         extra_context['navtree_nodes'] = self.nodes_li(tree)
         return super(NavTreeAdmin, self).change_view(
-            request, object_id, extra_context=extra_context, *args, **kwargs
+            request, str(object_id), extra_context=extra_context, *args, **kwargs
         )  # pylint: disable=E1002
 
 admin.site.register(get_navtree_class(), NavTreeAdmin)

@@ -41,7 +41,7 @@ class NavigationTest(BaseTestCase):
                 codename='change_{0}'.format(tree_class._meta.module_name)
             )
             self.editor.user_permissions.add(can_edit_tree)
-            self.editor.is_active
+            self.editor.is_active = True
             self.editor.save()
         
         return self.client.login(username='toto', password='toto')
@@ -69,7 +69,23 @@ class NavigationTest(BaseTestCase):
         url = reverse(reverse_name, args=[tree.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        
+
+    def test_view_favicon(self):
+        """It should return 404 if favicon is requested"""
+        self._log_as_editor()
+        tree_class = get_navtree_class()
+
+        reverse_name = "admin:{0}_{1}_changelist".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        url = reverse(reverse_name) + "favicon.ico"
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 404)
+
+        reverse_name = "admin:{0}_{1}_change".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        tree = tree_class.objects.create(name='another_tree')
+        url = reverse(reverse_name, args=[tree.id]) + "favicon.ico"
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 404)
+
     def test_add_node(self):
         link = Link.objects.create(url="http://www.google.fr")
         self._log_as_editor()
