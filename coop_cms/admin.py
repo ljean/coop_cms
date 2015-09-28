@@ -5,6 +5,7 @@ Admin pages for coop_cms
 
 from django.conf import settings
 from django.contrib import admin
+from django.http import Http404
 from django.utils.importlib import import_module
 from django.utils.translation import ugettext_lazy as _
 
@@ -63,12 +64,17 @@ class NavTreeAdmin(admin.ModelAdmin):
     def change_view(self, request, object_id, extra_context=None, *args, **kwargs):
         """override the change view"""
         extra_context = extra_context or {}
+        try:
+            object_id = int(object_id)
+        except ValueError:
+            #if the object_id is not a valid number, returns 404
+            raise Http404
         tree = models.get_navtree_class().objects.get(id=object_id)
         extra_context['navtree'] = tree
         extra_context['navtree_nodes'] = self.nodes_li(tree)
         return super(NavTreeAdmin, self).change_view(
             request, object_id, extra_context=extra_context, *args, **kwargs
-        ) # pylint: disable=E1002
+        )  # pylint: disable=E1002
 
 admin.site.register(get_navtree_class(), NavTreeAdmin)
 
