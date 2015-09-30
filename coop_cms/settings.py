@@ -70,6 +70,8 @@ def get_navtree_class(defaut_class=None):
             content_type = ContentType.objects.get(app_label=app_label, model=model_name)
         except ContentType.DoesNotExist:
             return None
+        except:
+            return None
         navtree_class = content_type.model_class()
         setattr(get_navtree_class, '_cache_class', navtree_class)
         return navtree_class
