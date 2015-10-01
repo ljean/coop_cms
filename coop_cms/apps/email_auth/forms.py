@@ -3,9 +3,10 @@
 
 from django import forms
 from django.contrib.auth import authenticate
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
 from django.utils.translation import ugettext as _, ugettext_lazy as __
 
-from coop_cms.bs_forms import Form
+from coop_cms.bs_forms import BootstrapableMixin, Form
 
 
 class EmailAuthForm(Form):
@@ -44,3 +45,17 @@ class EmailAuthForm(Form):
         """clean data"""
         self._authenticate()
         return self.cleaned_data
+
+
+class BsPasswordResetForm(BootstrapableMixin, PasswordResetForm):
+
+    def __init__(self, *args, **kwargs):
+        super(BsPasswordResetForm, self).__init__(*args, **kwargs)
+        self._bs_patch_field_class()
+
+
+class BsPasswordChangeForm(BootstrapableMixin, PasswordChangeForm):
+
+    def __init__(self, *args, **kwargs):
+        super(BsPasswordChangeForm, self).__init__(*args, **kwargs)
+        self._bs_patch_field_class()
