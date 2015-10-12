@@ -21,3 +21,8 @@ class RegistrationFormUniqueEmailAndTermsOfService(BootstrapableMixin, Registrat
         self.fields['username'].required = False
         self.fields['username'].widget = forms.HiddenInput()
         self._bs_patch_field_class()
+
+    def clean(self):
+        ret = super(RegistrationFormUniqueEmailAndTermsOfService, self).clean()
+        self.cleaned_data['username'] = self.cleaned_data['email'][:30]
+        return ret
