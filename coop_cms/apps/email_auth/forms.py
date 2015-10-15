@@ -50,6 +50,5 @@ class EmailAuthForm(Form):
 class PasswordResetForm(BasePasswordResetForm, BootstrapableMixin):
 
     def __init__(self, *args, **kwargs):
-        print "******************"
         super(PasswordResetForm, self).__init__(*args, **kwargs)
         self._bs_patch_field_class()

@@ -24,5 +24,7 @@ class RegistrationFormUniqueEmailAndTermsOfService(BootstrapableMixin, Registrat
 
     def clean(self):
         ret = super(RegistrationFormUniqueEmailAndTermsOfService, self).clean()
-        self.cleaned_data['username'] = self.cleaned_data['email'][:30]
+        email = self.cleaned_data.get('email', '')
+        if email:
+            self.cleaned_data['username'] = email[:30]
         return ret
