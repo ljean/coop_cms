@@ -17,11 +17,19 @@ class EmailAuthForm(Form):
     def __init__(self, request=None, *args, **kwargs):
         self.user_cache = None
         super(EmailAuthForm, self).__init__(*args, **kwargs)
-        if request and REDIRECT_FIELD_NAME in request.GET:
-            self.fields[REDIRECT_FIELD_NAME] = forms.CharField(
-                initial=request.GET[REDIRECT_FIELD_NAME],
-                widget=forms.HiddenInput()
-            )
+
+        if request:
+            # Redirect to the next url after login
+            if REDIRECT_FIELD_NAME in request.GET:
+                self.fields[REDIRECT_FIELD_NAME] = forms.CharField(
+                    initial=request.GET[REDIRECT_FIELD_NAME],
+                    widget=forms.HiddenInput()
+                )
+            elif REDIRECT_FIELD_NAME in request.POST:
+                # redirect to next even after error on the initial login form
+                self.fields[REDIRECT_FIELD_NAME] = forms.CharField(
+                    widget=forms.HiddenInput()
+                )
 
     def _authenticate(self):
         """check authentication"""
