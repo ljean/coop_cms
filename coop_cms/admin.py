@@ -168,7 +168,7 @@ class NewsletterItemAdmin(admin.ModelAdmin):
 admin.site.register(models.NewsletterItem, NewsletterItemAdmin)
 
 
-class NewsletterAdmin(admin.ModelAdmin):
+class NewsletterAdmin(BASE_ADMIN_CLASS):
     """Newsletter Admin"""
 
     form = NewsletterAdminForm
@@ -177,7 +177,7 @@ class NewsletterAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         """return custom form: it adds the current user"""
-        form = super(NewsletterAdmin, self).get_form(request, obj, **kwargs) # pylint: disable=E1002
+        form = super(NewsletterAdmin, self).get_form(request, obj, **kwargs)  # pylint: disable=E1002
         form.current_user = request.user
         return form
 

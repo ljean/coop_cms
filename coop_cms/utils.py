@@ -129,7 +129,7 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
     lang = translation.get_language()[:2]
     if not (lang in [code_and_name[0] for code_and_name in settings.LANGUAGES]):
         # The current language is not defined in settings.LANGUAGE
-        #force it to the defined language
+        # force it to the defined language
         lang = settings.LANGUAGE_CODE[:2]
         translation.activate(lang)
     
