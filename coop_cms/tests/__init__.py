@@ -41,7 +41,7 @@ def dummy_image_width(img):
 class BeautifulSoup(BaseBeautifulSoup):
 
     def __init__(self, content):
-        super(BaseBeautifulSoup, self).__init__(content, "html.parser")
+        super(BeautifulSoup, self).__init__(content, "html.parser")
 
 
 @override_settings(MEDIA_ROOT=os.path.join(default_media_root, '_unit_tests'))

@@ -12,7 +12,6 @@ from HTMLParser import HTMLParseError
 
 from django import template
 from django.conf import settings
-from django.contrib.staticfiles import finders
 from django.template import RequestContext
 from django.template.base import TemplateSyntaxError
 from django.template.loader import get_template
