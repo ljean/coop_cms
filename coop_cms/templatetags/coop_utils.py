@@ -56,7 +56,7 @@ class ArticleLinkNode(template.Node):
                 request = context.get('request', None)
                 lang = "en"
                 if request:
-                    lang = request.LANGUAGE_CODE
+                    lang = getattr(request, 'LANGUAGE_CODE', lang)
                 elif hasattr(settings, 'LANGUAGES'):
                     lang = settings.LANGUAGES[0][0]
                 elif hasattr(settings, 'LANGUAGE_CODE'):
@@ -132,8 +132,9 @@ class NewsletterFriendlyCssNode(template.Node):
         """to html"""
         content = self.nodelist_content.render(context)
         if context.get('by_email', False):
+            # avoid string.format issues with curly brackets
             try:
-                soup = BeautifulSoup(content)
+                soup = BeautifulSoup(content, "html.parser")
             except HTMLParseError, msg:
                 logger.error("HTMLParseError: %s", msg)
                 logger.error(content)
@@ -156,10 +157,12 @@ class NewsletterFriendlyCssNode(template.Node):
                         if key not in style_dict:
                             value = key_and_values[key]
                             style_dict[key] = value
-                    #keep items in order
+                    # keep items in order
                     html_tag["style"] = self._dict_to_style(style_dict, style_list)
 
-            content = soup.prettify(formatter="minimal")
+            # Do not prettify : it may cause some display problems
+            content = unicode(soup)  # .prettify(formatter="minimal")
+
         else:
             style = ""
             for tag in reversed(self.css.keys()):
