@@ -5,14 +5,13 @@ if 'localeurl' in settings.INSTALLED_APPS:
     from localeurl.models import patch_reverse
     patch_reverse()
 
-from bs4 import BeautifulSoup
 from django.core.urlresolvers import reverse
 
 from model_mommy import mommy
 
 from coop_cms.models import BaseArticle
 from coop_cms.settings import is_localized, get_article_class
-from coop_cms.tests import BaseArticleTest
+from coop_cms.tests import BaseArticleTest, BeautifulSoup
 
 
 class ArticleAdminTest(BaseArticleTest):

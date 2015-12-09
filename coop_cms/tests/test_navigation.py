@@ -5,7 +5,6 @@ if 'localeurl' in settings.INSTALLED_APPS:
     from localeurl.models import patch_reverse
     patch_reverse()
 
-from bs4 import BeautifulSoup
 import json
 
 from django.contrib.auth.models import User, Permission, AnonymousUser
@@ -17,7 +16,7 @@ from model_mommy import mommy
 
 from coop_cms.models import Link, NavNode, NavType
 from coop_cms.settings import get_article_class, get_navtree_class
-from coop_cms.tests import BaseTestCase
+from coop_cms.tests import BaseTestCase, BeautifulSoup
 
 
 class NavigationTest(BaseTestCase):

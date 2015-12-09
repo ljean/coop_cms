@@ -5,7 +5,6 @@ if 'localeurl' in settings.INSTALLED_APPS:
     from localeurl.models import patch_reverse
     patch_reverse()
 
-from bs4 import BeautifulSoup
 from datetime import datetime
 import logging
 
@@ -17,10 +16,13 @@ from django.test.utils import override_settings
 
 from model_mommy import mommy
 
+
 from coop_cms.apps.test_app.models import TestClass
 from coop_cms import settings as coop_settings
 from coop_cms.models import BaseArticle, Newsletter
+from coop_cms.tests import BeautifulSoup
 from coop_cms.tests.test_newsletter import NewsletterSettingsTest
+
 
 try:
     AUTH_LOGIN_NAME = "auth_login"

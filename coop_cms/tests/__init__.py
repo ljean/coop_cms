@@ -6,6 +6,7 @@ if 'localeurl' in settings.INSTALLED_APPS:
     patch_reverse()
 
 import logging
+from bs4 import BeautifulSoup as BaseBeautifulSoup
 import os.path
 import shutil
 
@@ -35,6 +36,12 @@ default_media_root = settings.MEDIA_ROOT
 #Used by a test below
 def dummy_image_width(img):
     return 20
+
+
+class BeautifulSoup(BaseBeautifulSoup):
+
+    def __init__(self, content):
+        super(BaseBeautifulSoup, self).__init__(content, "html.parser")
 
 
 @override_settings(MEDIA_ROOT=os.path.join(default_media_root, '_unit_tests'))

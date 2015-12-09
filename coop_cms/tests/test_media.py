@@ -11,7 +11,6 @@ from datetime import datetime
 from StringIO import StringIO
 from unittest import skipIf
 
-from bs4 import BeautifulSoup
 from PIL import Image as PilImage
 
 from django.core.files import File
@@ -26,7 +25,7 @@ if 'photologue' in settings.INSTALLED_APPS:
 
 from coop_cms.models import ArticleCategory, Document, Image, ImageSize, MediaFilter
 from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseArticleTest, BaseTestCase, MediaBaseTestCase
+from coop_cms.tests import BaseArticleTest, BaseTestCase, BeautifulSoup, MediaBaseTestCase
 
 
 class ImageUploadTest(MediaBaseTestCase):

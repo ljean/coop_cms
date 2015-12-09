@@ -5,14 +5,13 @@ if 'localeurl' in settings.INSTALLED_APPS:
     from localeurl.models import patch_reverse
     patch_reverse()
 
-from bs4 import BeautifulSoup
 from django.template import Template, Context
 
 from model_mommy import mommy
 
 from coop_cms.models import PieceOfHtml
 from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseTestCase, BaseArticleTest
+from coop_cms.tests import BaseTestCase, BeautifulSoup, BaseArticleTest
 
 
 class PieceOfHtmlTagsTest(BaseTestCase):

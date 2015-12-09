@@ -8,7 +8,7 @@ if 'localeurl' in settings.INSTALLED_APPS:
 from unittest import skipIf
 
 from django.contrib.sites.models import Site
-from django.utils.translation import activate, get_language
+from django.utils.translation import get_language
 
 from coop_cms.settings import is_localized, is_multilang, get_article_class
 from coop_cms.tests import BaseTestCase

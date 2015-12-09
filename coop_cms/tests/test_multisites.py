@@ -5,7 +5,6 @@ if 'localeurl' in settings.INSTALLED_APPS:
     from localeurl.models import patch_reverse
     patch_reverse()
 
-from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 
 from django.contrib.sites.models import Site
@@ -15,7 +14,7 @@ from model_mommy import mommy
 
 from coop_cms.models import BaseArticle, ArticleCategory
 from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseArticleTest, BaseTestCase
+from coop_cms.tests import BaseArticleTest, BaseTestCase, BeautifulSoup
 
         
 class MultiSiteTest(BaseTestCase):
