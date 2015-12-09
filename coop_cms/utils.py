@@ -89,7 +89,7 @@ def make_links_absolute(html_content, newsletter=None, site_prefix=""):
         if img_tag.get("src", None):
             img_tag["src"] = make_abs(img_tag["src"])
     
-    return soup.prettify()
+    return unicode(soup)
 
 
 def _send_email(subject, html_text, dests, list_unsubscribe):
