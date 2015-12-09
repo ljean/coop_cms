@@ -2,7 +2,7 @@
 """login form with Email rather than Username"""
 
 from django import forms
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
 from django.utils.translation import ugettext as _, ugettext_lazy as __
 
@@ -17,6 +17,19 @@ class EmailAuthForm(Form):
     def __init__(self, request=None, *args, **kwargs):
         self.user_cache = None
         super(EmailAuthForm, self).__init__(*args, **kwargs)
+
+        if request:
+            # Redirect to the next url after login
+            if REDIRECT_FIELD_NAME in request.GET:
+                self.fields[REDIRECT_FIELD_NAME] = forms.CharField(
+                    initial=request.GET[REDIRECT_FIELD_NAME],
+                    widget=forms.HiddenInput()
+                )
+            elif REDIRECT_FIELD_NAME in request.POST:
+                # redirect to next even after error on the initial login form
+                self.fields[REDIRECT_FIELD_NAME] = forms.CharField(
+                    widget=forms.HiddenInput()
+                )
 
     def _authenticate(self):
         """check authentication"""
