@@ -14,6 +14,7 @@ from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleE
 
 from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
 from coop_cms.settings import get_article_class
+from coop_cms.utils import get_text_from_template
 
 register = template.Library()
 
@@ -298,7 +299,14 @@ class SafeWrapper(object):
             if src:
                 try:
                     template_ = find_template("coop_cms/widgets/_img_logo.html")[0]
-                    value = template_.render(template.Context({'url': src.url}))
+                    value = template_.render(
+                        template.Context(
+                            {
+                                'url': src.url,
+                                'extra_classes': get_text_from_template("coop_cms/widgets/_imageedit_cssclass.html")
+                            }
+                        )
+                    )
                 except TemplateDoesNotExist:
                     value = u'<img class="logo" src="{0}" />'.format(src.url)
             else:

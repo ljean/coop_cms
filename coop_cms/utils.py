@@ -219,3 +219,13 @@ def redirect_to_language(url, lang_code):
     return HttpResponseRedirect(new_url)
 
 
+def get_text_from_template(template_name, extra_context=None):
+    """
+    load a template and render it as text
+    :parameter template_name: the path to a template
+    :parameter extra_context: some context for rendering
+    :return text
+    """
+    context = extra_context or {}
+    template = get_template(template_name)
+    return template.render(Context(context))
