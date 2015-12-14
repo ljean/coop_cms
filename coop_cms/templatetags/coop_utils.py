@@ -20,7 +20,7 @@ from django.utils.text import slugify
 
 from floppyforms import CheckboxInput
 
-from coop_cms.models import ArticleCategory, Image
+from coop_cms.models import ArticleCategory, Image, Document
 from coop_cms.settings import get_article_class, logger
 from coop_cms.shortcuts import get_article
 from coop_cms.utils import dehtml as do_dehtml
@@ -280,9 +280,9 @@ def group_in_sublists(list_of_objs, subslist_size):
     return [list_of_objs[i:i+subslist_size] for i in range(0, len(list_of_objs), subslist_size)]
 
 
-class ImageListNode(template.Node):
-    """image list"""
-    def __init__(self, filter_name, var_name):
+class MediaListNode(template.Node):
+    def __init__(self, model_class, filter_name, var_name):
+        self.model_class = model_class
         stripped_filter_name = filter_name.strip("'").strip('"')
         self.filter_var, self.filter_value = None, None
         if stripped_filter_name == filter_name:
@@ -294,7 +294,7 @@ class ImageListNode(template.Node):
     def render(self, context):
         if self.filter_var:
             self.filter_value = self.filter_var.resolve(context)
-        images = Image.objects.filter(filters__name=self.filter_value).order_by("ordering", "-created")
+        images = self.model_class.objects.filter(filters__name=self.filter_value).order_by("ordering", "-created")
         context.dicts[1][self.var_name] = images
         return ""
 
@@ -309,7 +309,7 @@ def coop_image_list(parser, token):
         var_name = args[3]
     except IndexError:
         raise TemplateSyntaxError(u"coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
-    return ImageListNode(filter_name, var_name)
+    return MediaListNode(Image, filter_name, var_name)
 
 
 DEFAULT_ACCEPT_COOKIE_MESSAGE_TEMPLATE = 'coop_cms/_accept_cookies_message.html'
@@ -394,3 +394,16 @@ def versioned_static_file(parser, token):
     except IndexError:
         raise TemplateSyntaxError(u"coop_image_list: usage --> {% versioned_static_file 'static_path' %}")
     return VersionedStaticFileNode(static_path)
+
+
+@register.tag
+def coop_docs_list(parser, token):
+    """image list"""
+    args = token.split_contents()
+    try:
+        filter_name = args[1]
+        # as_name = args[2]
+        var_name = args[3]
+    except IndexError:
+        raise TemplateSyntaxError(u"coop_docs_list: usage --> {% coop_docs_list 'filter_name' as var_name %}")
+    return MediaListNode(Document, filter_name, var_name)
