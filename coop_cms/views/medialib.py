@@ -169,6 +169,11 @@ def upload_doc(request):
                     doc.name = os.path.splitext(os.path.basename(doc.file.name))[0]
                     doc.save()
 
+                filters = form.cleaned_data['filters']
+                if filters:
+                    doc.filters.add(*filters)
+                    doc.save()
+
                 request.session["coop_cms_media_doc"] = True
 
                 return HttpResponse("close_popup_and_media_slide")

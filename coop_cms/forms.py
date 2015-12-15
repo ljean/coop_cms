@@ -219,7 +219,31 @@ class ArticleAdminForm(forms.ModelForm):
         }
 
 
-class AddImageForm(floppyforms.Form):
+class MediaBaseAddMixin(object):
+
+    def __init__(self, *args, **kwargs):
+        super(MediaBaseAddMixin, self).__init__(*args, **kwargs)  # pylint: disable=E1002
+        #Media filters
+        queryset1 = MediaFilter.objects.all()
+        if queryset1.count():
+            self.fields['filters'].choices = [(x.id, x.name) for x in queryset1]
+            try:
+                self.fields['filters'].widget = ChosenSelectMultiple(
+                    choices=self.fields['filters'].choices, force_template=True,
+                )
+            except NameError:
+                #print 'No ChosenSelectMultiple'
+                pass
+        else:
+            self.fields['filters'].widget = floppyforms.HiddenInput()
+
+    def clean_filters(self):
+        """validation"""
+        filters = self.cleaned_data['filters']
+        return [MediaFilter.objects.get(id=pk) for pk in filters]
+
+
+class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
     """Form for adding new image"""
 
     image = floppyforms.ImageField(required=True, label=_('Image'),)
@@ -239,21 +263,8 @@ class AddImageForm(floppyforms.Form):
 
     def __init__(self, *args, **kwargs):
         super(AddImageForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
-        #Media filters
-        queryset1 = MediaFilter.objects.all()
-        if queryset1.count():
-            self.fields['filters'].choices = [(x.id, x.name) for x in queryset1]
-            try:
-                self.fields['filters'].widget = ChosenSelectMultiple(
-                    choices=self.fields['filters'].choices, force_template=True,
-                )
-            except NameError:
-                #print 'No ChosenSelectMultiple'
-                pass
-        else:
-            self.fields['filters'].widget = floppyforms.HiddenInput()
-            
-        #Image size
+
+        # Image size
         img_size_queryset = ImageSize.objects.all()
         if img_size_queryset.count():
             self.fields['size'].choices = [
@@ -264,11 +275,6 @@ class AddImageForm(floppyforms.Form):
         else:
             self.fields['size'].widget = floppyforms.HiddenInput()
 
-    def clean_filters(self):
-        """validation"""
-        filters = self.cleaned_data['filters']
-        return [MediaFilter.objects.get(id=pk) for pk in filters]
-    
     def clean_size(self):
         """validation"""
         size_id = self.cleaned_data['size']
@@ -280,8 +286,13 @@ class AddImageForm(floppyforms.Form):
             raise ValidationError(_(u"Invalid choice"))
 
 
-class AddDocForm(forms.ModelForm):
+class AddDocForm(MediaBaseAddMixin, forms.ModelForm):
     """add document form"""
+
+    filters = floppyforms.MultipleChoiceField(
+        required=False, label=_(u"Filters"), help_text=_(u"Choose between tags to find images more easily")
+    )
+
     class Meta:
         model = Document
         fields = ('file', 'name', 'is_private', 'category')
