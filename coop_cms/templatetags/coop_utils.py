@@ -200,7 +200,9 @@ def normalize_utf8_to_ascii(ustr):
 def is_checkbox(field):
     """is checkbox"""
     field = getattr(field, 'field', field) # get the field attribute of the field or the field itself
-    return field.widget.__class__.__name__ == CheckboxInput().__class__.__name__
+    if hasattr(field, 'widget'):
+        return field.widget.__class__.__name__ == CheckboxInput().__class__.__name__
+    return False
 
 
 @register.filter
