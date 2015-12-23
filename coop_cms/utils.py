@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponseRedirect
+from django.template import Context
 from django.template.loader import get_template
 from django.utils import translation
 
