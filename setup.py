@@ -31,7 +31,7 @@ setup(
     install_requires=[
         'django==1.6.10',  # In road to 1.9
         'south',
-        'django-floppyforms',
+        'django-floppyforms==1.3.0',
         'django-extensions',
         'sorl-thumbnail',
         'apidev-coop_colorbox >= 1.1.1',
