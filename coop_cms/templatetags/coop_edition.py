@@ -8,7 +8,7 @@ from django import VERSION as DJANGO_VERSION
 from django import template
 from django.core.context_processors import csrf
 from django.template import Context
-from django.template.loader import get_template, TemplateDoesNotExist
+from django.template.loader import find_template, get_template, TemplateDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 if DJANGO_VERSION >= (1, 8, 0):
