@@ -2,7 +2,6 @@
 
 from django.conf import settings
 
-from bs4 import BeautifulSoup
 from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
@@ -15,7 +14,7 @@ from coop_cms.models import NavNode, BaseArticle, ArticleCategory
 from coop_cms.settings import (
     is_localized, get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed,
 )
-from coop_cms.tests import BaseArticleTest, make_dt, AUTH_LOGIN_NAME
+from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt, AUTH_LOGIN_NAME
 
     
 class ArticleTest(BaseArticleTest):

@@ -2,14 +2,13 @@
 
 from django.conf import settings
 
-from bs4 import BeautifulSoup
 from django.template import Template, Context
 
 from model_mommy import mommy
 
 from coop_cms.models import PieceOfHtml
 from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseTestCase, BaseArticleTest
+from coop_cms.tests import BaseTestCase, BeautifulSoup, BaseArticleTest
 
 
 class PieceOfHtmlTagsTest(BaseTestCase):

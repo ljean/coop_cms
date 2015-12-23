@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from bs4 import BeautifulSoup
 import json
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
 
@@ -13,7 +11,7 @@ from model_mommy import mommy
 
 from coop_cms.models import Link, NavNode, NavType
 from coop_cms.settings import get_article_class, get_navtree_class
-from coop_cms.tests import BaseTestCase
+from coop_cms.tests import BaseTestCase, BeautifulSoup
 from coop_cms.utils import get_model_app, get_model_name
 
 
@@ -38,7 +36,7 @@ class NavigationTest(BaseTestCase):
                 codename='change_{0}'.format(get_model_name(tree_class))
             )
             self.editor.user_permissions.add(can_edit_tree)
-            self.editor.is_active
+            self.editor.is_active = True
             self.editor.save()
         
         return self.client.login(username='toto', password='toto')
@@ -66,7 +64,23 @@ class NavigationTest(BaseTestCase):
         url = reverse(reverse_name, args=[tree.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        
+
+    def test_view_favicon(self):
+        """It should return 404 if favicon is requested"""
+        self._log_as_editor()
+        tree_class = get_navtree_class()
+
+        reverse_name = "admin:{0}_{1}_changelist".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        url = reverse(reverse_name) + "favicon.ico"
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 404)
+
+        reverse_name = "admin:{0}_{1}_change".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        tree = tree_class.objects.create(name='another_tree')
+        url = reverse(reverse_name, args=[tree.id]) + "favicon.ico"
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 404)
+
     def test_add_node(self):
         link = Link.objects.create(url="http://www.google.fr")
         self._log_as_editor()

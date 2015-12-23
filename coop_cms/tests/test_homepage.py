@@ -4,8 +4,6 @@ from django.conf import settings
 
 from unittest import skipIf
 
-from bs4 import BeautifulSoup
-
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 
@@ -14,7 +12,7 @@ from model_mommy import mommy
 from coop_cms.models import BaseArticle, SiteSettings
 from coop_cms.settings import get_article_class, cms_no_homepage
 from coop_cms.shortcuts import get_headlines
-from coop_cms.tests import BaseTestCase, UserBaseTestCase
+from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
 
 
 class NoHomepageTest(UserBaseTestCase):

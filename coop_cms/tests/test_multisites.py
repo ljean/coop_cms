@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from django.contrib.sites.models import Site
 from django.conf import settings
@@ -11,7 +10,7 @@ from model_mommy import mommy
 
 from coop_cms.models import BaseArticle, ArticleCategory
 from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseArticleTest, BaseTestCase
+from coop_cms.tests import BaseArticleTest, BaseTestCase, BeautifulSoup
 
         
 class MultiSiteTest(BaseTestCase):

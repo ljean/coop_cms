@@ -3,6 +3,7 @@
 from django.conf import settings
 
 import logging
+from bs4 import BeautifulSoup as BaseBeautifulSoup
 import os.path
 import shutil
 
@@ -32,6 +33,12 @@ def make_dt(dt):
 #Used by a test below
 def dummy_image_width(img):
     return 20
+
+
+class BeautifulSoup(BaseBeautifulSoup):
+
+    def __init__(self, content):
+        super(BeautifulSoup, self).__init__(content, "html.parser")
 
 
 @override_settings(MEDIA_ROOT=get_unit_test_media_root())

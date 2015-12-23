@@ -54,11 +54,9 @@ class NavigationTemplateNode(template.Node):
 
         return kwargs
 
-#----------------------------------------------------------
-
 
 class NavigationAsNestedUlNode(NavigationTemplateNode):
-    """NAvigation as nested ul"""
+    """Navigation as nested ul"""
 
     def __init__(self, **kwargs):
         super(NavigationAsNestedUlNode, self).__init__(**kwargs)
@@ -81,8 +79,6 @@ def navigation_as_nested_ul(parser, token):
     args = token.contents.split()
     kwargs = extract_kwargs(args)
     return NavigationAsNestedUlNode(**kwargs)
-
-#----------------------------------------------------------
 
 
 class NavigationBreadcrumbNode(NavigationTemplateNode):
@@ -111,8 +107,6 @@ def navigation_breadcrumb(parser, token):
     if len(args) < 2:
         raise template.TemplateSyntaxError(_("navigation_breadcrumb requires object as argument"))
     return NavigationBreadcrumbNode(args[1], **kwargs)
-
-#----------------------------------------------------------
 
 
 class NavigationChildrenNode(NavigationTemplateNode):
@@ -144,8 +138,6 @@ def navigation_children(parser, token):
         )
     return NavigationChildrenNode(args[1], **kwargs)
 
-#----------------------------------------------------------
-
 
 class NavigationSiblingsNode(NavigationTemplateNode):
     """Navigation"""
@@ -174,7 +166,7 @@ def navigation_siblings(parser, token):
         raise template.TemplateSyntaxError(_("navigation_siblings requires object as argument"))
     return NavigationSiblingsNode(args[1], **kwargs)
 
-#----------------------------------------------------------
+
 DEFAULT_NAVROOT_TEMPLATE = 'coop_cms/navigation_node.html'
 
 

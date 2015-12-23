@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from bs4 import BeautifulSoup
 from datetime import timedelta
 
 from django.conf import settings
@@ -17,7 +16,7 @@ from model_mommy import mommy
 
 from coop_cms.models import Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending
 from coop_cms.settings import is_localized, get_article_class
-from coop_cms.tests import BaseTestCase, UserBaseTestCase
+from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
 from coop_cms.utils import make_links_absolute
 
 
@@ -806,54 +805,58 @@ class AbsUrlTest(UserBaseTestCase):
         self.site_prefix = "http://"+self.site.domain
         self.newsletter = mommy.make(Newsletter, site=self.site)
         #settings.COOP_CMS_SITE_PREFIX = self.site_prefix
+
+    def _to_text(self, soup):
+        return unicode(soup)
     
     def test_href(self):
         settings.COOP_CMS_SITE_PREFIX = self.site_prefix
         test_html = '<a href="%s/toto">This is a link</a>'
         rel_html = test_html % ""
-        abs_html = BeautifulSoup(test_html % self.site_prefix).prettify()
+        abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
         self.assertEqual(abs_html, make_links_absolute(rel_html))
     
     def test_href(self):
         test_html = '<a href="%s/toto">This is a link</a>'
         rel_html = test_html % ""
-        abs_html = BeautifulSoup(test_html % self.site_prefix).prettify()
+        abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
         self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
         
     def test_src(self):
         test_html = '<h1>My image</h1><img src="%s/toto">'
         rel_html = test_html % ""
-        abs_html = BeautifulSoup(test_html % self.site_prefix).prettify()
+        abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
         self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
         
     def test_relative_path(self):
         test_html = '<h1>My image</h1><img src="%s/toto">'
         rel_html = test_html % "../../.."
-        abs_html = BeautifulSoup(test_html % self.site_prefix).prettify()
+        abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
         self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
     
     def test_src_and_img(self):
-        test_html = '<h1>My image</h1><a href="{0}/a1">This is a link</a><img src="{0}/toto"/><img src="{0}/titi"/><a href="{0}/a2">This is another link</a>'
+        test_html = '<h1>My image</h1><a href="{0}/a1">This is a link</a><img src="{0}/toto"/><img src="{0}/titi"/>' + \
+            '<a href="{0}/a2">This is another link</a>'
         rel_html = test_html.format("")
         html = test_html.format(self.site_prefix)
-        abs_html = BeautifulSoup(html).prettify()
+        abs_html = self._to_text(BeautifulSoup(html))
         self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
         
     def test_href_rel_and_abs(self):
         test_html = '<a href="%s/toto">This is a link</a><a href="http://www.apidev.fr">another</a>'
         rel_html = test_html % ""
-        abs_html = BeautifulSoup(test_html % self.site_prefix).prettify()
+        abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
         self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
         
     def test_style_in_between(self):
         test_html = u'<img style="margin: 0; width: 700px;" src="%s/media/img/newsletter_header.png" alt="Logo">'
         rel_html = test_html % ""
-        abs_html = BeautifulSoup(test_html % self.site_prefix).prettify()
+        abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
         self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
         
     def test_missing_attr(self):
         test_html = u'<img alt="Logo" /><a name="aa">link</a>'
-        abs_html = BeautifulSoup(test_html).prettify()
+        abs_html = self._to_text(BeautifulSoup(test_html))
         self.assertEqual(abs_html, make_links_absolute(test_html, self.newsletter))
 
 

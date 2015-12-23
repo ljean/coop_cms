@@ -22,6 +22,7 @@ from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleE
 
 from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
 from coop_cms.settings import get_article_class
+from coop_cms.utils import get_text_from_template
 
 register = template.Library()
 
@@ -31,8 +32,6 @@ class DummyEngine(object):
     debug = False
 
 
-
-################################################################################
 class PieceOfHtmlEditNode(DjalohaEditNode):
     """Template node for editing a PieceOfHtml"""
 
@@ -63,8 +62,6 @@ def coop_piece_of_html(parser, token):
         lookup_args.update({'extra_id': extra_id})
     
     return PieceOfHtmlEditNode(PieceOfHtml, lookup_args, 'content', read_only)
-
-################################################################################
 
 
 class FragmentEditNode(DjalohaMultipleEditNode):
@@ -164,7 +161,6 @@ def coop_fragments(parser, token):
     return FragmentEditNode(lookup, kwargs)
 
 
-################################################################################
 class ArticleSummaryEditNode(DjalohaEditNode):
     """edit the article summary"""
 
@@ -183,7 +179,6 @@ def article_summary_edit(parser, token):
     return ArticleSummaryEditNode(article_class, {'id': article_id}, 'summary')
 
 
-################################################################################
 class ArticleTitleNode(template.Node):
     """article title tag"""
 
@@ -203,8 +198,6 @@ class ArticleTitleNode(template.Node):
 def article_title(parser, token):
     """article title tag"""
     return ArticleTitleNode()
-
-################################################################################
 
 
 class CmsFormMediaNode(template.Node):
@@ -227,8 +220,6 @@ class CmsFormMediaNode(template.Node):
 def cms_form_media(parser, token):
     """generate html for getting required js and css"""
     return CmsFormMediaNode()
-
-################################################################################
 
 
 def _extract_if_node_args(parser, token):
@@ -287,8 +278,6 @@ def if_not_cms_edition(parser, token):
     nodelist_true, nodelist_false = _extract_if_node_args(parser, token)
     return IfNotCmsEditionNode(nodelist_true, nodelist_false)
 
-################################################################################
-
 
 CMS_FORM_TEMPLATE = """
 <form id="cms_form" enctype="multipart/form-data"  method="POST" action="{{post_url}}">{% csrf_token %}
@@ -311,8 +300,15 @@ class SafeWrapper(object):
             src = getattr(self._wrapped, 'logo_thumbnail')(False, self._logo_size, self._logo_crop)
             if src:
                 try:
-                    template_ = get_template("coop_cms/widgets/_img_logo.html")
-                    value = template_.render(template.Context({'url': src.url}))
+                    template_ = find_template("coop_cms/widgets/_img_logo.html")[0]
+                    value = template_.render(
+                        template.Context(
+                            {
+                                'url': src.url,
+                                'extra_classes': get_text_from_template("coop_cms/widgets/_imageedit_cssclass.html")
+                            }
+                        )
+                    )
                 except TemplateDoesNotExist:
                     value = u'<img class="logo" src="{0}" />'.format(src.url)
             else:
@@ -453,13 +449,13 @@ class CmsEditNode(template.Node):
         if self._render_logo_crop:
             self._logo_crop = context.get(self._logo_crop, None)
 
-        #the context used for rendering the templatetag content
+        # the context used for rendering the templatetag content
         inner_context = self._make_inner_context(context)
 
-        #the context used for rendering the whole page
+        # the context used for rendering the whole page
         outer_context = self._make_outer_context(context)
 
-        #copy of the inner_context to be modified
+        # copy of the inner_context to be modified
         safe_context = inner_context.copy()
 
         form = context.get('form', None)
@@ -509,8 +505,6 @@ def cms_edit(parser, token):
     nodelist = parser.parse(('end_cms_edit', ))
     parser.next_token()
     return CmsEditNode(nodelist, var_name, **data)
-
-################################################################################
 
 
 class CmsNoSpace(template.Node):

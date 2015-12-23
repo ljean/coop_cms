@@ -3,8 +3,6 @@
 
 from django.conf import settings
 
-from bs4 import BeautifulSoup
-
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
@@ -13,7 +11,7 @@ from django.template import Template, Context
 from model_mommy import mommy
 from coop_cms.models import BaseArticle, Fragment, FragmentType, FragmentFilter
 from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseTestCase
+from coop_cms.tests import BaseTestCase, BeautifulSoup
 
 
 class BaseFragmentTest(BaseTestCase):

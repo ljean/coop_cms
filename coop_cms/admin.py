@@ -5,6 +5,7 @@ Admin pages for coop_cms
 
 from django.conf import settings
 from django.contrib import admin
+from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
 from coop_cms.forms import NavTypeForm, ArticleAdminForm, NewsletterItemAdminForm, NewsletterAdminForm
@@ -62,11 +63,16 @@ class NavTreeAdmin(admin.ModelAdmin):
     def change_view(self, request, object_id, extra_context=None, *args, **kwargs):
         """override the change view"""
         extra_context = extra_context or {}
+        try:
+            object_id = int(object_id)
+        except ValueError:
+            #if the object_id is not a valid number, returns 404
+            raise Http404
         tree = models.get_navtree_class().objects.get(id=object_id)
         extra_context['navtree'] = tree
         extra_context['navtree_nodes'] = self.nodes_li(tree)
         return super(NavTreeAdmin, self).change_view(
-            request, object_id, extra_context=extra_context, *args, **kwargs
+            request, str(object_id), extra_context=extra_context, *args, **kwargs
         )  # pylint: disable=E1002
 
 if get_navtree_class():
@@ -166,7 +172,7 @@ class NewsletterItemAdmin(admin.ModelAdmin):
 admin.site.register(models.NewsletterItem, NewsletterItemAdmin)
 
 
-class NewsletterAdmin(admin.ModelAdmin):
+class NewsletterAdmin(BASE_ADMIN_CLASS):
     """Newsletter Admin"""
 
     form = NewsletterAdminForm
@@ -175,7 +181,7 @@ class NewsletterAdmin(admin.ModelAdmin):
 
     def get_form(self, request, obj=None, **kwargs):
         """return custom form: it adds the current user"""
-        form = super(NewsletterAdmin, self).get_form(request, obj, **kwargs) # pylint: disable=E1002
+        form = super(NewsletterAdmin, self).get_form(request, obj, **kwargs)  # pylint: disable=E1002
         form.current_user = request.user
         return form
 

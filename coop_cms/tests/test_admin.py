@@ -2,14 +2,13 @@
 
 from django.conf import settings
 
-from bs4 import BeautifulSoup
 from django.core.urlresolvers import reverse
 
 from model_mommy import mommy
 
 from coop_cms.models import BaseArticle
 from coop_cms.settings import is_localized, get_article_class
-from coop_cms.tests import BaseArticleTest
+from coop_cms.tests import BaseArticleTest, BeautifulSoup
 from coop_cms.utils import get_model_app, get_model_name
 
 

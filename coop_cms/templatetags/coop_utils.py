@@ -12,7 +12,6 @@ from HTMLParser import HTMLParseError
 
 from django import template
 from django.conf import settings
-from django.contrib.staticfiles import finders
 from django.template import RequestContext
 from django.template.base import TemplateSyntaxError
 from django.template.loader import get_template
@@ -21,7 +20,7 @@ from django.utils.text import slugify
 
 from floppyforms import CheckboxInput
 
-from coop_cms.models import ArticleCategory, Image
+from coop_cms.models import ArticleCategory, Image, Document
 from coop_cms.settings import get_article_class, logger
 from coop_cms.shortcuts import get_article
 from coop_cms.utils import dehtml as do_dehtml
@@ -56,7 +55,7 @@ class ArticleLinkNode(template.Node):
                 request = context.get('request', None)
                 lang = "en"
                 if request:
-                    lang = request.LANGUAGE_CODE
+                    lang = getattr(request, 'LANGUAGE_CODE', lang)
                 elif hasattr(settings, 'LANGUAGES'):
                     lang = settings.LANGUAGES[0][0]
                 elif hasattr(settings, 'LANGUAGE_CODE'):
@@ -132,8 +131,9 @@ class NewsletterFriendlyCssNode(template.Node):
         """to html"""
         content = self.nodelist_content.render(context)
         if context.get('by_email', False):
+            # avoid string.format issues with curly brackets
             try:
-                soup = BeautifulSoup(content)
+                soup = BeautifulSoup(content, "html.parser")
             except HTMLParseError, msg:
                 logger.error("HTMLParseError: %s", msg)
                 logger.error(content)
@@ -156,10 +156,12 @@ class NewsletterFriendlyCssNode(template.Node):
                         if key not in style_dict:
                             value = key_and_values[key]
                             style_dict[key] = value
-                    #keep items in order
+                    # keep items in order
                     html_tag["style"] = self._dict_to_style(style_dict, style_list)
 
-            content = soup.prettify(formatter="minimal")
+            # Do not prettify : it may cause some display problems
+            content = unicode(soup)  # .prettify(formatter="minimal")
+
         else:
             style = ""
             for tag in reversed(self.css.keys()):
@@ -198,7 +200,9 @@ def normalize_utf8_to_ascii(ustr):
 def is_checkbox(field):
     """is checkbox"""
     field = getattr(field, 'field', field) # get the field attribute of the field or the field itself
-    return field.widget.__class__.__name__ == CheckboxInput().__class__.__name__
+    if hasattr(field, 'widget'):
+        return field.widget.__class__.__name__ == CheckboxInput().__class__.__name__
+    return False
 
 
 @register.filter
@@ -278,9 +282,9 @@ def group_in_sublists(list_of_objs, subslist_size):
     return [list_of_objs[i:i+subslist_size] for i in range(0, len(list_of_objs), subslist_size)]
 
 
-class ImageListNode(template.Node):
-    """image list"""
-    def __init__(self, filter_name, var_name):
+class MediaListNode(template.Node):
+    def __init__(self, model_class, filter_name, var_name):
+        self.model_class = model_class
         stripped_filter_name = filter_name.strip("'").strip('"')
         self.filter_var, self.filter_value = None, None
         if stripped_filter_name == filter_name:
@@ -292,7 +296,7 @@ class ImageListNode(template.Node):
     def render(self, context):
         if self.filter_var:
             self.filter_value = self.filter_var.resolve(context)
-        images = Image.objects.filter(filters__name=self.filter_value).order_by("ordering", "-created")
+        images = self.model_class.objects.filter(filters__name=self.filter_value).order_by("ordering", "-created")
         context.dicts[1][self.var_name] = images
         return ""
 
@@ -307,7 +311,7 @@ def coop_image_list(parser, token):
         var_name = args[3]
     except IndexError:
         raise TemplateSyntaxError(u"coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
-    return ImageListNode(filter_name, var_name)
+    return MediaListNode(Image, filter_name, var_name)
 
 
 DEFAULT_ACCEPT_COOKIE_MESSAGE_TEMPLATE = 'coop_cms/_accept_cookies_message.html'
@@ -392,3 +396,16 @@ def versioned_static_file(parser, token):
     except IndexError:
         raise TemplateSyntaxError(u"coop_image_list: usage --> {% versioned_static_file 'static_path' %}")
     return VersionedStaticFileNode(static_path)
+
+
+@register.tag
+def coop_docs_list(parser, token):
+    """image list"""
+    args = token.split_contents()
+    try:
+        filter_name = args[1]
+        # as_name = args[2]
+        var_name = args[3]
+    except IndexError:
+        raise TemplateSyntaxError(u"coop_docs_list: usage --> {% coop_docs_list 'filter_name' as var_name %}")
+    return MediaListNode(Document, filter_name, var_name)

@@ -3,6 +3,8 @@
 
 from floppyforms.widgets import ClearableFileInput, Select, SelectMultiple, HiddenInput
 
+from coop_cms.utils import get_text_from_template
+
 
 class ReadOnlyInput(HiddenInput):
     """readonlyinput"""
@@ -17,7 +19,8 @@ class ImageEdit(ClearableFileInput):
         super(ImageEdit, self).__init__(*args, **kwargs)
         self._extra_context = {
             'update_url': update_url,
-            'thumbnail_src': thumbnail_src
+            'thumbnail_src': thumbnail_src,
+            'extra_classes': get_text_from_template("coop_cms/widgets/_imageedit_cssclass.html"),
         }
         
     def get_context(self, *args, **kwargs):

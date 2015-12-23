@@ -12,11 +12,14 @@ class BootstrapableMixin(object):
         for field_name in self.fields:
             field = self.fields[field_name]
             if not is_checkbox(field):
-                if field.widget.attrs.has_key('class'):
+                if 'class' in field.widget.attrs:
                     val = field.widget.attrs['class']
                     field.widget.attrs['class'] = val + " form-control"
                 else:
                     field.widget.attrs['class'] = "form-control"
+
+            if self.fields[field_name].required:
+                self.fields[field_name].widget.attrs['required'] = 'required'
 
 
 class Form(forms.Form, BootstrapableMixin):

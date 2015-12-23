@@ -88,7 +88,7 @@ def make_links_absolute(html_content, newsletter=None, site_prefix=""):
         if img_tag.get("src", None):
             img_tag["src"] = make_abs(img_tag["src"])
     
-    return soup.prettify()
+    return unicode(soup)
 
 
 def _send_email(subject, html_text, dests, list_unsubscribe):
@@ -137,7 +137,8 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
     lang = get_language()
     if not (lang in [code_and_name[0] for code_and_name in settings.LANGUAGES]):
         # The current language is not defined in settings.LANGUAGE
-        #force it to the defined language
+        # force it to the defined language
+        lang = settings.LANGUAGE_CODE[:2]
         translation.activate(lang)
 
     the_template = get_template(newsletter.get_template_name())
@@ -262,3 +263,15 @@ def get_model_app(model_class):
     """return app name for this model"""
     meta_class = getattr(model_class, '_meta')
     return getattr(meta_class, 'app_label')
+
+
+def get_text_from_template(template_name, extra_context=None):
+    """
+    load a template and render it as text
+    :parameter template_name: the path to a template
+    :parameter extra_context: some context for rendering
+    :return text
+    """
+    context = extra_context or {}
+    template = get_template(template_name)
+    return template.render(Context(context))
