@@ -13,14 +13,17 @@ from coop_cms.views.newsletters import NewsletterView
 from coop_cms.views import articles, fragments, homepage, links, navigation, newsletters, medialib, webutils
 from coop_cms.views.webutils import DebugErrorCodeView
 
-
 article_views = get_article_views()
 article_view = article_views['article_view']
 edit_article_view = article_views['edit_article_view']
 
 install_csrf_failure_view()
 
-urlpatterns = patterns('',
+urlpatterns = []
+
+urlpatterns = [
+    url(r'^djaloha/', include('djaloha.urls')),
+
     url(r'^cms/change-template/(?P<article_id>\d*)/$', articles.change_template, name="coop_cms_change_template"),
     url(r'^cms/settings/(?P<article_id>\d*)/$', articles.article_settings, name="coop_cms_article_settings"),
     url(r'^cms/new/$', articles.new_article, name="coop_cms_new_article"),
@@ -88,36 +91,37 @@ urlpatterns = patterns('',
         r'^cms/hide-accept-cookies-message/',
         webutils.hide_accept_cookies_message,
         name='coop_cms_hide_accept_cookies_message'
-    )
-)
+    ),
+]
 
 if settings.DEBUG:
-    urlpatterns += patterns('',
+    urlpatterns += [
         url(
             r'^cms/debug-error-code/((?P<error_code>\d{3}))/$',
             DebugErrorCodeView.as_view(),
             name='coop_cms_debug_404'
         ),
-    )
+    ]
 
 if not getattr(settings, "COOP_CMS_DISABLE_DEFAULT_SITEMAP", False):
     urlpatterns += sitemap.urlpatterns
 
 if 'coop_cms.apps.rss_sync' in settings.INSTALLED_APPS:
-    urlpatterns += patterns('',
+    urlpatterns += [
         url(r'^rss-sync/', include('coop_cms.apps.rss_sync.urls')),
-    )
+    ]
     
 if 'coop_cms.apps.test_app' in settings.INSTALLED_APPS:
-    urlpatterns += patterns('',
+    urlpatterns += [
         url(r'^this-should-be-only-in-test-mode', include('coop_cms.apps.test_app.urls')),
-    )
+    ]
 
-#keep these at the end
-urlpatterns += patterns('',
+# keep these at the end
+urlpatterns += [
     url(r'^(?P<url>.+)/cms_publish/$', articles.publish_article, name='coop_cms_publish_article'),
     url(r'^(?P<url>.+)/cms_cancel/$', articles.cancel_edit_article, name='coop_cms_cancel_edit_article'),
     url(r'^$', homepage.homepage, name='coop_cms_homepage'),
     url(r'^(?P<slug>.+)/cms_edit/$', edit_article_view.as_view(edit_mode=True), name='coop_cms_edit_article'),
     url(r'^(?P<slug>.+)/$', article_view.as_view(), name='coop_cms_view_article'),
-)
+    url(r'^coop_bar/', include('coop_bar.urls')),
+]

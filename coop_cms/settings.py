@@ -5,6 +5,7 @@ the settings should be accessed from here and not directly from django.conf.sett
 """
 
 import os.path
+import sys
 
 from django.conf import settings as django_settings
 from django.conf.urls import patterns
@@ -375,3 +376,11 @@ def get_unit_test_media_root():
         DEFAULT_MEDIA_ROOT = django_settings.MEDIA_ROOT
         django_settings.MEDIA_ROOT = os.path.join(django_settings.MEDIA_ROOT, '_unit_tests')
     return django_settings.MEDIA_ROOT
+
+
+def get_media_root():
+    """return unit testing_media root if unit test, regular unit test if not"""
+    if 'test' in sys.argv:
+        return get_unit_test_media_root()
+    else:
+        return django_settings.MEDIA_ROOT
