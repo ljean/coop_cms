@@ -15,12 +15,7 @@ localized_patterns = get_url_patterns()
 
 admin.autodiscover()
 
-urlpatterns = localized_patterns(
-    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^accounts/', include('coop_cms.apps.email_auth.urls')),
-    url(r'^accounts/', include('django.contrib.auth.urls')),
-)
+urlpatterns = []
 
 if settings.DEBUG or ('test' in sys.argv) or getattr(settings, 'SERVE_STATIC', True):
     if settings.DEBUG:
@@ -38,8 +33,12 @@ if settings.DEBUG or ('test' in sys.argv) or getattr(settings, 'SERVE_STATIC', T
             {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}
         ),
     ]
-    
+
 urlpatterns += localized_patterns(
+    url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+    url(r'^admin/', include(admin.site.urls)),
+    url(r'^accounts/', include('coop_cms.apps.email_auth.urls')),
+    url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^djaloha/', include('djaloha.urls')),
     url(r'^', include('coop_cms.urls')),
     url(r'^coop_bar/', include('coop_bar.urls')),

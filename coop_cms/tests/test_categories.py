@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
-from django.test import override_settings
+from django.test.utils import override_settings
 
 from model_mommy import mommy
 

@@ -69,7 +69,10 @@ class MediaBaseTestCase(BaseTestCase):
 
     def get_safe_content(self, response):
         if hasattr(response, 'content'):
-            return response.content.read()
+            if hasattr(response.content, 'read'):
+                return response.content.read()
+            else:
+                return response.content
         elif hasattr(response, 'streaming_content'):
             return "".join(response.streaming_content)
         return None

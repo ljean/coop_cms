@@ -876,7 +876,8 @@ class Image(Media):
                 return self.file.url
         try:
             crop = self.size.crop or None
-            return sorl_thumbnail.backend.get_thumbnail(self.file.file, self.size.size, crop=crop).url
+            url = sorl_thumbnail.backend.get_thumbnail(self.file.file, self.size.size, crop=crop).url
+            return url
         except (IOError, ThumbnailParseError):
             return self.file.url
 

@@ -158,7 +158,7 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
             context_dict.update(data)
 
     try:
-        html_text = the_template.render(context_dict)
+        html_text = the_template.render(Context(context_dict))
     except Exception:
         raise
         # import traceback
