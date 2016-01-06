@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """urls"""
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 from django.contrib.auth.views import login, password_change, password_reset
 
 from coop_cms.apps.email_auth.forms import BsPasswordChangeForm, BsPasswordResetForm, EmailAuthForm
 
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(
         r'^login/$',
         'django.contrib.auth.views.login',
@@ -25,5 +25,5 @@ urlpatterns = patterns('',
         {'password_reset_form': BsPasswordResetForm},
         name=password_reset
     ),
-    (r'^', include('django.contrib.auth.urls')),
-)
+    url(r'^', include('django.contrib.auth.urls')),
+]

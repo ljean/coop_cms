@@ -9,7 +9,7 @@ import shutil
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.core.urlresolvers import reverse_lazy, NoReverseMatch
 from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
@@ -18,7 +18,7 @@ from coop_cms.settings import get_article_class, get_unit_test_media_root, DEFAU
 
 try:
     AUTH_LOGIN_NAME = "auth_login"
-    reverse(AUTH_LOGIN_NAME)
+    reverse_lazy(AUTH_LOGIN_NAME)
 except NoReverseMatch:
     AUTH_LOGIN_NAME = "login"
 

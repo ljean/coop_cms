@@ -3,7 +3,7 @@
 
 from django.conf import settings
 
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
 
 from coop_cms import sitemap
 from coop_cms.settings import (
