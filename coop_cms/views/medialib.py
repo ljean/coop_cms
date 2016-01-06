@@ -10,18 +10,17 @@ import unicodedata
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
 from django.template.loader import get_template
-from django.utils.html import mark_safe, escapejs
 
 from coop_cms import forms
 from coop_cms.logger import logger
 from coop_cms import models
+from coop_cms.utils import paginate
 
 
 def _get_photologue_media(request):
@@ -101,20 +100,11 @@ def show_media(request, media_type):
                 queryset = queryset.filter(filters__id=media_filter)
                 context['media_filter'] = int(media_filter)
 
-        paginator = Paginator(queryset, 12)
-        try:
-            items = paginator.page(page or 1)
-        except PageNotAnInteger:
-            # If page is not an integer, deliver first page.
-            items = paginator.page(1)
-        except EmptyPage:
-            # If page is out of range (e.g. 9999), deliver last page of results.
-            items = paginator.page(paginator.num_pages)
+        page_obj = paginate(request, queryset, 12)
 
-        context[media_type+'s'] = items
-        context['pages'] = paginator
+        context[media_type+'s'] = list(page_obj)
+        context['page_obj'] = page_obj
 
-        context['pages_count'] = xrange(paginator.count)
         context["allow_photologue"] = "photologue" in settings.INSTALLED_APPS
 
         template = get_template('coop_cms/medialib/slide_base.html')

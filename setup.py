@@ -42,6 +42,11 @@ setup(
         'django-filetransfers',
         'model_mommy',
     ],
+    dependency_links=[
+        'git+https://github.com/ljean/coop-colorbox.git@1aefa1eefaace426e8570463b2b5cd6ad0e04be4#egg=apidev_coop_colorbox-dev',
+        'git+https://github.com/ljean/djaloha.git@82c9b25054350f76b47e5aa40a6d36414174bcf9#egg=apidev_djaloha-dev',
+        'git+https://github.com/ljean/coop-bar.git@3b7fae26c0e4c999fa1736f417b49d3983231364#egg=coop_bar-dev',
+    ],
     long_description=open('README.rst').read(),
     url='https://github.com/ljean/coop_cms/',
     download_url='https://github.com/ljean/coop_cms/tarball/master',

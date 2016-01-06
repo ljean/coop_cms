@@ -29,7 +29,7 @@ from coop_cms.settings import (
     get_articles_category_page_size
 )
 from coop_cms.shortcuts import get_article_or_404, get_headlines, redirect_if_alias
-from coop_cms.utils import get_model_name, get_model_app
+from coop_cms.utils import get_model_name, get_model_app, paginate
 
 
 def get_article_template(article):
@@ -343,25 +343,17 @@ def articles_category(request, slug):
     if articles.count() == 0:
         raise Http404
 
-    paginator = Paginator(articles, get_articles_category_page_size())
-    try:
-        articles = paginator.page(page or 1)
-    except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-        articles = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        articles = paginator.page(paginator.num_pages)
-
     try:
         category_template = u"coop_cms/categories/{0}.html".format(category.slug)
         get_template(category_template)
     except TemplateDoesNotExist:
         category_template = "coop_cms/articles_category.html"
 
+    page_obj = paginate(request, articles, get_articles_category_page_size())
+
     return render_to_response(
         category_template,
-        {'category': category, "articles": articles, 'pages': paginator},
+        {'category': category, "articles": list(page_obj), 'page_obj': page_obj},
         context_instance=RequestContext(request)
     )
 

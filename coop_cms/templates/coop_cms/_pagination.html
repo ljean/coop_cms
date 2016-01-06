@@ -1,26 +1,22 @@
-{% if pages.count %}
 {% load i18n %}
+{% if page_obj.paginator.num_pages > 1 %}
 <ul class="pagination">
-    {% if page.has_previous %}
+    {% if page_obj.has_previous %}
         <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
     {% else %}
         <li class="disabled"><a href="#">&laquo;</a></li>
     {% endif %}
 
-    {% for page_number in pages_count %}
-        {% if page_number %}
-            {% if page_number == page.number %}
-                <li class="active"><a href="#">{{ page_number }} <span class="sr-only">(current)</span></a></li>
-            {% else %}
-                <li><a href="?page={{ page_number }}">{{ page_number }}</a></li>
-            {% endif %}
+    {% for page_number in page_obj.paginator.page_range %}
+        {% if page_number == page_obj.number %}
+            <li class="active"><a href="#">{{ page_number }} <span class="sr-only">(current)</span></a></li>
         {% else %}
-            <li class="disabled"><a href="#">...</a></li>
+            <li><a href="?page={{ page_number }}">{{ page_number }}</a></li>
         {% endif %}
     {% endfor %}
 
-    {% if page.has_next %}
-        <li><a href="?page={{ page.next_page_number }}">&raquo;</a></li>
+    {% if page_obj.has_next %}
+        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
     {% else %}
         <li class="disabled"><a href="#">&raquo;</a></li>
     {% endif %}
