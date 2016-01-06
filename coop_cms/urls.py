@@ -19,8 +19,6 @@ edit_article_view = article_views['edit_article_view']
 
 install_csrf_failure_view()
 
-urlpatterns = []
-
 urlpatterns = [
     url(r'^djaloha/', include('djaloha.urls')),
 
@@ -97,7 +95,7 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += [
         url(
-            r'^cms/debug-error-code/((?P<error_code>\d{3}))/$',
+            r'^cms/debug-error-code/(?P<error_code>\d{3})/$',
             DebugErrorCodeView.as_view(),
             name='coop_cms_debug_404'
         ),
