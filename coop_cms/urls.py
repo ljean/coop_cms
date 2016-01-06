@@ -118,10 +118,10 @@ if 'coop_cms.apps.test_app' in settings.INSTALLED_APPS:
 
 # keep these at the end
 urlpatterns += [
-    url(r'^(?P<url>.+)/cms_publish/$', articles.publish_article, name='coop_cms_publish_article'),
-    url(r'^(?P<url>.+)/cms_cancel/$', articles.cancel_edit_article, name='coop_cms_cancel_edit_article'),
+    url(r'^(?P<url>[-\w]+)/cms_publish/$', articles.publish_article, name='coop_cms_publish_article'),
+    url(r'^(?P<url>[-\w]+)/cms_cancel/$', articles.cancel_edit_article, name='coop_cms_cancel_edit_article'),
     url(r'^$', homepage.homepage, name='coop_cms_homepage'),
-    url(r'^(?P<slug>.+)/cms_edit/$', edit_article_view.as_view(edit_mode=True), name='coop_cms_edit_article'),
-    url(r'^(?P<slug>.+)/$', article_view.as_view(), name='coop_cms_view_article'),
+    url(r'^(?P<slug>[-\w]+)/cms_edit/$', edit_article_view.as_view(edit_mode=True), name='coop_cms_edit_article'),
+    url(r'^(?P<slug>[-\w]+)/$', article_view.as_view(), name='coop_cms_view_article'),
     url(r'^coop_bar/', include('coop_bar.urls')),
 ]
