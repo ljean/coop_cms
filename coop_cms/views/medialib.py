@@ -10,7 +10,6 @@ import unicodedata
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
@@ -20,7 +19,7 @@ from django.template.loader import get_template
 from coop_cms import forms
 from coop_cms.logger import logger
 from coop_cms import models
-from coop_cms.utils import paginate
+from coop_cms.utils import paginate, FileWrapper
 
 
 def _get_photologue_media(request):

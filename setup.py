@@ -29,7 +29,7 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        'django >= 1.8.8, < 1.9',  # In road to 1.9
+        #'django >= 1.8.8',  # In road to 1.9
         'django-floppyforms',
         'django-extensions',
         'sorl-thumbnail',
@@ -40,6 +40,7 @@ setup(
         'beautifulsoup4',
         'django-filetransfers',
         'model_mommy',
+        'Pillow',
     ],
     long_description=open('README.rst').read(),
     url='https://github.com/ljean/coop_cms/',

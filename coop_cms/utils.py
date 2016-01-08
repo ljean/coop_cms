@@ -8,6 +8,7 @@ from sys import stderr
 from threading import current_thread
 from traceback import print_exc
 
+from django import VERSION
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import get_connection, EmailMultiAlternatives
@@ -19,6 +20,12 @@ from django.template.loader import get_template
 from django.utils import translation
 
 from coop_cms.settings import get_newsletter_context_callbacks
+
+if VERSION >= (1, 9, 0):
+    from wsgiref.util import FileWrapper
+else:
+    from django.core.servers.basehttp import FileWrapper
+FileWrapper = FileWrapper
 
 
 class _DeHTMLParser(HTMLParser):

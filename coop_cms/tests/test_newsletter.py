@@ -700,14 +700,14 @@ class NewsletterTest(UserBaseTestCase):
         redirect_url = response['Location']
         if is_localized():
             login_url = login_url[:2]
-            self.assertTrue(redirect_url.find(login_url)>0)
+            self.assertTrue(redirect_url.find(login_url) >= 0)
         else:
-            self.assertTrue(redirect_url.find(login_url)>0)
+            self.assertTrue(redirect_url.find(login_url) >= 0)
         
         sch_dt = timezone.now()+timedelta(1)
         response = self.client.post(url, data={'sending_dt': sch_dt})
         redirect_url = response['Location']
-        self.assertTrue(redirect_url.find(login_url)>0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
     
     def test_send_newsletter(self):
         

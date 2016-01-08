@@ -35,7 +35,7 @@ def change_language(request):
     if not is_localized():
         raise Http404
 
-    next_url = request.REQUEST.get('next', None)
+    next_url = request.POST.get('next', None) or request.GET.get('next', None)
     if not next_url:
         url = urlparse(request.META.get('HTTP_REFERER', ''))
         if url:
@@ -49,16 +49,16 @@ def change_language(request):
 
         if lang_code and check_for_language(lang_code):
 
-            #path is the locale-independent url
+            # path is the locale-independent url
             path = strip_locale_path(next_url)[1]
 
             article_class = get_article_class()
             try:
-                #get the translated slug of the current article
-                #If switching from French to English and path is /fr/accueil/
-                #The next should be : /en/home/
+                # get the translated slug of the current article
+                # If switching from French to English and path is /fr/accueil/
+                # The next should be : /en/home/
 
-                #Get the article
+                # Get the article
                 next_article = article_class.objects.get(slug=path.strip('/'))
 
             except article_class.DoesNotExist:
@@ -66,8 +66,6 @@ def change_language(request):
 
             if hasattr(request, 'session'):
                 request.session['django_language'] = lang_code
-            #else:
-                #response.set_cookie(settings.LANGUAGE_COOKIE_NAME, lang_code)
             activate(lang_code)
 
             if next_article:

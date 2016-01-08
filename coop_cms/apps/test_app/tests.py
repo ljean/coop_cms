@@ -67,7 +67,7 @@ class GenericViewTestCase(BaseTestCase):
         if coop_settings.is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
             auth_url = get_login_url()
-            self.assertRedirects(response, auth_url+'?next='+url)
+            self.assertRedirects(response, auth_url + '?next=' + url)
         else:
             self.assertEqual(403, response.status_code)
         
@@ -80,7 +80,7 @@ class GenericViewTestCase(BaseTestCase):
         if coop_settings.is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
             auth_url = get_login_url()
-            self.assertRedirects(response, auth_url+'?next='+url)
+            self.assertRedirects(response, auth_url + '?next=' + url)
         else:
             self.assertEqual(403, response.status_code)
         
@@ -91,15 +91,14 @@ class GenericViewTestCase(BaseTestCase):
         if coop_settings.is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
             auth_url = get_login_url()
-            self.assertRedirects(response, auth_url+'?next='+url)
+            self.assertRedirects(response, auth_url + '?next=' + url)
         else:
             self.assertEqual(403, response.status_code)
         
         obj = TestClass.objects.get(id=obj.id)
         self.assertEqual(obj.field1, field1)
         self.assertEqual(obj.field2, field2)
-        
-        
+
     def test_view_object_viewer(self):
         self._log_as_viewer()
         obj = mommy.make(TestClass)
@@ -164,8 +163,7 @@ class GenericViewTestCase(BaseTestCase):
         self.assertEqual(obj.bool_field, data["bool_field"])
         self.assertEqual(obj.int_field, data["int_field"])
         self.assertEqual(obj.float_field, data["float_field"])
-        
-        
+
     def test_edit_object_inactive(self):
         self._log_as_editor()
         self.editor.is_active = False
@@ -589,8 +587,6 @@ class ArticleFormTest(BaseTestCase):
         data = {
             'title': 'test',
             'template': settings.COOP_CMS_ARTICLE_TEMPLATES[0][0],
-            #'category': '',
-            #'headline': '',
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
             'navigation_parent': None,
@@ -612,8 +608,6 @@ class ArticleFormTest(BaseTestCase):
         data = {
             'title': 'test',
             'template': settings.COOP_CMS_ARTICLE_TEMPLATES[0][0],
-            #'category': '',
-            #'headline': '',
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
             'navigation_parent': None,
@@ -622,7 +616,7 @@ class ArticleFormTest(BaseTestCase):
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
         login_url = get_login_url()
-        self.assertTrue(response['Location'].find(login_url) > 0)
+        self.assertTrue(response['Location'].find(login_url) >= 0)
         
         self.assertEqual(article_class.objects.count(), 0)
         
@@ -633,8 +627,6 @@ class ArticleFormTest(BaseTestCase):
         data = {
             'title': 'test',
             'template': settings.COOP_CMS_ARTICLE_TEMPLATES[0][0],
-            #'category': '',
-            #'headline': '',
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
             'navigation_parent': None,
@@ -717,7 +709,7 @@ class ArticleFormTest(BaseTestCase):
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
         login_url = get_login_url()
-        self.assertTrue(response['Location'].find(login_url)>0)
+        self.assertTrue(response['Location'].find(login_url) >= 0)
         
         self.assertEqual(article_class.objects.count(), 1)
         article = article_class.objects.all()[0]

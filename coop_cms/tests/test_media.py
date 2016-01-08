@@ -140,8 +140,8 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=False)
         self.assertEqual(response.status_code, 302)
-        next_url = "http://testserver/accounts/login/?next={0}".format(url)
-        self.assertEqual(next_url, response['Location'])
+        next_url = "/accounts/login/?next={0}".format(url)
+        self.assertTrue(response['Location'].find(next_url) >= 0)
         
         images = Image.objects.all()
         self.assertEquals(0, images.count())
@@ -352,8 +352,8 @@ class MediaLibraryTest(MediaBaseTestCase):
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        next_url = "http://testserver/accounts/login/?next={0}".format(url)
-        self.assertEqual(next_url, response['Location'])
+        next_url = "/accounts/login/?next={0}".format(url)
+        self.assertTrue(response['Location'].find(next_url) >= 0)
         
     def test_show_media_not_staff(self):
         """show images empty user is not a staff member"""
@@ -509,7 +509,7 @@ class UploadDocTest(MediaBaseTestCase):
         self.assertEquals(0, Document.objects.all().count())
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
-        self.assertTrue(redirect_url.find(login_url) > 0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
         
     def test_upload_not_allowed(self):
         """upload: not allowed"""
@@ -569,7 +569,7 @@ class DocsInMediaLibTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
-        self.assertTrue(redirect_url.find(login_url) > 0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
         
     def test_view_docs_not_allowed(self):
         """view docs not allowed"""
@@ -618,7 +618,7 @@ class PhotologueInMediaLibTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
-        self.assertTrue(redirect_url.find(login_url) > 0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
 
     def test_view_not_allowed(self):
         """view docs not allowed"""
@@ -758,7 +758,7 @@ class DownloadDocTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
-        self.assertTrue(redirect_url.find(login_url) > 0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
         
 
 class ImageListTemplateTagTest(BaseTestCase):
