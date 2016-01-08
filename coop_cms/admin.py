@@ -12,7 +12,8 @@ from coop_cms.forms import NavTypeForm, ArticleAdminForm, NewsletterItemAdminFor
 from coop_cms import models
 from coop_cms.settings import get_article_class, get_navtree_class, import_module
 
-#The BASE_ADMIN_CLASS can be a Translation admin if needed or regular modelAdmin if not
+
+# The BASE_ADMIN_CLASS can be a Translation admin if needed or regular modelAdmin if not
 if 'modeltranslation' in settings.INSTALLED_APPS:
     BASE_ADMIN_CLASS = import_module('modeltranslation.admin').TranslationAdmin
 else:

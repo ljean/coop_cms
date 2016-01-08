@@ -204,7 +204,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
 )
 
-if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration', 'make_migrations')):
+if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration', 'makemigrations')):
     INSTALLED_APPS = ('modeltranslation', ) + INSTALLED_APPS
 
 if len(sys.argv) > 1 and 'test' == sys.argv[1]:
