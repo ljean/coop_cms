@@ -29,8 +29,7 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        'django',  # In road to 1.9
-        'south',
+        'django >= 1.8.8, < 1.9',  # In road to 1.9
         'django-floppyforms',
         'django-extensions',
         'sorl-thumbnail',
