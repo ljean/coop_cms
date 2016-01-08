@@ -12,6 +12,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponseRedirect
 from django.template import Context
 from django.template.loader import get_template
@@ -294,3 +295,10 @@ def paginate(request, queryset, items_count):
         # If page is out of range (e.g. 9999), deliver last page of results.
         page_obj = paginator.page(paginator.num_pages)
     return page_obj
+
+
+def get_login_url():
+    try:
+        return reverse("auth_login")
+    except NoReverseMatch:
+        return reverse("login")

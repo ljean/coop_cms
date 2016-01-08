@@ -13,19 +13,12 @@ from django.test.utils import override_settings
 
 from model_mommy import mommy
 
-
 from coop_cms.apps.test_app.models import TestClass
 from coop_cms import settings as coop_settings
 from coop_cms.models import BaseArticle, Newsletter
 from coop_cms.tests import BeautifulSoup
 from coop_cms.tests.test_newsletter import NewsletterSettingsTest
-
-
-try:
-    AUTH_LOGIN_NAME = "auth_login"
-    reverse(AUTH_LOGIN_NAME)
-except:
-    AUTH_LOGIN_NAME = "login"
+from coop_cms.utils import get_login_url
 
 
 class BaseTestCase(TestCase):
@@ -73,7 +66,7 @@ class GenericViewTestCase(BaseTestCase):
         response = self.client.get(url)
         if coop_settings.is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -86,7 +79,7 @@ class GenericViewTestCase(BaseTestCase):
         response = self.client.get(url)
         if coop_settings.is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -97,7 +90,7 @@ class GenericViewTestCase(BaseTestCase):
         
         if coop_settings.is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -442,7 +435,7 @@ class FormsetViewTestCase(BaseTestCase):
         
         if coop_settings.is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -547,7 +540,7 @@ class ArticleFormTest(BaseTestCase):
                 self._settings_backup[s] = v
         
         self.LOGIN_URL = settings.LOGIN_URL
-        settings.LOGIN_URL = reverse(AUTH_LOGIN_NAME)
+        settings.LOGIN_URL = get_login_url()
         settings.COOP_CMS_NEW_ARTICLE_FORM = 'coop_cms.apps.test_app.forms.MyNewArticleForm'
         settings.COOP_CMS_ARTICLE_SETTINGS_FORM = 'coop_cms.apps.test_app.forms.MyArticleSettingsForm'
         settings.COOP_CMS_ARTICLE_TEMPLATES = (
@@ -578,7 +571,7 @@ class ArticleFormTest(BaseTestCase):
         url = reverse('coop_cms_new_article')
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        auth_url = reverse(AUTH_LOGIN_NAME)
+        auth_url = get_login_url()
         self.assertRedirects(response, auth_url+'?next='+url)
 
     def test_view_article_not_allowed(self):
@@ -628,7 +621,7 @@ class ArticleFormTest(BaseTestCase):
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
-        login_url = reverse(AUTH_LOGIN_NAME)
+        login_url = get_login_url()
         self.assertTrue(response['Location'].find(login_url) > 0)
         
         self.assertEqual(article_class.objects.count(), 0)
@@ -668,7 +661,7 @@ class ArticleFormTest(BaseTestCase):
         url = reverse('coop_cms_article_settings', args=[article.id])
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        auth_url = reverse(AUTH_LOGIN_NAME)
+        auth_url = get_login_url()
         self.assertRedirects(response, auth_url+'?next='+url)
         
     def test_view_article_settings_not_allowed(self):
@@ -723,7 +716,7 @@ class ArticleFormTest(BaseTestCase):
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
-        login_url = reverse(AUTH_LOGIN_NAME)
+        login_url = get_login_url()
         self.assertTrue(response['Location'].find(login_url)>0)
         
         self.assertEqual(article_class.objects.count(), 1)

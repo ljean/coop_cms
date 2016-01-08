@@ -10,20 +10,20 @@ from coop_cms.apps.email_auth.forms import BsPasswordChangeForm, BsPasswordReset
 urlpatterns = [
     url(
         r'^login/$',
-        'django.contrib.auth.views.login',
+        login,
         {'authentication_form': EmailAuthForm},
-        name=login
+        name='login'
     ),
     url(r'^password_change/$',
-        'django.contrib.auth.views.password_change',
+        password_change,
         {'password_change_form': BsPasswordChangeForm},
-        name=password_change
+        name='password_change'
     ),
     url(
         r'^password_reset/$',
-        'django.contrib.auth.views.password_reset',
+        password_reset,
         {'password_reset_form': BsPasswordResetForm},
-        name=password_reset
+        name='password_reset'
     ),
     url(r'^', include('django.contrib.auth.urls')),
 ]

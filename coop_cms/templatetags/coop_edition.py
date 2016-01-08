@@ -8,7 +8,7 @@ from django import VERSION as DJANGO_VERSION
 from django import template
 from django.core.context_processors import csrf
 from django.template import Context
-from django.template.loader import find_template, get_template, TemplateDoesNotExist
+from django.template.loader import get_template, TemplateDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 if DJANGO_VERSION >= (1, 8, 0):
@@ -39,7 +39,7 @@ class PieceOfHtmlEditNode(DjalohaEditNode):
         """convert to html"""
         if context.get('form', None) or context.get('formset', None):
             context.dicts[0]['djaloha_edit'] = True
-        #context.dicts[0]['can_edit_template'] = True
+        # context.dicts[0]['can_edit_template'] = True
         return super(PieceOfHtmlEditNode, self).render(context)
 
 
@@ -300,7 +300,7 @@ class SafeWrapper(object):
             src = getattr(self._wrapped, 'logo_thumbnail')(False, self._logo_size, self._logo_crop)
             if src:
                 try:
-                    template_ = find_template("coop_cms/widgets/_img_logo.html")[0]
+                    template_ = get_template("coop_cms/widgets/_img_logo.html")
                     value = template_.render(
                         template.Context(
                             {
@@ -378,11 +378,12 @@ class CmsEditNode(template.Node):
 
             elif any([isinstance(node, node_type) for node_type in managed_node_types_with_template]):
                 local_context = Context(safe_context)
-                local_context.template = context.template
+                if hasattr(context, 'template'):
+                    local_context.template = context.template
                 content = node.render(local_context)
 
             elif DJANGO_VERSION >= (1, 8, 0) and isinstance(node, IncludeNode):
-                #monkey patching for django 1.8
+                # monkey patching for django 1.8
                 template_name = node.template.resolve(context)
                 node.template = get_template(template_name)
                 node.template.resolve = lambda s, c: s

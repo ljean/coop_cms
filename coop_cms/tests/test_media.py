@@ -564,7 +564,8 @@ class DocsInMediaLibTest(MediaBaseTestCase):
         
     def test_view_docs_anonymous(self):
         """view docs anonymous"""
-        response = self.client.get(reverse('coop_cms_media_documents'), follow=True)
+        url = reverse('coop_cms_media_documents')
+        response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')

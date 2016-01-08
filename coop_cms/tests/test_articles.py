@@ -14,7 +14,8 @@ from coop_cms.models import NavNode, BaseArticle, ArticleCategory
 from coop_cms.settings import (
     is_localized, get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed,
 )
-from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt, AUTH_LOGIN_NAME
+from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt
+from coop_cms.utils import get_login_url
 
     
 class ArticleTest(BaseArticleTest):
@@ -75,7 +76,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -100,7 +101,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -190,7 +191,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.post(url, data=data)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -215,7 +216,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url, follow=False)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -255,7 +256,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)

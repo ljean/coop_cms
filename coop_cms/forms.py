@@ -26,6 +26,14 @@ from coop_cms.utils import dehtml
 from coop_cms.widgets import ImageEdit, ChosenSelectMultiple, ReadOnlyInput
 
 
+class HidableMultipleChoiceField(floppyforms.MultipleChoiceField):
+    """
+    The MultipleChoiceField doesn't return an <input type="hidden"> when hidden but an empty string
+    Overload this field to restore an <input type="hidden">
+    """
+    hidden_widget = floppyforms.HiddenInput
+
+
 class NavTypeForm(forms.ModelForm):
     """Navigation Type Form"""
 
@@ -238,10 +246,10 @@ class MediaBaseAddMixin(object):
                     choices=self.fields['filters'].choices, force_template=True,
                 )
             except NameError:
-                #print 'No ChosenSelectMultiple'
+                # print 'No ChosenSelectMultiple'
                 pass
         else:
-            self.fields['filters'].widget = floppyforms.HiddenInput()
+            self.fields['filters'].widget = self.fields['filters'].hidden_widget()
 
     def clean_filters(self):
         """validation"""
@@ -260,7 +268,7 @@ class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
         ),
         label=_('Description'),
     )
-    filters = floppyforms.MultipleChoiceField(
+    filters = HidableMultipleChoiceField(
         required=False, label=_(u"Filters"), help_text=_(u"Choose between tags to find images more easily")
     )
     size = floppyforms.ChoiceField(

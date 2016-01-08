@@ -26,14 +26,14 @@ if settings.DEBUG or ('test' in sys.argv) or getattr(settings, 'SERVE_STATIC', T
         urlpatterns += [
             url(r'^static/(?P<path>.*)$', serve_media, {'document_root': settings.STATIC_ROOT}),
         ]
-    urlpatterns += patterns(
-        '',
+    urlpatterns += [
+        #'',
         url(
             r'^media/(?P<path>.*)$',
             serve_media,
             {'document_root': get_media_root(), 'show_indexes': True}
         ),
-    )
+    ]
 
 urlpatterns += localized_patterns(
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

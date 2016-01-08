@@ -70,12 +70,14 @@ class NavigationTest(BaseTestCase):
         self._log_as_editor()
         tree_class = get_navtree_class()
 
-        reverse_name = "admin:{0}_{1}_changelist".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        module_name = getattr(tree_class._meta, 'module_name', None) or getattr(tree_class._meta, 'model_name')
+
+        reverse_name = "admin:{0}_{1}_changelist".format(tree_class._meta.app_label, module_name)
         url = reverse(reverse_name) + "favicon.ico"
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 404)
 
-        reverse_name = "admin:{0}_{1}_change".format(tree_class._meta.app_label, tree_class._meta.module_name)
+        reverse_name = "admin:{0}_{1}_change".format(tree_class._meta.app_label, module_name)
         tree = tree_class.objects.create(name='another_tree')
         url = reverse(reverse_name, args=[tree.id]) + "favicon.ico"
         response = self.client.get(url, follow=True)
