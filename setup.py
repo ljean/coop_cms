@@ -29,13 +29,13 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        #'django >= 1.8.8',  # In road to 1.9
+        'django >= 1.6, <1.10',
         'django-floppyforms',
         'django-extensions',
         'sorl-thumbnail',
-        'apidev-coop_colorbox >= 1.1.1',
-        'apidev-coop_bar >= 1.3.0',
-        'apidev-djaloha >= 1.1.0',
+        'apidev-coop_colorbox >= 1.2.0',
+        'apidev-coop_bar >= 1.3.1',
+        'apidev-djaloha >= 1.1.1',
         'feedparser',
         'beautifulsoup4',
         'django-filetransfers',
