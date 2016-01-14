@@ -30,6 +30,7 @@ register = template.Library()
 class DummyEngine(object):
     """Used for monkey patching Context"""
     debug = False
+    string_if_invalid = ''
 
 
 class PieceOfHtmlEditNode(DjalohaEditNode):
@@ -404,7 +405,12 @@ class CmsEditNode(template.Node):
                     content = node.render(Context(safe_context))
 
             else:
-                content = node.render(Context(inner_context))
+                if DJANGO_VERSION >= (1, 8, 0):
+                    # monkey patching for django 1.8
+                    the_context = Context(inner_context)
+                    the_context.template = getattr(node, 'template', None) or template.Template("")
+                    the_context.template.engine = DummyEngine()
+                content = node.render(the_context)
 
             nodes_content += content
         return nodes_content
