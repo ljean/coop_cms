@@ -410,6 +410,8 @@ class CmsEditNode(template.Node):
                     the_context = Context(inner_context)
                     the_context.template = getattr(node, 'template', None) or template.Template("")
                     the_context.template.engine = DummyEngine()
+                else:
+                    the_context = Context(inner_context)
                 content = node.render(the_context)
 
             nodes_content += content
