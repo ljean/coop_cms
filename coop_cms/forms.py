@@ -26,6 +26,14 @@ from coop_cms.utils import dehtml
 from coop_cms.widgets import ImageEdit, ChosenSelectMultiple, ReadOnlyInput
 
 
+class HidableMultipleChoiceField(floppyforms.MultipleChoiceField):
+    """
+    The MultipleChoiceField doesn't return an <input type="hidden"> when hidden but an empty string
+    Overload this field to restore an <input type="hidden">
+    """
+    hidden_widget = floppyforms.HiddenInput
+
+
 class NavTypeForm(forms.ModelForm):
     """Navigation Type Form"""
 
@@ -46,6 +54,7 @@ class NavTypeForm(forms.ModelForm):
 
     class Meta:
         model = NavType
+        fields = ('content_type', 'search_field', 'label_rule')
 
 
 class AlohaEditableModelForm(floppyforms.ModelForm):
@@ -169,7 +178,7 @@ class WithNavigationModelForm(forms.ModelForm):
     def clean_navigation_parent(self):
         """validation"""
         parent_id = self.cleaned_data['navigation_parent']
-        parent_id = int(parent_id) if parent_id != 'None' else None
+        parent_id = int(parent_id) if (parent_id != '' and parent_id != 'None') else None
         return parent_id
 
     def save(self, commit=True):
@@ -214,6 +223,11 @@ class ArticleAdminForm(forms.ModelForm):
 
     class Meta:
         model = get_article_class()
+        fields = (
+            'slug', 'title', 'subtitle', 'content', 'template', 'publication', 'logo', 'temp_logo',
+            'summary', 'category', 'in_newsletter', 'homepage_for_site', 'headline', 'publication_date', 'sites',
+            'login_required',
+        )
         widgets = {
             'title': forms.TextInput(attrs={'size': 100})
         }
@@ -232,10 +246,10 @@ class MediaBaseAddMixin(object):
                     choices=self.fields['filters'].choices, force_template=True,
                 )
             except NameError:
-                #print 'No ChosenSelectMultiple'
+                # print 'No ChosenSelectMultiple'
                 pass
         else:
-            self.fields['filters'].widget = floppyforms.HiddenInput()
+            self.fields['filters'].widget = self.fields['filters'].hidden_widget()
 
     def clean_filters(self):
         """validation"""
@@ -249,12 +263,12 @@ class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
     image = floppyforms.ImageField(required=True, label=_('Image'),)
     descr = floppyforms.CharField(
         required=False,
-        widget=forms.TextInput(
-            attrs={'size': '35', 'placeholder': _(u'Optional description'),}
+        widget=floppyforms.TextInput(
+            attrs={'size': '35', 'placeholder': _(u'Optional description'), }
         ),
         label=_('Description'),
     )
-    filters = floppyforms.MultipleChoiceField(
+    filters = HidableMultipleChoiceField(
         required=False, label=_(u"Filters"), help_text=_(u"Choose between tags to find images more easily")
     )
     size = floppyforms.ChoiceField(
@@ -263,8 +277,6 @@ class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
 
     def __init__(self, *args, **kwargs):
         super(AddImageForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
-
-        # Image size
         img_size_queryset = ImageSize.objects.all()
         if img_size_queryset.count():
             self.fields['size'].choices = [
@@ -322,6 +334,7 @@ class ArticleSettingsForm(WithNavigationModelForm):
         model = get_article_class()
         fields = (
             'template', 'category', 'publication', 'publication_date', 'headline', 'in_newsletter', 'summary', 'sites',
+            'login_required',
         )
         widgets = {
             'sites': forms.CheckboxSelectMultiple(),
@@ -360,7 +373,7 @@ class NewArticleForm(WithNavigationModelForm):
     class Meta:
         model = get_article_class()
         fields = (
-            'title', 'template', 'category', 'headline', 'publication', 'in_newsletter', 'sites',
+            'title', 'template', 'category', 'headline', 'publication', 'in_newsletter', 'sites', 'login_required',
         )
         widgets = {
             'sites': forms.CheckboxSelectMultiple(),

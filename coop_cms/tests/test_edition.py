@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 from django.template import Template, Context
 
@@ -147,8 +144,10 @@ class PieceOfHtmlTagsTest(BaseTestCase):
 
 
 class BlockInheritanceTest(BaseArticleTest):
+    """test using block templatetag inside the cms_edit template tag"""
 
     def setUp(self):
+        """before each test"""
         super(BlockInheritanceTest, self).setUp()
         self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
         settings.COOP_CMS_ARTICLE_TEMPLATES = (
@@ -156,34 +155,39 @@ class BlockInheritanceTest(BaseArticleTest):
         )
 
     def tearDown(self):
+        """after each test"""
         super(BlockInheritanceTest, self).tearDown()
         #restore
         settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
 
     def test_view_with_blocks(self):
-        Article = get_article_class()
-        a = mommy.make(
-            Article,
+        """test view article with block templatetag inside the cms_edit template tag"""
+
+        article_class = get_article_class()
+        article = mommy.make(
+            article_class,
             title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
-            template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+            template='test/article_with_blocks.html'
         )
 
-        response = self.client.get(a.get_absolute_url())
+        response = self.client.get(article.get_absolute_url())
         self.assertEqual(response.status_code, 200)
 
-        self.assertContains(response, a.title)
-        self.assertContains(response, a.content)
+        self.assertContains(response, article.title)
+        self.assertContains(response, article.content)
 
         self.assertContains(response, "*** HELLO FROM CHILD ***")
         self.assertContains(response, "*** HELLO FROM PARENT ***")
         self.assertContains(response, "*** HELLO FROM BLOCK ***")
 
     def test_edit_with_blocks(self):
-        Article = get_article_class()
-        a = mommy.make(
-            Article,
+        """test edition with block templatetag inside the cms_edit template tag"""
+
+        article_class = get_article_class()
+        article = mommy.make(
+            article_class,
             title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
-            template = settings.COOP_CMS_ARTICLE_TEMPLATES[0][0]
+            template='test/article_with_blocks.html'
         )
 
         self._log_as_editor()
@@ -192,16 +196,16 @@ class BlockInheritanceTest(BaseArticleTest):
             "title": u"This is a new title",
             'content': "<p>This is a <i>*** NEW ***</i> <b>content</b></p>"
         }
-        response = self.client.post(a.get_edit_url(), data=data, follow=True)
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
 
-        a = Article.objects.get(id=a.id)
+        article = article_class.objects.get(id=article.id)
 
-        self.assertEqual(a.title, data['title'])
-        self.assertEqual(a.content, data['content'])
+        self.assertEqual(article.title, data['title'])
+        self.assertEqual(article.content, data['content'])
 
-        self.assertContains(response, a.title)
-        self.assertContains(response, a.content)
+        self.assertContains(response, article.title)
+        self.assertContains(response, article.content)
 
         self.assertContains(response, "*** HELLO FROM CHILD ***")
         self.assertContains(response, "*** HELLO FROM PARENT ***")

@@ -17,6 +17,7 @@ from django.utils.translation import ugettext as _
 from coop_cms import models
 from coop_cms.settings import get_navtree_class
 from coop_cms.logger import logger
+from coop_cms.utils import get_model_app, get_model_label, get_model_name
 
 
 def view_navnode(request, tree):
@@ -158,10 +159,9 @@ def move_navnode(request, tree):
 
                 if ref_pos == "before":
                     node.ordering = ref_node.ordering - 1
+
                 elif ref_pos == "after":
-                    node.ordering = ref_node.ordering
-                    ref_node.ordering -= 1
-                    ref_node.save()
+                    node.ordering = ref_node.ordering - 1
 
             elif ref_node.ordering < node.ordering:
                 #move backward
@@ -198,17 +198,17 @@ def add_navnode(request, tree):
         content_type = ContentType.objects.get(app_label=app_label, model=model_name)
         model_class = content_type.model_class()
         object_id = request.POST['object_id']
-        model_name = model_class._meta.verbose_name
+        model_name = get_model_label(model_class)
         if not object_id:
             raise ValidationError(_(u"Please choose an existing {0}").format(model_name.lower()))
         try:
             obj = model_class.objects.get(id=object_id)
         except model_class.DoesNotExist:
-            raise ValidationError(_(u"{0} {1} not found").format(model_class._meta.verbose_name, object_id))
+            raise ValidationError(_(u"{0} {1} not found").format(get_model_label(model_class), object_id))
 
         #objects can not be added twice in the navigation tree
         if models.NavNode.objects.filter(tree=tree, content_type=content_type, object_id=obj.id).count() > 0:
-            raise ValidationError(_(u"The {0} is already in navigation").format(model_class._meta.verbose_name))
+            raise ValidationError(_(u"The {0} is already in navigation").format(get_model_label(model_class)))
 
     else:
         content_type = None
@@ -266,7 +266,7 @@ def get_suggest_list(request, tree):
                 suggestions.append({
                     'label': models.get_object_label(content_type, obj),
                     'value': obj.id,
-                    'category': content_type.model_class()._meta.verbose_name.capitalize(),
+                    'category': get_model_label(content_type.model_class()).capitalize(),
                     'type': content_type.app_label + u'.' + content_type.model,
                 })
 
@@ -309,7 +309,7 @@ def process_nav_edition(request, tree_id):
             tree = get_object_or_404(tree_class, id=tree_id)
 
             #check permissions
-            perm_name = "{0}.change_{1}".format(tree_class._meta.app_label, tree_class._meta.module_name)
+            perm_name = "{0}.change_{1}".format(get_model_app(tree_class), get_model_name(tree_class))
             if not request.user.has_perm(perm_name):
                 raise PermissionDenied
 
@@ -331,14 +331,14 @@ def process_nav_edition(request, tree_id):
             response.setdefault('message', 'Ok')  # if no message defined in response, add something
 
         except KeyError, msg:
-            response = {'status': 'error', 'message': u"Unsupported message : %s" % msg}
+            response = {'status': 'error', 'message': u"Unsupported message : {0}".format(msg)}
         except PermissionDenied:
             response = {'status': 'error', 'message': u"You are not allowed to add a node"}
         except ValidationError, ex:
             response = {'status': 'error', 'message': u' - '.join(ex.messages)}
         except Exception, msg:
             logger.exception("process_nav_edition")
-            response = {'status': 'error', 'message': u"An error occured : %s" % msg}
+            response = {'status': 'error', 'message': u"An error occured : {0}".format(msg)}
 
         #return the result as json object
         return HttpResponse(json.dumps(response), content_type='application/json')

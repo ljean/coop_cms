@@ -1,22 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 from unittest import skipIf
 
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test.utils import override_settings
 
 from model_mommy import mommy
 
 from coop_cms.models import BaseArticle, SiteSettings
 from coop_cms.settings import get_article_class, cms_no_homepage
 from coop_cms.shortcuts import get_headlines
-from coop_cms.tests import UserBaseTestCase, BeautifulSoup
+from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
 
 
 class NoHomepageTest(UserBaseTestCase):
@@ -72,7 +69,7 @@ class HomepageTest(UserBaseTestCase):
     
         response = self.client.get(reverse('coop_cms_homepage'))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].find(a1.get_absolute_url())>0)
+        self.assertTrue(response['Location'].find(a1.get_absolute_url()) >= 0)
             
     def test_user_settings_homepage_priority(self):
         site = Site.objects.get(id=settings.SITE_ID)
@@ -82,7 +79,7 @@ class HomepageTest(UserBaseTestCase):
     
         response = self.client.get(reverse('coop_cms_homepage'))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].find(a1.get_absolute_url())>0)
+        self.assertTrue(response['Location'].find(a1.get_absolute_url()) >= 0)
     
     def test_user_settings_homepage_not_set(self):
         site = Site.objects.get(id=settings.SITE_ID)
@@ -92,7 +89,7 @@ class HomepageTest(UserBaseTestCase):
     
         response = self.client.get(reverse('coop_cms_homepage'))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].find(a2.get_absolute_url())>0)
+        self.assertTrue(response['Location'].find(a2.get_absolute_url()) >= 0)
 
     def test_only_one_homepage(self):
         site = Site.objects.get(id=settings.SITE_ID)
@@ -113,7 +110,7 @@ class HomepageTest(UserBaseTestCase):
         
         response = self.client.get(reverse('coop_cms_homepage'))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].find(a3.get_absolute_url())>0)
+        self.assertTrue(response['Location'].find(a3.get_absolute_url()) >= 0)
         
     def test_only_one_homepage_again(self):
         site = Site.objects.get(id=settings.SITE_ID)
@@ -131,7 +128,7 @@ class HomepageTest(UserBaseTestCase):
         
         response = self.client.get(reverse('coop_cms_homepage'))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].find(a3.get_absolute_url())>0)
+        self.assertTrue(response['Location'].find(a3.get_absolute_url()) >= 0)
     
     def test_view_change_homepage(self):
         self._log_as_editor()
@@ -177,7 +174,7 @@ class HomepageTest(UserBaseTestCase):
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a2.id]), data={'confirm': '1'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.redirect_chain[0][0], 302)
-        self.assertTrue(response.redirect_chain[-1][0].find(reverse('django.contrib.auth.views.login'))>0)
+        self.assertTrue(response.redirect_chain[-1][0].find(reverse('django.contrib.auth.views.login')) >= 0)
         a2 = get_article_class().objects.get(id=a2.id)
         self.assertEqual(a2.homepage_for_site, None)
 
@@ -215,41 +212,64 @@ class HomepageTest(UserBaseTestCase):
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = Site.objects.create(domain="wooooooaa.com", name="wooaa")
         
-        a1 = get_article_class().objects.create(title="python", content='python')
-        a2 = get_article_class().objects.create(title="django", content='django')
-        a3 = get_article_class().objects.create(title="home1", content='homepage1')
-        a4 = get_article_class().objects.create(title="home2", content='homepage2')
+        article1 = get_article_class().objects.create(title="python", content='python')
+        article2 = get_article_class().objects.create(title="django", content='django')
+        article3 = get_article_class().objects.create(title="home1", content='homepage1')
+        article4 = get_article_class().objects.create(title="home2", content='homepage2')
         
         self.assertEqual(0, get_article_class().objects.filter(homepage_for_site__id=settings.SITE_ID).count())
         
-        a3.homepage_for_site = site1
-        a3.save()
+        article3.homepage_for_site = site1
+        article3.save()
         
-        a4.homepage_for_site = site2
-        a4.save()
+        article4.homepage_for_site = site2
+        article4.save()
         
         home1 = get_article_class().objects.get(homepage_for_site__id=site1.id)
         home2 = get_article_class().objects.get(homepage_for_site__id=site2.id)
         
-        self.assertEqual(a3.id, home1.id)
-        self.assertEqual(a4.id, home2.id)
+        self.assertEqual(article3.id, home1.id)
+        self.assertEqual(article4.id, home2.id)
         
         settings.SITE_ID = site1.id
         response = self.client.get(reverse('coop_cms_homepage'))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].find(home1.get_absolute_url()))
+        self.assertTrue(response['Location'].find(home1.get_absolute_url()) >= 0)
         self.assertEqual(home1.is_homepage, True)
         self.assertEqual(home2.is_homepage, False)
-        
-        settings.SITE_ID = site2.id
+
+    @override_settings(SITE_ID=999)
+    def test_homepage_multisites_other(self):
+        site1 = Site.objects.get(id=self.site_id)
+        site2 = Site.objects.create(domain="wooooooaa.com", name="wooaa", id=settings.SITE_ID)
+
+        article1 = get_article_class().objects.create(title="python", content='python')
+        article2 = get_article_class().objects.create(title="django", content='django')
+        article3 = get_article_class().objects.create(title="home1", content='homepage1')
+        article4 = get_article_class().objects.create(title="home2", content='homepage2')
+
+        self.assertEqual(0, get_article_class().objects.filter(homepage_for_site__id=settings.SITE_ID).count())
+
+        article3.homepage_for_site = site1
+        article3.save()
+
+        article4.homepage_for_site = site2
+        article4.save()
+
+        home1 = get_article_class().objects.get(homepage_for_site__id=site1.id)
+        home2 = get_article_class().objects.get(homepage_for_site__id=site2.id)
+
+        self.assertEqual(article3.id, home1.id)
+        self.assertEqual(article4.id, home2.id)
+
         response = self.client.get(reverse('coop_cms_homepage'))
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].find(home2.get_absolute_url()))
+        self.assertTrue(response['Location'].find(home2.get_absolute_url()) >= 0)
         self.assertEqual(home1.is_homepage, False)
         self.assertEqual(home2.is_homepage, True)
 
 
-class HeadlineTest(TestCase):
+class HeadlineTest(BaseTestCase):
 
     def test_get_headlines_no_edit_perms(self):
         article_class = get_article_class()

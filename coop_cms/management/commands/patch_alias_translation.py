@@ -12,7 +12,7 @@ from coop_cms.settings import is_localized
 class Command(BaseCommand):
     """patch alias redirect"""
     help = u"patch alias redirect"
-
+    use_argparse = False
 
     def handle(self, *args, **options):
         """command"""

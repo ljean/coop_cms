@@ -1,4 +1,4 @@
-{% load i18n pagination_tags %}
+{% load i18n %}
 {% spaceless %}
   {% if galleries %}
   <div class="media-filters" style="font-size: 10px;">
@@ -14,18 +14,18 @@
   {% endif %}
 
   <div class="library-items library-images">
-    {% autopaginate photologues 12 %}
-    {% for photo in photologues %}
-        <div class="library-image">
-          <img class="library-thumbnail" src="{{ photo.get_thumbnail_url }}" title="{{photo.title}}" rel="{{photo.get_display_url}}" />
-          <div class="library-image-controls" style="">
-            {{ photo.name }}<br />
-            <a href="{% url 'admin:photologue_photo_change' photo.id %}" target="_blank">{% trans "Edit" %}</a>
-          </div>
+  {% for photo in photologues %}
+      <div class="library-image">
+        <img class="library-thumbnail" src="{{ photo.get_thumbnail_url }}" title="{{photo.title}}" rel="{{photo.get_display_url}}" />
+        <div class="library-image-controls" style="">
+          {{ photo.name }}<br />
+          <a href="{% url 'admin:photologue_photo_change' photo.id %}" target="_blank">{% trans "Edit" %}</a>
         </div>
-    {% endfor %}
-    <div>
-    {% paginate %}
-    </div>
+      </div>
+  {% endfor %}
+  </div>
+
+  <div>
+  {% include "coop_cms/_pagination.html" with page=photologues pages=pages %}
   </div>
 {% endspaceless %}

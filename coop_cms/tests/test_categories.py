@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 from datetime import datetime, timedelta
 
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
+from django.test.utils import override_settings
 
 from model_mommy import mommy
 
@@ -18,11 +16,13 @@ from coop_cms.tests import BaseTestCase
 
 
 class ArticlesByCategoryTest(BaseTestCase):
+    """Articles category page"""
 
     def test_view_articles(self):
-        Article = get_article_class()
+        """view article by category"""
+        article_class = get_article_class()
         cat = mommy.make(ArticleCategory)
-        art = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        art = mommy.make(article_class, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
         
         url = reverse('coop_cms_articles_category', args=[cat.slug])
         response = self.client.get(url)
@@ -30,29 +30,29 @@ class ArticlesByCategoryTest(BaseTestCase):
         self.assertContains(response, art.title)
     
     def test_view_articles_ordering(self):
-        Article = get_article_class()
+        """view articles by category in order"""
+        article_class = get_article_class()
         cat = mommy.make(ArticleCategory)
         
         dt1 = datetime.now() + timedelta(1)
         dt2 = datetime.now()
         dt3 = datetime.now() - timedelta(2)
         dt4 = datetime.now() - timedelta(1)
-        
-        
+
         art1 = mommy.make(
-            Article, category=cat, title=u"#ITEM1#", publication_date=dt1,
+            article_class, category=cat, title=u"#ITEM1#", publication_date=dt1,
             publication=BaseArticle.PUBLISHED
         )
         art2 = mommy.make(
-            Article, category=cat, title=u"#ITEM2#", publication_date=dt2,
+            article_class, category=cat, title=u"#ITEM2#", publication_date=dt2,
             publication=BaseArticle.PUBLISHED
         )
         art3 = mommy.make(
-            Article, category=cat, title=u"#ITEM3#", publication_date=dt3,
+            article_class, category=cat, title=u"#ITEM3#", publication_date=dt3,
             publication=BaseArticle.PUBLISHED
         )
         art4 = mommy.make(
-            Article, category=cat, title=u"#ITEM4#", publication_date=dt4,
+            article_class, category=cat, title=u"#ITEM4#", publication_date=dt4,
             publication=BaseArticle.PUBLISHED
         )
         
@@ -73,7 +73,7 @@ class ArticlesByCategoryTest(BaseTestCase):
         self.assertEqual(positions, sorted(positions))
 
     def test_view_no_articles(self):
-        Article = get_article_class()
+        """No article in category: It should return 404"""
         cat = mommy.make(ArticleCategory)
         
         url = reverse('coop_cms_articles_category', args=[cat.slug])
@@ -81,19 +81,21 @@ class ArticlesByCategoryTest(BaseTestCase):
         self.assertEqual(response.status_code, 404)
         
     def test_view_no_published_articles(self):
-        Article = get_article_class()
+        """no published article in category: returns 404"""
+        article_class = get_article_class()
         cat = mommy.make(ArticleCategory)
-        art = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.DRAFT)
+        mommy.make(article_class, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.DRAFT)
         
         url = reverse('coop_cms_articles_category', args=[cat.slug])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
     
     def test_view_articles_publication(self):
-        Article = get_article_class()
+        """view article by category: publication falg is taken into account"""
+        article_class = get_article_class()
         cat = mommy.make(ArticleCategory)
-        art1 = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
-        art2 = mommy.make(Article, category=cat, title=u"QSDFGHJKLM", publication=BaseArticle.DRAFT)
+        art1 = mommy.make(article_class, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        art2 = mommy.make(article_class, category=cat, title=u"QSDFGHJKLM", publication=BaseArticle.DRAFT)
         
         url = reverse('coop_cms_articles_category', args=[cat.slug])
         response = self.client.get(url)
@@ -102,11 +104,12 @@ class ArticlesByCategoryTest(BaseTestCase):
         self.assertNotContains(response, art2.title)
         
     def test_view_articles_different_categories(self):
-        Article = get_article_class()
+        """view article by category : no articles from different category"""
+        article_class = get_article_class()
         cat1 = mommy.make(ArticleCategory)
         cat2 = mommy.make(ArticleCategory)
-        art1 = mommy.make(Article, category=cat1, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
-        art2 = mommy.make(Article, category=cat2, title=u"QSDFGHJKLM", publication=BaseArticle.PUBLISHED)
+        art1 = mommy.make(article_class, category=cat1, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        art2 = mommy.make(article_class, category=cat2, title=u"QSDFGHJKLM", publication=BaseArticle.PUBLISHED)
         
         url = reverse('coop_cms_articles_category', args=[cat1.slug])
         response = self.client.get(url)
@@ -114,33 +117,39 @@ class ArticlesByCategoryTest(BaseTestCase):
         self.assertContains(response, art1.title)
         self.assertNotContains(response, art2.title)
         
-        
     def test_view_articles_unknwonw_categories(self):
-        Article = get_article_class()
+        """view article with unknown category: 404"""
+        article_class = get_article_class()
         cat = mommy.make(ArticleCategory, name="abcd")
-        art = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        mommy.make(article_class, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
         
         url = reverse('coop_cms_articles_category', args=["ghjk"])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 404)
         
     def test_view_articles_category_template(self):
-        Article = get_article_class()
+        """view article with custom template"""
+        article_class = get_article_class()
         cat = mommy.make(ArticleCategory, name="Only for unit testing")
-        art = mommy.make(Article, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
+        art = mommy.make(article_class, category=cat, title=u"AZERTYUIOP", publication=BaseArticle.PUBLISHED)
         self.assertEqual(cat.slug, "only-for-unit-testing")
         url = reverse('coop_cms_articles_category', args=[cat.slug])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, art.title)
         self.assertContains(response, "This comes from custom template")
-        
+
+    @override_settings(COOP_CMS_ARTICLES_CATEGORY_PAGINATION=10)
     def test_view_articles_category_many(self):
-        Article = get_article_class()
+        """view articles by category: check pagination"""
+
+        article_class = get_article_class()
         cat = mommy.make(ArticleCategory)
         for i in range(30):
-            art = mommy.make(Article, category=cat, publication_date=datetime(2014, 3, i+1),
-                title=u"AZERTY-{0}-UIOP".format(i), publication=BaseArticle.PUBLISHED)
+            mommy.make(
+                article_class, category=cat, publication_date=datetime(2014, 3, i+1),
+                title=u"AZERTY-{0}-UIOP".format(i), publication=BaseArticle.PUBLISHED
+            )
         
         url = reverse('coop_cms_articles_category', args=[cat.slug])
         response = self.client.get(url)

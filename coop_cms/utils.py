@@ -3,20 +3,29 @@
 
 from bs4 import BeautifulSoup
 from HTMLParser import HTMLParser
-from re import sub
+from re import sub, match
 from sys import stderr
 from threading import current_thread
 from traceback import print_exc
 
+from django import VERSION
 from django.conf import settings
-from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.exceptions import ImproperlyConfigured
+from django.core.mail import get_connection, EmailMultiAlternatives
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponseRedirect
 from django.template import Context
 from django.template.loader import get_template
 from django.utils import translation
 
 from coop_cms.settings import get_newsletter_context_callbacks
+
+if VERSION >= (1, 9, 0):
+    from wsgiref.util import FileWrapper
+else:
+    from django.core.servers.basehttp import FileWrapper
+FileWrapper = FileWrapper
 
 
 class _DeHTMLParser(HTMLParser):
@@ -96,7 +105,7 @@ def _send_email(subject, html_text, dests, list_unsubscribe):
     """send an email"""
     emails = []
     connection = get_connection()
-    from_email = settings.COOP_CMS_FROM_EMAIL
+    from_email = getattr(settings, 'COOP_CMS_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
     reply_to = getattr(settings, 'COOP_CMS_REPLY_TO', None)
 
     #make header
@@ -114,6 +123,15 @@ def _send_email(subject, html_text, dests, list_unsubscribe):
     return connection.send_messages(emails)
 
 
+def get_language():
+    """returns the language or default language"""
+    lang = translation.get_language()
+    if lang:
+        return lang[:2]
+    else:
+        return settings.LANGUAGE_CODE[:2]
+
+
 def send_newsletter(newsletter, dests, list_unsubscribe=None):
     """
     send newsletter
@@ -126,14 +144,14 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
     newsletter.is_public = True
     newsletter.save()
 
-    lang = translation.get_language()[:2]
+    lang = get_language()
     if not (lang in [code_and_name[0] for code_and_name in settings.LANGUAGES]):
         # The current language is not defined in settings.LANGUAGE
         # force it to the defined language
         lang = settings.LANGUAGE_CODE[:2]
         translation.activate(lang)
-    
-    template = get_template(newsletter.get_template_name())
+
+    the_template = get_template(newsletter.get_template_name())
     context_dict = {
         'title': newsletter.subject,
         'newsletter': newsletter,
@@ -142,13 +160,19 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
         'MEDIA_URL': settings.MEDIA_URL,
         'STATIC_URL': settings.STATIC_URL,
     }
-    
+
     for callback in get_newsletter_context_callbacks():
         data = callback(newsletter)
         if data:
             context_dict.update(data)
 
-    html_text = template.render(Context(context_dict))
+    try:
+        html_text = the_template.render(Context(context_dict))
+    except Exception:
+        raise
+        # import traceback
+        # print traceback.print_exc()
+
     html_text = make_links_absolute(html_text, newsletter)
 
     return _send_email(newsletter.subject, html_text, dests, list_unsubscribe)
@@ -202,14 +226,28 @@ class RequestMiddleware(object):
 
 def get_url_in_language(url, lang_code):
     """returns the url in another language"""
-    from localeurl import utils as localeurl_utils  # pylint: disable=F0401
     if lang_code and translation.check_for_language(lang_code):
-        #path is the locale-independant url
-        path = localeurl_utils.strip_path(url)[1]
-        new_url = localeurl_utils.locale_path(path, lang_code)
+        path = strip_locale_path(url)[1]
+        new_url = make_locale_path(path, lang_code)
         return new_url
     else:
         raise ImproperlyConfigured("{0} is not a valid language".format(lang_code))
+
+
+def strip_locale_path(locale_path):
+    """returns language independent url - /en/home/ --> /home/"""
+    elements = locale_path.split('/')
+    if len(elements) > 2:
+        lang = elements[1]
+        if lang in [lang_and_name[0] for lang_and_name in settings.LANGUAGES]:
+            del elements[1]
+            return lang, '/'.join(elements)
+    return '', locale_path
+
+
+def make_locale_path(path, lang):
+    """returns locale url - /home/ --> /en/home/"""
+    return u'/{0}{1}'.format(lang, path)
 
 
 def redirect_to_language(url, lang_code):
@@ -217,6 +255,24 @@ def redirect_to_language(url, lang_code):
     new_url = get_url_in_language(url, lang_code)
     translation.activate(lang_code)
     return HttpResponseRedirect(new_url)
+
+
+def get_model_name(model_class):
+    """return model name"""
+    meta_class = getattr(model_class, '_meta')
+    return getattr(meta_class, 'module_name', '') or getattr(meta_class, 'model_name')
+
+
+def get_model_label(model_class):
+    """return model name"""
+    meta_class = getattr(model_class, '_meta')
+    return getattr(meta_class, 'verbose_name')
+
+
+def get_model_app(model_class):
+    """return app name for this model"""
+    meta_class = getattr(model_class, '_meta')
+    return getattr(meta_class, 'app_label')
 
 
 def get_text_from_template(template_name, extra_context=None):
@@ -229,3 +285,27 @@ def get_text_from_template(template_name, extra_context=None):
     context = extra_context or {}
     template = get_template(template_name)
     return template.render(Context(context))
+
+
+def paginate(request, queryset, items_count):
+    try:
+        page = int(request.GET.get('page', 0) or 0)
+    except ValueError:
+        page = 1
+    paginator = Paginator(queryset, items_count)
+    try:
+        page_obj = paginator.page(page or 1)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        page_obj = paginator.page(paginator.num_pages)
+    return page_obj
+
+
+def get_login_url():
+    try:
+        return reverse("auth_login")
+    except NoReverseMatch:
+        return reverse("login")

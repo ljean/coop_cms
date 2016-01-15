@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
-
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import mail
@@ -353,45 +349,45 @@ class NewsletterSettingsTest(UserBaseTestCase):
 class NewsletterTest(UserBaseTestCase):
 
     def test_create_article_for_newsletter(self):
-        Article = get_article_class()
-        ct = ContentType.objects.get_for_model(Article)
+        article_class = get_article_class()
+        content_type = ContentType.objects.get_for_model(article_class)
         
-        art = mommy.make(Article, in_newsletter=True)
+        art = mommy.make(article_class, in_newsletter=True)
         
         self.assertEqual(1, NewsletterItem.objects.count())
-        item = NewsletterItem.objects.get(content_type=ct, object_id=art.id)
+        item = NewsletterItem.objects.get(content_type=content_type, object_id=art.id)
         self.assertEqual(item.content_object, art)
         
         art.delete()
         self.assertEqual(0, NewsletterItem.objects.count())
 
     def test_create_article_not_for_newsletter(self):
-        Article = get_article_class()
-        ct = ContentType.objects.get_for_model(Article)
+        article_class = get_article_class()
+        ContentType.objects.get_for_model(article_class)
         
-        art = mommy.make(Article, in_newsletter=False)
+        art = mommy.make(article_class, in_newsletter=False)
         self.assertEqual(0, NewsletterItem.objects.count())
         
         art.delete()
         self.assertEqual(0, NewsletterItem.objects.count())
 
     def test_create_article_commands(self):
-        Article = get_article_class()
-        ct = ContentType.objects.get_for_model(Article)
-        art1 = mommy.make(Article, in_newsletter=True)
-        art2 = mommy.make(Article, in_newsletter=True)
-        art3 = mommy.make(Article, in_newsletter=False)
+        article_class = get_article_class()
+        content_type = ContentType.objects.get_for_model(article_class)
+        art1 = mommy.make(article_class, in_newsletter=True)
+        art2 = mommy.make(article_class, in_newsletter=True)
+        art3 = mommy.make(article_class, in_newsletter=False)
         self.assertEqual(2, NewsletterItem.objects.count())
         NewsletterItem.objects.all().delete()
         self.assertEqual(0, NewsletterItem.objects.count())
         management.call_command('create_newsletter_items', verbosity=0, interactive=False)
         self.assertEqual(2, NewsletterItem.objects.count())
-        item1 = NewsletterItem.objects.get(content_type=ct, object_id=art1.id)
-        item2 = NewsletterItem.objects.get(content_type=ct, object_id=art2.id)
+        item1 = NewsletterItem.objects.get(content_type=content_type, object_id=art1.id)
+        item2 = NewsletterItem.objects.get(content_type=content_type, object_id=art2.id)
 
     def test_view_newsletter(self):
         article_class = get_article_class()
-        ct = ContentType.objects.get_for_model(article_class)
+        content_type = ContentType.objects.get_for_model(article_class)
         
         art1 = mommy.make(article_class, title="Art 1", in_newsletter=True)
         art2 = mommy.make(article_class, title="Art 2", in_newsletter=True)
@@ -403,8 +399,8 @@ class NewsletterTest(UserBaseTestCase):
             template="test/newsletter_blue.html",
             is_public=True
         )
-        newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art1.id))
-        newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art2.id))
+        newsletter.items.add(NewsletterItem.objects.get(content_type=content_type, object_id=art1.id))
+        newsletter.items.add(NewsletterItem.objects.get(content_type=content_type, object_id=art2.id))
         newsletter.save()
         
         url = reverse('coop_cms_view_newsletter', args=[newsletter.id])
@@ -509,26 +505,30 @@ class NewsletterTest(UserBaseTestCase):
         self.assertContains(response, data['content'])
         
     def test_newsletter_templates(self):
+        """it should send email with right content"""
+        article_class = get_article_class()
+        content_type = ContentType.objects.get_for_model(article_class)
         
-        Article = get_article_class()
-        ct = ContentType.objects.get_for_model(Article)
-        
-        art1 = mommy.make(Article, title="Art 1", in_newsletter=True)
+        art1 = mommy.make(article_class, title="Art 1", in_newsletter=True)
         poh = mommy.make(PieceOfHtml, div_id="newsletter_header", content="HELLO!!!")
         
-        newsletter = mommy.make(Newsletter, content="a little intro for this newsletter",
-            template="test/newsletter_blue.html")
-        newsletter.items.add(NewsletterItem.objects.get(content_type=ct, object_id=art1.id))
+        newsletter = mommy.make(
+            Newsletter,
+            content="a little intro for this newsletter",
+            template="test/newsletter_blue.html"
+        )
+        newsletter.items.add(NewsletterItem.objects.get(content_type=content_type, object_id=art1.id))
         newsletter.save()
         
         self._log_as_editor()
         
         view_names = ['coop_cms_view_newsletter', 'coop_cms_edit_newsletter']
         for view_name in view_names:
+
             url = reverse(view_name, args=[newsletter.id])
             response = self.client.get(url)
             self.assertEqual(200, response.status_code)
-            
+
             self.assertContains(response, newsletter.content)
             self.assertContains(response, art1.title)
             self.assertContains(response, "background: blue;")
@@ -608,11 +608,9 @@ class NewsletterTest(UserBaseTestCase):
         
         newsletter = Newsletter.objects.get(id=newsletter.id)
         self.assertEqual(newsletter.template, original_data['template'])
-        
+
+    @override_settings(COOP_CMS_TEST_EMAILS=['toto@toto.fr', 'titi@toto.fr'], COOP_CMS_FROM_EMAIL='contact@toto.fr')
     def test_send_test_newsletter(self, template='test/newsletter_blue.html', extra_checker=None):
-        settings.COOP_CMS_FROM_EMAIL = 'contact@toto.fr'
-        settings.COOP_CMS_TEST_EMAILS = ('toto@toto.fr', 'titi@toto.fr')
-        #settings.COOP_CMS_SITE_PREFIX = 'http://toto.fr'
         settings.SITE_ID = 1
         site = Site.objects.get(id=settings.SITE_ID)
         site.domain = 'toto.fr'
@@ -634,19 +632,22 @@ class NewsletterTest(UserBaseTestCase):
         response = self.client.post(url, data={})
         self.assertEqual(200, response.status_code)
         
-        self.assertEqual([[e] for e in settings.COOP_CMS_TEST_EMAILS], [e.to for e in mail.outbox])
-        for e in mail.outbox:
-            self.assertEqual(e.from_email, settings.COOP_CMS_FROM_EMAIL)
-            self.assertEqual(e.subject, newsletter.subject)
-            self.assertTrue(e.body.find('Title')>=0)
-            self.assertTrue(e.body.find('Google')>=0)
-            self.assertTrue(e.alternatives[0][1], "text/html")
-            self.assertTrue(e.alternatives[0][0].find('Title')>=0)
-            self.assertTrue(e.alternatives[0][0].find('Google')>=0)
+        self.assertEqual(
+            [[test_address] for test_address in settings.COOP_CMS_TEST_EMAILS],
+            [received_email.to for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, newsletter.subject)
+            self.assertTrue(received_email.body.find('Title') >= 0)
+            self.assertTrue(received_email.body.find('Google') >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
+            self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
             site_prefix = "http://"+site.domain
-            self.assertTrue(e.alternatives[0][0].find(site_prefix)>=0)
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
             if extra_checker:
-                extra_checker(e)
+                extra_checker(received_email)
         
     def test_schedule_newsletter_sending(self):
         newsletter = mommy.make(Newsletter)
@@ -699,14 +700,14 @@ class NewsletterTest(UserBaseTestCase):
         redirect_url = response['Location']
         if is_localized():
             login_url = login_url[:2]
-            self.assertTrue(redirect_url.find(login_url)>0)
+            self.assertTrue(redirect_url.find(login_url) >= 0)
         else:
-            self.assertTrue(redirect_url.find(login_url)>0)
+            self.assertTrue(redirect_url.find(login_url) >= 0)
         
         sch_dt = timezone.now()+timedelta(1)
         response = self.client.post(url, data={'sending_dt': sch_dt})
         redirect_url = response['Location']
-        self.assertTrue(redirect_url.find(login_url)>0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
     
     def test_send_newsletter(self):
         
@@ -719,9 +720,9 @@ class NewsletterTest(UserBaseTestCase):
         self.assertEqual(newsletter.is_public, False)
         sch_dt = timezone.now() - timedelta(1)
         sending = mommy.make(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
-        
+
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
-        
+
         sending = NewsletterSending.objects.get(id=sending.id)
         self.assertNotEqual(sending.sending_dt, None)
         

@@ -10,7 +10,6 @@ import unicodedata
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.servers.basehttp import FileWrapper
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response, get_object_or_404
@@ -20,6 +19,7 @@ from django.template.loader import get_template
 from coop_cms import forms
 from coop_cms.logger import logger
 from coop_cms import models
+from coop_cms.utils import paginate, FileWrapper
 
 
 def _get_photologue_media(request):
@@ -50,7 +50,11 @@ def show_media(request, media_type):
         if not request.user.is_staff:
             raise PermissionDenied
 
-        is_ajax = request.GET.get('page', 0)
+        try:
+            page = int(request.GET.get('page', 0) or 0)
+        except ValueError:
+            page = 1
+        is_ajax = page > 0
         media_filter = request.GET.get('media_filter', 0)
         skip_media_filter = False
 
@@ -95,7 +99,11 @@ def show_media(request, media_type):
                 queryset = queryset.filter(filters__id=media_filter)
                 context['media_filter'] = int(media_filter)
 
-        context[media_type+'s'] = queryset
+        page_obj = paginate(request, queryset, 12)
+
+        context[media_type+'s'] = list(page_obj)
+        context['page_obj'] = page_obj
+
         context["allow_photologue"] = "photologue" in settings.INSTALLED_APPS
 
         template = get_template('coop_cms/medialib/slide_base.html')
@@ -127,10 +135,10 @@ def upload_image(request):
             form = forms.AddImageForm(request.POST, request.FILES)
             if form.is_valid():
                 src = form.cleaned_data['image']
-                descr = form.cleaned_data['descr']
-                if not descr:
-                    descr = os.path.splitext(src.name)[0]
-                image = models.Image(name=descr)
+                description = form.cleaned_data['descr']
+                if not description:
+                    description = os.path.splitext(src.name)[0]
+                image = models.Image(name=description)
                 image.size = form.cleaned_data["size"]
                 image.file.save(src.name, src)
                 image.save()
@@ -146,7 +154,9 @@ def upload_image(request):
 
         return render_to_response(
             'coop_cms/popup_upload_image.html',
-            locals(),
+            {
+                'form': form,
+            },
             context_instance=RequestContext(request)
         )
     except Exception:

@@ -2,19 +2,14 @@
 """sitemaps"""
 
 from django.conf import settings
-from django.conf.urls import url
+from django.conf.urls import url, patterns
 from django.contrib.sitemaps import Sitemap
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 
 from coop_cms.models import BaseArticle, SiteSettings
 from coop_cms.settings import get_article_class, is_localized
-
-if is_localized():
-    from localeurl.sitemaps import LocaleurlSitemap # pylint: disable=F0401
-    BaseSitemapClass = LocaleurlSitemap
-else:
-    BaseSitemapClass = Sitemap
+from coop_cms.utils import get_url_in_language
 
 
 class ViewSitemap(Sitemap):
@@ -35,16 +30,13 @@ class ViewSitemap(Sitemap):
         return [Klass(x) for x in self.view_names]
 
 
-class BaseSitemap(BaseSitemapClass):
+class BaseSitemap(Sitemap):
     """Base class"""
     _current_site = None
 
     def __init__(self, language):
-        if is_localized():
-            super(BaseSitemap, self).__init__(language)
-        else:
-            super(BaseSitemap, self).__init__()
-        #self._site = site
+        super(BaseSitemap, self).__init__()
+        self.language = language
 
     def get_urls(self, page=1, site=None, protocol=None):
         """get urls"""
@@ -59,22 +51,26 @@ class BaseSitemap(BaseSitemapClass):
             self._current_site = Site.objects.get_current()
         return self._current_site
 
+    def location(self, obj):
+        if is_localized():
+            return get_url_in_language(obj.get_absolute_url(), self.language)
+        else:
+            return obj.get_absolute_url()
+
 
 class ArticleSitemap(BaseSitemap):
     """article sitemap"""
     changefreq = "weekly"
     priority = 0.5
-    _sitemap_mode = None
 
     def get_sitemap_mode(self):
         """define which articles must be included in sitemap"""
         site = self.get_current_site()
-        if not self._sitemap_mode:
-            try:
-                self._sitemap_mode = site.sitesettings.sitemap_mode
-            except SiteSettings.DoesNotExist:
-                self._sitemap_mode = SiteSettings.SITEMAP_ONLY_SITE
-        return self._sitemap_mode
+        try:
+            site_settings = SiteSettings.objects.get(site=site)
+            return site_settings.sitemap_mode
+        except SiteSettings.DoesNotExist:
+            return SiteSettings.SITEMAP_ONLY_SITE
 
     def items(self):
         """items"""
@@ -95,6 +91,7 @@ class ArticleSitemap(BaseSitemap):
                 elif sitemap_mode == SiteSettings.SITEMAP_ALL:
                     #Articles of which are only on the site and not in current site
                     items.extend(queryset.filter(sites=site).exclude(sites=self.get_current_site()))
+
         return items
 
     def lastmod(self, obj):
@@ -115,7 +112,7 @@ def get_sitemaps(langs=None):
     return sitemaps
 
 
-urlpatterns = (
+urlpatterns = patterns('',
     url(
         r'^sitemap\.xml$',
         'django.contrib.sitemaps.views.sitemap',

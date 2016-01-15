@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message, error as error_message
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
@@ -17,14 +18,18 @@ from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 
 from djaloha import utils as djaloha_utils
-from colorbox.decorators import popup_redirect, popup_close
+from colorbox.decorators import popup_redirect
 
 from coop_cms import forms
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
-from coop_cms.settings import get_article_class, get_article_form, get_article_settings_form, get_new_article_form
+from coop_cms.settings import (
+    get_article_class, get_article_form, get_article_settings_form, get_new_article_form,
+    get_articles_category_page_size
+)
 from coop_cms.shortcuts import get_article_or_404, get_headlines, redirect_if_alias
+from coop_cms.utils import get_model_name, get_model_app, paginate
 
 
 def get_article_template(article):
@@ -43,7 +48,8 @@ def view_all_articles(request):
 
     if request.user.is_staff:
         article_class = get_article_class()
-        view_name = 'admin:{0}_{1}_changelist'.format(article_class._meta.app_label, article_class._meta.module_name)
+
+        view_name = 'admin:{0}_{1}_changelist'.format(get_model_app(article_class), get_model_name(article_class))
         articles_admin_url = reverse(view_name)
 
         newsletters_admin_url = reverse('admin:coop_cms_newsletter_changelist')
@@ -322,6 +328,11 @@ def articles_category(request, slug):
     """view articles by category"""
     category = get_object_or_404(models.ArticleCategory, slug=slug, sites__id=settings.SITE_ID)
 
+    try:
+        page = int(request.GET.get('page', 0) or 0)
+    except ValueError:
+        page = 1
+
     if not request.user.has_perm('can_view_category', category):
         raise PermissionDenied()
 
@@ -338,9 +349,11 @@ def articles_category(request, slug):
     except TemplateDoesNotExist:
         category_template = "coop_cms/articles_category.html"
 
+    page_obj = paginate(request, articles, get_articles_category_page_size())
+
     return render_to_response(
         category_template,
-        {'category': category, "articles": articles},
+        {'category': category, "articles": list(page_obj), 'page_obj': page_obj},
         context_instance=RequestContext(request)
     )
 
@@ -358,6 +371,10 @@ class ArticleView(EditableObjectView):
 
     def can_access_object(self):
         """perms -> 404 if no perms"""
+
+        if self.object.login_required and not self.request.user.is_authenticated():
+            raise PermissionDenied
+
         if self.object.is_archived():
             return super(ArticleView, self).can_view_object()
         return True

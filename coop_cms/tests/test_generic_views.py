@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from django import VERSION as DJANGO_VERSION
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
-from django.utils.unittest import SkipTest
+if DJANGO_VERSION >= (1, 8, 0):
+    from unittest import SkipTest
+else:
+    # Deprecated in Django 1.9
+    from django.utils.unittest import SkipTest
 
 from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
 

@@ -32,7 +32,7 @@
     <div style="font-size: small; background: #000; color: #eee; text-align: center;">
         <div class="item">
             <span class="text">{% trans "If you can't view this email, " %}</span>
-            <a href="{{SITE_PREFIX}}{% url "coop_cms_view_newsletter" newsletter.id %}">
+            <a href="{{SITE_PREFIX}}{% url 'coop_cms_view_newsletter' newsletter.id %}">
                 {% trans "read the online version" %}
             </a>
         </div>

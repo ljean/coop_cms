@@ -2,9 +2,6 @@
 """models"""
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 from datetime import datetime
 import os
@@ -12,11 +9,15 @@ import os.path
 import shutil
 import urlparse
 
+from django import VERSION
 from django.db import models
 from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.signals import pre_delete, post_save
-from django.contrib.contenttypes import generic
+if VERSION < (1, 7):
+    from django.contrib.contenttypes.generic import GenericForeignKey
+else:
+    from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.staticfiles import finders
@@ -26,8 +27,7 @@ from django.core.urlresolvers import reverse
 from django.template import Context
 from django.template.defaultfilters import slugify, escape
 from django.template.loader import get_template
-from django.utils import translation
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import get_language, ugettext, ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
@@ -38,7 +38,7 @@ from coop_cms.settings import (
     get_headline_image_size, get_headline_image_crop, get_img_folder, get_newsletter_item_classes,
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
 )
-from coop_cms.utils import dehtml, RequestManager, RequestNotFound
+from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path
 
 ADMIN_THUMBS_SIZE = '60x60'
 
@@ -53,7 +53,7 @@ def get_object_label(content_type, obj):
     returns the label used in navigation according to the configured rule
     """
     if not obj:
-        return _(u"Node")
+        return ugettext(u"Node")
     try:
         nav_type = NavType.objects.get(content_type=content_type)
         if nav_type.label_rule == NavType.LABEL_USE_SEARCH_FIELD:
@@ -104,7 +104,7 @@ class NavType(models.Model):
         (LABEL_USE_GET_LABEL, _(u'Use get_label')),
     )
 
-    content_type = models.ForeignKey(ContentType, unique=True, verbose_name=_(u'django model'))
+    content_type = models.OneToOneField(ContentType, verbose_name=_(u'django model'))
     search_field = models.CharField(max_length=200, blank=True, default="", verbose_name=_(u'search field'))
     label_rule = models.IntegerField(
         verbose_name=_(u'How to generate the label'), choices=LABEL_RULE_CHOICES, default=LABEL_USE_UNICODE
@@ -163,7 +163,7 @@ class NavNode(models.Model):
     #generic relation
     content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"), blank=True, null=True)
     object_id = models.PositiveIntegerField(verbose_name=_("object id"), blank=True, null=True)
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     in_navigation = models.BooleanField(_("in navigation"), default=True)
 
     def get_absolute_url(self):
@@ -188,7 +188,7 @@ class NavNode(models.Model):
 
     def get_content_name(self):
         """friendly name of the object model"""
-        return self.content_type.model_class()._meta.verbose_name
+        return get_model_label(self.content_type.model_class())
 
     def __unicode__(self):
         return self.label
@@ -202,7 +202,7 @@ class NavNode(models.Model):
         """children of the node"""
         nodes = NavNode.objects.filter(parent=self).order_by("ordering")
         #Be carful : in_navigation can be False
-        if in_navigation != None:
+        if in_navigation is not None:
             nodes = nodes.filter(in_navigation=in_navigation)
         return nodes
 
@@ -236,7 +236,7 @@ class NavNode(models.Model):
         """formatted for jstree -> displayed as tree view in admin"""
         url = self.get_absolute_url()
         label = escape(self.label)
-        if url == None:
+        if url is None:
             li_content = u'<a>{0}</a>'.format(label)
         else:
             li_content = u'<a href="{0}">{1}</a>'.format(url, label)
@@ -450,6 +450,16 @@ class BaseNavigable(TimeStampedModel):
         return ret
 
 
+def get_logo_folder(article, filename):
+    """where to put logo image file"""
+    try:
+        img_root = settings.CMS_ARTICLE_LOGO_FOLDER
+    except AttributeError:
+        img_root = 'cms_logos'
+    basename = os.path.basename(filename)
+    return u'{0}/{1}/{2}'.format(img_root, article.id, basename)
+
+
 class BaseArticle(BaseNavigable):
     """An article : static page, blog item, ..."""
 
@@ -462,15 +472,6 @@ class BaseArticle(BaseNavigable):
         (PUBLISHED, _(u'Published')),
         (ARCHIVED, _(u'Archived')),
     )
-
-    def get_logo_folder(self, filename):
-        """where to put logo image file"""
-        try:
-            img_root = settings.CMS_ARTICLE_LOGO_FOLDER
-        except AttributeError:
-            img_root = 'cms_logos'
-        basename = os.path.basename(filename)   
-        return u'{0}/{1}/{2}'.format(img_root, self.id, basename)
 
     slug = models.CharField(max_length=100, unique=True, db_index=True, blank=False)
     title = models.TextField(_(u'title'), default='', blank=True)
@@ -497,8 +498,13 @@ class BaseArticle(BaseNavigable):
         _(u"Headline"), default=False,
         help_text=_(u'Make this article appear on the home page')
     )
-    publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now())
+    publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now)
     sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
+    login_required = models.BooleanField(
+        default=False,
+        verbose_name=_(u'login required'),
+        help_text=_(u'If true, only user with login/password will able to access the article')
+    )
     
     @property
     def is_homepage(self):
@@ -609,7 +615,7 @@ class BaseArticle(BaseNavigable):
             raise InvalidArticleError(u"coop_cms.Article: slug can not be empty")
             
         if is_localized():
-            from modeltranslation.utils import build_localized_fieldname # pylint: disable=F0401
+            from modeltranslation.utils import build_localized_fieldname  # pylint: disable=F0401
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
                 loc_title_var = build_localized_fieldname('title', lang_code)
                 locale_title = getattr(self, loc_title_var, '')
@@ -645,7 +651,7 @@ class BaseArticle(BaseNavigable):
         article_class = get_article_class()
 
         if is_localized():
-            from modeltranslation.utils import build_localized_fieldname # pylint: disable=F0401
+            from modeltranslation.utils import build_localized_fieldname  # pylint: disable=F0401
             slug_fields = []
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
                 loc_slug_var = build_localized_fieldname('slug', lang_code)
@@ -770,9 +776,8 @@ class Link(BaseNavigable):
             scheme = parsed_url[0]
             if not scheme:
                 #the urls doesn't starts with http://, so it's a url managed by the site
-                from localeurl.utils import locale_path # pylint: disable=F0401
-                locale = translation.get_language()                
-                return locale_path(self.url, locale)
+                locale = get_language()
+                return make_locale_path(self.url, locale)
         return self.url
 
     def get_label(self):
@@ -863,14 +868,16 @@ class Image(Media):
             max_width = int(max_width) if max_width else 0
             if max_width and (max_width < self.file.width):
                 try:
-                    return sorl_thumbnail.backend.get_thumbnail(self.file.file, str(max_width), upscale=False).url
+                    url = sorl_thumbnail.backend.get_thumbnail(self.file.file, str(max_width), upscale=False).url
+                    return url
                 except (IOError, ThumbnailParseError):
                     return self.file.url
             else:
                 return self.file.url
         try:
             crop = self.size.crop or None
-            return sorl_thumbnail.backend.get_thumbnail(self.file.file, self.size.size, crop=crop).url
+            url = sorl_thumbnail.backend.get_thumbnail(self.file.file, self.size.size, crop=crop).url
+            return url
         except (IOError, ThumbnailParseError):
             return self.file.url
 
@@ -879,25 +886,26 @@ class Image(Media):
         verbose_name_plural = _(u'images')
 
 
+def get_doc_folder(document, filename):
+    """where to store this file. If private in a different folder which must be protected by web server"""
+    if not document.is_private:
+        doc_root = getattr(settings, 'DOCUMENT_FOLDER', 'documents/public')
+    else:
+        doc_root = getattr(settings, 'PRIVATE_DOCUMENT_FOLDER', 'documents/private')
+
+    filename = os.path.basename(filename)
+    #This is required for x-sendfile
+    name, ext = os.path.splitext(filename)
+    filename = slugify(name) + ext
+
+    return u'{0}/{1}'.format(doc_root, filename)
+
+
 class Document(Media):
     """file in media library"""
 
     def __unicode__(self):
         return self.name
-
-    def get_doc_folder(self, filename):
-        """where to store this file. If private in a different folder which must be protected by web server"""
-        if not self.is_private:
-            doc_root = getattr(settings, 'DOCUMENT_FOLDER', 'documents/public')
-        else:
-            doc_root = getattr(settings, 'PRIVATE_DOCUMENT_FOLDER', 'documents/private')
-
-        filename = os.path.basename(filename)
-        #This is required for x-sendfile
-        name, ext = os.path.splitext(filename)
-        filename = slugify(name) + ext
-        
-        return u'{0}/{1}'.format(doc_root, filename)
 
     file = models.FileField(_('file'), upload_to=get_doc_folder)
     is_private = models.BooleanField(
@@ -976,7 +984,7 @@ class NewsletterItem(models.Model):
     """Something which is in a newsletter"""
     content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"))
     object_id = models.PositiveIntegerField(verbose_name=_("object id"))
-    content_object = generic.GenericForeignKey('content_type', 'object_id')
+    content_object = GenericForeignKey('content_type', 'object_id')
     ordering = models.IntegerField(verbose_name=_("ordering"), default=0)
 
     class Meta:

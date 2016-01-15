@@ -6,14 +6,14 @@ Admin pages for coop_cms
 from django.conf import settings
 from django.contrib import admin
 from django.http import Http404
-from django.utils.importlib import import_module
 from django.utils.translation import ugettext_lazy as _
 
 from coop_cms.forms import NavTypeForm, ArticleAdminForm, NewsletterItemAdminForm, NewsletterAdminForm
 from coop_cms import models
-from coop_cms.settings import get_article_class, get_navtree_class
+from coop_cms.settings import get_article_class, get_navtree_class, import_module
 
-#The BASE_ADMIN_CLASS can be a Translation admin if needed or regular modelAdmin if not
+
+# The BASE_ADMIN_CLASS can be a Translation admin if needed or regular modelAdmin if not
 if 'modeltranslation' in settings.INSTALLED_APPS:
     BASE_ADMIN_CLASS = import_module('modeltranslation.admin').TranslationAdmin
 else:
@@ -76,22 +76,27 @@ class NavTreeAdmin(admin.ModelAdmin):
             request, str(object_id), extra_context=extra_context, *args, **kwargs
         )  # pylint: disable=E1002
 
-admin.site.register(get_navtree_class(), NavTreeAdmin)
+if get_navtree_class():
+    admin.site.register(get_navtree_class(), NavTreeAdmin)
 
 
 class ArticleAdmin(BASE_ADMIN_CLASS):
     """Article admin"""
     form = ArticleAdminForm
     list_display = [
-        'slug', 'title', 'category', 'template_name', 'publication', 'headline', 'in_newsletter', 'modified'
+        'slug', 'title', 'category', 'template_name', 'publication', 'headline', 'in_newsletter', 'modified',
+        'login_required',
     ]
     list_editable = ['publication', 'headline', 'in_newsletter', 'category']
     readonly_fields = ['created', 'modified', 'is_homepage']
-    list_filter = ['publication', 'headline', 'in_newsletter', 'sites', 'homepage_for_site', 'category', 'template']
+    list_filter = [
+        'publication', 'login_required', 'headline', 'in_newsletter', 'sites', 'homepage_for_site',
+        'category', 'template'
+    ]
     date_hierarchy = 'publication_date'
     fieldsets = (
         #(_('Navigation'), {'fields': ('navigation_parent',)}),
-        (_(u'General'), {'fields': ('slug', 'title', 'subtitle', 'publication', )}),
+        (_(u'General'), {'fields': ('slug', 'title', 'subtitle', 'publication', 'login_required', )}),
         (_(u'Settings'), {
             'fields': ('sites', 'template', 'category', 'headline', 'is_homepage', 'logo', 'in_newsletter', )
         }),
@@ -102,7 +107,7 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
 
     def get_form(self, request, obj=None, **kwargs):
         """return custom form: It adds the current user"""
-        form = super(ArticleAdmin, self).get_form(request, obj, **kwargs) # pylint: disable=E1002
+        form = super(ArticleAdmin, self).get_form(request, obj, **kwargs)  # pylint: disable=E1002
         form.current_user = request.user
         return form
 
@@ -124,7 +129,7 @@ class MediaFilterFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         """return values after taken the filter into account"""
         value = self.value()
-        if value == None:
+        if value is None:
             return queryset
         return queryset.filter(filters__id=value)
 

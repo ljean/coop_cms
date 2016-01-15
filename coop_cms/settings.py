@@ -3,15 +3,23 @@
 Coop_cms settings : central place for coop_cms settings
 the settings should be accessed from here and not directly from django.conf.settings
 """
+
+import os.path
+import sys
+
 from django.conf import settings as django_settings
+from django.conf.urls import patterns
+from django.conf.urls.i18n import i18n_patterns
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.utils.importlib import import_module
+from importlib import import_module
 
 from coop_cms.logger import logger
 
+
 COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'
 DEPRECATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'basic_cms.NavTree')
+DEFAULT_MEDIA_ROOT = ''
 
 
 def load_class(settings_key, default_value):
@@ -59,7 +67,12 @@ def get_navtree_class(defaut_class=None):
         full_class_name = COOP_CMS_NAVTREE_CLASS
         app_label, model_name = full_class_name.split('.')
         model_name = model_name.lower()
-        content_type = ContentType.objects.get(app_label=app_label, model=model_name)
+        try:
+            content_type = ContentType.objects.get(app_label=app_label, model=model_name)
+        except ContentType.DoesNotExist:
+            return None
+        except:
+            return None
         navtree_class = content_type.model_class()
         setattr(get_navtree_class, '_cache_class', navtree_class)
         return navtree_class
@@ -247,7 +260,7 @@ def get_newsletter_context_callbacks():
 
 def is_localized():
     """return True if site is localized"""
-    if ('localeurl' in django_settings.INSTALLED_APPS) and ('modeltranslation' in django_settings.INSTALLED_APPS):
+    if ('modeltranslation' in django_settings.INSTALLED_APPS):
         return True
     return False
 
@@ -341,3 +354,33 @@ def get_img_folder(instance, filename):
         img_root = 'img'
 
     return u'{0}/{1}'.format(img_root, filename)
+
+
+def get_articles_category_page_size():
+    """returns number of articles for pagination"""
+    return getattr(django_settings, 'COOP_CMS_ARTICLES_CATEGORY_PAGINATION', 10)
+
+
+def get_url_patterns():
+    """return urlspatterns to use"""
+    if is_localized():
+        return i18n_patterns
+    else:
+        return patterns
+
+
+def get_unit_test_media_root():
+    """return unit testing_media root"""
+    global DEFAULT_MEDIA_ROOT
+    if not DEFAULT_MEDIA_ROOT:
+        DEFAULT_MEDIA_ROOT = django_settings.MEDIA_ROOT
+        django_settings.MEDIA_ROOT = os.path.join(django_settings.MEDIA_ROOT, '_unit_tests')
+    return django_settings.MEDIA_ROOT
+
+
+def get_media_root():
+    """return unit testing_media root if unit test, regular unit test if not"""
+    if 'test' in sys.argv:
+        return get_unit_test_media_root()
+    else:
+        return django_settings.MEDIA_ROOT

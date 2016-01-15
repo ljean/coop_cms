@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """project settings"""
 
+import os.path
+import sys
+
+
 DEBUG = False
 TEMPLATE_DEBUG = DEBUG
-import os.path
-import re
-import sys
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -39,7 +40,7 @@ TIME_ZONE = 'Europe/Paris'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-en'
+LANGUAGE_CODE = 'en'
 
 gettext = lambda s: s
 LANGUAGES = (
@@ -103,13 +104,12 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'localeurl.middleware.LocaleURLMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'pagination.middleware.PaginationMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -130,7 +130,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
     "django.core.context_processors.debug",
     "django.core.context_processors.i18n",
-    'django.core.context_processors.request',
+    "django.core.context_processors.request",
     "django.core.context_processors.media",
     "django.core.context_processors.static",
     "django.contrib.messages.context_processors.messages",
@@ -146,16 +146,18 @@ LOCALE_PATHS = (
     PROJECT_PATH+'/locale/',
 )
 
-LOCALE_INDEPENDENT_MEDIA_URL = True
-LOCALE_INDEPENDENT_PATHS = (
-    re.compile(r'^/sitemap\.xml$'),
-    #re.compile('^/crm/.*$'),
-)
+# LOCALE_INDEPENDENT_MEDIA_URL = True
+# LOCALE_INDEPENDENT_PATHS = (
+#     re.compile(r'^/sitemap\.xml$'),
+#     #re.compile('^/crm/.*$'),
+# )
+#LOCALE_REDIRECT_PERMANENT = False
 
 #SOUTH_SKIP_MIGRATIONS = True
 SOUTH_TESTS_MIGRATE = False
 
-LOCALE_REDIRECT_PERMANENT = False
+TEST_RUNNER = 'coop_cms.test_runners.SafeMediaDiscoverRunner'
+
 #COOP_CMS_ARTICLE_CLASS = 'apps.content.models.Page'
 #COOP_CMS_NAVTREE_CLASS = 'content.NavTree'
 #COOP_BAR_MODULES = ('apps.content.coop_bar_cfg',)
@@ -186,12 +188,9 @@ INSTALLED_APPS = (
     'django.contrib.sitemaps',
 
     #3rd parties
-    'south',
     'django_extensions',
     'floppyforms',
     'sorl.thumbnail',
-    'pagination',
-    'localeurl',
 
     #externals
     'djaloha',
@@ -205,11 +204,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
 )
 
-
-if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration', )):
-    INSTALLED_APPS += (
-        'modeltranslation',
-    )
+if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration', 'makemigrations')):
+    INSTALLED_APPS = ('modeltranslation', ) + INSTALLED_APPS
 
 if len(sys.argv) > 1 and 'test' == sys.argv[1]:
     INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app', )
@@ -246,6 +242,6 @@ LOGGING = {
 }
 
 try:
-    from local_settings import * #pylint: disable=W0401,W0614
+    from local_settings import *  # pylint: disable=W0401,W0614
 except ImportError:
     pass

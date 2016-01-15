@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 from datetime import datetime
 
@@ -17,7 +14,8 @@ from coop_cms.models import NavNode, BaseArticle, ArticleCategory
 from coop_cms.settings import (
     is_localized, get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed,
 )
-from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt, AUTH_LOGIN_NAME
+from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt
+from coop_cms.utils import get_login_url
 
     
 class ArticleTest(BaseArticleTest):
@@ -30,16 +28,15 @@ class ArticleTest(BaseArticleTest):
             ('test/newsletter_blue.html', 'Blue'),
         )
         self._DJALOHA_LINK_MODELS = getattr(settings, 'DJALOHA_LINK_MODELS', [])
-        Article = get_article_class()
-        ct = ContentType.objects.get_for_model(Article)
-        settings.DJALOHA_LINK_MODELS = ['{0}.{1}'.format(ct.app_label, ct.model)]
+        article_class = get_article_class()
+        content_type = ContentType.objects.get_for_model(article_class)
+        settings.DJALOHA_LINK_MODELS = ['{0}.{1}'.format(content_type.app_label, content_type.model)]
         
     def tearDown(self):
         super(ArticleTest, self).tearDown()
         #restore
         settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
         settings.DJALOHA_LINK_MODELS = self._DJALOHA_LINK_MODELS
-    
 
     def _check_article(self, response, data):
         for (key, value) in data.items():
@@ -79,7 +76,32 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
+            self.assertRedirects(response, auth_url+'?next='+url)
+        else:
+            self.assertEqual(403, response.status_code)
+
+    def test_login_required_authenticated(self):
+        """show page if permission required and authenticated"""
+        self._log_as_non_editor()
+        article = get_article_class().objects.create(
+            title="test", publication=BaseArticle.PUBLISHED, login_required=True
+        )
+        url = article.get_absolute_url()
+        response = self.client.get(url)
+        self.assertEqual(200, response.status_code)
+
+    def test_login_required_not_authenticated(self):
+        """raise permission denied if permission required not authenticated"""
+        self.client.logout()
+        article = get_article_class().objects.create(
+            title="test", publication=BaseArticle.PUBLISHED, login_required=True
+        )
+        url = article.get_absolute_url()
+        response = self.client.get(url)
+        if is_perm_middleware_installed():
+            self.assertEqual(302, response.status_code)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -169,7 +191,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.post(url, data=data)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -194,7 +216,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url, follow=False)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -234,7 +256,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(url)
         if is_perm_middleware_installed():
             self.assertEqual(302, response.status_code)
-            auth_url = reverse(AUTH_LOGIN_NAME)
+            auth_url = get_login_url()
             self.assertRedirects(response, auth_url+'?next='+url)
         else:
             self.assertEqual(403, response.status_code)
@@ -346,7 +368,6 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(article.navigation_parent, None)
         self.assertEqual(NavNode.objects.count(), 0)
         self.assertEqual([a.id for a in article.sites.order_by("id")], data['sites'])
-
 
     def test_new_article_without_site(self):
         article_class = get_article_class()
@@ -720,60 +741,3 @@ class ArticleTest(BaseArticleTest):
 
         self.assertNotEqual(art1.summary, data['summary'])
         self.assertEqual(sorted([a.id for a in art1.sites.all()]), [settings.SITE_ID])
-
-
-class TemplateTest(BaseArticleTest):
-    
-    def setUp(self):
-        super(TemplateTest, self).setUp()
-        self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
-        settings.COOP_CMS_ARTICLE_TEMPLATES = (
-            ('coop_cms/article.html', 'coop_cms base article'),
-            ('test/article.html', 'test article'),
-        )
-        
-    def tearDown(self):
-        super(TemplateTest, self).tearDown()
-        #restore
-        settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
-
-    def test_view_article(self):
-        #Check that we are do not using the PrivateArticle anymore
-        klass = get_article_class()
-        article = mommy.make(klass, publication=klass.PUBLISHED)
-        response = self.client.get(article.get_absolute_url())
-        self.assertTemplateUsed(response, 'coop_cms/article.html')
-        self.assertEqual(200, response.status_code)
-        
-    def test_view_article_custom_template(self):
-        #Check that we are do not using the PrivateArticle anymore
-        klass = get_article_class()
-        article = mommy.make(klass, publication=klass.PUBLISHED, template='test/article.html')
-        response = self.client.get(article.get_absolute_url())
-        self.assertTemplateUsed(response, 'test/article.html')
-        self.assertEqual(200, response.status_code)
-        
-    def test_change_template(self):
-        #Check that we are do not using the PrivateArticle anymore
-        klass = get_article_class()
-        article = mommy.make(klass)
-        self._log_as_editor()
-        url = reverse('coop_cms_change_template', args=[article.id])
-        response = self.client.post(url, data={'template': 'test/article.html'}, follow=True)
-        self.assertEqual(200, response.status_code)
-        article = klass.objects.get(id=article.id)#refresh
-        self.assertEqual(article.template, 'test/article.html')
-        
-    def test_change_template_permission(self):
-        #Check that we are do not using the PrivateArticle anymore
-        klass = get_article_class()
-        article = mommy.make(klass)
-        url = reverse('coop_cms_change_template', args=[article.id])
-        response = self.client.post(url, data={'template': 'test/article.html'}, follow=True)
-        self.assertEqual(200, response.status_code)
-        redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
-        self.assertTrue(redirect_url.find(login_url)>0)
-        article = klass.objects.get(id=article.id)#refresh
-        self.assertEqual(article.template, '')
-

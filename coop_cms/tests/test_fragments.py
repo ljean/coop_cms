@@ -2,9 +2,6 @@
 """test fragments feature"""
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -948,8 +945,8 @@ class FragmentsInArticleTest(BaseFragmentTest):
         url = reverse("coop_cms_add_fragment")
         response = self.client.post(url, data=data, follow=False)
         self.assertEqual(302, response.status_code)
-        next_url = "http://testserver/accounts/login/?next={0}".format(url)
-        self.assertEqual(next_url, response['Location'])
+        next_url = "/accounts/login/?next={0}".format(url)
+        self.assertTrue(response['Location'].find(next_url) >= 0)
         
         self._log_as_regular_user()
         response = self.client.post(url, data=data, follow=False)

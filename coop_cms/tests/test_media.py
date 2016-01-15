@@ -2,9 +2,6 @@
 """media library unit testing"""
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 import json
 from datetime import datetime
@@ -38,6 +35,9 @@ class ImageUploadTest(MediaBaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content)
+        id_size = soup.select("input#id_size")
+        self.assertEqual(1, len(id_size))
+        self.assertEqual("hidden", id_size[0]["type"])
         id_filters = soup.select("input#id_filters")
         self.assertEqual(1, len(id_filters))
         self.assertEqual("hidden", id_filters[0]["type"])
@@ -140,8 +140,8 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=False)
         self.assertEqual(response.status_code, 302)
-        next_url = "http://testserver/accounts/login/?next={0}".format(url)
-        self.assertEqual(next_url, response['Location'])
+        next_url = "/accounts/login/?next={0}".format(url)
+        self.assertTrue(response['Location'].find(next_url) >= 0)
         
         images = Image.objects.all()
         self.assertEquals(0, images.count())
@@ -253,7 +253,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(response.content)
+        data = StringIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 130)
         
@@ -265,7 +265,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(response.content)
+        data = StringIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 60)
         
@@ -276,7 +276,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(response.content)
+        data = StringIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 60)
         
@@ -287,7 +287,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(response.content)
+        data = StringIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 20)
         
@@ -298,7 +298,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(response.content)
+        data = StringIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 130)
 
@@ -352,8 +352,8 @@ class MediaLibraryTest(MediaBaseTestCase):
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        next_url = "http://testserver/accounts/login/?next={0}".format(url)
-        self.assertEqual(next_url, response['Location'])
+        next_url = "/accounts/login/?next={0}".format(url)
+        self.assertTrue(response['Location'].find(next_url) >= 0)
         
     def test_show_media_not_staff(self):
         """show images empty user is not a staff member"""
@@ -509,7 +509,7 @@ class UploadDocTest(MediaBaseTestCase):
         self.assertEquals(0, Document.objects.all().count())
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
-        self.assertTrue(redirect_url.find(login_url) > 0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
         
     def test_upload_not_allowed(self):
         """upload: not allowed"""
@@ -564,11 +564,12 @@ class DocsInMediaLibTest(MediaBaseTestCase):
         
     def test_view_docs_anonymous(self):
         """view docs anonymous"""
-        response = self.client.get(reverse('coop_cms_media_documents'), follow=True)
+        url = reverse('coop_cms_media_documents')
+        response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
-        self.assertTrue(redirect_url.find(login_url) > 0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
         
     def test_view_docs_not_allowed(self):
         """view docs not allowed"""
@@ -617,7 +618,7 @@ class PhotologueInMediaLibTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
-        self.assertTrue(redirect_url.find(login_url) > 0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
 
     def test_view_not_allowed(self):
         """view docs not allowed"""
@@ -715,16 +716,19 @@ class DownloadDocTest(MediaBaseTestCase):
         
         #login and download
         self._log_as_mediamgr()
+
         response = self.client.get(doc.get_download_url())
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(response.content, self._get_file().read())
+        content = self.get_safe_content(response)
+        self.assertEqual(content, self._get_file().read())
         
         #logout and download
         self.client.logout()
         response = self.client.get(doc.get_download_url())
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, self._get_file().read())
+        content = self.get_safe_content(response)
+        self.assertEqual(content, self._get_file().read())
         
     @skipIf('sanza.Profile' in settings.INSTALLED_APPS, "sanza.Profile installed")
     def test_download_private(self):
@@ -754,7 +758,7 @@ class DownloadDocTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
         login_url = reverse('django.contrib.auth.views.login')
-        self.assertTrue(redirect_url.find(login_url) > 0)
+        self.assertTrue(redirect_url.find(login_url) >= 0)
         
 
 class ImageListTemplateTagTest(BaseTestCase):

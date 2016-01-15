@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
-from django.core.urlresolvers import reverse
 from coop_cms.models import BaseArticle
 from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseArticleTest, AUTH_LOGIN_NAME
+from coop_cms.tests import BaseArticleTest
+from coop_cms.utils import get_login_url
 
 
 class PermissionMiddlewareTest(BaseArticleTest):
@@ -29,7 +26,7 @@ class PermissionMiddlewareTest(BaseArticleTest):
         url = article.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        auth_url = reverse(AUTH_LOGIN_NAME)
+        auth_url = get_login_url()
         self.assertRedirects(response, auth_url+'?next='+url)
         
     def test_edit_anonymous(self):
@@ -38,9 +35,8 @@ class PermissionMiddlewareTest(BaseArticleTest):
         url = article.get_edit_url()
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
-        auth_url = reverse(AUTH_LOGIN_NAME)
-        self.assertEqual(response["Location"], "http://testserver"+auth_url+'?next='+url)
-        #self.assertRedirects(response, auth_url+'?next='+url)
+        auth_url = get_login_url()
+        self.assertTrue(response["Location"].find(auth_url+'?next='+url) >= 0)
         
     def test_view_published_anonymous(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)

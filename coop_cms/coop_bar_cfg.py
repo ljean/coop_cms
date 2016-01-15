@@ -7,10 +7,12 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 
+
 from coop_bar.utils import make_link
 
 from coop_cms.models import Link, Fragment
 from coop_cms.settings import get_article_class, get_navtree_class, cms_no_homepage, hide_media_library_menu
+from coop_cms.utils import get_model_name, get_model_app, get_model_label
 
 
 def can_do(perm, object_names):
@@ -84,7 +86,8 @@ def django_admin_edit_article(request, context):
     if request and request.user.is_staff and 'article' in context:
         article_class = get_article_class()
         article = context['article']
-        view_name = 'admin:{0}_{1}_change'.format(article_class._meta.app_label, article_class._meta.module_name)
+
+        view_name = 'admin:{0}_{1}_change'.format(get_model_app(article_class), get_model_name(article_class))
         return make_link(
             reverse(view_name, args=[article.id]), _(u'Article admin'), 'fugue/table.png',
             classes=['icon', 'alert_on_click']
@@ -96,11 +99,11 @@ def django_admin_edit_object(request, context):
     if request and request.user.is_staff and context.get('object', None):
         obj = context['object']
         object_class = obj.__class__
-        view_name = 'admin:{0}_{1}_change'.format(object_class._meta.app_label, object_class._meta.module_name)
+        view_name = 'admin:{0}_{1}_change'.format(get_model_app(object_class), get_model_name(object_class))
         try:
             return make_link(
                 reverse(view_name, args=[obj.id]),
-                _(u'Admin {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+                _(u'Admin {0}').format(get_model_label(object_class)), 'fugue/table.png',
                 classes=['icon', 'alert_on_click']
             )
         except NoReverseMatch:
@@ -114,11 +117,11 @@ def django_admin_add_object(request, context):
         object_class = context.get('model', None)
         if not object_class:
             object_class = context['object'].__class__
-        view_name = 'admin:{0}_{1}_add'.format(object_class._meta.app_label, object_class._meta.module_name)
+        view_name = 'admin:{0}_{1}_add'.format(get_model_app(object_class), get_model_name(object_class))
         try:
             return make_link(
                 reverse(view_name),
-                _(u'Add {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+                _(u'Add {0}').format(get_model_label(object_class)), 'fugue/table.png',
                 classes=['icon', 'alert_on_click']
             )
         except NoReverseMatch:
@@ -132,10 +135,10 @@ def django_admin_list_objects(request, context):
         if not object_class:
             object_class = context['object'].__class__
         try:
-            view_name = 'admin:{0}_{1}_changelist'.format(object_class._meta.app_label, object_class._meta.module_name)
+            view_name = 'admin:{0}_{1}_changelist'.format(get_model_app(object_class), get_model_name(object_class))
             return make_link(
                 reverse(view_name),
-                _(u'List {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+                _(u'List {0}').format(get_model_label(object_class)), 'fugue/table.png',
                 classes=['icon', 'alert_on_click']
             )
         except NoReverseMatch:
@@ -148,7 +151,7 @@ def django_admin_navtree(request, context):
         coop_cms_navtrees = context.get('coop_cms_navtrees', None)
         if coop_cms_navtrees:
             tree_class = get_navtree_class()
-            admin_tree_name = "{0}_{1}".format(tree_class._meta.app_label, tree_class._meta.module_name)
+            admin_tree_name = "{0}_{1}".format(get_model_app(tree_class), get_model_name(tree_class))
             if len(coop_cms_navtrees) == 1:
                 tree = coop_cms_navtrees[0]
                 url = reverse('admin:{0}_change'.format(admin_tree_name), args=[tree.id])
@@ -340,11 +343,11 @@ def newsletter_admin(request, context):
     """show menu"""
     newsletter = context.get('newsletter')
     object_class = newsletter.__class__
-    view_name = 'admin:{0}_{1}_change'.format(object_class._meta.app_label, object_class._meta.module_name)
+    view_name = 'admin:{0}_{1}_change'.format(get_model_app(object_class), get_model_name(object_class))
     try:
         return make_link(
             reverse(view_name, args=[newsletter.id]),
-            _(u'Admin {0}'.format(object_class._meta.verbose_name)), 'fugue/table.png',
+            _(u'Admin {0}').format(get_model_label(object_class)), 'fugue/table.png',
             classes=['icon', 'alert_on_click']
         )
     except NoReverseMatch:

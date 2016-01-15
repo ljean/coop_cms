@@ -1,18 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
-
-from django.test import TestCase
 from django.test.utils import override_settings
 
-from coop_cms.settings import load_class
 from coop_cms.forms import ArticleSettingsForm, NewArticleForm
+from coop_cms.settings import load_class
+from coop_cms.tests import BaseTestCase
 
 
-class LoadClassTest(TestCase):
+class LoadClassTest(BaseTestCase):
 
     @override_settings(COOP_CMS_ARTICLE_SETTINGS_FORM='coop_cms.forms.ArticleSettingsForm')
     def test_load_value(self):

@@ -1,6 +1,5 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_modify admin_static %}
-{% load url from future %}
 
 {% block extrahead %}{{ block.super }}
 {% url 'admin:jsi18n' as jsi18nurl %}
@@ -132,11 +131,13 @@
       $("#nodes").bind("move_node.jstree", function (event, data) {
         var tree_data = {
           node_id: get_node_id(data.rslt.o),
-          ref_pos: data.rslt.p,
+          ref_pos: data.rslt.p
         };
         try {
           tree_data['ref_id'] = get_node_id(data.rslt.or);
-        } catch (ex) {}
+        } catch (ex) {
+          console.log('error > invalid ref_id');
+        }
 
         try {
           tree_data['parent_id'] = get_node_id(data.rslt.np);
@@ -149,7 +150,7 @@
       $("#nodes").bind("rename_node.jstree", function (event, data) {
           var tree_data = {
           node_id: get_node_id(data.rslt.obj),
-          name: data.rslt.name,
+          name: data.rslt.name
           };
           post_msg('rename_navnode', tree_data, function(data) {
             if (data.message) {
@@ -258,7 +259,7 @@
 {% endif %}
 {% endblock %}
 
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}" />{% endblock %}
 
 {% block coltype %}{% if ordered_objects %}colMS{% else %}colM{% endif %}{% endblock %}
 

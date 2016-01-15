@@ -10,6 +10,7 @@ from coop_cms.settings import get_newsletter_item_classes
 class Command(BaseCommand):
     """force the creation of every newsletter items"""
     help = u"force the creation of every newsletter items"
+    use_argparse = False
 
     def handle(self, *args, **options):
         """command"""

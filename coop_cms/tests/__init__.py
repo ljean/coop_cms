@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-if 'localeurl' in settings.INSTALLED_APPS:
-    from localeurl.models import patch_reverse
-    patch_reverse()
 
 import logging
 from bs4 import BeautifulSoup as BaseBeautifulSoup
@@ -16,21 +13,14 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from coop_cms.settings import get_article_class
+from coop_cms.settings import get_article_class, get_unit_test_media_root, DEFAULT_MEDIA_ROOT
 
-try:
-    AUTH_LOGIN_NAME = "auth_login"
-    reverse(AUTH_LOGIN_NAME)
-except:
-    AUTH_LOGIN_NAME = "login"
 
 def make_dt(dt):
     if settings.USE_TZ:
         return timezone.make_aware(dt, timezone.get_default_timezone())
     else:
         return dt
-
-default_media_root = settings.MEDIA_ROOT
 
 
 #Used by a test below
@@ -44,16 +34,16 @@ class BeautifulSoup(BaseBeautifulSoup):
         super(BeautifulSoup, self).__init__(content, "html.parser")
 
 
-@override_settings(MEDIA_ROOT=os.path.join(default_media_root, '_unit_tests'))
+@override_settings(MEDIA_ROOT=get_unit_test_media_root())
 class BaseTestCase(TestCase):
     def _clean_files(self):
-        if default_media_root != settings.MEDIA_ROOT:
+        if DEFAULT_MEDIA_ROOT != settings.MEDIA_ROOT:
             try:
                 shutil.rmtree(settings.MEDIA_ROOT)
             except OSError:
                 pass
         else:
-            raise Exception("Warning! wrong media root for unittesting")
+            raise Exception("Warning! wrong media root for unit-testing")
     
     def setUp(self):
         logging.disable(logging.CRITICAL)
@@ -69,6 +59,16 @@ class MediaBaseTestCase(BaseTestCase):
     def _get_file(self, file_name='unittest1.txt'):
         full_name = os.path.normpath(os.path.dirname(__file__) + '/fixtures/' + file_name)
         return open(full_name, 'rb')
+
+    def get_safe_content(self, response):
+        if hasattr(response, 'content'):
+            if hasattr(response.content, 'read'):
+                return response.content.read()
+            else:
+                return response.content
+        elif hasattr(response, 'streaming_content'):
+            return "".join(response.streaming_content)
+        return None
 
     def _log_as_mediamgr(self, is_staff=True, perm=None):
         u = User.objects.create(username='toto', is_staff=is_staff)
@@ -125,7 +125,6 @@ class UserBaseTestCase(BaseTestCase):
         return self.client.login(username='titi', password='titi')
 
 
-
 class BaseArticleTest(MediaBaseTestCase):
     def _log_as_editor(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
@@ -169,4 +168,3 @@ class BaseArticleTest(MediaBaseTestCase):
         user.save()
         
         return self.client.login(username='toto', password='toto')
-

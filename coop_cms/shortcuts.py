@@ -10,16 +10,13 @@ from django.utils.translation import get_language
 
 from coop_cms.models import BaseArticle, Alias
 from coop_cms.settings import get_article_class, is_localized
+from coop_cms.utils import strip_locale_path
 
 
 def get_article_slug(*args, **kwargs):
     """slugify"""
     slug = reverse(*args, **kwargs)
-    if 'localeurl' in settings.INSTALLED_APPS:
-        #If localeurl is installed reverse is patched
-        #We must remove the lang prefix
-        from localeurl.utils import strip_path
-        lang, slug = strip_path(slug)
+    lang, slug = strip_locale_path(slug)
     return slug.strip('/')
 
 
