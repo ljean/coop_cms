@@ -110,6 +110,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'coop_cms.utils.RequestMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -145,22 +146,10 @@ AUTHENTICATION_BACKENDS = (
 LOCALE_PATHS = (
     PROJECT_PATH+'/locale/',
 )
-
-# LOCALE_INDEPENDENT_MEDIA_URL = True
-# LOCALE_INDEPENDENT_PATHS = (
-#     re.compile(r'^/sitemap\.xml$'),
-#     #re.compile('^/crm/.*$'),
-# )
-#LOCALE_REDIRECT_PERMANENT = False
-
-#SOUTH_SKIP_MIGRATIONS = True
 SOUTH_TESTS_MIGRATE = False
 
 TEST_RUNNER = 'coop_cms.test_runners.SafeMediaDiscoverRunner'
 
-#COOP_CMS_ARTICLE_CLASS = 'apps.content.models.Page'
-#COOP_CMS_NAVTREE_CLASS = 'content.NavTree'
-#COOP_BAR_MODULES = ('apps.content.coop_bar_cfg',)
 DJALOHA_LINK_MODELS = ('basic_cms.Article',)
 COOP_CMS_ARTICLE_LOGO_SIZE = "950x250"
 COOP_CMS_NEWSLETTER_TEMPLATES = (
@@ -178,7 +167,7 @@ COOP_CMS_TITLE_OPTIONAL = True
 LOGIN_REDIRECT_URL = "/"
 
 INSTALLED_APPS = (
-    #contribs
+    # contribs
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -187,12 +176,12 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
 
-    #3rd parties
+    # 3rd parties
     'django_extensions',
     'floppyforms',
     'sorl.thumbnail',
 
-    #externals
+    # externals
     'djaloha',
     'colorbox',
     'coop_cms',

@@ -17,7 +17,7 @@ from importlib import import_module
 from coop_cms.logger import logger
 
 
-COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'
+DEFAULT_NAVTREE_CLASS = COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'
 DEPRECATED_COOP_CMS_NAVTREE_CLASS = getattr(django_settings, 'COOP_CMS_NAVTREE_CLASS', 'basic_cms.NavTree')
 DEFAULT_MEDIA_ROOT = ''
 
@@ -64,16 +64,20 @@ def get_navtree_class(defaut_class=None):
     if hasattr(get_navtree_class, '_cache_class'):
         return getattr(get_navtree_class, '_cache_class')
     else:
-        full_class_name = COOP_CMS_NAVTREE_CLASS
-        app_label, model_name = full_class_name.split('.')
-        model_name = model_name.lower()
-        try:
-            content_type = ContentType.objects.get(app_label=app_label, model=model_name)
-        except ContentType.DoesNotExist:
-            return None
-        except:
-            return None
-        navtree_class = content_type.model_class()
+        navtree_class = None
+        if DEFAULT_NAVTREE_CLASS != COOP_CMS_NAVTREE_CLASS:
+            full_class_name = COOP_CMS_NAVTREE_CLASS
+            app_label, model_name = full_class_name.split('.')
+            model_name = model_name.lower()
+            try:
+                content_type = ContentType.objects.get(app_label=app_label, model=model_name)
+                navtree_class = content_type.model_class()
+            except Exception:
+                navtree_class = None
+
+        if navtree_class is None:
+            module = import_module('coop_cms.models')
+            navtree_class = module.NavTree
         setattr(get_navtree_class, '_cache_class', navtree_class)
         return navtree_class
 
@@ -142,22 +146,22 @@ def get_article_templates(article, user):
         coop_cms_article_templates = getattr(django_settings, 'COOP_CMS_ARTICLE_TEMPLATES')
 
         if type(coop_cms_article_templates) in (str, unicode):
-            #COOP_CMS_ARTICLE_TEMPLATES is a string :
-            # - a function name that will return a tuple
-            # - a variable name that contains a tuple
+            # COOP_CMS_ARTICLE_TEMPLATES is a string :
+            #  - a function name that will return a tuple
+            #  - a variable name that contains a tuple
 
             #extract module and function/var names
             module_name, object_name = coop_cms_article_templates.rsplit('.', 1)
-            module = import_module(module_name) #import module
-            article_templates_object = getattr(module, object_name) #get the object
+            module = import_module(module_name) # import module
+            article_templates_object = getattr(module, object_name)  # get the object
             if callable(article_templates_object):
-                #function: call it
+                # function: call it
                 article_templates = article_templates_object(article, user)
             else:
-                #var: assign
+                # var: assign
                 article_templates = article_templates_object
         else:
-            #COOP_CMS_ARTICLE_TEMPLATES is directly a tuple, assign it
+            # COOP_CMS_ARTICLE_TEMPLATES is directly a tuple, assign it
             article_templates = coop_cms_article_templates
     else:
         article_templates = None

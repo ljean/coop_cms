@@ -16,22 +16,16 @@ from coop_cms.shortcuts import get_headlines
 from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
 
 
+@override_settings(COOP_CMS_NO_HOMEPAGE=False)
 class NoHomepageTest(UserBaseTestCase):
     
-    def setUp(self):
-        super(NoHomepageTest, self).setUp()
-        self._settings_backup = getattr(settings, 'COOP_CMS_NO_HOMEPAGE', False)
-    
-    def tearDown(self):
-        super(NoHomepageTest, self).tearDown()
-        settings.COOP_CMS_NO_HOMEPAGE = self._settings_backup
-        
+    @override_settings(COOP_CMS_NO_HOMEPAGE=True)
     def test_view_article_set_homepage_no_homepage(self):
-        settings.COOP_CMS_NO_HOMEPAGE = True
         self._log_as_editor(can_add=True)
         article_class = get_article_class()
         art = mommy.make(article_class, is_homepage=False, publication=BaseArticle.PUBLISHED)
-        response = self.client.get(art.get_edit_url())
+        url = art.get_edit_url()
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content)
         url = reverse('coop_cms_set_homepage', args=[art.id])
@@ -39,11 +33,11 @@ class NoHomepageTest(UserBaseTestCase):
         self.assertEqual(0, len(links))
         
     def test_view_article_set_homepage(self):
-        settings.COOP_CMS_NO_HOMEPAGE = False
         self._log_as_editor(can_add=True)
         article_class = get_article_class()
         art = mommy.make(article_class, is_homepage=False, publication=BaseArticle.PUBLISHED)
-        response = self.client.get(art.get_edit_url())
+        url = art.get_edit_url()
+        response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content)
         url = reverse('coop_cms_set_homepage', args=[art.id])
@@ -51,13 +45,13 @@ class NoHomepageTest(UserBaseTestCase):
         self.assertEqual(1, len(links))
 
 
-@skipIf(cms_no_homepage(), "no homepage")          
+@skipIf(cms_no_homepage(), "no homepage")
 class HomepageTest(UserBaseTestCase):
     
     def setUp(self):
         super(HomepageTest, self).setUp()
         self.site_id = settings.SITE_ID
-    
+
     def tearDown(self):
         super(HomepageTest, self).tearDown()
         settings.SITE_ID = self.site_id
