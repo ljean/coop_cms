@@ -164,6 +164,7 @@ class EditableObjectView(View):
         djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)
 
         if self.form.is_valid() and all([f.is_valid() for f in djaloha_forms]):
+
             self.object = self.form.save()
             
             self.after_save(self.object)

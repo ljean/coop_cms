@@ -36,19 +36,18 @@ class BaseTestCase(TestCase):
     def _log_as_editor(self):
         self.editor = user = User.objects.create_user('editor', 'toto@toto.fr', 'editor')
         
-        ct = ContentType.objects.get_for_model(TestClass)
+        content_type = ContentType.objects.get_for_model(TestClass)
         
-        perm = 'change_{0}'.format(ct.model)
-        can_edit = Permission.objects.get(content_type=ct, codename=perm)
+        perm = 'change_{0}'.format(content_type.model)
+        can_edit = Permission.objects.get(content_type=content_type, codename=perm)
         user.user_permissions.add(can_edit)
         
-        perm = 'add_{0}'.format(ct.model)
-        can_add = Permission.objects.get(content_type=ct, codename=perm)
+        perm = 'add_{0}'.format(content_type.model)
+        can_add = Permission.objects.get(content_type=content_type, codename=perm)
         user.user_permissions.add(can_add)
         
         user.is_active = True
-        user.is_staff = True #can_edit_object
-        #user.user_permissions
+        user.is_staff = True  # can_edit_object
         user.save()
         return self.client.login(username='editor', password='editor')
   
@@ -70,8 +69,7 @@ class GenericViewTestCase(BaseTestCase):
             self.assertRedirects(response, auth_url + '?next=' + url)
         else:
             self.assertEqual(403, response.status_code)
-        
-    
+
     def test_edit_object_anonymous(self):
         obj = mommy.make(TestClass)
         url = obj.get_edit_url()
@@ -327,7 +325,6 @@ class FormsetViewTestCase(BaseTestCase):
         self.assertEqual(data['form-0-int_field'], obj.int_field)
         self.assertEqual(data['form-0-float_field'], obj.float_field)
         
-        
     def test_edit_formset_several_object(self):
         self._log_as_editor()
         
@@ -551,7 +548,7 @@ class ArticleFormTest(BaseTestCase):
     def tearDown(self):
         for s in self._settings_fields_to_backup():
             v = self._settings_backup.get(s, None)
-            if v != None:
+            if v is not None:
                 setattr(settings, s, v)
         
         settings.LOGIN_URL = self.LOGIN_URL

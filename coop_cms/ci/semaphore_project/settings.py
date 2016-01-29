@@ -20,11 +20,12 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'test',
-        'USER': 'postgres',
-        'PASSWORD': '',
+        'NAME': 'test_db',
+        'USER': 'runner',
+        'PASSWORD': 'semaphoredb',
         'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'PORT': 5432,
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -147,11 +148,6 @@ LOCALE_PATHS = (
     PROJECT_PATH+'/locale/',
 )
 SOUTH_TESTS_MIGRATE = False
-
-SOUTH_MIGRATION_MODULES = {
-    'coop_cms': 'coop_cms.south_migrations',
-    'basic_cms': 'coop_cms.apps.basic_cms.south_migrations',
-}
 
 TEST_RUNNER = 'coop_cms.test_runners.SafeMediaDiscoverRunner'
 
