@@ -156,6 +156,11 @@ LOCALE_PATHS = (
 #SOUTH_SKIP_MIGRATIONS = True
 SOUTH_TESTS_MIGRATE = False
 
+SOUTH_MIGRATION_MODULES = {
+    'coop_cms': 'coop_cms.south_migrations',
+    'basic_cms': 'coop_cms.apps.basic_cms.south_migrations',
+}
+
 TEST_RUNNER = 'coop_cms.test_runners.SafeMediaDiscoverRunner'
 
 #COOP_CMS_ARTICLE_CLASS = 'apps.content.models.Page'
