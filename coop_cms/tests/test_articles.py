@@ -138,7 +138,62 @@ class ArticleTest(BaseArticleTest):
         response = self.client.post(article.get_edit_url(), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         self._check_article(response, data)
-        
+
+    def test_edit_article_html(self):
+        """It should save article correctly"""
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+
+        data = {"title": 'salut', 'content': '<h2>Hello</h2><p>Hello</p>'}
+
+        self._log_as_editor()
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self._check_article(response, data)
+
+    def test_edit_article_html_with_br(self):
+        """It should save article correctly"""
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+
+        data = {"title": 'salut', 'content': '<h2>Hello</h2><p>Hello<br>Cool<br /></p>'}
+
+        self._log_as_editor()
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        expected_content = '<h2>Hello</h2><p>Hello<br />Cool<br /></p>'
+        data['content'] = expected_content
+        self._check_article(response, data)
+
+    def test_edit_article_html_with_img_wrapper(self):
+        """It should save article correctly"""
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+
+        content = """
+            <p><div
+            contenteditable="false"
+            style="overflow: hidden; position: relative; display: inline-block; float: none;"
+            class="ui-wrapper aloha-image-box-active Aloha_Image_Resize aloha"
+            >
+                <img src="moby-dick.jpg" style="height: 207px; width: 269px;" class="ui-resizable" />
+                <div class="ui-resizable-handle ui-resizable-ne" style="z-index: 1000;"></div>
+                <div class="ui-resizable-handle ui-resizable-se ui-icon" style="z-index: 1000;"></div>
+                <div class="ui-resizable-handle ui-resizable-sw" style="z-index: 1000;"></div>
+                <div class="ui-resizable-handle ui-resizable-nw" style="z-index: 1000;"></div>
+            </div></p>
+        """
+
+        data = {"title": 'salut', 'content': content}
+
+        self._log_as_editor()
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        #print response.content
+
+        expected_content = '<p><img class="" src="moby-dick.jpg" style="height: 207px; width: 269px;"/></p>'
+        data['content'] = expected_content
+        self._check_article(response, data)
+
     def test_edit_article_draft(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
         

@@ -741,10 +741,10 @@ class NewsletterTest(UserBaseTestCase):
         mail.outbox = []
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
         self.assertEqual(len(mail.outbox), 0)
-        
-        
+
     def test_send_newsletter_several(self):
-        
+        """it should send newsletter to several addresses"""
+
         newsletter_data = {
             'subject': 'This is the subject',
             'content': '<h2>Hello guys!</h2><p>Visit <a href="http://toto.fr">us</a></p>',
@@ -769,7 +769,7 @@ class NewsletterTest(UserBaseTestCase):
             self.assertTrue(email.alternatives[0][1], "text/html")
             self.assertTrue(email.alternatives[0][0].find('Hello guys')>=0)
         
-        #check whet happens if command is called again
+        # check whet happens if command is called again
         mail.outbox = []
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
         self.assertEqual(len(mail.outbox), 0)

@@ -109,7 +109,6 @@ def view_article(request, url, extra_context=None, force_template=None):
 @login_required
 def edit_article(request, url, extra_context=None, force_template=None):
     """edit the article"""
-
     article_form_class = get_article_form()
 
     article = get_article_or_404(slug=url, sites=settings.SITE_ID)

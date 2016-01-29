@@ -35,7 +35,7 @@ setup(
         'sorl-thumbnail',
         'apidev-coop_colorbox >= 1.2.0',
         'apidev-coop_bar >= 1.3.1',
-        'apidev-djaloha >= 1.1.1',
+        'apidev-djaloha >= 1.1.2',
         'feedparser',
         'beautifulsoup4',
         'django-filetransfers',
@@ -46,7 +46,7 @@ setup(
     url='https://github.com/ljean/coop_cms/',
     download_url='https://github.com/ljean/coop_cms/tarball/master',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
