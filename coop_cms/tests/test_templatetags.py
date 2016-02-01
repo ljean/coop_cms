@@ -13,7 +13,7 @@ from django.test.client import RequestFactory
 
 from coop_cms.models import Link, NavNode, BaseArticle
 from coop_cms.settings import is_localized, is_multilang, get_article_class, get_navtree_class
-from coop_cms.templatetags.coop_utils import get_part, get_parts, group_in_sublists, find_css
+from coop_cms.templatetags.coop_utils import get_part, get_parts, group_in_sublists, find_css, reduced_page_range
 from coop_cms.tests import BaseTestCase
 
 
@@ -360,3 +360,55 @@ class FindCssTestCase(BaseTestCase):
     def test_dont_find_several(self):
         """check template filter returns false if not in css_classes"""
         self.assertFalse(find_css("col1 ligne", "col2"))
+
+
+class PaginationReducedPageRangeTestCase(BaseTestCase):
+    """reduced_page_range template filter"""
+
+    def get_pagination(self, page_number, nb_pages):
+
+        class _Paginator(object):
+            """Dummy class"""
+            def __init__(self):
+                self.page_range = list(range(1, nb_pages + 1))
+
+        class _Pagination(object):
+            """Dummy class"""
+
+            def __init__(self):
+                self.paginator = _Paginator()
+                self.number = page_number
+
+        return _Pagination()
+
+    def test_less_than_10_pages(self):
+        """It should keep the range as it is"""
+
+        page_obj = self.get_pagination(1, 10)
+        self.assertEqual(
+            list(range(1, 11)), reduced_page_range(page_obj)
+        )
+
+    def test_more_than_10_pages(self):
+        """It should reduce the range"""
+
+        page_obj = self.get_pagination(1, 12)
+        self.assertEqual(
+            [1, 2, 3, 0, 12], reduced_page_range(page_obj)
+        )
+
+    def test_more_than_10_pages_at_the_end(self):
+        """It should reduce the range"""
+
+        page_obj = self.get_pagination(12, 12)
+        self.assertEqual(
+            [1, 0, 10, 11, 12], reduced_page_range(page_obj)
+        )
+
+    def test_more_than_10_pages_middle(self):
+        """It should reduce the range"""
+
+        page_obj = self.get_pagination(6, 12)
+        self.assertEqual(
+            [1, 0, 4, 5, 6, 7, 8, 0, 12], reduced_page_range(page_obj)
+        )

@@ -409,3 +409,38 @@ def coop_docs_list(parser, token):
     except IndexError:
         raise TemplateSyntaxError(u"coop_docs_list: usage --> {% coop_docs_list 'filter_name' as var_name %}")
     return MediaListNode(Document, filter_name, var_name)
+
+
+@register.filter
+def reduced_page_range(page_obj, max_num=10):
+    nb_pages = len(page_obj.paginator.page_range)
+
+    if nb_pages > max_num:
+        current_page = page_obj.number
+
+        start_value = max(1, current_page - 2)
+        pages = list(range(start_value, current_page))
+
+        pages += [current_page]
+
+        end_value = min(nb_pages, current_page + 2)
+        pages += list(range(current_page + 1, end_value + 1))
+
+        if 1 not in pages:
+            # If not in the list add first page
+            extra_pages = [1, ]
+            if pages[0] != 2:
+                # Add separator if there is a gap between numbers
+                extra_pages += [0, ]
+            pages = extra_pages + pages
+
+        if nb_pages not in pages:
+            # If not in the list add separator and last page
+            extra_pages = [nb_pages, ]
+            if pages[-1] != nb_pages - 1:
+                extra_pages = [0, ] + extra_pages
+            pages += extra_pages
+
+        return pages
+    else:
+        return page_obj.paginator.page_range
