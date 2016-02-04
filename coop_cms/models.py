@@ -1035,7 +1035,7 @@ def on_create_newsletterable_instance(sender, instance, created, raw, **kwargs):
 post_save.connect(on_create_newsletterable_instance)
 
 
-class Newsletter(models.Model):
+class Newsletter(TimeStampedModel):
     """Newsletter"""
     subject = models.CharField(max_length=200, verbose_name=_(u'subject'), blank=True, default="")
     content = models.TextField(_(u"content"), default="<br>", blank=True)
