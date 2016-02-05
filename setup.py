@@ -41,7 +41,6 @@ setup(
         'django-filetransfers',
         'model_mommy',
         'Pillow',
-        'django-wkhtmltopdf',
     ],
     long_description=open('README.rst').read(),
     url='https://github.com/ljean/coop_cms/',

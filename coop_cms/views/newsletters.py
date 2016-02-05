@@ -18,8 +18,11 @@ from django.utils.translation import ugettext as _
 from django.views.generic import View
 
 from colorbox.decorators import popup_redirect
-from wkhtmltopdf.utils import convert_to_pdf, make_absolute_paths
-from wkhtmltopdf.views import PDFResponse
+try:
+    from wkhtmltopdf.utils import convert_to_pdf, make_absolute_paths
+    from wkhtmltopdf.views import PDFResponse
+except ImportError:
+    pass
 
 from coop_cms import forms
 from coop_cms import models

@@ -7,7 +7,6 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.loader import get_template
 from django.utils.translation import get_language, ugettext as _
 
-
 from coop_bar.utils import make_link
 
 from coop_cms.models import Link, Fragment
@@ -383,7 +382,7 @@ def change_newsletter_settings(request, context):
 @can_edit_newsletter
 def convert_newsletter_to_pdf(request, context):
     """show menu"""
-    if not context.get('edit_mode'):
+    if 'wkhtmltopdf' in settings.INSTALLED_APPS and not context.get('edit_mode'):
         newsletter = context.get('newsletter')
         url = reverse('coop_cms_newsletter_pdf', args=[newsletter.id, ])
         return make_link(
