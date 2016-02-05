@@ -3,17 +3,23 @@
 
 from datetime import datetime
 import sys
+from tempfile import NamedTemporaryFile
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.utils.encoding import smart_text
+from django.utils.text import slugify
 from django.utils.translation import ugettext as _
+from django.views.generic import View
 
 from colorbox.decorators import popup_redirect
+from wkhtmltopdf.utils import convert_to_pdf, make_absolute_paths
+from wkhtmltopdf.views import PDFResponse
 
 from coop_cms import forms
 from coop_cms import models
@@ -143,6 +149,7 @@ class NewsletterView(EditableObjectView):
     form_class = get_newsletter_form()
     field_lookup = "id"
     varname = "newsletter"
+    editable = True
 
     def can_view_object(self):
         if self.object.is_public:
@@ -154,8 +161,10 @@ class NewsletterView(EditableObjectView):
         context_data = super(NewsletterView, self).get_context_data()
         context_data.update({
             'title': self.object.subject,
-            'by_email': self.request.GET.get('by_email', False)
+            'by_email': self.request.GET.get('by_email', False),
+            'editable': self.editable,
         })
+        print context_data
         return context_data
 
     def after_save(self, article):
@@ -166,3 +175,60 @@ class NewsletterView(EditableObjectView):
         """get template"""
         return self.object.get_template_name()
 
+
+class NewsletterPdfView(View):
+    """convert the newsletter to pdf"""
+
+    def get(self, request, *args, **kwargs):
+        """handle GET request : convert newsletter to pdf"""
+
+        newsletter = get_object_or_404(models.Newsletter, id=self.kwargs['id'])
+
+        # Call the newsletter view as a regular function
+        newsletter_view = NewsletterView.as_view(editable=False)
+        response = newsletter_view(request, id=newsletter.id)
+
+        # Save the Html into a temporary file
+        temp_file = self.save_to_temporary_file(response.content)
+
+        # convert this file to pdf
+        pdf_content = convert_to_pdf(
+            filename=temp_file.name,
+            header_filename=None,
+            footer_filename=None,
+            cmd_options={}
+        )
+
+        # Generate name of the pdf file
+        filename = u'newsletter_{0}.pdf'.format(slugify(newsletter.subject))
+
+        # returns PDF response
+        return PDFResponse(pdf_content, show_content_in_browser=False, filename=filename)
+
+    def save_to_temporary_file(self, content):
+        """
+        put content into a temporary file
+        Inspired by django-wkhtmltopdf
+        """
+
+        # Turn path to absolute
+        content = smart_text(content)
+        content = make_absolute_paths(content)
+
+        try:
+            # Python3 has 'buffering' arg instead of 'bufsize'
+            temp_file = NamedTemporaryFile(
+                mode='w+b', buffering=-1, suffix='.html', prefix='tmp', dir=None, delete=True)
+        except TypeError:
+            temp_file = NamedTemporaryFile(
+                mode='w+b', bufsize=-1, suffix='.html', prefix='tmp', dir=None, delete=True
+            )
+
+        try:
+            temp_file.write(content.encode('utf-8'))
+            temp_file.flush()
+            return temp_file
+        except:
+            # Clean-up tempfile if an Exception is raised.
+            temp_file.close()
+            raise

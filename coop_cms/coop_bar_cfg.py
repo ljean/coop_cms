@@ -381,6 +381,18 @@ def change_newsletter_settings(request, context):
 
 
 @can_edit_newsletter
+def convert_newsletter_to_pdf(request, context):
+    """show menu"""
+    if not context.get('edit_mode'):
+        newsletter = context.get('newsletter')
+        url = reverse('coop_cms_newsletter_pdf', args=[newsletter.id, ])
+        return make_link(
+            url, _(u'Convert to Pdf'), 'fugue/document-pdf.png',
+            classes=['icon']
+        )
+
+
+@can_edit_newsletter
 def test_newsletter(request, context):
     """show menu"""
     newsletter = context.get('newsletter', None)
@@ -492,7 +504,8 @@ def load_commands(coop_bar):
             change_newsletter_settings,
             newsletter_admin,
             newsletter_articles,
-            test_newsletter
+            test_newsletter,
+            convert_newsletter_to_pdf,
         ],
         [
             cms_edit,

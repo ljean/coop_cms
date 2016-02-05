@@ -9,7 +9,7 @@ from coop_cms import sitemap
 from coop_cms.settings import (
     get_article_views, install_csrf_failure_view
 )
-from coop_cms.views.newsletters import NewsletterView
+from coop_cms.views.newsletters import NewsletterView, NewsletterPdfView
 from coop_cms.views import articles, fragments, homepage, links, navigation, newsletters, medialib, webutils
 from coop_cms.views.webutils import DebugErrorCodeView
 
@@ -50,6 +50,11 @@ urlpatterns = [
         r'^cms/newsletter/(?P<id>\d+)/$',
         NewsletterView.as_view(),
         name='coop_cms_view_newsletter'
+    ),
+    url(
+        r'^cms/newsletter-pdf/(?P<id>\d+)/$',
+        NewsletterPdfView.as_view(),
+        name='coop_cms_newsletter_pdf'
     ),
     url(
         r'^cms/newsletter/(?P<id>\d+)/cms_edit/$',
