@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.loader import get_template
-from django.utils.translation import ugettext as _
+from django.utils.translation import get_language, ugettext as _
 
 
 from coop_bar.utils import make_link
@@ -430,10 +430,44 @@ def publication_css_classes(request, context):
             return 'is-archived'    
 
 
+class LanguageSwitcher(object):
+
+    def __init__(self, lang_code, lang_name):
+        self.lang_code = lang_code
+        self.lang_name = lang_name
+
+    def __call__(self, request, context):
+        if request and request.user.is_staff:
+            object_var_name = ''
+            for var_name in ('newsletter', 'article', 'object'):
+                if var_name in context:
+                    object_var_name = var_name
+                    break
+
+            if object_var_name:
+                object_var = context[object_var_name]
+                try:
+                    url = object_var.get_absolute_url()
+                except AttributeError:
+                    url = ''
+
+            if url:
+                is_localized = False
+                lang = get_language()
+                if url.find("/" + lang + "/") == 0:
+                    is_localized = True
+                    url = url[3:]
+
+                if is_localized and lang != self.lang_code:
+                    url = "/" + lang + url
+                    icon = "/fugue/locale.png".format(self.lang_code)
+                    return make_link(url, _(u'Switch to {0}').format(self.lang_name), icon, classes=['icon'])
+
+
 def load_commands(coop_bar):
     """load commandes"""
     
-    coop_bar.register([
+    menu_list = [
         [
             log_out,
         ],
@@ -474,7 +508,17 @@ def load_commands(coop_bar):
         [
             cms_publish,
         ],
-    ])
+    ]
+
+    # Create a menu to switch language on newsletters
+    language_switchers = []
+    if len(settings.LANGUAGES) > 1:
+        for lang_code, lang_name in settings.LANGUAGES:
+            language_switchers.append(LanguageSwitcher(lang_code, lang_name))
+        if language_switchers:
+            menu_list.append(language_switchers)
+
+    coop_bar.register(menu_list)
     
     coop_bar.register_css_classes(publication_css_classes)
     
