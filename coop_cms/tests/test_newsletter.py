@@ -989,6 +989,22 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         self.assertEqual(1, html.count(u'''<a style="color: #000;">'''))
         self.assertEqual(1, html.count(u'''<a style="color: #fff;">'''))
 
+    def test_no_end_tag(self):
+
+        template_content = """
+            {{% load coop_utils %}}
+            {{% nlf_css {0} %}}
+                <a>One</a>
+                <hr />
+                <a>Two</a>
+            {{% end_nlf_css %}}
+        """
+
+        template = template_content.format('hr="color: red;"')
+        tpl = Template(template)
+        html = tpl.render(Context({'by_email': True}))
+        self.assertEqual(1, html.count(u'<hr style="color: red;"/>'))
+
 
 class HtmlFixTest(BaseTestCase):
     """Test dirty fixs for newsletter html"""
@@ -1014,6 +1030,21 @@ class HtmlFixTest(BaseTestCase):
 
         expected_html = '<p>\n <h1>\n  Test\n </h1>\n <a class="link" href="/">Cool</a>\n <div>\n  ' \
         '<a href="/test">Test</a>\n </div>\n</p>\n'
+
+        self.assertEqual(fixed_html, expected_html)
+
+    def test_no_a_tags(self):
+        """Make sure that content is returned properly if no a tag in content"""
+        html = u'''
+        <p>
+         <h1>Test</h1>
+        </p>
+        '''
+
+        soup = BeautifulSoup(html)
+        fixed_html = strip_a_tags(soup.prettify())
+
+        expected_html = '<p>\n <h1>\n  Test\n </h1>\n</p>\n'
 
         self.assertEqual(fixed_html, expected_html)
 
