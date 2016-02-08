@@ -60,9 +60,11 @@ class _DeHTMLParser(HTMLParser):
         return ''.join(self.__text).strip()
 
 
-# copied from http://stackoverflow.com/a/3987802/117092
 def dehtml(text, allow_spaces=False):
-    """html to text"""
+    """
+    html to text
+    copied from http://stackoverflow.com/a/3987802/117092
+    """
     try:
         parser = _DeHTMLParser(allow_spaces=allow_spaces)
         parser.feed(text)
@@ -71,6 +73,59 @@ def dehtml(text, allow_spaces=False):
     except Exception:  # pylint: disable=broad-except
         print_exc(file=stderr)
         return text
+
+
+def strip_a_tags(pretty_html_text):
+    """
+    Reformat prettified html to remove spaces in <a> tags
+    """
+    pos = 0
+    fixed_html = u''
+    while True:
+        new_pos = pretty_html_text.find('<a', pos)
+        if new_pos > 0:
+            fixed_html += pretty_html_text[pos:new_pos]
+            end_tag = pretty_html_text.find('>', new_pos + 1)
+            end_pos = pretty_html_text.find('</a>', end_tag + 1)
+
+            fixed_html += pretty_html_text[new_pos:end_tag + 1]
+            tag_content = pretty_html_text[end_tag + 1:end_pos]
+            fixed_html += tag_content.strip() + '</a>'
+
+            pos = end_pos + 4
+        else:
+            fixed_html += pretty_html_text[pos:]
+            break
+
+    return fixed_html
+
+
+def _replace_from_end(s, a, b, times=None):
+    """replace from end"""
+    return s[::-1].replace(a, b, times)[::-1]
+
+
+def avoid_line_too_long(pretty_html_text):
+    """
+    detect any line with more than 998 characters
+    """
+    lines = pretty_html_text.split(u'\n')
+    new_lines = []
+    for line in lines:
+        line_length = len(line)
+        if line_length >= 998:
+            # Cut the line in several parts of 900 characters
+            parts = []
+            part_size = 900
+            part_index = 0
+            while part_size * len(parts) < line_length:
+                parts.append(line[part_index*part_size:(part_index + 1)*part_size])
+                part_index = len(parts)
+            parts = [_replace_from_end(part, u' ', u'\n', 1) for part in parts]
+            new_lines.append(u''.join(parts))
+        else:
+            new_lines.append(line)
+    return u'\n'.join(new_lines)
 
 
 def make_links_absolute(html_content, newsletter=None, site_prefix=""):
@@ -89,7 +144,7 @@ def make_links_absolute(html_content, newsletter=None, site_prefix=""):
     if not site_prefix:
         site_prefix = newsletter.get_site_prefix() if newsletter else settings.COOP_CMS_SITE_PREFIX
 
-    soup = BeautifulSoup(html_content)
+    soup = BeautifulSoup(html_content, 'html.parser')
     for a_tag in soup.find_all("a"):
         if a_tag.get("href", None):
             a_tag["href"] = make_abs(a_tag["href"])
@@ -97,8 +152,10 @@ def make_links_absolute(html_content, newsletter=None, site_prefix=""):
     for img_tag in soup.find_all("img"):
         if img_tag.get("src", None):
             img_tag["src"] = make_abs(img_tag["src"])
-    
-    return unicode(soup)
+
+    pretty_html = soup.prettify()
+    fixed_html = strip_a_tags(pretty_html)
+    return avoid_line_too_long(fixed_html)
 
 
 def _send_email(subject, html_text, dests, list_unsubscribe):
@@ -108,7 +165,7 @@ def _send_email(subject, html_text, dests, list_unsubscribe):
     from_email = getattr(settings, 'COOP_CMS_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
     reply_to = getattr(settings, 'COOP_CMS_REPLY_TO', None)
 
-    #make header
+    # make header
     headers = {}
     if reply_to:
         headers['Reply-To'] = reply_to

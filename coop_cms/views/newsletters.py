@@ -167,7 +167,6 @@ class NewsletterView(EditableObjectView):
             'by_email': self.request.GET.get('by_email', False),
             'editable': self.editable,
         })
-        print context_data
         return context_data
 
     def after_save(self, article):

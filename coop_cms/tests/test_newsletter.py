@@ -17,7 +17,7 @@ from model_mommy import mommy
 from coop_cms.models import Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending
 from coop_cms.settings import is_localized, get_article_class
 from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
-from coop_cms.utils import make_links_absolute
+from coop_cms.utils import make_links_absolute, strip_a_tags, avoid_line_too_long
 
 
 @override_settings(COOP_CMS_NEWSLETTER_SETTINGS_FORM='')
@@ -807,32 +807,27 @@ class AbsUrlTest(UserBaseTestCase):
         #settings.COOP_CMS_SITE_PREFIX = self.site_prefix
 
     def _to_text(self, soup):
-        return unicode(soup)
-    
-    def test_href(self):
-        settings.COOP_CMS_SITE_PREFIX = self.site_prefix
-        test_html = '<a href="%s/toto">This is a link</a>'
-        rel_html = test_html % ""
-        abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
-        self.assertEqual(abs_html, make_links_absolute(rel_html))
+        text = soup.prettify()
+        text = strip_a_tags(text)
+        return text
     
     def test_href(self):
         test_html = '<a href="%s/toto">This is a link</a>'
         rel_html = test_html % ""
         abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
-        self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
+        self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))
         
     def test_src(self):
         test_html = '<h1>My image</h1><img src="%s/toto">'
         rel_html = test_html % ""
         abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
-        self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
+        self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))
         
     def test_relative_path(self):
         test_html = '<h1>My image</h1><img src="%s/toto">'
         rel_html = test_html % "../../.."
         abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
-        self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
+        self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))
     
     def test_src_and_img(self):
         test_html = '<h1>My image</h1><a href="{0}/a1">This is a link</a><img src="{0}/toto"/><img src="{0}/titi"/>' + \
@@ -840,24 +835,24 @@ class AbsUrlTest(UserBaseTestCase):
         rel_html = test_html.format("")
         html = test_html.format(self.site_prefix)
         abs_html = self._to_text(BeautifulSoup(html))
-        self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
+        self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))
         
     def test_href_rel_and_abs(self):
         test_html = '<a href="%s/toto">This is a link</a><a href="http://www.apidev.fr">another</a>'
         rel_html = test_html % ""
         abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
-        self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
+        self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))
         
     def test_style_in_between(self):
         test_html = u'<img style="margin: 0; width: 700px;" src="%s/media/img/newsletter_header.png" alt="Logo">'
         rel_html = test_html % ""
         abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
-        self.assertEqual(abs_html, make_links_absolute(rel_html, self.newsletter))
+        self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))
         
     def test_missing_attr(self):
         test_html = u'<img alt="Logo" /><a name="aa">link</a>'
         abs_html = self._to_text(BeautifulSoup(test_html))
-        self.assertEqual(abs_html, make_links_absolute(test_html, self.newsletter))
+        self.assertEqual(abs_html, strip_a_tags(make_links_absolute(test_html, self.newsletter)))
 
 
 class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
@@ -993,3 +988,106 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'by_email': True}))
         self.assertEqual(1, html.count(u'''<a style="color: #000;">'''))
         self.assertEqual(1, html.count(u'''<a style="color: #fff;">'''))
+
+
+class HtmlFixTest(BaseTestCase):
+    """Test dirty fixs for newsletter html"""
+
+    def test_strip_a_tags(self):
+        """Make sure that the a tags have no space inside"""
+        html = u'''
+        <p>
+         <h1>Test</h1>
+         <a class="link" href="/">
+          Cool
+         </a>
+         <div>
+         <a href="/test">
+          Test
+         </a>
+         </div>
+        </p>
+        '''
+
+        soup = BeautifulSoup(html)
+        fixed_html = strip_a_tags(soup.prettify())
+
+        expected_html = '<p>\n <h1>\n  Test\n </h1>\n <a class="link" href="/">Cool</a>\n <div>\n  ' \
+        '<a href="/test">Test</a>\n </div>\n</p>\n'
+
+        self.assertEqual(fixed_html, expected_html)
+
+    def test_avoid_line_too_long(self):
+        """newsletter should not contains more than 998 chars. Force some endline if so"""
+        html = u'''
+        <p>
+         <h1>Test</h1>
+         <a class="link" href="/">
+          {0}
+         </a>
+         <div>
+         <a href="/test">
+          <h2>Eté</h2>
+         </a>
+         </div>
+        </p>
+        '''.format('abcd ' * 300)  # 1500
+
+        fixed_html = avoid_line_too_long(html)
+
+        max_length = 0
+        for line in fixed_html.split('\n'):
+            max_length = max(max_length, len(line))
+
+        self.assertEqual(fixed_html.count('abcd'), 300)
+        self.assertEqual(len(fixed_html.splitlines()), len(html.splitlines()) + 1 + (1500 // 900))
+        self.assertTrue(max_length <= 900)
+        self.assertTrue(fixed_html.find(u'<h1>Test</h1>') > 0)
+        self.assertTrue(fixed_html.find(u'<h2>Eté</h2>') > 0)
+
+    def test_avoid_line_very_too_long(self):
+        """newsletter should not contains more than 998 chars. Force some endline if so"""
+        html = u'''
+        <p>
+         <h1>Test</h1>
+         <a class="link" href="/">
+          {0}
+         </a>
+         <div>
+         <a href="/test">
+          <h2>Eté</h2>
+         </a>
+         </div>
+        </p>
+        '''.format(u'abcdé ' * 600)  # 4200 characters
+
+        fixed_html = avoid_line_too_long(html)
+
+        max_length = 0
+        for line in fixed_html.split('\n'):
+            max_length = max(max_length, len(line))
+
+        self.assertEqual(fixed_html.count(u'abcdé'), 600)
+        self.assertEqual(len(fixed_html.splitlines()), len(html.splitlines()) + 1 + (4200 // 900))
+        self.assertTrue(max_length <= 900)
+        self.assertTrue(fixed_html.find(u'<h1>Test</h1>') > 0)
+        self.assertTrue(fixed_html.find(u'<h2>Eté</h2>') > 0)
+
+    def test_avoid_line_too_long_no_change(self):
+        """newsletter should not contains more than 998 chars. Force some endline if so"""
+        html = u'''
+        <p>
+         <h1>Test</h1>
+         <a class="link" href="/">
+          Cool
+         </a>
+         <div>
+         <a href="/test">
+          Test
+         </a>
+         </div>
+        </p>
+        '''
+
+        fixed_html = avoid_line_too_long(html)
+        self.assertEqual(fixed_html, html)
