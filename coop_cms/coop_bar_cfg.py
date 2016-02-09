@@ -455,12 +455,13 @@ class LanguageSwitcher(object):
                     object_var_name = var_name
                     break
 
+            url = ''
             if object_var_name:
                 object_var = context[object_var_name]
                 try:
                     url = object_var.get_absolute_url()
                 except AttributeError:
-                    url = ''
+                    pass
 
             if url:
                 is_localized = False
