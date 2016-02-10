@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coop_cms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-04 16:11+0200\n"
+"POT-Creation-Date: 2016-02-10 10:53+0100\n"
 "PO-Revision-Date: 2013-06-28 15:16+0100\n"
 "Last-Translator: Luc Jean <ljean@apidev.fr>\n"
 "Language-Team: Apidev, Quinode <contact@quinode.fr>\n"
@@ -18,664 +18,56 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n>1;\n"
 "X-Generator: Poedit 1.5.5\n"
 
-#: admin.py:26
+#: admin.py:27
 msgid "Clear thumbnails"
 msgstr "Réinitailiser les miniatures"
 
-#: admin.py:58 templates/coop_cms/medialib/slide_images_content.html:5
+#: admin.py:59 templates/coop_cms/medialib/slide_images_content.html:5
 #: templates/coop_cms/medialib/slide_photologue_content.html:5
 msgid "All"
 msgstr "Tous"
 
-#: admin.py:61 models.py:118
+#: admin.py:62 models.py:118
 msgid "navigable types"
 msgstr "types navigables"
 
-#: admin.py:88
+#: admin.py:99
 msgid "General"
 msgstr "Général"
 
-#: admin.py:89
+#: admin.py:100
 msgid "Settings"
 msgstr "Réglages"
 
-#: admin.py:92
+#: admin.py:103
 msgid "Advanced"
 msgstr "Avancé"
 
-#: admin.py:93 apps/rss_sync/admin.py:45
+#: admin.py:104
 msgid "Content"
 msgstr "Contenu"
 
-#: admin.py:94
+#: admin.py:105
 msgid "Debug"
 msgstr "Debug"
 
-#: admin.py:108
+#: admin.py:119
 msgid "Media filter"
 msgstr "Filtre Média"
 
-#: admin.py:159
+#: admin.py:170
 msgid "Article"
 msgstr "Article"
 
-#: coop_bar_cfg.py:77
-msgid "Administration"
-msgstr "Administration"
-
-#: coop_bar_cfg.py:89
-msgid "Article admin"
-msgstr "Admin de l'article"
-
-#: coop_bar_cfg.py:103 coop_bar_cfg.py:347
-msgid "Admin {0}"
-msgstr "Admin {0}"
-
-#: coop_bar_cfg.py:121
-msgid "Add {0}"
-msgstr "Ajout {0}"
-
-#: coop_bar_cfg.py:138
-msgid "List {0}"
-msgstr "Liste {0}"
-
-#: coop_bar_cfg.py:155 models.py:139
-msgid "Navigation tree"
-msgstr "Arborescence"
-
-#: coop_bar_cfg.py:158 models.py:140
-msgid "Navigation trees"
-msgstr "Arborescences"
-
-#: coop_bar_cfg.py:169 templates/coop_cms/view_all_articles.html:52
-msgid "Articles"
-msgstr "Articles"
-
-#: coop_bar_cfg.py:182
-msgid "Media library"
-msgstr "Médiathèque"
-
-#: coop_bar_cfg.py:195
-msgid "Add image"
-msgstr "Ajouter une image"
-
-#: coop_bar_cfg.py:208
-msgid "Add document"
-msgstr "Ajouter un document"
-
-#: coop_bar_cfg.py:219 templates/coop_cms/view_all_articles.html:61
-msgid "Add article"
-msgstr "Ajouter un article"
-
-#: coop_bar_cfg.py:230
-msgid "Add link"
-msgstr "Ajouter un lien"
-
-#: coop_bar_cfg.py:245
-msgid "Set homepage"
-msgstr "Définir la page d'accueil"
-
-#: coop_bar_cfg.py:256 templates/coop_cms/popup_article_settings.html:10
-msgid "Article settings"
-msgstr "Réglages article"
-
-#: coop_bar_cfg.py:267
-#: apps/coop_bootstrap/templates/coop_bootstrap/form.html:62
-msgid "Save"
-msgstr "Enregistrer"
-
-#: coop_bar_cfg.py:279
 #: apps/coop_bootstrap/templates/coop_bootstrap/form.html:60
+#: coop_bar_cfg.py:281
 msgid "Cancel"
 msgstr "Annuler"
 
-#: coop_bar_cfg.py:290
-#: templates/coop_cms/medialib/slide_images_content.html:19
-#: templates/coop_cms/medialib/slide_photologue_content.html:23
-msgid "Edit"
-msgstr "Editer"
-
-#: coop_bar_cfg.py:301 models.py:461
-#: templates/coop_cms/popup_publish_article.html:36
-msgid "Draft"
-msgstr "Brouillon"
-
-#: coop_bar_cfg.py:306 models.py:462
-msgid "Published"
-msgstr "Publié"
-
-#: coop_bar_cfg.py:321
-msgid "Log out"
-msgstr "Déconnexion"
-
-#: coop_bar_cfg.py:333
-msgid "Create newsletter"
-msgstr "Créer une lettre d'info"
-
-#: coop_bar_cfg.py:361
-msgid "Articles ordering"
-msgstr "Ordre des articles"
-
-#: coop_bar_cfg.py:375
-msgid "Newsletter settings"
-msgstr "Réglages lettre"
-
-#: coop_bar_cfg.py:387
-msgid "Send test"
-msgstr "Test envoi"
-
-#: coop_bar_cfg.py:401 templates/coop_cms/popup_add_fragment.html:31
-msgid "Add fragment"
-msgstr "Ajouter un fragment"
-
-#: coop_bar_cfg.py:415 templates/coop_cms/popup_edit_fragments.html:4
-msgid "Edit fragments"
-msgstr "Editer les fragments"
-
-#: forms.py:43
-msgid ""
-"Invalid rule for this content type: The object class doesn't have a "
-"get_label method"
-msgstr ""
-"Règle invalide pour ce content type: La classe de l'objet n'a pas de méthode "
-"get_label"
-
-#: forms.py:118
-msgid "Title can not be empty"
-msgstr "Le titre ne peut pas être vide"
-
-#: forms.py:125
-msgid "<not in navigation>"
-msgstr "< pas dans l'arborescence >"
-
-#: forms.py:147
-msgid "Select an article"
-msgstr "Choisir un article"
-
-#: forms.py:225 models.py:857
-msgid "Image"
-msgstr "Image"
-
-#: forms.py:229
-msgid "Optional description"
-msgstr "Description optionelle"
-
-#: forms.py:231
-msgid "Description"
-msgstr "Description"
-
-#: forms.py:234
-msgid "Filters"
-msgstr "Filtres"
-
-#: forms.py:234
-msgid "Choose between tags to find images more easily"
-msgstr "Sélectionner un filtre qui rendra les images plus faciles à trouver"
-
-#: forms.py:237
-msgid "Size"
-msgstr "Taille"
-
-#: forms.py:237
-msgid "Define a size if you want to resize the image"
-msgstr "Definissez une taille pour l'image"
-
-#: forms.py:280 forms.py:434
-msgid "Invalid choice"
-msgstr "Choix invalide"
-
-#: forms.py:305
-msgid "Logo"
-msgstr "Logo"
-
-#: forms.py:377
-msgid "It is recommended to keep the current site."
-msgstr "Il est recommandé de garder le site en cours"
-
-#: forms.py:467
-msgid "This field is required"
-msgstr "Ce champ est requis"
-
-#: forms.py:470
-msgid "The scheduling date must be in future"
-msgstr "La date d'envoi doit être dans le futur"
-
-#: forms.py:546
-msgid "Select CSS classes to apply"
-msgstr "Sélectionner les classes CSS à appliquer"
-
-#: forms.py:565
-msgid "Invalid class '{0}'"
-msgstr "Classe CSS invalide '{0}'"
-
-#: forms.py:585
-msgid "delete"
-msgstr "supprimer"
-
-#: generic_views.py:174
-msgid "The object has been saved properly"
-msgstr "L’objet a été enregistré avec succès"
-
-#: generic_views.py:179 views/articles.py:139
-msgid "An error occured: {0}"
-msgstr "Une erreur est survenue: {0}"
-
-#: generic_views.py:312
-msgid "The objects have been saved properly"
-msgstr "L’objet a été enregistré avec succès"
-
-#: generic_views.py:318
-msgid "Index error in formset: some objects may be missing"
-msgstr "Erreur: des objets peuvent manquer"
-
-#: generic_views.py:319
-msgid "An error occured: At least one object is missing. Please try again."
-msgstr "Erreur: Au moins un objet est manquant. Veuillez réessayer."
-
-#: models.py:56 views/navigation.py:275
-msgid "Node"
-msgstr "Noeud"
-
-#: models.py:102
-msgid "Use object unicode"
-msgstr "Utiliser l'unicode de l'objet"
-
-#: models.py:103
-msgid "Use search field"
-msgstr "Utiliser le champ search"
-
-#: models.py:104
-msgid "Use get_label"
-msgstr "Utiliser la méthode get_label"
-
-#: models.py:107
-msgid "django model"
-msgstr "modèle django"
-
-#: models.py:108
-msgid "search field"
-msgstr "le champ de recherche"
-
-#: models.py:110
-msgid "How to generate the label"
-msgstr "Comment générer le label"
-
-#: models.py:117
-msgid "navigable type"
-msgstr "type navigable"
-
-#: models.py:124 models.py:363 models.py:797 models.py:809 models.py:823
-#: models.py:1124 models.py:1153
-msgid "name"
-msgstr "nom"
-
-#: models.py:158
-msgid "tree"
-msgstr "arbre"
-
-#: models.py:159
-msgid "label"
-msgstr "libellé"
-
-#: models.py:160
-msgid "parent"
-msgstr "parent"
-
-#: models.py:161 models.py:365 models.py:825 models.py:980
-msgid "ordering"
-msgstr "ordre"
-
-#: models.py:164 models.py:977
-msgid "content_type"
-msgstr "type de contenu"
-
-#: models.py:165 models.py:978
-msgid "object id"
-msgstr "identifiant de l'objet"
-
-#: models.py:167
-msgid "in navigation"
-msgstr "visible dans la navigation"
-
-#: models.py:197
-msgid "navigation node"
-msgstr "noeud de navigation"
-
-#: models.py:198
-msgid "navigation nodes"
-msgstr "noeuds de navigation"
-
-#: models.py:351
-msgid "A node can not be its own parent"
-msgstr "Un élément ne peut pas être son propre parent"
-
-#: models.py:357
-msgid "A node can not be child of its own child"
-msgstr "Un élément ne peut pas être son propre enfant"
-
-#: models.py:367
-msgid "in rss"
-msgstr "flux rss"
-
-#: models.py:368
-msgid "The articles of this category will be listed in the main rss feed"
-msgstr "Les articles de cette catégorie seront listés dans le flux rss"
-
-#: models.py:370 models.py:501 models.py:1036
-msgid "site"
-msgstr "site"
-
-#: models.py:390
-msgid "article category"
-msgstr "catégorie d'article"
-
-#: models.py:391
-msgid "article categories"
-msgstr "catégories d'article"
-
-#: models.py:440
-msgid "set the parent in navigation."
-msgstr "ajouter l’élément à la navigation."
-
-#: models.py:463
-msgid "Archived"
-msgstr "Archivé"
-
-#: models.py:476 models.py:762 apps/rss_sync/models.py:14
-#: apps/rss_sync/models.py:34
-msgid "title"
-msgstr "titre"
-
-#: models.py:477
-msgid "subtitle"
-msgstr "sous-titre"
-
-#: models.py:478 models.py:949 models.py:1033 models.py:1156
-msgid "content"
-msgstr "contenu"
-
-#: models.py:479
-msgid "publication"
-msgstr "publication"
-
-#: models.py:480 models.py:1035
-msgid "template"
-msgstr "modèle"
-
-#: models.py:483
-msgid "Summary"
-msgstr "Résumé"
-
-#: models.py:485
-msgid "Category"
-msgstr "Catégorie"
-
-#: models.py:489
-msgid "In newsletter"
-msgstr "Lettre d'info"
-
-#: models.py:490
-msgid "Make this article available for newsletters."
-msgstr ""
-"rendre cet article disponible pour insertion dans une lettre d'information"
-
-#: models.py:493
-msgid "Homepage for site"
-msgstr "Accueil du site"
-
-#: models.py:497
-msgid "Headline"
-msgstr "à la une"
-
-#: models.py:498
-msgid "Make this article appear on the home page"
-msgstr "Faire apparaitre cet article à la une du site"
-
-#: models.py:500
-msgid "Publication date"
-msgstr "Date de publication"
-
-#: models.py:590
-msgid "No Image"
-msgstr "Pas d'image"
-
-#: models.py:591
-msgid "logo"
-msgstr "logo"
-
-#: models.py:595
-msgid "article"
-msgstr "article"
-
-#: models.py:596
-msgid "articles"
-msgstr "articles"
-
-#: models.py:762
-msgid "Title"
-msgstr "Titre"
-
-#: models.py:763
-msgid "URL"
-msgstr "URL"
-
-#: models.py:791 apps/rss_sync/models.py:33
-msgid "link"
-msgstr "lien"
-
-#: models.py:792
-msgid "links"
-msgstr "liens"
-
-#: models.py:800
-msgid "media filter"
-msgstr "filtre de média"
-
-#: models.py:801
-msgid "media filters"
-msgstr "filtres de médias"
-
-#: models.py:810 models.py:837
-msgid "size"
-msgstr "taille"
-
-#: models.py:811
-msgid "crop"
-msgstr "découpage"
-
-#: models.py:814
-msgid "Image size"
-msgstr "Taille d'image"
-
-#: models.py:815
-msgid "Image sizes"
-msgstr "Tailles d'images"
-
-#: models.py:824
-msgid "filters"
-msgstr "filtres"
-
-#: models.py:836 models.py:902
-msgid "file"
-msgstr "fichier"
-
-#: models.py:878
-msgid "image"
-msgstr "image"
-
-#: models.py:879
-msgid "images"
-msgstr "images"
-
-#: models.py:904
-msgid "is private"
-msgstr "privé"
-
-#: models.py:905
-msgid "Check this if you do not want to publish this document to all users"
-msgstr ""
-"Cocher cette case si vous -ne voulez pas- publier ce document à tous les "
-"utilisateurs"
-
-#: models.py:907
-msgid "category"
-msgstr "catégorie"
-
-#: models.py:942
-msgid "document"
-msgstr "document"
-
-#: models.py:943
-msgid "documents"
-msgstr "documents"
-
-#: models.py:948
-msgid "identifier"
-msgstr "identifier"
-
-#: models.py:951
-msgid "extra identifier"
-msgstr "extra id"
-
-#: models.py:958
-msgid "piece of HTML"
-msgstr "bloc HTML"
-
-#: models.py:959
-msgid "pieces of HTML"
-msgstr "blocs HTML"
-
-#: models.py:984
-msgid "newsletter item"
-msgstr "élément de lettre d'information"
-
-#: models.py:985
-msgid "newsletter items"
-msgstr "éléments de lettre d'information"
-
-#: models.py:1032
-msgid "subject"
-msgstr "sujet"
-
-#: models.py:1037
-msgid "source url"
-msgstr "url source"
-
-#: models.py:1038
-msgid "is_public"
-msgstr "est public"
-
-#: models.py:1085
-msgid "newsletter"
-msgstr "lettre d'information"
-
-#: models.py:1086
-msgid "newsletters"
-msgstr "lettres d'information"
-
-#: models.py:1093
-msgid "scheduling date"
-msgstr "date de programmation"
-
-#: models.py:1094
-msgid "sending date"
-msgstr "date d'envoi"
-
-#: models.py:1100
-msgid "newsletter sending"
-msgstr "Envoi de lettre d'information"
-
-#: models.py:1101
-msgid "newsletter sendings"
-msgstr "Envois de lettre d'informations"
-
-#: models.py:1111
-msgid "Alias"
-msgstr "Alias"
-
-#: models.py:1112
-msgid "Aliases"
-msgstr "Alias"
-
-#: models.py:1126
-msgid "allowed css classes"
-msgstr "classes CSS autorisées"
-
-#: models.py:1127
-msgid ""
-"the css classed proposed when editing a fragment. It must be separated by "
-"comas"
-msgstr ""
-"Définit les classes CSS qui sont autorisées pour ce type de fragments. Les "
-"valeurs doivent être séparées par des virgules."
-
-#: models.py:1131
-msgid "Fragment type"
-msgstr "Type de fragment"
-
-#: models.py:1132
-msgid "Fragment types"
-msgstr "types de fragments"
-
-#: models.py:1140
-msgid "extra_id"
-msgstr "extra id"
-
-#: models.py:1143
-msgid "Fragment filter"
-msgstr "Filtre de fragment"
-
-#: models.py:1144
-msgid "Fragment filters"
-msgstr "Filtres de fragments"
-
-#: models.py:1152
-msgid "fragment type"
-msgstr "type de fragment"
-
-#: models.py:1154
-msgid "CSS class"
-msgstr "classe CSS"
-
-#: models.py:1155
-msgid "position"
-msgstr "position"
-
-#: models.py:1157
-msgid "fragment filter"
-msgstr "filtre de fragment"
-
-#: models.py:1160 models.py:1161
-msgid "Fragment"
-msgstr "Fragment"
-
-#: models.py:1202
-msgid "Only site articles"
-msgstr "Seulement les articles du site"
-
-#: models.py:1203
-msgid "All articles"
-msgstr "Tous les articles"
-
-#: models.py:1206
-msgid "site settings"
-msgstr "Réglages article"
-
-#: models.py:1208
-msgid "homepage URL"
-msgstr "URL de la page d'accueil"
-
-#: models.py:1209
-msgid "if set, the homepage will be redirected to the given URL"
-msgstr "si défini, la page d'accueil redirigera vers l'URL"
-
-#: models.py:1217
-msgid "Sites settings"
-msgstr "Réglages site"
-
-#: models.py:1218
-msgid "Site settings"
-msgstr "Réglages site"
+#: apps/coop_bootstrap/templates/coop_bootstrap/form.html:62
+#: coop_bar_cfg.py:269
+msgid "Save"
+msgstr "Enregistrer"
 
 #: apps/demo_cms/templates/404.html:4 apps/demo_cms/templates/404.html.py:7
 msgid "Page not found"
@@ -715,11 +107,13 @@ msgstr "Veuillez réessayer dans un instant ou retournez à la "
 
 #: apps/demo_cms/templates/500.html:13
 #: ci/drone_project/templates/registration/logged_out.html:5
+#: ci/semaphore_project/templates/registration/logged_out.html:5
 msgid "homepage"
 msgstr "page d'accueil"
 
 #: apps/demo_cms/templates/base.html:16
 #: ci/drone_project/templates/registration/password_change_done.html:5
+#: ci/semaphore_project/templates/registration/password_change_done.html:5
 msgid "Homepage"
 msgstr "Accueil"
 
@@ -728,7 +122,7 @@ msgstr "Accueil"
 msgid "Author"
 msgstr "Auteur"
 
-#: apps/email_auth/forms.py:24
+#: apps/email_auth/forms.py:40
 #, python-format
 msgid ""
 "Please enter a correct %(email)s and password. Note that both fields may be "
@@ -737,99 +131,33 @@ msgstr ""
 "Veuillez entrer un %(email)s valide et un mot de passe. Notez que ces 2 "
 "champs sont sensibles à la casse."
 
-#: apps/email_auth/forms.py:34
+#: apps/email_auth/forms.py:50
 msgid "email"
 msgstr "email"
 
-#: apps/rss_sync/admin.py:19
-msgid "Feed"
-msgstr "Flux"
+#: apps/email_auth/registration_backend/forms.py:15
+msgid "I have read and agree to the Terms of Service"
+msgstr "J'accepte les conditions d'utilisation"
 
-#: apps/rss_sync/admin.py:20
-msgid "Information"
-msgstr "Information"
+#: apps/email_auth/registration_backend/forms.py:16
+msgid "You must agree to the terms to register"
+msgstr "Vous devez accepter les conditions d'utilisation"
 
-#: apps/rss_sync/admin.py:43
-msgid "Actions"
-msgstr "Actions"
-
-#: apps/rss_sync/admin.py:44
-msgid "Source"
-msgstr "Source"
-
-#: apps/rss_sync/admin.py:46
-msgid "CMS"
-msgstr "CMS"
-
-#: apps/rss_sync/models.py:13
-msgid "url"
-msgstr "url"
-
-#: apps/rss_sync/models.py:15
-msgid "last collect"
-msgstr "dernière collecte"
-
-#: apps/rss_sync/models.py:25
-msgid "RSS source"
-msgstr "Source RSS"
-
-#: apps/rss_sync/models.py:26
-msgid "RSS sources"
-msgstr "Sources RSS"
-
-#: apps/rss_sync/models.py:35
-msgid "summary"
-msgstr "résumé"
-
-#: apps/rss_sync/models.py:36
-msgid "author"
-msgstr "auteur"
-
-#: apps/rss_sync/models.py:37
-msgid "updated"
-msgstr "mis à jour"
-
-#: apps/rss_sync/models.py:38
-msgid "processed"
-msgstr "traité"
-
-#: apps/rss_sync/models.py:44
-msgid "RSS item"
-msgstr "Article à importer (RSS)"
-
-#: apps/rss_sync/models.py:45
-msgid "RSS items"
-msgstr "Articles à importer (RSS)"
-
-#: apps/rss_sync/views.py:31
-msgid "Collect RSS items"
-msgstr "Collecter les articles via RSS"
-
-#: apps/rss_sync/views.py:50
-msgid "Create CMS Article"
-msgstr "Importer l'article sur le site"
-
-#: apps/rss_sync/widgets.py:38
-msgid "Collect"
-msgstr "Collecter"
-
-#: apps/rss_sync/widgets.py:54
-msgid "Create CMS article"
-msgstr "Importer l'article"
-
-#: ci/drone_project/settings.py:46
+#: ci/drone_project/settings.py:47 ci/semaphore_project/settings.py:48
 msgid "English"
 msgstr ""
 
-#: ci/drone_project/settings.py:47
+#: ci/drone_project/settings.py:48 ci/semaphore_project/settings.py:49
 msgid "Français"
 msgstr ""
 
 #: ci/drone_project/templates/registration/logged_out.html:3
+#: ci/semaphore_project/templates/registration/logged_out.html:3
 msgid "You've been logged out"
 msgstr "Vous avez été déconnecté"
 
 #: ci/drone_project/templates/registration/logged_out.html:5
+#: ci/semaphore_project/templates/registration/logged_out.html:5
 msgid "You are going to be redirected to the"
 msgstr "Vous allez être redirigé vers"
 
@@ -837,63 +165,706 @@ msgstr "Vous allez être redirigé vers"
 #: ci/drone_project/templates/registration/login.html:26
 #: ci/drone_project/templates/registration/password_reset_complete.html:5
 #: ci/drone_project/templates/registration/password_reset_form.html:13
+#: ci/semaphore_project/templates/registration/login.html:3
+#: ci/semaphore_project/templates/registration/login.html:26
+#: ci/semaphore_project/templates/registration/password_reset_complete.html:5
+#: ci/semaphore_project/templates/registration/password_reset_form.html:13
 msgid "Login"
 msgstr "Connexion"
 
 #: ci/drone_project/templates/registration/login.html:5
+#: ci/semaphore_project/templates/registration/login.html:5
 msgid "Login has failed"
 msgstr "La connexion a échoué"
 
 #: ci/drone_project/templates/registration/login.html:16
+#: ci/semaphore_project/templates/registration/login.html:16
 msgid "Email"
 msgstr "Email"
 
 #: ci/drone_project/templates/registration/login.html:20
+#: ci/semaphore_project/templates/registration/login.html:20
 msgid "Password"
 msgstr "Mot de passe"
 
 #: ci/drone_project/templates/registration/login.html:30
+#: ci/semaphore_project/templates/registration/login.html:30
 msgid "Forgotten Password"
 msgstr "Mot de passe oublié"
 
 #: ci/drone_project/templates/registration/password_change_done.html:3
 #: ci/drone_project/templates/registration/password_reset_complete.html:3
+#: ci/semaphore_project/templates/registration/password_change_done.html:3
+#: ci/semaphore_project/templates/registration/password_reset_complete.html:3
 msgid "The password has been changed"
 msgstr "Le mot de passe a été modifié"
 
 #: ci/drone_project/templates/registration/password_change_done.html:5
+#: ci/semaphore_project/templates/registration/password_change_done.html:5
 msgid "Go back to the"
 msgstr "Retour à la "
 
 #: ci/drone_project/templates/registration/password_change_form.html:3
+#: ci/semaphore_project/templates/registration/password_change_form.html:3
 msgid "Password modification"
 msgstr "Modification de mot de passe"
 
 #: ci/drone_project/templates/registration/password_change_form.html:10
+#: ci/semaphore_project/templates/registration/password_change_form.html:10
 msgid "Change password"
 msgstr "Modifier le mode de passe"
 
 #: ci/drone_project/templates/registration/password_reset_complete.html:5
+#: ci/semaphore_project/templates/registration/password_reset_complete.html:5
 msgid "Click Here"
 msgstr "Cliquer ici"
 
 #: ci/drone_project/templates/registration/password_reset_confirm.html:3
 #: ci/drone_project/templates/registration/password_reset_form.html:3
+#: ci/semaphore_project/templates/registration/password_reset_confirm.html:3
+#: ci/semaphore_project/templates/registration/password_reset_form.html:3
 msgid "Password reset"
 msgstr "Réinitialisation de mot de passe"
 
 #: ci/drone_project/templates/registration/password_reset_confirm.html:9
 #: ci/drone_project/templates/registration/password_reset_form.html:9
+#: ci/semaphore_project/templates/registration/password_reset_confirm.html:9
+#: ci/semaphore_project/templates/registration/password_reset_form.html:9
 msgid "Reset"
 msgstr "Réinitialiser"
 
 #: ci/drone_project/templates/registration/password_reset_done.html:3
+#: ci/semaphore_project/templates/registration/password_reset_done.html:3
 msgid "An Email has been sent"
 msgstr "Un email a été envoyé"
 
 #: ci/drone_project/templates/registration/password_reset_done.html:5
+#: ci/semaphore_project/templates/registration/password_reset_done.html:5
 msgid "It contains the procedure to reset the password."
 msgstr "Il contient la procédure de réinitialisation du mot de passe"
+
+#: coop_bar_cfg.py:78
+msgid "Administration"
+msgstr "Administration"
+
+#: coop_bar_cfg.py:91
+msgid "Article admin"
+msgstr "Admin de l'article"
+
+#: coop_bar_cfg.py:105 coop_bar_cfg.py:349
+msgid "Admin {0}"
+msgstr "Admin {0}"
+
+#: coop_bar_cfg.py:123
+msgid "Add {0}"
+msgstr "Ajout {0}"
+
+#: coop_bar_cfg.py:140
+msgid "List {0}"
+msgstr "Liste {0}"
+
+#: coop_bar_cfg.py:157 models.py:139
+msgid "Navigation tree"
+msgstr "Arborescence"
+
+#: coop_bar_cfg.py:160 models.py:140
+msgid "Navigation trees"
+msgstr "Arborescences"
+
+#: coop_bar_cfg.py:171 templates/coop_cms/view_all_articles.html:52
+msgid "Articles"
+msgstr "Articles"
+
+#: coop_bar_cfg.py:184
+msgid "Media library"
+msgstr "Médiathèque"
+
+#: coop_bar_cfg.py:197
+msgid "Add image"
+msgstr "Ajouter une image"
+
+#: coop_bar_cfg.py:210
+msgid "Add document"
+msgstr "Ajouter un document"
+
+#: coop_bar_cfg.py:221 templates/coop_cms/view_all_articles.html:61
+msgid "Add article"
+msgstr "Ajouter un article"
+
+#: coop_bar_cfg.py:232
+msgid "Add link"
+msgstr "Ajouter un lien"
+
+#: coop_bar_cfg.py:247
+msgid "Set homepage"
+msgstr "Définir la page d'accueil"
+
+#: coop_bar_cfg.py:258 templates/coop_cms/popup_article_settings.html:10
+msgid "Article settings"
+msgstr "Réglages article"
+
+#: coop_bar_cfg.py:292
+#: templates/coop_cms/medialib/slide_images_content.html:18
+#: templates/coop_cms/medialib/slide_photologue_content.html:22
+msgid "Edit"
+msgstr "Editer"
+
+#: coop_bar_cfg.py:303 models.py:471
+#: templates/coop_cms/popup_publish_article.html:36
+msgid "Draft"
+msgstr "Brouillon"
+
+#: coop_bar_cfg.py:308 models.py:472
+msgid "Published"
+msgstr "Publié"
+
+#: coop_bar_cfg.py:323
+msgid "Log out"
+msgstr "Déconnexion"
+
+#: coop_bar_cfg.py:335
+msgid "Create newsletter"
+msgstr "Créer une lettre d'info"
+
+#: coop_bar_cfg.py:363
+msgid "Articles ordering"
+msgstr "Ordre des articles"
+
+#: coop_bar_cfg.py:377
+msgid "Newsletter settings"
+msgstr "Réglages lettre"
+
+#: coop_bar_cfg.py:389
+msgid "Convert to Pdf"
+msgstr "Convertir en Pdf"
+
+#: coop_bar_cfg.py:401
+msgid "Send test"
+msgstr "Test envoi"
+
+#: coop_bar_cfg.py:415 templates/coop_cms/popup_add_fragment.html:31
+msgid "Add fragment"
+msgstr "Ajouter un fragment"
+
+#: coop_bar_cfg.py:429 templates/coop_cms/popup_edit_fragments.html:4
+msgid "Edit fragments"
+msgstr "Editer les fragments"
+
+#: coop_bar_cfg.py:476
+msgid "Switch to {0}"
+msgstr "Basculer en {0}"
+
+#: forms.py:51
+msgid ""
+"Invalid rule for this content type: The object class doesn't have a "
+"get_label method"
+msgstr ""
+"Règle invalide pour ce content type: La classe de l'objet n'a pas de méthode "
+"get_label"
+
+#: forms.py:127
+msgid "Title can not be empty"
+msgstr "Le titre ne peut pas être vide"
+
+#: forms.py:134
+msgid "<not in navigation>"
+msgstr "< pas dans l'arborescence >"
+
+#: forms.py:156
+msgid "Select an article"
+msgstr "Choisir un article"
+
+#: forms.py:263 models.py:862
+msgid "Image"
+msgstr "Image"
+
+#: forms.py:267
+msgid "Optional description"
+msgstr "Description optionelle"
+
+#: forms.py:269
+msgid "Description"
+msgstr "Description"
+
+#: forms.py:272 forms.py:305
+msgid "Filters"
+msgstr "Filtres"
+
+#: forms.py:272 forms.py:305
+msgid "Choose between tags to find images more easily"
+msgstr "Sélectionner un filtre qui rendra les images plus faciles à trouver"
+
+#: forms.py:275
+msgid "Size"
+msgstr "Taille"
+
+#: forms.py:275
+msgid "Define a size if you want to resize the image"
+msgstr "Definissez une taille pour l'image"
+
+#: forms.py:298 forms.py:458
+msgid "Invalid choice"
+msgstr "Choix invalide"
+
+#: forms.py:328
+msgid "Logo"
+msgstr "Logo"
+
+#: forms.py:401
+msgid "It is recommended to keep the current site."
+msgstr "Il est recommandé de garder le site en cours"
+
+#: forms.py:491
+msgid "This field is required"
+msgstr "Ce champ est requis"
+
+#: forms.py:494
+msgid "The scheduling date must be in future"
+msgstr "La date d'envoi doit être dans le futur"
+
+#: forms.py:570
+msgid "Select CSS classes to apply"
+msgstr "Sélectionner les classes CSS à appliquer"
+
+#: forms.py:589
+msgid "Invalid class '{0}'"
+msgstr "Classe CSS invalide '{0}'"
+
+#: forms.py:609
+msgid "delete"
+msgstr "supprimer"
+
+#: generic_views.py:175
+msgid "The object has been saved properly"
+msgstr "L’objet a été enregistré avec succès"
+
+#: generic_views.py:180 views/articles.py:144
+msgid "An error occured: {0}"
+msgstr "Une erreur est survenue: {0}"
+
+#: generic_views.py:313
+msgid "The objects have been saved properly"
+msgstr "L’objet a été enregistré avec succès"
+
+#: generic_views.py:319
+msgid "Index error in formset: some objects may be missing"
+msgstr "Erreur: des objets peuvent manquer"
+
+#: generic_views.py:320
+msgid "An error occured: At least one object is missing. Please try again."
+msgstr "Erreur: Au moins un objet est manquant. Veuillez réessayer."
+
+#: models.py:56 views/navigation.py:275
+msgid "Node"
+msgstr "Noeud"
+
+#: models.py:102
+msgid "Use object unicode"
+msgstr "Utiliser l'unicode de l'objet"
+
+#: models.py:103
+msgid "Use search field"
+msgstr "Utiliser le champ search"
+
+#: models.py:104
+msgid "Use get_label"
+msgstr "Utiliser la méthode get_label"
+
+#: models.py:107
+msgid "django model"
+msgstr "modèle django"
+
+#: models.py:108
+msgid "search field"
+msgstr "le champ de recherche"
+
+#: models.py:110
+msgid "How to generate the label"
+msgstr "Comment générer le label"
+
+#: models.py:117
+msgid "navigable type"
+msgstr "type navigable"
+
+#: models.py:124 models.py:363 models.py:802 models.py:814 models.py:828
+#: models.py:1133 models.py:1162
+msgid "name"
+msgstr "nom"
+
+#: models.py:158
+msgid "tree"
+msgstr "arbre"
+
+#: models.py:159
+msgid "label"
+msgstr "libellé"
+
+#: models.py:160
+msgid "parent"
+msgstr "parent"
+
+#: models.py:161 models.py:365 models.py:830 models.py:988
+msgid "ordering"
+msgstr "ordre"
+
+#: models.py:164 models.py:985
+msgid "content_type"
+msgstr "type de contenu"
+
+#: models.py:165 models.py:986
+msgid "object id"
+msgstr "identifiant de l'objet"
+
+#: models.py:167
+msgid "in navigation"
+msgstr "visible dans la navigation"
+
+#: models.py:197
+msgid "navigation node"
+msgstr "noeud de navigation"
+
+#: models.py:198
+msgid "navigation nodes"
+msgstr "noeuds de navigation"
+
+#: models.py:351
+msgid "A node can not be its own parent"
+msgstr "Un élément ne peut pas être son propre parent"
+
+#: models.py:357
+msgid "A node can not be child of its own child"
+msgstr "Un élément ne peut pas être son propre enfant"
+
+#: models.py:367
+msgid "in rss"
+msgstr "flux rss"
+
+#: models.py:368
+msgid "The articles of this category will be listed in the main rss feed"
+msgstr "Les articles de cette catégorie seront listés dans le flux rss"
+
+#: models.py:370 models.py:502 models.py:1044
+msgid "site"
+msgstr "site"
+
+#: models.py:390
+msgid "article category"
+msgstr "catégorie d'article"
+
+#: models.py:391
+msgid "article categories"
+msgstr "catégories d'article"
+
+#: models.py:440
+msgid "set the parent in navigation."
+msgstr "ajouter l’élément à la navigation."
+
+#: models.py:473
+msgid "Archived"
+msgstr "Archivé"
+
+#: models.py:477 models.py:768
+msgid "title"
+msgstr "titre"
+
+#: models.py:478
+msgid "subtitle"
+msgstr "sous-titre"
+
+#: models.py:479 models.py:957 models.py:1041 models.py:1165
+msgid "content"
+msgstr "contenu"
+
+#: models.py:480
+msgid "publication"
+msgstr "publication"
+
+#: models.py:481 models.py:1043
+msgid "template"
+msgstr "modèle"
+
+#: models.py:484
+msgid "Summary"
+msgstr "Résumé"
+
+#: models.py:486
+msgid "Category"
+msgstr "Catégorie"
+
+#: models.py:490
+msgid "In newsletter"
+msgstr "Lettre d'info"
+
+#: models.py:491
+msgid "Make this article available for newsletters."
+msgstr ""
+"rendre cet article disponible pour insertion dans une lettre d'information"
+
+#: models.py:494
+msgid "Homepage for site"
+msgstr "Accueil du site"
+
+#: models.py:498
+msgid "Headline"
+msgstr "à la une"
+
+#: models.py:499
+msgid "Make this article appear on the home page"
+msgstr "Faire apparaitre cet article à la une du site"
+
+#: models.py:501
+msgid "Publication date"
+msgstr "Date de publication"
+
+#: models.py:505
+msgid "login required"
+msgstr "Login requis"
+
+#: models.py:506
+msgid "If true, only user with login/password will able to access the article"
+msgstr "Si vrai, seulement un utilisateur avec un login/mod de passe pourra accéder à cet article"
+
+#: models.py:596
+msgid "No Image"
+msgstr "Pas d'image"
+
+#: models.py:597
+msgid "logo"
+msgstr "logo"
+
+#: models.py:601
+msgid "article"
+msgstr "article"
+
+#: models.py:602
+msgid "articles"
+msgstr "articles"
+
+#: models.py:768
+msgid "Title"
+msgstr "Titre"
+
+#: models.py:769
+msgid "URL"
+msgstr "URL"
+
+#: models.py:796
+msgid "link"
+msgstr "lien"
+
+#: models.py:797
+msgid "links"
+msgstr "liens"
+
+#: models.py:805
+msgid "media filter"
+msgstr "filtre de média"
+
+#: models.py:806
+msgid "media filters"
+msgstr "filtres de médias"
+
+#: models.py:815 models.py:842
+msgid "size"
+msgstr "taille"
+
+#: models.py:816
+msgid "crop"
+msgstr "découpage"
+
+#: models.py:819
+msgid "Image size"
+msgstr "Taille d'image"
+
+#: models.py:820
+msgid "Image sizes"
+msgstr "Tailles d'images"
+
+#: models.py:829
+msgid "filters"
+msgstr "filtres"
+
+#: models.py:841 models.py:910
+msgid "file"
+msgstr "fichier"
+
+#: models.py:885
+msgid "image"
+msgstr "image"
+
+#: models.py:886
+msgid "images"
+msgstr "images"
+
+#: models.py:912
+msgid "is private"
+msgstr "privé"
+
+#: models.py:913
+msgid "Check this if you do not want to publish this document to all users"
+msgstr ""
+"Cocher cette case si vous -ne voulez pas- publier ce document à tous les "
+"utilisateurs"
+
+#: models.py:915
+msgid "category"
+msgstr "catégorie"
+
+#: models.py:950
+msgid "document"
+msgstr "document"
+
+#: models.py:951
+msgid "documents"
+msgstr "documents"
+
+#: models.py:956
+msgid "identifier"
+msgstr "identifier"
+
+#: models.py:959
+msgid "extra identifier"
+msgstr "extra id"
+
+#: models.py:966
+msgid "piece of HTML"
+msgstr "bloc HTML"
+
+#: models.py:967
+msgid "pieces of HTML"
+msgstr "blocs HTML"
+
+#: models.py:992
+msgid "newsletter item"
+msgstr "élément de lettre d'information"
+
+#: models.py:993
+msgid "newsletter items"
+msgstr "éléments de lettre d'information"
+
+#: models.py:1040
+msgid "subject"
+msgstr "sujet"
+
+#: models.py:1045
+msgid "source url"
+msgstr "url source"
+
+#: models.py:1046
+msgid "is_public"
+msgstr "est public"
+
+#: models.py:1094
+msgid "newsletter"
+msgstr "lettre d'information"
+
+#: models.py:1095
+msgid "newsletters"
+msgstr "lettres d'information"
+
+#: models.py:1102
+msgid "scheduling date"
+msgstr "date de programmation"
+
+#: models.py:1103
+msgid "sending date"
+msgstr "date d'envoi"
+
+#: models.py:1109
+msgid "newsletter sending"
+msgstr "Envoi de lettre d'information"
+
+#: models.py:1110
+msgid "newsletter sendings"
+msgstr "Envois de lettre d'informations"
+
+#: models.py:1120
+msgid "Alias"
+msgstr "Alias"
+
+#: models.py:1121
+msgid "Aliases"
+msgstr "Alias"
+
+#: models.py:1135
+msgid "allowed css classes"
+msgstr "classes CSS autorisées"
+
+#: models.py:1136
+msgid ""
+"the css classed proposed when editing a fragment. It must be separated by "
+"comas"
+msgstr ""
+"Définit les classes CSS qui sont autorisées pour ce type de fragments. Les "
+"valeurs doivent être séparées par des virgules."
+
+#: models.py:1140
+msgid "Fragment type"
+msgstr "Type de fragment"
+
+#: models.py:1141
+msgid "Fragment types"
+msgstr "types de fragments"
+
+#: models.py:1149
+msgid "extra_id"
+msgstr "extra id"
+
+#: models.py:1152
+msgid "Fragment filter"
+msgstr "Filtre de fragment"
+
+#: models.py:1153
+msgid "Fragment filters"
+msgstr "Filtres de fragments"
+
+#: models.py:1161
+msgid "fragment type"
+msgstr "type de fragment"
+
+#: models.py:1163
+msgid "CSS class"
+msgstr "classe CSS"
+
+#: models.py:1164
+msgid "position"
+msgstr "position"
+
+#: models.py:1166
+msgid "fragment filter"
+msgstr "filtre de fragment"
+
+#: models.py:1169 models.py:1170
+msgid "Fragment"
+msgstr "Fragment"
+
+#: models.py:1211
+msgid "Only site articles"
+msgstr "Seulement les articles du site"
+
+#: models.py:1212
+msgid "All articles"
+msgstr "Tous les articles"
+
+#: models.py:1215
+msgid "site settings"
+msgstr "Réglages article"
+
+#: models.py:1217
+msgid "homepage URL"
+msgstr "URL de la page d'accueil"
+
+#: models.py:1218
+msgid "if set, the homepage will be redirected to the given URL"
+msgstr "si défini, la page d'accueil redirigera vers l'URL"
+
+#: models.py:1226
+msgid "Sites settings"
+msgstr "Réglages site"
+
+#: models.py:1227
+msgid "Site settings"
+msgstr "Réglages site"
 
 #: templates/admin/base_site.html:4
 msgid "Django site admin"
@@ -907,50 +878,50 @@ msgstr "Django Administration"
 msgid "Site"
 msgstr "Site"
 
-#: templates/admin/coop_cms/navtree/change_form.html:224
+#: templates/admin/coop_cms/navtree/change_form.html:225
 msgid "Are you sure to delete the selected node?"
 msgstr "Etes-vous sur de vouloir supprimer l’élément sélectionné ?"
 
-#: templates/admin/coop_cms/navtree/change_form.html:269
+#: templates/admin/coop_cms/navtree/change_form.html:270
 msgid "Home"
 msgstr "Accueil"
 
-#: templates/admin/coop_cms/navtree/change_form.html:272
+#: templates/admin/coop_cms/navtree/change_form.html:273
 #: templates/coop_cms/popup_upload_doc.html:5
 #: templates/coop_cms/popup_upload_image.html:5
 msgid "Add"
 msgstr "Ajouter"
 
-#: templates/admin/coop_cms/navtree/change_form.html:278
+#: templates/admin/coop_cms/navtree/change_form.html:279
 msgid "The site requires javascript to be enabled!"
 msgstr "Le site nécessite l'activation de javascript"
 
-#: templates/admin/coop_cms/navtree/change_form.html:283
+#: templates/admin/coop_cms/navtree/change_form.html:284
 msgid "Add a new node"
 msgstr "Ajouter un nouvel élément"
 
-#: templates/admin/coop_cms/navtree/change_form.html:293
+#: templates/admin/coop_cms/navtree/change_form.html:294
 msgid "Rename this node"
 msgstr "Renommer cet élément"
 
-#: templates/admin/coop_cms/navtree/change_form.html:294
+#: templates/admin/coop_cms/navtree/change_form.html:295
 msgid "Navigation"
 msgstr "Arborescence"
 
-#: templates/admin/coop_cms/navtree/change_form.html:295
+#: templates/admin/coop_cms/navtree/change_form.html:296
 msgid "Remove this node"
 msgstr "Supprimer cet élément de l’arborescence"
 
-#: templates/admin/coop_cms/navtree/change_form.html:309
+#: templates/admin/coop_cms/navtree/change_form.html:310
 msgid "History"
 msgstr "Historique"
 
-#: templates/admin/coop_cms/navtree/change_form.html:310
+#: templates/admin/coop_cms/navtree/change_form.html:311
 #: templates/coop_cms/navtree_content/default.html:25
 msgid "View on site"
 msgstr "Voir sur le site"
 
-#: templates/admin/coop_cms/navtree/change_form.html:321
+#: templates/admin/coop_cms/navtree/change_form.html:322
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
 msgstr[0] "Veuillez corriger l'erreur ci-dessous"
@@ -1043,13 +1014,53 @@ msgstr "Partagez sur Google+"
 msgid "Permission Denied"
 msgstr "Permission refusée"
 
-#: templates/coop_cms/newsletter.html:86
-#: templates/coop_cms/newsletter_base.html:36
+#: templates/coop_cms/medialib/slide_base.html:85
+msgid "Images"
+msgstr "Images"
+
+#: templates/coop_cms/medialib/slide_base.html:86
+msgid "Galleries"
+msgstr "Galleries"
+
+#: templates/coop_cms/medialib/slide_base.html:87
+msgid "Documents"
+msgstr "Documents"
+
+#: templates/coop_cms/medialib/slide_photologue_content.html:11
+msgid "Hide galleries"
+msgstr "Cacher les gallerie"
+
+#: templates/coop_cms/medialib/slide_photologue_content.html:12
+msgid "Show galleries"
+msgstr "Montrer les galleries"
+
+#: templates/coop_cms/navtree_content/article.html:5
+msgid "Edit on site"
+msgstr "Editer sur le site"
+
+#: templates/coop_cms/navtree_content/default.html:4 views/navigation.py:293
+msgid "Hide node in navigation"
+msgstr "Masquer cet élément"
+
+#: templates/coop_cms/navtree_content/default.html:6 views/navigation.py:297
+msgid "Show node in navigation"
+msgstr "Rendre visible cet élément"
+
+#: templates/coop_cms/navtree_content/default.html:14 views/navigation.py:277
+msgid "Empty node"
+msgstr "Noeud vide"
+
+#: templates/coop_cms/navtree_content/default.html:21
+msgid "Edit in admin"
+msgstr "Editer dans l'admin"
+
+#: templates/coop_cms/newsletter.html:81
+#: templates/coop_cms/newsletter_base.html:34
 msgid "If you can't view this email, "
 msgstr "Si vous ne pouvez lire cet e-mail"
 
-#: templates/coop_cms/newsletter.html:88
-#: templates/coop_cms/newsletter_base.html:38
+#: templates/coop_cms/newsletter.html:83
+#: templates/coop_cms/newsletter_base.html:36
 msgid "read the online version"
 msgstr "lire la version en ligne"
 
@@ -1160,89 +1171,49 @@ msgstr "Voir toutes les lettres d'information"
 msgid "Create a newsletter"
 msgstr "Créer une lettre d'information"
 
-#: templates/coop_cms/medialib/slide_base.html:88
-msgid "Images"
-msgstr "Images"
-
-#: templates/coop_cms/medialib/slide_base.html:89
-msgid "Galleries"
-msgstr "Galleries"
-
-#: templates/coop_cms/medialib/slide_base.html:90
-msgid "Documents"
-msgstr "Documents"
-
-#: templates/coop_cms/medialib/slide_photologue_content.html:11
-msgid "Hide galleries"
-msgstr "Cacher les gallerie"
-
-#: templates/coop_cms/medialib/slide_photologue_content.html:12
-msgid "Show galleries"
-msgstr "Montrer les galleries"
-
-#: templates/coop_cms/navtree_content/article.html:5
-msgid "Edit on site"
-msgstr "Editer sur le site"
-
-#: templates/coop_cms/navtree_content/default.html:4 views/navigation.py:293
-msgid "Hide node in navigation"
-msgstr "Masquer cet élément"
-
-#: templates/coop_cms/navtree_content/default.html:6 views/navigation.py:297
-msgid "Show node in navigation"
-msgstr "Rendre visible cet élément"
-
-#: templates/coop_cms/navtree_content/default.html:14 views/navigation.py:277
-msgid "Empty node"
-msgstr "Noeud vide"
-
-#: templates/coop_cms/navtree_content/default.html:21
-msgid "Edit in admin"
-msgstr "Editer dans l'admin"
-
-#: templatetags/coop_edition.py:181
+#: templatetags/coop_edition.py:192
 msgid " [EDITION]"
 msgstr " [EDITION]"
 
-#: templatetags/coop_edition.py:182
+#: templatetags/coop_edition.py:193
 msgid " [DRAFT]"
 msgstr " [BROUILLON]"
 
-#: templatetags/coop_edition.py:183
+#: templatetags/coop_edition.py:194
 msgid " [ARCHIVED]"
 msgstr " [ARCHIVÉ]"
 
-#: templatetags/coop_navigation.py:111
+#: templatetags/coop_navigation.py:108
 msgid "navigation_breadcrumb requires object as argument"
 msgstr "navigation_breadcrumb requiert un objet en argument"
 
-#: templatetags/coop_navigation.py:142
+#: templatetags/coop_navigation.py:137
 msgid ""
 "navigation_children requires object as argument and optionally tree="
 "{{tree_name}}"
 msgstr "navigation_children requiert un objet en argument"
 
-#: templatetags/coop_navigation.py:173
+#: templatetags/coop_navigation.py:166
 msgid "navigation_siblings requires object as argument"
 msgstr "navigation_siblings requiert un objet en argument"
 
-#: views/articles.py:113
+#: views/articles.py:118
 msgid "Permission denied"
 msgstr "Permission refusée"
 
-#: views/articles.py:134
+#: views/articles.py:139
 msgid "The article has been saved properly"
 msgstr "L’article a été enregistré avec succès"
 
-#: views/articles.py:198
+#: views/articles.py:203
 msgid "Do you want to publish this article?"
 msgstr "Voulez-vous publier cet article ?"
 
-#: views/articles.py:198
+#: views/articles.py:203
 msgid "Make it draft?"
 msgstr "Voulez-vous passez en mode brouillon?"
 
-#: views/articles.py:278
+#: views/articles.py:283
 msgid "The article has been created properly"
 msgstr "L’article a été créé avec succès"
 
@@ -1258,15 +1229,15 @@ msgstr "Voulez-vous utiliser cet article comme page d'accueil ?"
 msgid "The link has been created properly"
 msgstr "Le lien a été créé avec succès"
 
-#: views/navigation.py:74
+#: views/navigation.py:75
 msgid "The node '{0}' has been renamed into '{1}'."
 msgstr "L’élément '{0}' a été renommé en '{1}'."
 
-#: views/navigation.py:88
+#: views/navigation.py:89
 msgid "The node has been removed."
 msgstr "L’élément a été supprimé"
 
-#: views/navigation.py:90
+#: views/navigation.py:91
 msgid "{0} nodes has been removed."
 msgstr "{0} éléments ont été supprimés"
 
@@ -1298,13 +1269,70 @@ msgstr "l’élément est à présent visible dans l’arborescence."
 msgid "The node is now hidden."
 msgstr "Cet élément est maintenant masqué."
 
-#: views/newsletters.py:95
+#: views/newsletters.py:104
 msgid "The test email has been sent to {0} addresses: {1}"
 msgstr "L'email de test a été envoyé à {0} adresses: {1}"
 
-#: views/newsletters.py:100
+#: views/newsletters.py:109
 msgid "An error occured! Please contact your support."
 msgstr "Une erreur est intervenue, contactez le support technique."
+
+#~ msgid "Feed"
+#~ msgstr "Flux"
+
+#~ msgid "Information"
+#~ msgstr "Information"
+
+#~ msgid "Actions"
+#~ msgstr "Actions"
+
+#~ msgid "Source"
+#~ msgstr "Source"
+
+#~ msgid "CMS"
+#~ msgstr "CMS"
+
+#~ msgid "url"
+#~ msgstr "url"
+
+#~ msgid "last collect"
+#~ msgstr "dernière collecte"
+
+#~ msgid "RSS source"
+#~ msgstr "Source RSS"
+
+#~ msgid "RSS sources"
+#~ msgstr "Sources RSS"
+
+#~ msgid "summary"
+#~ msgstr "résumé"
+
+#~ msgid "author"
+#~ msgstr "auteur"
+
+#~ msgid "updated"
+#~ msgstr "mis à jour"
+
+#~ msgid "processed"
+#~ msgstr "traité"
+
+#~ msgid "RSS item"
+#~ msgstr "Article à importer (RSS)"
+
+#~ msgid "RSS items"
+#~ msgstr "Articles à importer (RSS)"
+
+#~ msgid "Collect RSS items"
+#~ msgstr "Collecter les articles via RSS"
+
+#~ msgid "Create CMS Article"
+#~ msgstr "Importer l'article sur le site"
+
+#~ msgid "Collect"
+#~ msgstr "Collecter"
+
+#~ msgid "Create CMS article"
+#~ msgstr "Importer l'article"
 
 #~ msgid "Newsletter template"
 #~ msgstr "Modèle Lettre"
