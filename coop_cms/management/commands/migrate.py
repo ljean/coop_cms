@@ -34,5 +34,5 @@ class Command(get_and_configure_base_class()):
         """command"""
 
         super(Command, self).handle(*args, **options)
-        if DJANGO_VERSION >= (1, 7, 0) and 'test' in sys.argv:
+        if DJANGO_VERSION >= (1, 7, 0) and 'test' in sys.argv and 'modeltranslation' in settings.INSTALLED_APPS:
             call_command('sync_translation_fields', interactive=False)
