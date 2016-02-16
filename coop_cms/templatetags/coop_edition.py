@@ -374,6 +374,7 @@ class CmsEditNode(template.Node):
 
         nodes_content = ""
         for node in self.nodelist_content:
+
             if any([isinstance(node, node_type) for node_type in managed_node_types]):
                 content = node.render(Context(safe_context))
 
@@ -383,12 +384,27 @@ class CmsEditNode(template.Node):
                     local_context.template = context.template
                 content = node.render(local_context)
 
+            elif node.__class__.__name__ == 'MediaListNode':
+                content = node.render(context)
+                safe_context[node.var_name] = context.get(node.var_name)
+                inner_context[node.var_name] = context.get(node.var_name)
+
+            elif node.__class__.__name__ == 'AssignmentNode':
+                content = node.render(context)
+                safe_context[node.target_var] = context.get(node.target_var)
+                inner_context[node.target_var] = context.get(node.target_var)
+
             elif DJANGO_VERSION >= (1, 8, 0) and isinstance(node, IncludeNode):
                 # monkey patching for django 1.8
                 template_name = node.template.resolve(context)
                 node.template = get_template(template_name)
                 node.template.resolve = lambda s, c: s
-                the_context = Context(inner_context)
+                context_dict = inner_context.copy()
+                if node.extra_context:
+                    for filter_expression in node.extra_context:
+                        value = node.extra_context[filter_expression].resolve(context)
+                        context_dict[filter_expression] = value
+                the_context = Context(context_dict)
                 the_context.template = node.template
                 the_context.template.engine = DummyEngine()
                 content = node.template.render(the_context)
@@ -402,8 +418,11 @@ class CmsEditNode(template.Node):
                 if node.filter_expression.filters:
                     content = node.render(Context(context))
                 else:
-                    content = node.render(Context(safe_context))
-
+                    the_context = Context(safe_context)
+                    if DJANGO_VERSION >= (1, 8, 0):
+                        the_context.template = getattr(node, 'template', None) or template.Template("")
+                        the_context.template.engine = DummyEngine()
+                    content = node.render(the_context)
             else:
                 if DJANGO_VERSION >= (1, 8, 0):
                     # monkey patching for django 1.8

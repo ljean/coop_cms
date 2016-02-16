@@ -11,10 +11,12 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test.client import RequestFactory
 
-from coop_cms.models import Link, NavNode, BaseArticle
+from model_mommy import mommy
+
+from coop_cms.models import Link, NavNode, BaseArticle, MediaFilter, Image
 from coop_cms.settings import is_localized, is_multilang, get_article_class, get_navtree_class
 from coop_cms.templatetags.coop_utils import get_part, get_parts, group_in_sublists, find_css, reduced_page_range
-from coop_cms.tests import BaseTestCase
+from coop_cms.tests import BaseTestCase, BeautifulSoup
 
 
 class CmsEditTagTest(BaseTestCase):
@@ -412,3 +414,107 @@ class PaginationReducedPageRangeTestCase(BaseTestCase):
         self.assertEqual(
             [1, 0, 4, 5, 6, 7, 8, 0, 12], reduced_page_range(page_obj)
         )
+
+
+class ImageListTemplateTagsTest(BaseTestCase):
+    """Test coop_image_list tags"""
+
+    def test_show_carousel(self):
+        """display an album"""
+
+        media_filer = mommy.make(MediaFilter, name='Album Homepage')
+        image = mommy.make(Image)
+        image.filters.add(media_filer)
+        image.save()
+
+        mommy.make(Image)
+
+        template_content = '''
+        {% load coop_utils %}
+        {% coop_image_list 'Album Homepage' as homepage_album %}
+        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        '''
+        tpl = Template(template_content)
+        html = tpl.render(Context({}))
+
+        soup = BeautifulSoup(html)
+        tags = soup.select('img')
+        self.assertEqual(1, len(tags))
+        self.assertEqual(image.get_absolute_url(), tags[0]['src'])
+
+    def test_show_carousel_several_images(self):
+        """display an album"""
+
+        media_filer = mommy.make(MediaFilter, name='Album Homepage')
+        image1 = mommy.make(Image)
+        image1.filters.add(media_filer)
+        image1.save()
+        image2 = mommy.make(Image)
+        image2.filters.add(media_filer)
+        image2.save()
+        image3 = mommy.make(Image)
+
+        template_content = '''
+        {% load coop_utils %}
+        {% coop_image_list 'Album Homepage' as homepage_album %}
+        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        '''
+        tpl = Template(template_content)
+        html = tpl.render(Context({}))
+
+        soup = BeautifulSoup(html)
+        tags = soup.select('img')
+        self.assertEqual(2, len(tags))
+        self.assertEqual(
+            sorted([img.get_absolute_url() for img in (image1, image2)]),
+            sorted([tag['src'] for tag in tags]),
+        )
+
+    def test_show_carousel_context_var(self):
+        """display an album"""
+
+        media_filer = mommy.make(MediaFilter, name='Album Homepage')
+        image = mommy.make(Image)
+        image.filters.add(media_filer)
+        image.save()
+
+        template_content = '''
+        {% load coop_utils %}
+        {% coop_image_list album_name as homepage_album %}
+        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        '''
+        tpl = Template(template_content)
+        html = tpl.render(Context({'album_name': 'Album Homepage'}))
+
+        soup = BeautifulSoup(html)
+        self.assertEqual(1, len(soup.select('img')))
+
+    def test_show_empty_carousel(self):
+        """display an album"""
+
+        mommy.make(MediaFilter, name='Album Homepage')
+
+        template_content = '''
+        {% load coop_utils %}
+        {% coop_image_list 'Album Homepage' as homepage_album %}
+        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        '''
+        tpl = Template(template_content)
+        html = tpl.render(Context({}))
+
+        soup = BeautifulSoup(html)
+        self.assertEqual(0, len(soup.select('img')))
+
+    def test_show_empty_carousel_missing_filter(self):
+        """display an album"""
+
+        template_content = '''
+        {% load coop_utils %}
+        {% coop_image_list 'Album Homepage' as homepage_album %}
+        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        '''
+        tpl = Template(template_content)
+        html = tpl.render(Context({}))
+
+        soup = BeautifulSoup(html)
+        self.assertEqual(0, len(soup.select('img')))

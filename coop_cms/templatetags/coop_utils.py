@@ -297,7 +297,7 @@ class MediaListNode(template.Node):
         if self.filter_var:
             self.filter_value = self.filter_var.resolve(context)
         images = self.model_class.objects.filter(filters__name=self.filter_value).order_by("ordering", "-created")
-        context.dicts[1][self.var_name] = images
+        context.dicts[0][self.var_name] = images
         return ""
 
 
@@ -307,7 +307,7 @@ def coop_image_list(parser, token):
     args = token.split_contents()
     try:
         filter_name = args[1]
-        #as_name = args[2]
+        # as_name = args[2]
         var_name = args[3]
     except IndexError:
         raise TemplateSyntaxError(u"coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
