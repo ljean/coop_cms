@@ -432,7 +432,7 @@ class ImageListTemplateTagsTest(BaseTestCase):
         template_content = '''
         {% load coop_utils %}
         {% coop_image_list 'Album Homepage' as homepage_album %}
-        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        {% include "test/carousel.html" with image_list=homepage_album %}')
         '''
         tpl = Template(template_content)
         html = tpl.render(Context({}))
@@ -457,7 +457,7 @@ class ImageListTemplateTagsTest(BaseTestCase):
         template_content = '''
         {% load coop_utils %}
         {% coop_image_list 'Album Homepage' as homepage_album %}
-        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        {% include "test/carousel.html" with image_list=homepage_album %}')
         '''
         tpl = Template(template_content)
         html = tpl.render(Context({}))
@@ -481,7 +481,7 @@ class ImageListTemplateTagsTest(BaseTestCase):
         template_content = '''
         {% load coop_utils %}
         {% coop_image_list album_name as homepage_album %}
-        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        {% include "test/carousel.html" with image_list=homepage_album %}')
         '''
         tpl = Template(template_content)
         html = tpl.render(Context({'album_name': 'Album Homepage'}))
@@ -497,7 +497,7 @@ class ImageListTemplateTagsTest(BaseTestCase):
         template_content = '''
         {% load coop_utils %}
         {% coop_image_list 'Album Homepage' as homepage_album %}
-        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        {% include "test/carousel.html" with image_list=homepage_album %}')
         '''
         tpl = Template(template_content)
         html = tpl.render(Context({}))
@@ -511,7 +511,7 @@ class ImageListTemplateTagsTest(BaseTestCase):
         template_content = '''
         {% load coop_utils %}
         {% coop_image_list 'Album Homepage' as homepage_album %}
-        {% include "coop_bootstrap/carousel.html" with image_list=homepage_album %}')
+        {% include "test/carousel.html" with image_list=homepage_album %}')
         '''
         tpl = Template(template_content)
         html = tpl.render(Context({}))

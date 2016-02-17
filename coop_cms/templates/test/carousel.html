@@ -1,0 +1,27 @@
+<div id="carousel" class="carousel slide" data-ride="carousel">
+    <!-- Indicators -->
+    <ol class="carousel-indicators">
+    {% for image in image_list %}
+      <li data-target="#carousel" data-slide-to="{{forloop.counter0}}" class="{% if forloop.counter0 == 0 %}active{% endif %}"></li>
+    {% endfor %}
+    </ol>
+
+    <!-- Wrapper for slides -->
+    <div class="carousel-inner">
+    {% for image in image_list %}
+      <div class="item {% if forloop.counter0 == 0 %}active{% endif %}">
+        <img src="{{image.get_absolute_url}}" alt="{{image.name}}">
+        <!---<div class="carousel-caption">
+        </div>--->
+      </div>
+    {% endfor %}
+    </div>
+
+    <!-- Controls -->
+    <a class="left carousel-control" href="#carousel" role="button" data-slide="prev">
+      <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+    <a class="right carousel-control" href="#carousel" role="button" data-slide="next">
+      <span class="glyphicon glyphicon-chevron-right"></span>
+    </a>
+</div>
