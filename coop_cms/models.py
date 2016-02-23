@@ -712,9 +712,6 @@ class BaseArticle(BaseNavigable):
 
     def _get_slug(self):
         """get slug"""
-        slug = getattr(self, '_cache_slug', None)
-        if slug:
-            return slug
         slug = self.slug
         if not slug:
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
@@ -722,7 +719,6 @@ class BaseArticle(BaseNavigable):
                 slug = getattr(self, key)
                 if slug:
                     break
-        setattr(self, '_cache_slug', slug)
         return slug
 
     def get_absolute_url(self):

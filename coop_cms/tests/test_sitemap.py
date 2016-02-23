@@ -7,6 +7,7 @@ from django.contrib.sites.models import Site
 from django.contrib.sitemaps.views import sitemap as sitemap_view
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
+from django.utils.text import slugify
 from django.utils.translation import activate
 
 from model_mommy import mommy
@@ -166,3 +167,35 @@ class LocaleSitemapTest(SitemapTest):
             self.assertContains(response, site.domain + get_url_in_language(article2.get_absolute_url(), lang))
             self.assertNotContains(response, get_url_in_language(article3.get_absolute_url(), lang))
             self.assertNotContains(response, get_url_in_language(article4.get_absolute_url(), lang))
+
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    def test_sitemap_lang_slug(self):
+        """Test that the url is in the locale language"""
+        site = Site.objects.get_current()
+        from modeltranslation.utils import build_localized_fieldname  # pylint: disable=F0401
+
+        kwargs1 = {}
+        kwargs2 = {}
+
+        for lang_code, lang_name in settings.LANGUAGES:
+            loc_title_var = build_localized_fieldname('title', lang_code)
+            loc_slug_var = build_localized_fieldname('slug', lang_code)
+            kwargs1[loc_title_var] = u'article-{0}-1'.format(lang_name)
+            kwargs2[loc_title_var] = u'other-article-{0}-2'.format(lang_name)
+            kwargs1[loc_slug_var] = slugify(kwargs1[loc_title_var])
+            kwargs2[loc_slug_var] = slugify(kwargs2[loc_title_var])
+
+        article_class = get_article_class()
+
+        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, **kwargs1)
+        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, **kwargs2)
+
+        factory = RequestFactory()
+        request = factory.get('/sitemap.xml')
+        response = sitemap_view(request, get_sitemaps())
+        self.assertEqual(200, response.status_code)
+
+        for (lang, name) in settings.LANGUAGES:
+            activate(lang)
+            self.assertContains(response, site.domain + article1.get_absolute_url())
+            self.assertContains(response, site.domain + article2.get_absolute_url())

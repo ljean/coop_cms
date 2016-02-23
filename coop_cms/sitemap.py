@@ -6,13 +6,24 @@ from django.conf.urls import url, patterns
 from django.contrib.sitemaps import Sitemap
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
+from django.utils.translation import activate
 
 from coop_cms.models import BaseArticle, SiteSettings
 from coop_cms.settings import get_article_class, is_localized
-from coop_cms.utils import get_url_in_language
 
 
-class ViewSitemap(Sitemap):
+class LocaleSitemap(Sitemap):
+    def __init__(self, language=''):
+        super(LocaleSitemap, self).__init__()
+        self.language = language
+
+    def location(self, obj):
+        if is_localized() and self.language:
+            activate(self.language)
+        return obj.get_absolute_url()
+
+
+class ViewSitemap(LocaleSitemap):
     """Sitemap base class for django view"""
     view_names = []
     
@@ -30,13 +41,9 @@ class ViewSitemap(Sitemap):
         return [Klass(x) for x in self.view_names]
 
 
-class BaseSitemap(Sitemap):
+class BaseSitemap(LocaleSitemap):
     """Base class"""
     _current_site = None
-
-    def __init__(self, language):
-        super(BaseSitemap, self).__init__()
-        self.language = language
 
     def get_urls(self, page=1, site=None, protocol=None):
         """get urls"""
@@ -50,12 +57,6 @@ class BaseSitemap(Sitemap):
         if not self._current_site:
             self._current_site = Site.objects.get_current()
         return self._current_site
-
-    def location(self, obj):
-        if is_localized():
-            return get_url_in_language(obj.get_absolute_url(), self.language)
-        else:
-            return obj.get_absolute_url()
 
 
 class ArticleSitemap(BaseSitemap):
