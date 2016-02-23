@@ -4,7 +4,7 @@
 	<a href="" class="close-message">{% trans "close" %}</a>
   {% for msg in messages %}
     <li class="{{msg.tags}}">
-      <span class="{{msg.tags}}">{{m}}</span>
+      <span class="{{msg.tags}}">{{ msg }}</span>
     </li>
   {% endfor %}
 </ul>
