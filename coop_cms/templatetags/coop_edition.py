@@ -366,9 +366,6 @@ class CmsEditNode(template.Node):
             template.defaulttags.IfNode,
             IfCmsEditionNode,
             IfNotCmsEditionNode,
-        ]
-
-        managed_node_types_with_template = [
             template.defaulttags.ForNode,
         ]
 
@@ -376,9 +373,6 @@ class CmsEditNode(template.Node):
         for node in self.nodelist_content:
 
             if any([isinstance(node, node_type) for node_type in managed_node_types]):
-                content = node.render(Context(safe_context))
-
-            elif any([isinstance(node, node_type) for node_type in managed_node_types_with_template]):
                 local_context = Context(safe_context)
                 if hasattr(context, 'template'):
                     local_context.template = context.template
