@@ -3,7 +3,7 @@
 
 from django import forms
 from django.contrib.auth import authenticate, REDIRECT_FIELD_NAME
-from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm
+from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.utils.translation import ugettext as _, ugettext_lazy as __
 
 from coop_cms.bs_forms import Form, BootstrapableMixin
@@ -61,14 +61,23 @@ class EmailAuthForm(Form):
 
 
 class BsPasswordResetForm(BootstrapableMixin, PasswordResetForm):
-
+    """Password reset form : Inherit from django_auth standard form. Add bootstrap style to fields"""
     def __init__(self, *args, **kwargs):
         super(PasswordResetForm, self).__init__(*args, **kwargs)
         self._bs_patch_field_class()
 
 
 class BsPasswordChangeForm(BootstrapableMixin, PasswordChangeForm):
+    """Password change form : Inherit from django_auth standard form. Add bootstrap style to fields"""
 
     def __init__(self, *args, **kwargs):
         super(BsPasswordChangeForm, self).__init__(*args, **kwargs)
+        self._bs_patch_field_class()
+
+
+class BsSetPasswordForm(BootstrapableMixin, SetPasswordForm):
+    """Password set form : Inherit from django_auth standard form. Add bootstrap style to fields"""
+
+    def __init__(self, *args, **kwargs):
+        super(BsSetPasswordForm, self).__init__(*args, **kwargs)
         self._bs_patch_field_class()
