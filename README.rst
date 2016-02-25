@@ -27,9 +27,9 @@ Coop-cms has some sister apps to make it more usable:
 Quick start
 -----------
 
-Python 2.6+, Django 1.4+ required
+Python 2.6+, Django 1.6+ required
 
-Install it with ``pip install coop-cms``
+Install it with ``pip install apidev_coop_cms``
 
 urls.py
 ~~~~~~~
@@ -49,12 +49,17 @@ settings.py
 In settings.py::
 
     MIDDLEWARE_CLASSES = (
-        'django.middleware.common.CommonMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
+        'django.middleware.common.CommonMiddleware',
+        'django.middleware.locale.LocaleMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
+        'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
         'django.contrib.messages.middleware.MessageMiddleware',
-        'pagination.middleware.PaginationMiddleware',
+        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        'django.middleware.security.SecurityMiddleware',
+        'coop_cms.middleware.PermissionsMiddleware',  # Optional: redirect to login when PermissionDenied is raised
+        'coop_cms.utils.RequestMiddleware',
         ...
     )
 
@@ -71,6 +76,7 @@ In settings.py::
 
     AUTHENTICATION_BACKENDS = (
         'coop_cms.perms_backends.ArticlePermissionBackend',
+        'coop_cms.apps.email_auth.auth_backends.EmailAuthBackend',  # Optional -> login with email rather than username
         'django.contrib.auth.backends.ModelBackend', # Django's default auth backend
     )
 
@@ -86,18 +92,18 @@ In settings.py::
         'django.contrib.admindocs',
 
         #3rd parties
-        'south',
         'django_extensions',
         'sorl.thumbnail',
         'floppyforms',
-        'pagination',
-        'chosen', #optional but recommended. You must install it separately
+        'registration', # Optional
 
         #apps
         'coop_bar',
         'djaloha',
         'colorbox',
         'coop_cms',
+        'coop_cms.apps.coop_bootstrap', # Optional -> utilities for Bootstrap CSS framework
+        'coop_cms.apps.email_auth', # Optional -> login with email rather than username
 
         #The coop_cms Article is an abstract model, you must define an Article in one of your app
         #We provide 2 apps that can be used if needed. Choose one or the other
@@ -239,15 +245,20 @@ You can look at the demo_app in apps folder to see how to customize the behavior
 Internationalization
 --------------------
 
-If you want to make an international site, coop_cms works well with django-modeltranslation and django-localeurl.
+If you want to make an international site, coop_cms works well with `django-modeltranslation`.
 
-If you use django-localeurl, we recommend to put the reverse patch at the top of your urls.py
+We recommend to remove `django-modeltranslation` from the apps when making the model migrations
 
-    if 'localeurl' in settings.INSTALLED_APPS:
-        #If localeurl is installed : need to patch the django reverse
-        #In order to take lang prefix into account
-        from localeurl.models import patch_reverse
-        patch_reverse()
+
+    if (len(sys.argv) > 1) and (not sys.argv[1] in ('makemigrations',)):
+        INSTALLED_APPS = ('modeltranslation', ) + INSTALLED_APPS
+
+The model migrations wil not take the translation fields into account and it will be easier to add or remove languages
+with the following commands
+
+    python manage.py sync_translation_fields --noinput
+    python manage.py update_translation_fields
+
 
 License
 =======
