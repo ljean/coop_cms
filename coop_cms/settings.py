@@ -274,6 +274,11 @@ def is_multilang():
     return len(django_settings.LANGUAGES) > 1
 
 
+def multilang_mode():
+    """return true if several languages are set"""
+    return len(django_settings.LANGUAGES)
+
+
 def install_csrf_failure_view():
     """Make possible to customize csrf failure page"""
     dont_do_it = getattr(django_settings, 'COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW', False)

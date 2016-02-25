@@ -677,20 +677,20 @@ class BaseArticle(BaseNavigable):
 
     def get_unique_slug(self, slug_field, title):
         """unique slug"""
-        #no html in title
+        # no html in title
         title = dehtml(title)
         slug = slugify(title)
         next_suffix, origin_slug = 2, slug
         slug_exists = True
 
         while slug_exists:
-            #Check that this slug doesn't already exist
-            #The slug must be unique for all sites
+            # Check that this slug doesn't already exist
+            # The slug must be unique for all sites
 
             slug_exists = self._does_slug_exist(slug)
             
             if slug_exists:
-                #oups the slug is already used: change it and try again
+                # oups the slug is already used: change it and try again
                 next_suffix_len = len(str(next_suffix))
                 safe_slug = origin_slug[:(100 - next_suffix_len)]
                 slug = u"{0}{1}".format(safe_slug, next_suffix)
@@ -767,18 +767,18 @@ class Link(BaseNavigable):
     def get_absolute_url(self):
         """url"""
         if is_localized():
-            #parsed_url = scheme, netloc, path, params, query, fragment
+            # parsed_url = scheme, netloc, path, params, query, fragment
             parsed_url = urlparse.urlparse(self.url)
             scheme = parsed_url[0]
             if not scheme:
-                #the urls doesn't starts with http://, so it's a url managed by the site
+                # the urls doesn't starts with http://, so it's a url managed by the site
                 locale = get_language()
                 return make_locale_path(self.url, locale)
         return self.url
 
     def get_label(self):
         """label for navigation"""
-        #parsed_url = scheme, netloc, path, params, query, fragment
+        # parsed_url = scheme, netloc, path, params, query, fragment
         parsed_url = urlparse.urlparse(self.url)
         scheme, netloc, path = parsed_url[0], parsed_url[1], parsed_url[2]
         if scheme:

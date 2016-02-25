@@ -23,6 +23,7 @@ def get_article_slug(*args, **kwargs):
 def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwargs):
     """get article"""
     article_class = get_article_class()
+    current_lang = get_language()
     try:
         return article_class.objects.get(slug=slug, **kwargs)
     except article_class.DoesNotExist:
@@ -35,7 +36,6 @@ def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwa
             try:
                 lang = force_lang
                 if not lang:
-                    current_lang = get_language()
                     if current_lang != default_lang:
                         lang = default_lang
                 if lang:
@@ -44,17 +44,18 @@ def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwa
                 else:
                     raise article_class.DoesNotExist()
             except article_class.DoesNotExist:
-                #Try to find in another lang
-                #The article might be created in another language than the default one
-                for (l, n) in settings.LANGUAGES:
-                    key = 'slug_{0}'.format(l)
-                    try:
-                        kwargs.update({key: slug})
-                        return article_class.objects.get(**kwargs)
-                    except article_class.DoesNotExist:
-                        kwargs.pop(key)
+                if current_lang == default_lang:
+                    # Try to find in another lang
+                    # The article might be created in another language than the default one
+                    for (lang_code, lang_name) in settings.LANGUAGES:
+                        key = 'slug_{0}'.format(lang_code)
+                        try:
+                            kwargs.update({key: slug})
+                            return article_class.objects.get(**kwargs)
+                        except article_class.DoesNotExist:
+                            kwargs.pop(key)
                 raise article_class.DoesNotExist()
-        raise #re-raise previous error
+        raise  # re-raise previous error
 
 
 def get_article_or_404(slug, **kwargs):

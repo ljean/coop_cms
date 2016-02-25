@@ -95,7 +95,6 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
     ]
     date_hierarchy = 'publication_date'
     fieldsets = (
-        #(_('Navigation'), {'fields': ('navigation_parent',)}),
         (_(u'General'), {'fields': ('slug', 'title', 'subtitle', 'publication', 'login_required', )}),
         (_(u'Settings'), {
             'fields': ('sites', 'template', 'category', 'headline', 'is_homepage', 'logo', 'in_newsletter', )

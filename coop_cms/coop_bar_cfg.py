@@ -471,8 +471,8 @@ class LanguageSwitcher(object):
                     url = url[3:]
 
                 if is_localized and lang != self.lang_code:
-                    url = "/" + lang + url
-                    icon = "/fugue/locale.png".format(self.lang_code)
+                    url = "/" + self.lang_code + url
+                    icon = "/fugue/locale.png"
                     return make_link(url, _(u'Switch to {0}').format(self.lang_name), icon, classes=['icon'])
 
 

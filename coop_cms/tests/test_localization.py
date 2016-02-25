@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import activate, get_language
 
 from coop_cms.models import BaseArticle, InvalidArticleError
-from coop_cms.settings import is_localized, is_multilang, get_article_class
+from coop_cms.settings import is_localized, is_multilang, multilang_mode, get_article_class
 from coop_cms.tests import BaseTestCase
 from coop_cms.utils import redirect_to_language, strip_locale_path, get_url_in_language, make_locale_path
 
@@ -474,6 +474,39 @@ class UrlLocalizationTest(BaseTestCase):
         response = self.client.get(art1.get_absolute_url())
         self.assertEqual(200, response.status_code)
         self.assertContains(response, art1.content)
+
+    @skipIf(not is_localized() or multilang_mode() < 3, "not localized")
+    def test_create_article_in_third_lang(self):
+        """test create article into an other language than the default"""
+
+        article_class = get_article_class()
+
+        default_lang = settings.LANGUAGES[0][0]
+        other_lang = settings.LANGUAGES[1][0]
+        third_lang = settings.LANGUAGES[2][0]
+
+        activate(third_lang)
+        content = u"a!*%:"*10
+
+        art1 = article_class.objects.create(title=u"abcd", content=content, publication=BaseArticle.PUBLISHED)
+        self.assertEqual(art1.slug, 'abcd')
+        third_lang_url = art1.get_absolute_url()
+        response = self.client.get(third_lang_url)
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, content)
+
+        activate(other_lang)
+        art1.title = 'efgh'
+        art1.save()
+
+        self.assertEqual(art1.slug, 'efgh')
+
+        response = self.client.get(art1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        self.assertNotContains(response, content)
+
+        response = self.client.get(third_lang_url.replace('/' + third_lang + '/', '/' + other_lang + '/', 1))
+        self.assertEqual(404, response.status_code)
 
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_redirect_to_language(self):
