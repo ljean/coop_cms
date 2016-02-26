@@ -250,7 +250,7 @@ If you want to make an international site, coop_cms works well with `django-mode
 We recommend to remove `django-modeltranslation` from the apps when making the model migrations
 
 
-    if (len(sys.argv) > 1) and (not sys.argv[1] in ('makemigrations',)):
+    if not (len(sys.argv) > 1 and sys.argv[1] in ('makemigrations', 'schemamigration', 'datamigration')):
         INSTALLED_APPS = ('modeltranslation', ) + INSTALLED_APPS
 
 The model migrations wil not take the translation fields into account and it will be easier to add or remove languages
