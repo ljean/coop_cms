@@ -367,11 +367,11 @@ class CmsEditNode(template.Node):
             IfCmsEditionNode,
             IfNotCmsEditionNode,
             template.defaulttags.ForNode,
+            template.loader_tags.BlockNode,
         ]
 
         nodes_content = ""
         for node in self.nodelist_content:
-
             if any([isinstance(node, node_type) for node_type in managed_node_types]):
                 local_context = Context(safe_context)
                 if hasattr(context, 'template'):
