@@ -1,0 +1,19 @@
+{% extends "coop_cms/article.html" %}
+{% load i18n coop_navigation coop_edition coop_utils %}
+
+{% block article %}
+
+<span class="li_nav_node">
+{% navigation_as_nested_ul tree=li_nav_node_menu li_node="test/navigation_li_node.html" %}
+</span>
+
+{% cms_edit article %}
+    {{ article.title }}
+    {{ article.logo }}
+    {{ article.content }}
+{% end_cms_edit %}
+
+{% if_cms_edition %} {% include "coop_cms/_article_publication.html" %} {% endif %}
+
+{% endblock %}
+

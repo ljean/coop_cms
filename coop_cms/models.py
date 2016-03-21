@@ -24,7 +24,7 @@ from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.urlresolvers import reverse
-from django.template import Context
+from django.template import Context, RequestContext
 from django.template.defaultfilters import slugify, escape
 from django.template.loader import get_template
 from django.utils.translation import get_language, ugettext, ugettext_lazy as _
@@ -249,14 +249,22 @@ class NavNode(models.Model):
 
     def _get_li_content(self, li_template, node_pos=0, total_nodes=0):
         """content when displayed in li html tag"""
+        request = RequestManager().get_request()
         if li_template:
             template_ = li_template if hasattr(li_template, 'render') else get_template(li_template)
-            return template_.render(
-                Context({
-                    'node': self, 'STATIC_URL': settings.STATIC_URL,
-                    'node_pos': node_pos, 'total_nodes': total_nodes,
-                })
-            )
+            if request:
+                return template_.render(
+                    RequestContext(request, {
+                        'node': self,  'node_pos': node_pos, 'total_nodes': total_nodes,
+                    })
+                )
+            else:
+                return template_.render(
+                    Context(request, {
+                        'STATIC_URL': settings.STATIC_URL,
+                        'node': self,  'node_pos': node_pos, 'total_nodes': total_nodes,
+                    })
+                )
         else:
             url = self.get_absolute_url()
             if url is None:

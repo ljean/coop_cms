@@ -2,6 +2,7 @@
 
 import json
 
+from django.conf import settings
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
@@ -1349,3 +1350,57 @@ class NavigationTreeTest(NavigationTreeBaseTest):
 
         for node in nodes_in:
             self.assertTrue(html.find(unicode(node)) >= 0)
+
+
+class NavigationLiNodeTest(NavigationTreeBaseTest):
+    """test li_node argument of navigation_as_nested_ul templatetag"""
+
+    def test_li_node(self):
+        """check that request context is use for rendering li_node arg template"""
+        li_nav_node_menu = get_navtree_class().objects.create(name="li_nav_node_menu")
+
+        article = mommy.make(get_article_class(), template='test/article_li_node.html')
+
+        link1 = Link.objects.create(url='http://www.google.fr', title="http://www.google.fr")
+        node1 = NavNode.objects.create(
+            tree=li_nav_node_menu, label=link1.url, content_object=link1, ordering=1, parent=None
+        )
+
+        response = self.client.get(article.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+
+        soup = BeautifulSoup(response.content)
+        li_nodes = soup.select('.li_nav_node li a')
+        self.assertEqual(1, len(li_nodes))
+
+        li_node = li_nodes[0]
+        # image name is the slug of the label
+        self.assertEqual(li_node.img['src'], '{0}httpwwwgooglefr.png'.format(settings.MEDIA_URL))
+
+    def test_li_node_user(self):
+        """check that request context is use for rendering li_node arg template : user should be in"""
+
+        self._log_as_user()
+
+        li_nav_node_menu = get_navtree_class().objects.create(name="li_nav_node_menu")
+
+        article = mommy.make(get_article_class(), template='test/article_li_node.html')
+
+        link1 = Link.objects.create(url='http://www.google.fr', title="http://www.google.fr")
+        node1 = NavNode.objects.create(
+            tree=li_nav_node_menu, label=link1.url, content_object=link1, ordering=1, parent=None
+        )
+
+        response = self.client.get(article.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+
+        soup = BeautifulSoup(response.content)
+        li_nodes = soup.select('.li_nav_node li a')
+        self.assertEqual(1, len(li_nodes))
+
+        li_node = li_nodes[0]
+        # image name is the slug of the label
+        self.assertEqual(li_node.img['src'], '{0}httpwwwgooglefr.png'.format(settings.MEDIA_URL))
+        self.assertTrue(li_node.text.find(self.user.username) >= 0)
