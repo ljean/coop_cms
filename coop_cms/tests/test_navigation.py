@@ -159,7 +159,9 @@ class NavigationTest(BaseTestCase):
         
         nodes = []
         for i, link in enumerate(links):
-            nodes.append(NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None))
+            nodes.append(
+                NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None)
+            )
         
         self._log_as_editor()
         
@@ -188,7 +190,9 @@ class NavigationTest(BaseTestCase):
         
         nodes = []
         for i, link in enumerate(links):
-            nodes.append(NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None))
+            nodes.append(
+                NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None)
+            )
         nodes[1].parent = nodes[0]
         nodes[1].ordering = 1
         nodes[1].save()
@@ -242,7 +246,9 @@ class NavigationTest(BaseTestCase):
         
         nodes = []
         for i, link in enumerate(links):
-            nodes.append(NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None))
+            nodes.append(
+                NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None)
+            )
         
         self._log_as_editor()
         
@@ -284,7 +290,9 @@ class NavigationTest(BaseTestCase):
         
         nodes = []
         for i, link in enumerate(links):
-            nodes.append(NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None))
+            nodes.append(
+                NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None)
+            )
         
         self._log_as_editor()
         
@@ -311,7 +319,9 @@ class NavigationTest(BaseTestCase):
         
         nodes = []
         for i, link in enumerate(links):
-            nodes.append(NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None))
+            nodes.append(
+                NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None)
+            )
         
         nodes[-1].parent = nodes[-2]
         nodes[-1].ordering = 1
@@ -343,11 +353,13 @@ class NavigationTest(BaseTestCase):
         
         nodes = []
         for i, link in enumerate(links):
-            nodes.append(NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None))
+            nodes.append(NavNode.objects.create(
+                tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None)
+            )
         
         self._log_as_editor()
         
-        #rename the 1st one
+        # rename the 1st one
         data = {
             'msg_id': 'rename_navnode',
             'node_id': nodes[0].id,
@@ -372,11 +384,13 @@ class NavigationTest(BaseTestCase):
         
         nodes = []
         for i, link in enumerate(links):
-            nodes.append(NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None))
+            nodes.append(NavNode.objects.create(
+                tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=None)
+            )
         
         self._log_as_editor()
         
-        #remove the 2ns one
+        # remove the 2ns one
         data = {
             'msg_id': 'view_navnode',
             'node_id': nodes[0].id,
@@ -385,8 +399,8 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         result = json.loads(response.content)
         self.assertEqual(result['status'], 'success')
-        self.assertTrue(result['html'].find(nodes[0].get_absolute_url())>=0)
-        self.assertTrue(result['html'].find(nodes[1].get_absolute_url())<0)
+        self.assertTrue(result['html'].find(nodes[0].get_absolute_url()) >= 0)
+        self.assertTrue(result['html'].find(nodes[1].get_absolute_url()) < 0)
         self.assertTemplateUsed(response, 'coop_cms/navtree_content/default.html')
         
     def _do_test_get_suggest_list(self):
@@ -463,7 +477,9 @@ class NavigationTest(BaseTestCase):
         nt_link = NavType.objects.get(content_type=self.url_ct)
         
         ct = ContentType.objects.get_for_model(get_article_class())
-        nt_art = NavType.objects.create(content_type=ct, search_field='title', label_rule=NavType.LABEL_USE_SEARCH_FIELD)
+        nt_art = NavType.objects.create(
+            content_type=ct, search_field='title', label_rule=NavType.LABEL_USE_SEARCH_FIELD
+        )
         
         self.assertEqual(self.tree.types.count(), 0)
         
@@ -489,7 +505,9 @@ class NavigationTest(BaseTestCase):
         nt_link = NavType.objects.get(content_type=self.url_ct)
         
         ct = ContentType.objects.get_for_model(get_article_class())
-        nt_art = NavType.objects.create(content_type=ct, search_field='title', label_rule=NavType.LABEL_USE_SEARCH_FIELD)
+        nt_art = NavType.objects.create(
+            content_type=ct, search_field='title', label_rule=NavType.LABEL_USE_SEARCH_FIELD
+        )
         
         self.tree.types.add(nt_art)
         self.tree.save()
@@ -590,8 +608,11 @@ class NavigationTest(BaseTestCase):
         
     def test_check_auth(self):
         link = Link.objects.create(url='http://www.google.fr')
-        
-        for msg_id in ('add_navnode', 'move_navnode', 'rename_navnode', 'get_suggest_list', 'view_navnode', 'remove_navnode'):
+
+        msg_ids = (
+            'add_navnode', 'move_navnode', 'rename_navnode', 'get_suggest_list', 'view_navnode', 'remove_navnode',
+        )
+        for msg_id in msg_ids:
             data = {
                 'ref_pos': 'after',
                 'name': 'oups',
@@ -601,7 +622,9 @@ class NavigationTest(BaseTestCase):
                 'msg_id': msg_id
             }
             if msg_id != 'add_navnode':
-                node = NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=1, parent=None)
+                node = NavNode.objects.create(
+                    tree=self.tree, label=link.url, content_object=link, ordering=1, parent=None
+                )
                 data.update({'node_id': node.id, 'node_ids': node.id})
             
             self._log_as_staff()
@@ -622,7 +645,9 @@ class NavigationTest(BaseTestCase):
         self._log_as_editor()
         
         link = Link.objects.create(url='http://www.google.fr')
-        node = NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=1, parent=None, in_navigation=True)
+        node = NavNode.objects.create(
+            tree=self.tree, label=link.url, content_object=link, ordering=1, parent=None, in_navigation=True
+        )
         
         data = {
             'msg_id': 'navnode_in_navigation',
@@ -642,7 +667,9 @@ class NavigationTest(BaseTestCase):
         self._log_as_editor()
         
         link = Link.objects.create(url='http://www.google.fr')
-        node = NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=1, parent=None, in_navigation=False)
+        node = NavNode.objects.create(
+            tree=self.tree, label=link.url, content_object=link, ordering=1, parent=None, in_navigation=False
+        )
         
         data = {
             'msg_id': 'navnode_in_navigation',
@@ -662,10 +689,11 @@ class NavigationTest(BaseTestCase):
         addrs = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
         links = [Link.objects.create(url=a) for a in addrs]
         
-        nodes = []
         parent = None
         for i, link in enumerate(links):
-            parent = NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=parent)
+            parent = NavNode.objects.create(
+                tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=parent
+            )
             
         links[1].delete()
         
@@ -682,15 +710,18 @@ class NavigationTest(BaseTestCase):
         addrs = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
         links = [Link.objects.create(url=a) for a in addrs]
         
-        #nodes = []
         parent = None
         for i, link in enumerate(links):
-            parent = NavNode.objects.create(tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=parent)
+            parent = NavNode.objects.create(
+                tree=self.tree, label=link.url, content_object=link, ordering=i+1, parent=parent
+            )
             
         parent = None
         other_tree = get_navtree_class().objects.create(name="other")
         for i, link in enumerate(links):
-            parent = NavNode.objects.create(tree=other_tree, label=link.url, content_object=link, ordering=i+1, parent=parent)
+            parent = NavNode.objects.create(
+                tree=other_tree, label=link.url, content_object=link, ordering=i+1, parent=parent
+            )
             
         links[1].delete()
         
@@ -713,11 +744,10 @@ class NavigationTest(BaseTestCase):
         article1 = mommy.make(Article, title="abcd")
         article2 = mommy.make(Article, title="efgh")
         
-        nodes = []
-        parent = None
         for i, art in enumerate((article1, article2)):
-            node = NavNode.objects.create(
-                tree=self.tree, label=art.title, content_object=art, ordering=i+1, parent=None)
+            NavNode.objects.create(
+                tree=self.tree, label=art.title, content_object=art, ordering=i+1, parent=None
+            )
             
         article2.delete()
         
@@ -734,13 +764,13 @@ class NavigationTest(BaseTestCase):
         
         ct = ContentType.objects.get_for_model(Article)
         
-        nodes = []
-        parent = None
         node1 = NavNode.objects.create(
-            tree=self.tree, label="#LABEL1#", content_type=None, object_id=article.id, ordering=1, parent=None)
+            tree=self.tree, label="#LABEL1#", content_type=None, object_id=article.id, ordering=1, parent=None
+        )
         
         node2 = NavNode.objects.create(
-            tree=self.tree, label="#LABEL2#", content_type=ct, object_id=0, ordering=1, parent=None)
+            tree=self.tree, label="#LABEL2#", content_type=ct, object_id=0, ordering=1, parent=None
+        )
         
         nodes = NavNode.objects.all()
         self.assertEqual(2, nodes.count())
@@ -758,8 +788,6 @@ class NavigationTest(BaseTestCase):
         
         ct = ContentType.objects.get_for_model(Article)
         
-        nodes = []
-        parent = None
         node1 = NavNode.objects.create(
             tree=self.tree, label="#LABEL1#", content_type=None, object_id=article.id, ordering=1, parent=None)
         
@@ -792,12 +820,24 @@ class TemplateTagsTest(BaseTestCase):
         
         self.tree = tree = get_navtree_class().objects.create()
         
-        self.nodes.append(NavNode.objects.create(tree=tree, label=link1.url, content_object=link1, ordering=1, parent=None))
-        self.nodes.append(NavNode.objects.create(tree=tree, label=link2.url, content_object=link2, ordering=2, parent=None))
-        self.nodes.append(NavNode.objects.create(tree=tree, label=link3.url, content_object=link3, ordering=3, parent=None))
-        self.nodes.append(NavNode.objects.create(tree=tree, label=link4.url, content_object=link4, ordering=1, parent=self.nodes[2]))
-        self.nodes.append(NavNode.objects.create(tree=tree, label=link5.url, content_object=link5, ordering=1, parent=self.nodes[3]))
-        self.nodes.append(NavNode.objects.create(tree=tree, label=link6.url, content_object=link6, ordering=2, parent=self.nodes[3]))
+        self.nodes.append(
+            NavNode.objects.create(tree=tree, label=link1.url, content_object=link1, ordering=1, parent=None)
+        )
+        self.nodes.append(
+            NavNode.objects.create(tree=tree, label=link2.url, content_object=link2, ordering=2, parent=None)
+        )
+        self.nodes.append(
+            NavNode.objects.create(tree=tree, label=link3.url, content_object=link3, ordering=3, parent=None)
+        )
+        self.nodes.append(
+            NavNode.objects.create(tree=tree, label=link4.url, content_object=link4, ordering=1, parent=self.nodes[2])
+        )
+        self.nodes.append(
+            NavNode.objects.create(tree=tree, label=link5.url, content_object=link5, ordering=1, parent=self.nodes[3])
+        )
+        self.nodes.append(
+            NavNode.objects.create(tree=tree, label=link6.url, content_object=link6, ordering=2, parent=self.nodes[3])
+        )
         
     def test_view_navigation(self):
         tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul%}')
@@ -805,14 +845,19 @@ class TemplateTagsTest(BaseTestCase):
         
         positions = [html.find('{0}'.format(n.content_object.url)) for n in self.nodes]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         sorted_positions = positions[:]
         sorted_positions.sort()
         self.assertEqual(positions, sorted_positions)
         
     def _insert_new_node(self):
         link7 = Link.objects.create(url='http://www.tutu.fr')
-        self.nodes.insert(-1, NavNode.objects.create(tree=self.tree, label=link7.url, content_object=link7, ordering=2, parent=self.nodes[3]))
+        self.nodes.insert(
+            -1,
+            NavNode.objects.create(
+                tree=self.tree, label=link7.url, content_object=link7, ordering=2, parent=self.nodes[3]
+            )
+        )
         self.nodes[-1].ordering = 3
         self.nodes[-1].save()
         
@@ -824,7 +869,7 @@ class TemplateTagsTest(BaseTestCase):
         
         positions = [html.find('{0}'.format(n.content_object.url)) for n in self.nodes]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         sorted_positions = positions[:]
         sorted_positions.sort()
         self.assertEqual(positions, sorted_positions)
@@ -837,10 +882,10 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({}))
         
         for n in self.nodes[:2]:
-            self.assertTrue(html.find('{0}'.format(n.content_object.url))>=0)
+            self.assertTrue(html.find('{0}'.format(n.content_object.url)) >= 0)
             
         for n in self.nodes[2:]:
-            self.assertFalse(html.find('{0}'.format(n.content_object.url))>=0)
+            self.assertFalse(html.find('{0}'.format(n.content_object.url)) >= 0)
             
     def test_view_navigation_custom_template(self):
         cst_tpl = Template('<span id="{{node.id}}">{{node.label}}</span>')
@@ -848,9 +893,9 @@ class TemplateTagsTest(BaseTestCase):
         
         html = tpl.render(Context({'cst_tpl': cst_tpl}))
         
-        for n in self.nodes:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
-            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
+        for node in self.nodes:
+            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
     
     def test_navigation_other_tree(self):    
         link1 = Link.objects.create(url='http://www.my-tree.com')
@@ -872,21 +917,21 @@ class TemplateTagsTest(BaseTestCase):
         self.assertTrue(html.find(n2.get_absolute_url())>0)
         self.assertTrue(html.find(n3.get_absolute_url())>0)
         
-        self.assertTrue(html.find(self.nodes[0].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[1].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[2].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[3].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[4].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[5].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[0].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[2].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[3].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[4].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[5].get_absolute_url()) < 0)
         
     def test_view_navigation_custom_template_file(self):
         tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul li_template=coop_cms/test_li.html%}')
         
         html = tpl.render(Context({}))
         
-        for n in self.nodes:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
-            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
+        for node in self.nodes:
+            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
     
     def test_view_navigation_css(self):
         tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul css_class=toto%}')
@@ -900,33 +945,33 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({}))
         self.assertEqual(html.count('<li class="toto " >'), len(self.nodes))
             
-        for n in self.nodes:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
-            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
+        for node in self.nodes:
+            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
             
     def test_view_breadcrumb(self):
         tpl = Template('{% load coop_navigation %}{% navigation_breadcrumb obj %}')
         html = tpl.render(Context({'obj': self.nodes[5].content_object}))
         
-        for n in (self.nodes[2], self.nodes[3], self.nodes[5]) :
-            self.assertTrue(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in (self.nodes[2], self.nodes[3], self.nodes[5]) :
+            self.assertTrue(html.find('{0}'.format(node.content_object.url)) >= 0)
             
-        for n in (self.nodes[0], self.nodes[1], self.nodes[4]) :
-            self.assertFalse(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in (self.nodes[0], self.nodes[1], self.nodes[4]) :
+            self.assertFalse(html.find('{0}'.format(node.content_object.url)) >= 0)
             
     def test_view_breadcrumb_out_of_navigation(self):
-        for n in self.nodes:
-            n.in_navigation = False
-            n.save()
+        for node in self.nodes:
+            node.in_navigation = False
+            node.save()
         
         tpl = Template('{% load coop_navigation %}{% navigation_breadcrumb obj %}')
         html = tpl.render(Context({'obj': self.nodes[5].content_object}))
         
-        for n in (self.nodes[2], self.nodes[3], self.nodes[5]) :
-            self.assertTrue(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in (self.nodes[2], self.nodes[3], self.nodes[5]) :
+            self.assertTrue(html.find('{0}'.format(node.content_object.url)) >= 0)
             
-        for n in (self.nodes[0], self.nodes[1], self.nodes[4]) :
-            self.assertFalse(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in (self.nodes[0], self.nodes[1], self.nodes[4]) :
+            self.assertFalse(html.find('{0}'.format(node.content_object.url)) >= 0)
 
     def test_view_breadcrumb_custom_template(self):
         cst_tpl = Template('<span id="{{node.id}}">{{node.label}}</span>')
@@ -934,28 +979,28 @@ class TemplateTagsTest(BaseTestCase):
         
         html = tpl.render(Context({'obj': self.nodes[5].content_object, 'cst_tpl': cst_tpl}))
         
-        for n in (self.nodes[2], self.nodes[3], self.nodes[5]) :
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
-            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
+        for node in (self.nodes[2], self.nodes[3], self.nodes[5]) :
+            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
             
     def test_view_breadcrumb_custom_template_file(self):
         tpl = Template('{% load coop_navigation %}{% navigation_breadcrumb obj li_template=coop_cms/test_li.html%}')
         
         html = tpl.render(Context({'obj': self.nodes[5].content_object}))
         
-        for n in (self.nodes[2], self.nodes[3], self.nodes[5]) :
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
-            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
+        for node in (self.nodes[2], self.nodes[3], self.nodes[5]) :
+            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
             
     def test_view_children(self):
         tpl = Template('{% load coop_navigation %}{%navigation_children obj %}')
         html = tpl.render(Context({'obj': self.nodes[3].content_object}))
         
-        for n in self.nodes[4:]:
-            self.assertTrue(html.find(n.content_object.url)>=0)
+        for node in self.nodes[4:]:
+            self.assertTrue(html.find(node.content_object.url) >= 0)
             
-        for n in self.nodes[:4]:
-            self.assertFalse(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in self.nodes[:4]:
+            self.assertFalse(html.find('{0}'.format(node.content_object.url)) >= 0)
             
     def test_view_children_out_of_navigation(self):
         self.nodes[1].in_navigation = False
@@ -967,37 +1012,37 @@ class TemplateTagsTest(BaseTestCase):
         tpl = Template('{% load coop_navigation %}{%navigation_children obj %}')
         html = tpl.render(Context({'obj': self.nodes[3].content_object}))
         
-        for n in (self.nodes[4], ):
-            self.assertTrue(html.find(n.content_object.url)>=0)
+        for node in (self.nodes[4], ):
+            self.assertTrue(html.find(node.content_object.url) >= 0)
             
-        for n in self.nodes[:4] + [self.nodes[5]]:
-            self.assertFalse(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in self.nodes[:4] + [self.nodes[5]]:
+            self.assertFalse(html.find('{0}'.format(node.content_object.url)) >= 0)
             
     def test_view_children_custom_template(self):
         cst_tpl = Template('<span id="{{node.id}}">{{node.label}}</span>')
         tpl = Template('{% load coop_navigation %}{%navigation_children obj  li_template=cst_tpl %}')
         html = tpl.render(Context({'obj': self.nodes[3].content_object, 'cst_tpl': cst_tpl}))
         
-        for n in self.nodes[4:]:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
-            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
+        for node in self.nodes[4:]:
+            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
             
     def test_view_children_custom_template_file(self):
         tpl = Template('{% load coop_navigation %}{%navigation_children obj li_template=coop_cms/test_li.html %}')
         html = tpl.render(Context({'obj': self.nodes[3].content_object}))
         
-        for n in self.nodes[4:]:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
-            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
+        for node in self.nodes[4:]:
+            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
             
     def test_view_children_order(self):
         self._insert_new_node()
         nodes = self.nodes[3].get_children(in_navigation=True)
         tpl = Template('{% load coop_navigation %}{%navigation_children obj%}')
         html = tpl.render(Context({'obj': self.nodes[3].content_object}))
-        positions = [html.find(n.content_object.url) for n in nodes]
+        positions = [html.find(node.content_object.url) for node in nodes]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         sorted_positions = positions[:]
         sorted_positions.sort()
         self.assertEqual(positions, sorted_positions)
@@ -1005,11 +1050,11 @@ class TemplateTagsTest(BaseTestCase):
     def test_view_siblings(self):
         tpl = Template('{% load coop_navigation %}{% navigation_siblings obj %}')
         html = tpl.render(Context({'obj': self.nodes[0].content_object}))
-        for n in self.nodes[:3]:
-            self.assertTrue(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in self.nodes[:3]:
+            self.assertTrue(html.find('{0}'.format(node.content_object.url)) >= 0)
             
-        for n in self.nodes[3:]:
-            self.assertFalse(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in self.nodes[3:]:
+            self.assertFalse(html.find('{0}'.format(node.content_object.url)) >= 0)
     
     def test_view_siblings_order(self):
         self._insert_new_node()
@@ -1019,7 +1064,7 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'obj': all_nodes[-1].content_object}))
         positions = [html.find(n.content_object.url) for n in nodes]
         for pos in positions:
-            self.assertTrue(pos>=0)
+            self.assertTrue(pos >= 0)
         sorted_positions = positions[:]
         sorted_positions.sort()
         self.assertEqual(positions, sorted_positions)
@@ -1034,28 +1079,28 @@ class TemplateTagsTest(BaseTestCase):
         tpl = Template('{% load coop_navigation %}{% navigation_siblings obj %}')
         html = tpl.render(Context({'obj': self.nodes[0].content_object}))
         
-        for n in self.nodes[:2]:
-            self.assertTrue(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in self.nodes[:2]:
+            self.assertTrue(html.find('{0}'.format(node.content_object.url)) >= 0)
             
-        for n in self.nodes[2:]:
-            self.assertFalse(html.find('{0}'.format(n.content_object.url))>=0)
+        for node in self.nodes[2:]:
+            self.assertFalse(html.find('{0}'.format(node.content_object.url)) >= 0)
     
     def test_view_siblings_custom_template(self):
         cst_tpl = Template('<span id="{{node.id}}">{{node.label}}</span>')
         tpl = Template('{% load coop_navigation %}{% navigation_siblings obj li_template=cst_tpl%}')
         html = tpl.render(Context({'obj': self.nodes[0].content_object, 'cst_tpl': cst_tpl}))
         
-        for n in self.nodes[:3]:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
-            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
+        for node in self.nodes[:3]:
+            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
             
     def test_view_siblings_custom_template_file(self):
         tpl = Template('{% load coop_navigation %}{% navigation_siblings obj li_template=coop_cms/test_li.html%}')
         html = tpl.render(Context({'obj': self.nodes[0].content_object}))
         
-        for n in self.nodes[:3]:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(n))>=0)
-            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(n.content_object.url, n.label))>=0)
+        for node in self.nodes[:3]:
+            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
             
     def test_navigation_no_nodes(self):
         NavNode.objects.all().delete()
@@ -1074,7 +1119,7 @@ class TemplateTagsTest(BaseTestCase):
         NavNode.objects.all().delete()
         link = Link.objects.get(url='http://www.python.org')
         tpl = Template('{% load coop_navigation %}{%navigation_children obj %}')
-        html = tpl.render(Context({'obj': link })).replace(' ', '')
+        html = tpl.render(Context({'obj': link})).replace(' ', '')
         self.assertEqual(html, '')
             
     def test_siblings_no_nodes(self):
@@ -1112,7 +1157,7 @@ class TemplateTagsTest(BaseTestCase):
         soup = BeautifulSoup(html)
         self.assertEqual(len(soup.select('li')), len(self.nodes)-1)
         
-        self.assertTrue(html.find(self.nodes[1].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url()) < 0)
         
     def test_navigation_root_nodes_out_of_navigation_with_child(self):
         self.nodes[2].in_navigation = False
@@ -1123,12 +1168,12 @@ class TemplateTagsTest(BaseTestCase):
         soup = BeautifulSoup(html)
         self.assertEqual(len(soup.select('li')), len(self.nodes)-4)
         
-        self.assertTrue(html.find(self.nodes[0].get_absolute_url())>0)
-        self.assertTrue(html.find(self.nodes[1].get_absolute_url())>0)
-        self.assertTrue(html.find(self.nodes[2].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[3].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[4].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[5].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[0].get_absolute_url()) > 0)
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url()) > 0)
+        self.assertTrue(html.find(self.nodes[2].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[3].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[4].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[5].get_absolute_url()) < 0)
         
     def test_navigation_root_nodes_out_of_navigation_child(self):
         self.nodes[4].in_navigation = False
@@ -1139,12 +1184,12 @@ class TemplateTagsTest(BaseTestCase):
         soup = BeautifulSoup(html)
         self.assertEqual(len(soup.select('li')), len(self.nodes)-1)
         
-        self.assertTrue(html.find(self.nodes[0].get_absolute_url())>0)
-        self.assertTrue(html.find(self.nodes[1].get_absolute_url())>0)
-        self.assertTrue(html.find(self.nodes[2].get_absolute_url())>0)
-        self.assertTrue(html.find(self.nodes[3].get_absolute_url())>0)
-        self.assertTrue(html.find(self.nodes[4].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[5].get_absolute_url())>0)
+        self.assertTrue(html.find(self.nodes[0].get_absolute_url()) > 0)
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url()) > 0)
+        self.assertTrue(html.find(self.nodes[2].get_absolute_url()) > 0)
+        self.assertTrue(html.find(self.nodes[3].get_absolute_url()) > 0)
+        self.assertTrue(html.find(self.nodes[4].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[5].get_absolute_url()) > 0)
     
     def test_navigation_root_nodes_other_tree(self):    
         link1 = Link.objects.create(url='http://www.my-tree.com')
@@ -1153,25 +1198,25 @@ class TemplateTagsTest(BaseTestCase):
         
         tree = get_navtree_class().objects.create(name="mon_arbre")
         
-        n1 = NavNode.objects.create(tree=tree, label=link1.url, content_object=link1, ordering=1, parent=None)
-        n2 = NavNode.objects.create(tree=tree, label=link2.url, content_object=link2, ordering=2, parent=None)
-        n3 = NavNode.objects.create(tree=tree, label=link3.url, content_object=link3, ordering=2, parent=n2)
+        node1 = NavNode.objects.create(tree=tree, label=link1.url, content_object=link1, ordering=1, parent=None)
+        node2 = NavNode.objects.create(tree=tree, label=link2.url, content_object=link2, ordering=2, parent=None)
+        node3 = NavNode.objects.create(tree=tree, label=link3.url, content_object=link3, ordering=2, parent=node2)
         
         tpl = Template('{% load coop_navigation %}{%navigation_root_nodes tree=mon_arbre %}')
         html = tpl.render(Context({}))
         soup = BeautifulSoup(html)
         self.assertEqual(len(soup.select('li')), 3)
         
-        self.assertTrue(html.find(n1.get_absolute_url())>0)
-        self.assertTrue(html.find(n2.get_absolute_url())>0)
-        self.assertTrue(html.find(n3.get_absolute_url())>0)
+        self.assertTrue(html.find(node1.get_absolute_url()) > 0)
+        self.assertTrue(html.find(node2.get_absolute_url()) > 0)
+        self.assertTrue(html.find(node3.get_absolute_url()) > 0)
         
-        self.assertTrue(html.find(self.nodes[0].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[1].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[2].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[3].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[4].get_absolute_url())<0)
-        self.assertTrue(html.find(self.nodes[5].get_absolute_url())<0)
+        self.assertTrue(html.find(self.nodes[0].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[1].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[2].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[3].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[4].get_absolute_url()) < 0)
+        self.assertTrue(html.find(self.nodes[5].get_absolute_url()) < 0)
 
 
 class NavigationTreeTest(BaseTestCase):
@@ -1201,9 +1246,15 @@ class NavigationTreeTest(BaseTestCase):
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
         
-        node1 = NavNode.objects.create(tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None)
-        node2 = NavNode.objects.create(tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None)
-        node3 = NavNode.objects.create(tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2)
+        node1 = NavNode.objects.create(
+            tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None
+        )
+        node2 = NavNode.objects.create(
+            tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None
+        )
+        node3 = NavNode.objects.create(
+            tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2
+        )
         node4 = NavNode.objects.create(tree=self.tree1, label=art3.title, content_object=art3, ordering=1, parent=None)
         node5 = NavNode.objects.create(tree=self.tree1, label=art1.title, content_object=art1, ordering=2, parent=None)
         node6 = NavNode.objects.create(tree=self.tree1, label=link2.url, content_object=link2, ordering=2, parent=node5)
@@ -1212,11 +1263,11 @@ class NavigationTreeTest(BaseTestCase):
         
         html = tpl.render(Context({}))
         
-        for n in nodes_in:
-            self.assertTrue(html.find(unicode(n))>=0)
+        for node in nodes_in:
+            self.assertTrue(html.find(unicode(node)) >= 0)
             
-        for n in nodes_out:
-            self.assertFalse(html.find(unicode(n))>=0)
+        for node in nodes_out:
+            self.assertFalse(html.find(unicode(node)) >= 0)
             
     def test_view_alternative_navigation(self):
         tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul tree=tree1 %}')
@@ -1227,9 +1278,15 @@ class NavigationTreeTest(BaseTestCase):
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
         
-        node1 = NavNode.objects.create(tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None)
-        node2 = NavNode.objects.create(tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None)
-        node3 = NavNode.objects.create(tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2)
+        node1 = NavNode.objects.create(
+            tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None
+        )
+        node2 = NavNode.objects.create(
+            tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None
+        )
+        node3 = NavNode.objects.create(
+            tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2
+        )
         node4 = NavNode.objects.create(tree=self.tree1, label=art3.title, content_object=art3, ordering=1, parent=None)
         node5 = NavNode.objects.create(tree=self.tree1, label=art1.title, content_object=art1, ordering=2, parent=None)
         node6 = NavNode.objects.create(tree=self.tree1, label=link2.url, content_object=link2, ordering=2, parent=node5)
@@ -1238,15 +1295,22 @@ class NavigationTreeTest(BaseTestCase):
         
         html = tpl.render(Context({}))
         
-        for n in nodes_in:
-            self.assertTrue(html.find(unicode(n))>=0)
+        for node in nodes_in:
+            self.assertTrue(html.find(unicode(node)) >= 0)
             
-        for n in nodes_out:
-            self.assertFalse(html.find(unicode(n))>=0)
+        for node in nodes_out:
+            self.assertFalse(html.find(unicode(node)) >= 0)
             
             
     def test_view_several_navigation(self):
-        tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul tree=tree1 %}{% navigation_as_nested_ul tree=tree2 %}{% navigation_as_nested_ul %}')
+        tpl = Template(
+            '''
+            {% load coop_navigation %}
+            {% navigation_as_nested_ul tree=tree1 %}
+            {% navigation_as_nested_ul tree=tree2 %}
+            {% navigation_as_nested_ul %}
+            '''
+        )
         
         link1 = Link.objects.create(url='http://www.google.fr', title="http://www.google.fr")
         link2 = Link.objects.create(url='http://www.apidev.fr', title="http://www.apidev.fr")
@@ -1254,9 +1318,15 @@ class NavigationTreeTest(BaseTestCase):
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
         
-        node1 = NavNode.objects.create(tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None)
-        node2 = NavNode.objects.create(tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None)
-        node3 = NavNode.objects.create(tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2)
+        node1 = NavNode.objects.create(
+            tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None
+        )
+        node2 = NavNode.objects.create(
+            tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None
+        )
+        node3 = NavNode.objects.create(
+            tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2
+        )
         node4 = NavNode.objects.create(tree=self.tree1, label=art3.title, content_object=art3, ordering=1, parent=None)
         node5 = NavNode.objects.create(tree=self.tree1, label=art1.title, content_object=art1, ordering=2, parent=None)
         node6 = NavNode.objects.create(tree=self.tree2, label=link2.url, content_object=link2, ordering=2, parent=node5)
@@ -1265,8 +1335,8 @@ class NavigationTreeTest(BaseTestCase):
         
         html = tpl.render(Context({}))
         
-        for n in nodes_in:
-            self.assertTrue(html.find(unicode(n))>=0)
+        for node in nodes_in:
+            self.assertTrue(html.find(unicode(node)) >= 0)
 
         
 class NavigationTreeTest(BaseTestCase):
@@ -1274,12 +1344,14 @@ class NavigationTreeTest(BaseTestCase):
     def setUp(self):
         super(NavigationTreeTest, self).setUp()
         ct = ContentType.objects.get_for_model(get_article_class())
-        nt_articles = NavType.objects.create(content_type=ct, search_field='title',
-            label_rule=NavType.LABEL_USE_SEARCH_FIELD)
+        nt_articles = NavType.objects.create(
+            content_type=ct, search_field='title', label_rule=NavType.LABEL_USE_SEARCH_FIELD
+        )
 
         ct = ContentType.objects.get(app_label='coop_cms', model='link')
-        nt_links = NavType.objects.create(content_type=ct, search_field='url',
-            label_rule=NavType.LABEL_USE_SEARCH_FIELD)
+        nt_links = NavType.objects.create(
+            content_type=ct, search_field='url', label_rule=NavType.LABEL_USE_SEARCH_FIELD
+        )
 
         self.default_tree = get_navtree_class().objects.create()
         self.tree1 = get_navtree_class().objects.create(name="tree1")
@@ -1296,9 +1368,15 @@ class NavigationTreeTest(BaseTestCase):
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
 
-        node1 = NavNode.objects.create(tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None)
-        node2 = NavNode.objects.create(tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None)
-        node3 = NavNode.objects.create(tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2)
+        node1 = NavNode.objects.create(
+            tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None
+        )
+        node2 = NavNode.objects.create(
+            tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None
+        )
+        node3 = NavNode.objects.create(
+            tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2
+        )
         node4 = NavNode.objects.create(tree=self.tree1, label=art3.title, content_object=art3, ordering=1, parent=None)
         node5 = NavNode.objects.create(tree=self.tree1, label=art1.title, content_object=art1, ordering=2, parent=None)
         node6 = NavNode.objects.create(tree=self.tree1, label=link2.url, content_object=link2, ordering=2, parent=node5)
@@ -1307,11 +1385,11 @@ class NavigationTreeTest(BaseTestCase):
 
         html = tpl.render(Context({}))
 
-        for n in nodes_in:
-            self.assertTrue(html.find(unicode(n))>=0)
+        for node in nodes_in:
+            self.assertTrue(html.find(unicode(node)) >= 0)
 
-        for n in nodes_out:
-            self.assertFalse(html.find(unicode(n))>=0)
+        for node in nodes_out:
+            self.assertFalse(html.find(unicode(node)) >= 0)
 
     def test_view_alternative_navigation(self):
         tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul tree=tree1 %}')
@@ -1322,9 +1400,15 @@ class NavigationTreeTest(BaseTestCase):
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
 
-        node1 = NavNode.objects.create(tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None)
-        node2 = NavNode.objects.create(tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None)
-        node3 = NavNode.objects.create(tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2)
+        node1 = NavNode.objects.create(
+            tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None
+        )
+        node2 = NavNode.objects.create(
+            tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None
+        )
+        node3 = NavNode.objects.create(
+            tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2
+        )
         node4 = NavNode.objects.create(tree=self.tree1, label=art3.title, content_object=art3, ordering=1, parent=None)
         node5 = NavNode.objects.create(tree=self.tree1, label=art1.title, content_object=art1, ordering=2, parent=None)
         node6 = NavNode.objects.create(tree=self.tree1, label=link2.url, content_object=link2, ordering=2, parent=node5)
@@ -1333,14 +1417,21 @@ class NavigationTreeTest(BaseTestCase):
 
         html = tpl.render(Context({}))
 
-        for n in nodes_in:
-            self.assertTrue(html.find(unicode(n))>=0)
+        for node in nodes_in:
+            self.assertTrue(html.find(unicode(node)) >= 0)
 
-        for n in nodes_out:
-            self.assertFalse(html.find(unicode(n))>=0)
+        for node in nodes_out:
+            self.assertFalse(html.find(unicode(node)) >= 0)
 
     def test_view_several_navigation(self):
-        tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul tree=tree1 %}{% navigation_as_nested_ul tree=tree2 %}{% navigation_as_nested_ul %}')
+        tpl = Template(
+            '''
+            {% load coop_navigation %}
+            {% navigation_as_nested_ul tree=tree1 %}
+            {% navigation_as_nested_ul tree=tree2 %}
+            {% navigation_as_nested_ul %}
+            '''
+        )
 
         link1 = Link.objects.create(url='http://www.google.fr', title="http://www.google.fr")
         link2 = Link.objects.create(url='http://www.apidev.fr', title="http://www.apidev.fr")
@@ -1348,9 +1439,15 @@ class NavigationTreeTest(BaseTestCase):
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
 
-        node1 = NavNode.objects.create(tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None)
-        node2 = NavNode.objects.create(tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None)
-        node3 = NavNode.objects.create(tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2)
+        node1 = NavNode.objects.create(
+            tree=self.default_tree, label=link1.url, content_object=link1, ordering=1, parent=None
+        )
+        node2 = NavNode.objects.create(
+            tree=self.default_tree, label=art1.title, content_object=art1, ordering=2, parent=None
+        )
+        node3 = NavNode.objects.create(
+            tree=self.default_tree, label=art2.title, content_object=art2, ordering=1, parent=node2
+        )
         node4 = NavNode.objects.create(tree=self.tree1, label=art3.title, content_object=art3, ordering=1, parent=None)
         node5 = NavNode.objects.create(tree=self.tree1, label=art1.title, content_object=art1, ordering=2, parent=None)
         node6 = NavNode.objects.create(tree=self.tree2, label=link2.url, content_object=link2, ordering=2, parent=node5)
@@ -1359,5 +1456,5 @@ class NavigationTreeTest(BaseTestCase):
 
         html = tpl.render(Context({}))
 
-        for n in nodes_in:
-            self.assertTrue(html.find(unicode(n))>=0)
+        for node in nodes_in:
+            self.assertTrue(html.find(unicode(node)) >= 0)
