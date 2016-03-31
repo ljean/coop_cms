@@ -367,11 +367,11 @@ class CmsEditNode(template.Node):
             IfCmsEditionNode,
             IfNotCmsEditionNode,
             template.defaulttags.ForNode,
-            template.loader_tags.BlockNode,
         ]
 
         nodes_content = ""
         for node in self.nodelist_content:
+
             if any([isinstance(node, node_type) for node_type in managed_node_types]):
                 local_context = Context(safe_context)
                 if hasattr(context, 'template'):
@@ -406,6 +406,8 @@ class CmsEditNode(template.Node):
             elif isinstance(node, template.loader_tags.BlockNode):
                 safe_context_var = Context(safe_context)
                 safe_context_var.render_context['block_context'] = context.render_context.get('block_context', None)
+                safe_context_var.template = getattr(node, 'template', None) or template.Template("")
+                safe_context_var.template.engine = DummyEngine()
                 content = node.render(safe_context_var)
 
             elif isinstance(node, VariableNode):

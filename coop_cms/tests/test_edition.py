@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-
 from django.template import Template, Context
+from django.test.utils import override_settings
 
 from model_mommy import mommy
 
@@ -143,22 +143,9 @@ class PieceOfHtmlTagsTest(BaseTestCase):
         PieceOfHtml.objects.get(div_id="test", extra_id="1")
 
 
+@override_settings(COOP_CMS_ARTICLE_TEMPLATES=(('test/article_with_blocks.html', 'Article with blocks'),))
 class BlockInheritanceTest(BaseArticleTest):
     """test using block templatetag inside the cms_edit template tag"""
-
-    def setUp(self):
-        """before each test"""
-        super(BlockInheritanceTest, self).setUp()
-        self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
-        settings.COOP_CMS_ARTICLE_TEMPLATES = (
-            ('test/article_with_blocks.html', 'Article with blocks'),
-        )
-
-    def tearDown(self):
-        """after each test"""
-        super(BlockInheritanceTest, self).tearDown()
-        #restore
-        settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
 
     def test_view_with_blocks(self):
         """test view article with block templatetag inside the cms_edit template tag"""

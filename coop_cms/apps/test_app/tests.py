@@ -16,7 +16,7 @@ from model_mommy import mommy
 from coop_cms.apps.test_app.models import TestClass
 from coop_cms import settings as coop_settings
 from coop_cms.models import BaseArticle, Newsletter
-from coop_cms.tests import BeautifulSoup
+from coop_cms.tests import BeautifulSoup, BaseArticleTest
 from coop_cms.tests.test_newsletter import NewsletterSettingsTest
 from coop_cms.utils import get_login_url
 
@@ -764,3 +764,62 @@ class MyNewsletterSettingsTest(NewsletterSettingsTest):
         soup = BeautifulSoup(response.content)
         self.assertEqual(1, len(soup.select("#id_dummy")))
 
+
+@override_settings(COOP_CMS_ARTICLE_TEMPLATES=(('coop_cms/test_app/custom_tag_template.html', 'Custom Tag'),))
+class CustomTemplateTagInCmsEditTag(BaseArticleTest):
+    """test using custom templatetag inside the cms_edit template tag"""
+
+    def test_view_with_blocks(self):
+        """test view article with block templatetag inside the cms_edit template tag"""
+
+        article_class = coop_settings.get_article_class()
+        article = mommy.make(
+            article_class,
+            title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+            template='coop_cms/test_app/custom_tag_template.html'
+        )
+
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+
+        soup = BeautifulSoup(response.content)
+
+        self.assertEqual(3, len(soup.select("ul.custom li")))
+
+        self.assertContains(response, article.title)
+        self.assertContains(response, article.content)
+
+        self.assertContains(response, "*** HELLO FROM CHILD ***")
+        self.assertContains(response, "*** HELLO FROM PARENT ***")
+        self.assertContains(response, "*** HELLO FROM BLOCK ***")
+
+    def test_edit_with_blocks(self):
+        """test edition with block templatetag inside the cms_edit template tag"""
+
+        article_class = coop_settings.get_article_class()
+        article = mommy.make(
+            article_class,
+            title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+            template='coop_cms/test_app/custom_tag_template.html'
+        )
+
+        self._log_as_editor()
+
+        data = {
+            "title": u"This is a new title",
+            'content': "<p>This is a <i>*** NEW ***</i> <b>content</b></p>"
+        }
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        article = article_class.objects.get(id=article.id)
+
+        self.assertEqual(article.title, data['title'])
+        self.assertEqual(article.content, data['content'])
+
+        self.assertContains(response, article.title)
+        self.assertContains(response, article.content)
+
+        self.assertContains(response, "*** HELLO FROM CHILD ***")
+        self.assertContains(response, "*** HELLO FROM PARENT ***")
+        self.assertContains(response, "*** HELLO FROM BLOCK ***")

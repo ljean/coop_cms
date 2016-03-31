@@ -1,0 +1,31 @@
+{% extends "test/article_with_blocks_parent.html" %}
+
+{% load coop_unit_test i18n %}
+
+{% block article_data %}
+  {% fill_custom_list %}
+  <div class="article-content">
+    <div class="row">
+        <div class="col-md-12">
+        {{ article.title }}
+        </div>
+        <ul class="custom" style="list-style: none;">
+        {% for a_obj in custom_list %}
+            <li>{{ a_obj }}</li>
+        {% endfor %}
+        </ul>
+    </div>
+
+  <div class="row">
+      <div class="col-md-9">
+      {{ article.content }}
+      </div>
+  </div>
+</div>
+*** HELLO FROM BLOCK ***
+{% endblock %}
+
+{% block other_data %}
+    {{ block.super }}
+    *** HELLO FROM CHILD ***
+{% endblock %}
