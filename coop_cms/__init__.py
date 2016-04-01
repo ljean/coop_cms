@@ -3,7 +3,7 @@
 coop_cms is a Content Management System for Django
 """
 
-VERSION = (1, 1, 8)
+VERSION = (1, 1, 9)
 
 
 def get_version():
