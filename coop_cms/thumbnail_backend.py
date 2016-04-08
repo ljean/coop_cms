@@ -7,11 +7,11 @@ from sorl.thumbnail.base import ThumbnailBackend, EXTENSIONS
 from sorl.thumbnail.conf import settings
 from sorl.thumbnail.helpers import tokey, serialize
 
-#activated by adding following line to the settings.py
-#THUMBNAIL_BACKEND = 'coop_cms.thumbnail_backend.KeepNameThumbnailBackend'
 
+# activated by adding following line to the settings.py
+# THUMBNAIL_BACKEND = 'coop_cms.thumbnail_backend.KeepNameThumbnailBackend'
+# This backend keeps the filename
 
-#This backend keeps the filename
 class KeepNameThumbnailBackend(ThumbnailBackend):
     """This backend keep the filename when generating a thumbnail image"""
     
@@ -22,7 +22,7 @@ class KeepNameThumbnailBackend(ThumbnailBackend):
         
         filename, _ext = os.path.splitext(os.path.basename(source.name))
         
-        path = '{0}/{1}'.format(key, filename)
+        path = u'{0}/{1}'.format(key, filename)
         image_format = options['format']
 
-        return '{0}{1}.{2}'.format(settings.THUMBNAIL_PREFIX, path, EXTENSIONS[image_format])
+        return u'{0}{1}.{2}'.format(settings.THUMBNAIL_PREFIX, path, EXTENSIONS[image_format])
