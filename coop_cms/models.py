@@ -1126,7 +1126,7 @@ class Alias(models.Model):
     
     def get_absolute_url(self):
         """urls"""
-        return reverse('coop_cms_view_article', args=[self.path])
+        return reverse('coop_cms_view_alias', args=[self.path])
     
     def __unicode__(self):
         return self.path

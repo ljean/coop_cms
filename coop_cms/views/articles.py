@@ -9,13 +9,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message, error as error_message
 from django.core.exceptions import PermissionDenied
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, Context, TemplateDoesNotExist
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
+from django.views.generic import View
 
 from djaloha import utils as djaloha_utils
 from colorbox.decorators import popup_redirect
@@ -378,10 +378,6 @@ class ArticleView(EditableObjectView):
             return super(ArticleView, self).can_view_object()
         return True
 
-    def handle_object_not_found(self):
-        """go to alias if not found"""
-        return redirect_if_alias(path=self.kwargs['slug'])
-
     def get_headlines(self):
         """headline"""
         return get_headlines(self.object)
@@ -408,3 +404,9 @@ class ArticleView(EditableObjectView):
         return get_article_template(self.object)
 
 
+class AliasView(View):
+    """redirect to another url"""
+
+    def get(self, *args, **kwargs):
+        """redirect to aliased page"""
+        return redirect_if_alias(path=kwargs.get('path'))

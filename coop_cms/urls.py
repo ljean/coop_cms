@@ -126,5 +126,6 @@ urlpatterns += [
     url(r'^$', homepage.homepage, name='coop_cms_homepage'),
     url(r'^(?P<slug>[-\w]+)/cms_edit/$', edit_article_view.as_view(edit_mode=True), name='coop_cms_edit_article'),
     url(r'^(?P<slug>[-\w]+)/$', article_view.as_view(), name='coop_cms_view_article'),
+    url(r'^(?P<path>.+)$', articles.AliasView.as_view(), name='coop_cms_view_alias'),
     url(r'^coop_bar/', include('coop_bar.urls')),
 ]

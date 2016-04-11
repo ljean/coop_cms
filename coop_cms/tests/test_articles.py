@@ -56,6 +56,12 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(article.slug, 'test')
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
+
+    def test_view_article_full_slug(self):
+        article = get_article_class().objects.create(title="When I am 64", publication=BaseArticle.PUBLISHED)
+        self.assertEqual(article.slug, 'when-i-am-64')
+        response = self.client.get(article.get_absolute_url())
+        self.assertEqual(200, response.status_code)
         
     def test_publication_flag_published(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)

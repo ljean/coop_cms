@@ -134,7 +134,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         art1.save()
         
-        origin_url = '/{0}/home'.format(origin_lang)
+        origin_url = '/{0}/home/'.format(origin_lang)
         response = self.client.get(origin_url, follow=True)
         self.assertEqual(200, response.status_code)
         self.assertContains(response, original_text)
@@ -171,7 +171,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         art1.save()
         
-        origin_url = '/{0}/home'.format(origin_lang)
+        origin_url = '/{0}/home/'.format(origin_lang)
         response = self.client.get(origin_url, follow=True)
         self.assertEqual(200, response.status_code)
         self.assertContains(response, original_text)
@@ -196,7 +196,7 @@ class UrlLocalizationTest(BaseTestCase):
         origin_lang = settings.LANGUAGES[0][0]
         trans_lang = settings.LANGUAGES[1][0]
         
-        origin_url = '/{0}/home'.format(origin_lang)
+        origin_url = '/{0}/home/'.format(origin_lang)
         response = self.client.get(origin_url, follow=True)
         self.assertEqual(200, response.status_code)
         self.assertContains(response, original_text)
