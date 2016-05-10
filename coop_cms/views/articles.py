@@ -348,7 +348,7 @@ class ArticlesByCategoryView(TemplateView):
 
     def get_context_data(self, **kwargs):
         """context"""
-        context_data = super(ArticlesByCategory, self).get_context_data()
+        context_data = super(ArticlesByCategoryView, self).get_context_data()
         category = self.get_category()
 
         if not self.request.user.has_perm('can_view_category', category):
