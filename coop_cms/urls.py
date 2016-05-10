@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'^cms/update-logo/(?P<article_id>\d*)/$', articles.update_logo, name="coop_cms_update_logo"),
     url(r'^cms/articles/$', articles.view_all_articles, name="coop_cms_view_all_articles"),
     url(r'^cms/$', articles.view_all_articles),
-    url(r'articles/(?P<slug>[-\w]+)/$', articles.ArticlesByCategory.as_view(), name="coop_cms_articles_category"),
+    url(r'articles/(?P<slug>[-\w]+)/$', articles.ArticlesByCategoryView.as_view(), name="coop_cms_articles_category"),
 
     url(r'^cms/fragments/add/$', fragments.add_fragment, name='coop_cms_add_fragment'),
     url(r'^cms/fragments/edit/$', fragments.edit_fragments, name='coop_cms_edit_fragments'),

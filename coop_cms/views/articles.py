@@ -324,7 +324,7 @@ def update_logo(request, article_id):
         raise
 
 
-class ArticlesByCategory(TemplateView):
+class ArticlesByCategoryView(TemplateView):
     """Show the articles of a given category"""
     category = None
 
