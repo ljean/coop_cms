@@ -14,6 +14,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext, Context, TemplateDoesNotExist
 from django.template.loader import get_template
+from django.views.generic.base import TemplateView
 from django.utils.translation import ugettext as _
 from django.views.generic import View
 
@@ -323,38 +324,56 @@ def update_logo(request, article_id):
         raise
 
 
-def articles_category(request, slug):
-    """view articles by category"""
-    category = get_object_or_404(models.ArticleCategory, slug=slug, sites__id=settings.SITE_ID)
+class ArticlesByCategory(TemplateView):
+    """Show the articles of a given category"""
+    category = None
 
-    try:
-        page = int(request.GET.get('page', 0) or 0)
-    except ValueError:
-        page = 1
+    def get_category(self):
+        """return the category"""
+        if not self.category:
+            slug = self.kwargs['slug']
+            self.category = get_object_or_404(models.ArticleCategory, slug=slug, sites__id=settings.SITE_ID)
+        return self.category
 
-    if not request.user.has_perm('can_view_category', category):
-        raise PermissionDenied()
+    def get_articles(self, category):
+        """return list of articles for this category, 404 if no articles"""
+        articles = category.get_articles_qs().filter(
+            publication=models.BaseArticle.PUBLISHED
+        ).order_by("-publication_date")
 
-    articles = category.get_articles_qs().filter(
-        publication=models.BaseArticle.PUBLISHED
-    ).order_by("-publication_date")
+        if articles.count() == 0:
+            raise Http404
 
-    if articles.count() == 0:
-        raise Http404
+        return articles
 
-    try:
-        category_template = u"coop_cms/categories/{0}.html".format(category.slug)
-        get_template(category_template)
-    except TemplateDoesNotExist:
-        category_template = "coop_cms/articles_category.html"
+    def get_context_data(self, **kwargs):
+        """context"""
+        context_data = super(ArticlesByCategory, self).get_context_data()
+        category = self.get_category()
 
-    page_obj = paginate(request, articles, get_articles_category_page_size())
+        if not self.request.user.has_perm('can_view_category', category):
+            raise PermissionDenied()
 
-    return render_to_response(
-        category_template,
-        {'category': category, "articles": list(page_obj), 'page_obj': page_obj},
-        context_instance=RequestContext(request)
-    )
+        articles = self.get_articles(category)
+
+        page_obj = paginate(self.request, articles, get_articles_category_page_size())
+
+        context_data.update({
+            'category': category,
+            "articles": list(page_obj),
+            'page_obj': page_obj,
+        })
+        return context_data
+
+    def get_template_names(self):
+        """template to use"""
+        try:
+            category_template = u"coop_cms/categories/{0}.html".format(self.get_category().slug)
+            get_template(category_template)
+        except TemplateDoesNotExist:
+            category_template = "coop_cms/articles_category.html"
+
+        return [category_template]
 
 
 class ArticleView(EditableObjectView):
