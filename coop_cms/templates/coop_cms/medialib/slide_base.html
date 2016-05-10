@@ -2,15 +2,27 @@
   <head>
     <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}/css/mediatheque.css?v=1.1">
     <script>
+    {%  include "coop_cms/_pagination_js.html" %}
     $(function() {
       $(document).on('click', '.pagination a', function(e) {
         try {
           var media_url = $("#media_url").text();
           e.preventDefault();
+
+          var href = media_url;
+          var hrefArgs = getUrlVars($(this).attr('href'));
+          var page = hrefArgs.page;
+
+          if (page && href && (href !== '#')) {
+            href = patchUrl(page, media_url);
+            //return false;
+          }
+
           $.ajax({
-            url: media_url+$(this).attr('href'),
+            url: href,
             success: function(data) {
               $("#media_slide_content").html(data["html"]);
+              $("#media_url").text(data["media_url"]);
             }
           });  
         } catch(err) {
@@ -20,7 +32,7 @@
         return false;
       });
       
-      $("img.library-thumbnail").bind('dragstart', function(event) {
+      $(document).on('dragstart', "img.library-thumbnail, img.library-document", function(event) {
           $("a.pageslide-close").click();
       });
 
@@ -36,6 +48,7 @@
           dataType: 'json',
           success: function(data) {
             $("#media_slide_content").html(data["html"]);
+            $("#media_url").text(data["media_url"]);
           }
         });
         if (!$(this).hasClass('active')){ $(".media-selector a").toggleClass('active'); }
@@ -43,8 +56,17 @@
       $(document).on('click', '.media-filters a', function(e) {
         e.preventDefault();
         e.stopPropagation();
+
+        var href = $(this).attr('href');
+        var page = 1;
+
+        if (page && href && (href !== '#')) {
+          href = patchUrl(page, href);
+          //return false;
+        }
+
         $.ajax({
-          url: $(this).attr('href'),
+          url: href,
           dataType: 'json',
           success: function(data) {
             $("#media_slide_content").html(data["html"]);

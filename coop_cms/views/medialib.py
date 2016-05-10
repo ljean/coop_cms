@@ -27,13 +27,15 @@ def _get_photologue_media(request):
     #Only if django-photologue is installed
     if "photologue" in settings.INSTALLED_APPS:
         from photologue.models import Photo, Gallery
+        media_url = reverse('coop_cms_media_photologue')
         gallery_filter = request.GET.get('gallery_filter', 0)
         queryset = Photo.objects.all().order_by("-date_added")
         if gallery_filter:
             queryset = queryset.filter(galleries__id=gallery_filter)
+            media_url += "?gallery_filter={0}".format(gallery_filter)
 
         context = {
-            'media_url': reverse('coop_cms_media_photologue'),
+            'media_url': media_url,
             'media_slide_template': 'coop_cms/medialib/slide_photologue_content.html',
             'gallery_filter': int(gallery_filter),
             'galleries': Gallery.objects.all(),
@@ -59,7 +61,7 @@ def show_media(request, media_type):
         skip_media_filter = False
 
         if request.session.get("coop_cms_media_doc", False):
-            #force the doc
+            # force the doc
             media_type = 'document'
             del request.session["coop_cms_media_doc"]
 
@@ -88,9 +90,9 @@ def show_media(request, media_type):
         if not skip_media_filter:
             # list of lists of media_filters
             media_filters = [media.filters.all() for media in queryset.all()]
-            #flat list of media_filters
+            # flat list of media_filters
             media_filters = itertools.chain(*media_filters)
-            #flat list of unique media filters sorted by alphabetical order (ignore case)
+            # flat list of unique media filters sorted by alphabetical order (ignore case)
             context['media_filters'] = sorted(
                 list(set(media_filters)), key=lambda mf: mf.name.upper()
             )
@@ -105,6 +107,9 @@ def show_media(request, media_type):
         context['page_obj'] = page_obj
 
         context["allow_photologue"] = "photologue" in settings.INSTALLED_APPS
+
+        if int(media_filter):
+            context["media_url"] += '?media_filter={0}'.format(media_filter)
 
         template = get_template('coop_cms/medialib/slide_base.html')
         html = template.render(RequestContext(request, context))
