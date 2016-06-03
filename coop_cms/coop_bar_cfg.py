@@ -173,7 +173,7 @@ def view_all_articles(request, context):
         )
 
 
-@can_edit
+@can_edit_object
 def cms_media_library(request, context):
     """show menu"""
     if hide_media_library_menu():
@@ -186,7 +186,7 @@ def cms_media_library(request, context):
         )
 
 
-@can_edit
+@can_edit_object
 def cms_upload_image(request, context):
     """show menu"""
     if hide_media_library_menu():
@@ -199,7 +199,7 @@ def cms_upload_image(request, context):
         )
 
 
-@can_edit
+@can_edit_object
 def cms_upload_doc(request, context):
     """show menu"""
     if hide_media_library_menu():
