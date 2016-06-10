@@ -3,9 +3,6 @@
 Email authentication Unit tests
 """
 
-from django.conf import settings
-from coop_cms.settings import import_module
-
 from bs4 import BeautifulSoup
 
 from django.contrib.auth.models import User
@@ -20,6 +17,7 @@ TEST_AUTHENTICATION_BACKENDS = (
     'coop_cms.apps.email_auth.auth_backends.EmailAuthBackend',
     'django.contrib.auth.backends.ModelBackend', # Django's default auth backend
 )
+
 
 class BaseTest(TestCase):
     """Base class for TestCase"""
