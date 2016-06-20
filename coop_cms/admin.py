@@ -85,12 +85,12 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
     form = ArticleAdminForm
     list_display = [
         'slug', 'title', 'category', 'template_name', 'publication', 'headline', 'in_newsletter', 'modified',
-        'login_required',
+        'login_required', 'is_homepage'
     ]
     list_editable = ['publication', 'headline', 'in_newsletter', 'category']
     readonly_fields = ['created', 'modified', 'is_homepage']
     list_filter = [
-        'publication', 'login_required', 'headline', 'in_newsletter', 'sites', 'homepage_for_site',
+        'publication', 'login_required', 'headline', 'in_newsletter', 'sites',
         'category', 'template'
     ]
     date_hierarchy = 'publication_date'
@@ -99,7 +99,7 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
         (_(u'Settings'), {
             'fields': ('sites', 'template', 'category', 'headline', 'is_homepage', 'logo', 'in_newsletter', )
         }),
-        (_(u'Advanced'), {'fields': ('publication_date', 'homepage_for_site', 'created', 'modified', )}),
+        (_(u'Advanced'), {'fields': ('publication_date', 'created', 'modified', )}),
         (_(u'Content'), {'fields': ('content', 'summary', )}),
         (_(u'Debug'), {'fields': ('temp_logo', )}),
     )

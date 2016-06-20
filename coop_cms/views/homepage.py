@@ -19,25 +19,20 @@ from coop_cms.settings import cms_no_homepage, get_article_class
 
 def homepage(request):
     """view homepage"""
+    if cms_no_homepage():
+        raise Http404
+
+    site = Site.objects.get_current()
+
+    # Try site settings
     try:
-        if cms_no_homepage():
-            raise Http404
+        site_settings = models.SiteSettings.objects.get(site=site)
+        if site_settings.homepage_url:
+            return HttpResponseRedirect(site_settings.homepage_url)
+    except models.SiteSettings.DoesNotExist:
+        pass
 
-        site = Site.objects.get_current()
-
-        #Try site settings
-        try:
-            site_settings = models.SiteSettings.objects.get(site=site)
-            if site_settings.homepage_url:
-                return HttpResponseRedirect(site_settings.homepage_url)
-        except models.SiteSettings.DoesNotExist:
-            pass
-
-        #Try: homepage article #Deprecated
-        article = get_article_class().objects.get(homepage_for_site=site, sites=site.id)
-        return HttpResponseRedirect(article.get_absolute_url())
-    except get_article_class().DoesNotExist:
-        return HttpResponseRedirect(reverse('coop_cms_view_all_articles'))
+    return HttpResponseRedirect(reverse('coop_cms_view_all_articles'))
 
 
 @login_required
@@ -50,8 +45,10 @@ def set_homepage(request, article_id):
         raise PermissionDenied
 
     if request.method == "POST":
-        article.homepage_for_site = Site.objects.get(id=settings.SITE_ID)
-        article.save()
+        site_settings = models.SiteSettings.objects.get_or_create(site=Site.objects.get_current())[0]
+        site_settings.homepage_url = article.get_absolute_url()
+        site_settings.save()
+
         return HttpResponseRedirect(reverse('coop_cms_homepage'))
 
     context_dict = {

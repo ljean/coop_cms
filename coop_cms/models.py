@@ -517,10 +517,9 @@ class BaseArticle(BaseNavigable):
     @property
     def is_homepage(self):
         """True if is the homepage of the current site"""
-        if self.homepage_for_site:
-            return self.homepage_for_site.id == settings.SITE_ID
-        return False
-    
+        site_settings = SiteSettings.objects.get_or_create(site=Site.objects.get_current())[0]
+        return site_settings.homepage_url == self.get_absolute_url()
+
     def is_draft(self):
         """True if draft"""
         return self.publication == BaseArticle.DRAFT
@@ -646,12 +645,7 @@ class BaseArticle(BaseNavigable):
             site = Site.objects.get(id=settings.SITE_ID)
             self.sites.add(site)
             ret = super(BaseArticle, self).save(do_not_create_nav=True)
-        
-        if self.homepage_for_site and (self.homepage_for_site.id == settings.SITE_ID):
-            for art in get_article_class().objects.filter(homepage_for_site__id=settings.SITE_ID).exclude(id=self.id):
-                art.homepage_for_site = None
-                art.save()
-        
+
         return ret
 
     def _does_slug_exist(self, slug):
