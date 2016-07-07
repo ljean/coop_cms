@@ -375,6 +375,11 @@ class ArticleCategory(models.Model):
         help_text=_(u"The articles of this category will be listed in the main rss feed")
     )
     sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
+    pagination_size = models.IntegerField(
+        default=0,
+        verbose_name=_(u'pagination size'),
+        help_text=_(u"The number of articles to display in a category page. If 0, use default")
+    )
 
     def __unicode__(self):
         return self.name

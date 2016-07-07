@@ -365,8 +365,10 @@ def get_img_folder(instance, filename):
     return u'{0}/{1}'.format(img_root, filename)
 
 
-def get_articles_category_page_size():
+def get_articles_category_page_size(article_category):
     """returns number of articles for pagination"""
+    if article_category.pagination_size:
+        return article_category.pagination_size
     return getattr(django_settings, 'COOP_CMS_ARTICLES_CATEGORY_PAGINATION', 10)
 
 
