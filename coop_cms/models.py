@@ -646,7 +646,7 @@ class BaseArticle(BaseNavigable):
 
         return ret
 
-    def _does_slug_exist(self, slug):
+    def _does_slug_exist(self, slug_field, slug):
         """generate slug"""
         article_class = get_article_class()
 
@@ -654,10 +654,10 @@ class BaseArticle(BaseNavigable):
             from modeltranslation.utils import build_localized_fieldname  # pylint: disable=F0401
             slug_fields = []
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
-                loc_slug_var = build_localized_fieldname('slug', lang_code)
+                loc_slug_var = build_localized_fieldname(slug_field, lang_code)
                 slug_fields.append(loc_slug_var)
         else:
-            slug_fields = ('slug',)
+            slug_fields = (slug_field,)
 
         for slug_field in slug_fields:
             try:
@@ -687,7 +687,7 @@ class BaseArticle(BaseNavigable):
             # Check that this slug doesn't already exist
             # The slug must be unique for all sites
 
-            slug_exists = self._does_slug_exist(slug)
+            slug_exists = self._does_slug_exist(slug_field, slug)
             
             if slug_exists:
                 # oups the slug is already used: change it and try again
