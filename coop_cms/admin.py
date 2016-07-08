@@ -154,8 +154,9 @@ admin.site.register(models.Fragment, FragmentAdmin)
 
 class ArticleCategoryAdmin(admin.ModelAdmin):
     """Article category Admin"""
-    list_display = ['name', 'ordering', 'in_rss', 'pagination_size']
+    list_display = ['name', 'slug', 'ordering', 'in_rss', 'pagination_size']
     list_editable = ['ordering', 'in_rss']
+    readonly_fields = ['slug']
 
 admin.site.register(models.ArticleCategory, ArticleCategoryAdmin)
 
