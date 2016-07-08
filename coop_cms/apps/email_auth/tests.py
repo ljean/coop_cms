@@ -4,18 +4,22 @@ Email authentication Unit tests
 """
 
 from bs4 import BeautifulSoup
+from unittest import skipUnless
 
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core import mail
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
 
 from model_mommy import mommy
+from registration.models import RegistrationProfile
 
 TEST_AUTHENTICATION_BACKENDS = (
     'coop_cms.perms_backends.ArticlePermissionBackend',
     'coop_cms.apps.email_auth.auth_backends.EmailAuthBackend',
-    'django.contrib.auth.backends.ModelBackend', # Django's default auth backend
+    'django.contrib.auth.backends.ModelBackend',  # Django's default auth backend
 )
 
 
@@ -263,3 +267,219 @@ class UserLoginTest(BaseTest):
 
         user_id = self.client.session.get("_auth_user_id", 0)
         self.assertEqual(user_id, 0)
+
+
+@skipUnless('registration' in settings.INSTALLED_APPS, "registration not installed installed")
+@override_settings(AUTHENTICATION_BACKENDS=TEST_AUTHENTICATION_BACKENDS)
+class RegistrationTest(BaseTest):
+    """Test that events are sent on registration events"""
+
+    def test_view_register(self):
+        """It should display form"""
+        user_count = User.objects.count()
+        url = reverse('registration_register')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(User.objects.count(), user_count)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_register(self):
+        """It should create disabled user"""
+        url = reverse('registration_register')
+        data = {
+            'email': 'john.doe@company.com',
+            'password1': 'blabla-123',
+            'password2': 'blabla-123',
+            'terms_of_service': True,
+        }
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 1)
+        user = User.objects.filter(email=data['email'])[0]
+        self.assertEqual(user.is_active, False)
+        self.assertEqual(user.is_staff, False)
+        self.assertEqual(user.is_superuser, False)
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual(email.to, [data['email']])
+
+    def test_register_refuse_terms(self):
+        """It should display error"""
+        url = reverse('registration_register')
+        data = {
+            'email': 'john.doe@company.com',
+            'password1': 'blabla-123',
+            'password2': 'blabla-123',
+            'terms_of_service': False,
+        }
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select('.errorlist')), 1)
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_register_refuse_wrong_password(self):
+        """It should display error"""
+        url = reverse('registration_register')
+        data = {
+            'email': 'john.doe@company.com',
+            'password1': 'blabla-123',
+            'password2': 'blabla-124',
+            'terms_of_service': True,
+        }
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select('.errorlist')), 1)
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_register_refuse_no_password(self):
+        """It should display error"""
+        url = reverse('registration_register')
+        data = {
+            'email': 'john.doe@company.com',
+            'password1': '',
+            'password2': '',
+            'terms_of_service': True,
+        }
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select('.errorlist')), 2)
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_register_refuse_wrong_email(self):
+        """It should display error"""
+        url = reverse('registration_register')
+        data = {
+            'email': 'john',
+            'password1': 'blabla-123',
+            'password2': 'blabla-123',
+            'terms_of_service': True,
+        }
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select('.errorlist')), 1)
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(COOP_CMS_ACCOUNT_REGISTRATION_NOTIFICATION_EMAILS=['toto@toto.fr'])
+    def test_register_notify(self):
+        """It should create disabled user"""
+        url = reverse('registration_register')
+        data = {
+            'email': 'john.doe@company.com',
+            'password1': 'blabla-123',
+            'password2': 'blabla-123',
+            'terms_of_service': True,
+        }
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 1)
+        user = User.objects.filter(email=data['email'])[0]
+        self.assertEqual(user.is_active, False)
+        self.assertEqual(user.is_staff, False)
+        self.assertEqual(user.is_superuser, False)
+
+        self.assertEqual(len(mail.outbox), 2)
+        email = mail.outbox[0]
+        self.assertEqual(email.to, [data['email']])
+        email = mail.outbox[1]
+        self.assertEqual(email.to, ['toto@toto.fr'])
+        self.assertTrue(email.body.find(data['email']) > 0)
+
+    def test_activate_user(self):
+        """It should activate the user"""
+        url = reverse('registration_register')
+        data = {
+            'email': 'john.doe@company.com',
+            'password1': 'blabla-123',
+            'password2': 'blabla-123',
+            'terms_of_service': True,
+        }
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 1)
+        user = User.objects.filter(email=data['email'])[0]
+        self.assertEqual(user.is_active, False)
+        self.assertEqual(user.is_staff, False)
+        self.assertEqual(user.is_superuser, False)
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual(email.to, [data['email']])
+        mail.outbox = []
+
+        self.assertEqual(RegistrationProfile.objects.count(), 1)
+        registration_profile = RegistrationProfile.objects.all()[0]
+        self.assertEqual(registration_profile.user, user)
+
+        activation_url = reverse('registration_activate', args=[registration_profile.activation_key])
+        response = self.client.get(activation_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        user = User.objects.get(id=user.id)
+        self.assertEqual(user.is_active, True)
+        self.assertEqual(user.is_staff, False)
+        self.assertEqual(user.is_superuser, False)
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(COOP_CMS_ACCOUNT_ACTION_NOTIFICATION_EMAILS=['toto@toto.fr', 'titi@titi.fr'])
+    def test_activate_user_and_notify(self):
+        """It should activate the user"""
+        url = reverse('registration_register')
+        data = {
+            'email': 'john.doe@company.com',
+            'password1': 'blabla-123',
+            'password2': 'blabla-123',
+            'terms_of_service': True,
+        }
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 0)
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(User.objects.filter(email=data['email']).count(), 1)
+        user = User.objects.filter(email=data['email'])[0]
+        self.assertEqual(user.is_active, False)
+        self.assertEqual(user.is_staff, False)
+        self.assertEqual(user.is_superuser, False)
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual(email.to, [data['email']])
+        mail.outbox = []
+
+        self.assertEqual(RegistrationProfile.objects.count(), 1)
+        registration_profile = RegistrationProfile.objects.all()[0]
+        self.assertEqual(registration_profile.user, user)
+
+        activation_url = reverse('registration_activate', args=[registration_profile.activation_key])
+        response = self.client.get(activation_url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        user = User.objects.get(id=user.id)
+        self.assertEqual(user.is_active, True)
+        self.assertEqual(user.is_staff, False)
+        self.assertEqual(user.is_superuser, False)
+
+        self.assertEqual(len(mail.outbox), 1)
+        email = mail.outbox[0]
+        self.assertEqual(email.to, ['toto@toto.fr', 'titi@titi.fr'])
+        self.assertTrue(email.body.find(data['email']) > 0)
