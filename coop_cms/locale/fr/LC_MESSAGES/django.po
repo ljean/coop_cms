@@ -224,7 +224,7 @@ msgstr ""
 #: ci/drone_project/templates/registration/activation_email_subject.txt:2
 #: ci/semaphore_project/templates/registration/activation_email_subject.txt:2
 msgid "Account activation"
-msgstr "ACtivation du compte"
+msgstr "Activation du compte"
 
 #: ci/drone_project/templates/registration/logged_out.html:3
 #: ci/semaphore_project/templates/registration/logged_out.html:3
