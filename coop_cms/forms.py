@@ -389,6 +389,8 @@ class NewArticleForm(WithNavigationModelForm):
         self.fields["title"].required = True
         self.fields["title"].widget = forms.TextInput(attrs={'size': 30})
 
+        self.fields['category'].queryset = self.fields['category'].queryset.filter(sites=settings.SITE_ID)
+
         if 'sites' in self.fields:
             self.fields['sites'].initial = [Site.objects.get_current()]
             if not is_multi_site():
