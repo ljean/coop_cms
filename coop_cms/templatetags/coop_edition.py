@@ -316,7 +316,10 @@ class SafeWrapper(object):
                 value = u''
             return mark_safe(value)
         elif callable(value):
-            return value()
+            try:
+                return value()
+            except KeyError:
+                pass
         elif type(value) in (unicode, str):
             return mark_safe(value)
         return value

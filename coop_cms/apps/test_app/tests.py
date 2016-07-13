@@ -13,7 +13,7 @@ from django.test.utils import override_settings
 
 from model_mommy import mommy
 
-from coop_cms.apps.test_app.models import TestClass
+from coop_cms.apps.test_app.models import TestClass, TestTag
 from coop_cms import settings as coop_settings
 from coop_cms.models import BaseArticle, Newsletter
 from coop_cms.tests import BeautifulSoup, BaseArticleTest
@@ -113,7 +113,22 @@ class GenericViewTestCase(BaseTestCase):
         soup = BeautifulSoup(response.content)
         self.assertEqual(1, len(soup.select(".bool_field_is_true")))
         self.assertEqual(0, len(soup.select(".bool_field_is_false")))
-        
+
+    def test_view_object_m2m_relationships(self):
+        self._log_as_viewer()
+        obj = mommy.make(TestClass)
+        tag1 = mommy.make(TestTag)
+        tag2 = mommy.make(TestTag)
+        tag3 = mommy.make(TestTag)
+        obj.tags.add(tag1)
+        obj.tags.add(tag2)
+        obj.save()
+        response = self.client.get(obj.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, tag1.name)
+        self.assertContains(response, tag2.name)
+        self.assertNotContains(response, tag3.name)
+
     def test_view_object_viewer_bool_false(self):
         self._log_as_viewer()
         obj = mommy.make(TestClass, bool_field=False)
