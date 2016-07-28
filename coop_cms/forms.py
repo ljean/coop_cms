@@ -268,6 +268,7 @@ class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
         ),
         label=_('Description'),
     )
+    copyright = floppyforms.CharField(required=False, label=_(u'copyright'))
     filters = HidableMultipleChoiceField(
         required=False, label=_(u"Filters"), help_text=_(u"Choose between tags to find images more easily")
     )

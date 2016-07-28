@@ -35,6 +35,8 @@ class ImageUploadTest(MediaBaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content)
+        id_copyright = soup.select("input#id_copyright")
+        self.assertEqual(1, len(id_copyright))
         id_size = soup.select("input#id_size")
         self.assertEqual(1, len(id_size))
         self.assertEqual("hidden", id_size[0]["type"])
@@ -241,6 +243,58 @@ class ImageUploadTest(MediaBaseTestCase):
         
         images = Image.objects.all()
         self.assertEquals(0, images.count())
+
+    def test_post_form(self):
+        """upload image with size"""
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': '',
+            'filters': '',
+            'size': '',
+            'copyright': '',
+        }
+
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'close_popup_and_media_slide')
+
+        images = Image.objects.all()
+        self.assertEquals(1, images.count())
+        self.assertEqual(images[0].name, 'unittest1')
+        self.assertEqual(images[0].copyright, data['copyright'])
+        self.assertEqual(images[0].filters.count(), 0)
+        self.assertEqual(images[0].size, None)
+        file_ = images[0].file
+        file_.open('rb')
+        self.assertEqual(file_.read(), self._get_file("unittest1.png").read())
+
+    def test_post_form_copyright(self):
+        """upload image with size"""
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': 'a test file',
+            'filters': '',
+            'size': '',
+            'copyright': 'copyright me',
+        }
+
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, 'close_popup_and_media_slide')
+
+        images = Image.objects.all()
+        self.assertEquals(1, images.count())
+        self.assertEqual(images[0].name, data['descr'])
+        self.assertEqual(images[0].copyright, data['copyright'])
+        self.assertEqual(images[0].filters.count(), 0)
+        self.assertEqual(images[0].size, None)
+        file_ = images[0].file
+        file_.open('rb')
+        self.assertEqual(file_.read(), self._get_file("unittest1.png").read())
 
 
 class ImageSizeTest(MediaBaseTestCase):

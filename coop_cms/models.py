@@ -841,6 +841,7 @@ class Image(Media):
     """An image in media library"""
     file = models.ImageField(_(u'file'), upload_to=get_img_folder)
     size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_(u"size"))
+    copyright = models.CharField(max_length=200, verbose_name=_(u'copyright'), blank=True, default='')
 
     def __unicode__(self):
         return self.name
