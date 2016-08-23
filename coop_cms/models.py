@@ -992,7 +992,10 @@ class NewsletterItem(models.Model):
         ordering = ['ordering']
 
     def __unicode__(self):
-        return u'{0}: {1}'.format(self.content_type, self.content_object)
+        try:
+            return u'{0}: {1}'.format(self.content_type, self.content_object)
+        except AttributeError:
+            return u''
 
 
 def on_delete_newsletterable_item(sender, instance, **kwargs):
@@ -1011,12 +1014,12 @@ def create_newsletter_item(instance):
     """Create a newsletter item automatically"""
     content_type = ContentType.objects.get_for_model(instance)
     if getattr(instance, 'in_newsletter', True):
-        #Create a newsletter item automatically
-        #An optional 'in_newsletter' field can skip the automatic creation if set to False
+        # Create a newsletter item automatically
+        # An optional 'in_newsletter' field can skip the automatic creation if set to False
         return NewsletterItem.objects.get_or_create(content_type=content_type, object_id=instance.id)
     elif hasattr(instance, 'in_newsletter'):
-        #If 'in_newsletter' field existe and is False
-        #We delete the Item if exists
+        # If 'in_newsletter' field exists and is False
+        # We delete the Item if exists
         try:
             item = NewsletterItem.objects.get(content_type=content_type, object_id=instance.id)
             item.delete()
@@ -1042,6 +1045,7 @@ class Newsletter(TimeStampedModel):
     site = models.ForeignKey(Site, verbose_name=_(u'site'), default=settings.SITE_ID)
     source_url = models.URLField(verbose_name=_(u'source url'), default="", blank=True)
     is_public = models.BooleanField(default=False, verbose_name=_(u'is_public'))
+    newsletter_date = models.DateField(blank=True, null=True, default=None, verbose_name=_(u'newsletter date'))
 
     def get_items(self):
         """associated items"""

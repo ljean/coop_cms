@@ -414,7 +414,7 @@ class NewsletterSettingsForm(forms.ModelForm):
 
     class Meta:
         model = Newsletter
-        fields = ('subject', 'template', 'items')
+        fields = ('subject', 'template', 'newsletter_date', 'items', )
 
     class Media:
         css = {
@@ -439,7 +439,11 @@ class NewsletterSettingsForm(forms.ModelForm):
         for choice in choices:
             obj_id = choice[0]
             obj = NewsletterItem.objects.get(id=obj_id)
-            if getattr(obj.content_object, 'sites', None):
+            try:
+                has_sites = getattr(obj.content_object, 'sites', None)
+            except AttributeError:
+                has_sites = False
+            if has_sites:
                 if current_site in obj.content_object.sites.all():
                     sites_choices.append(choice)
             else:
@@ -523,7 +527,7 @@ class NewsletterAdminForm(forms.ModelForm):
 
     class Meta:
         model = Newsletter
-        fields = ('subject', 'content', 'template', 'source_url', 'items')
+        fields = ('subject', 'content', 'template', 'source_url', 'items', 'newsletter_date', )
         widgets = {}
 
     class Media:
