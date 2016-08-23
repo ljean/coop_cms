@@ -356,7 +356,7 @@ class ArticlesByCategoryView(TemplateView):
 
         articles = self.get_articles(category)
 
-        page_obj = paginate(self.request, articles, get_articles_category_page_size())
+        page_obj = paginate(self.request, articles, get_articles_category_page_size(category))
 
         context_data.update({
             'category': category,

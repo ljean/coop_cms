@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coop_cms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-02-10 10:53+0100\n"
+"POT-Creation-Date: 2016-07-08 14:58+0000\n"
 "PO-Revision-Date: 2013-06-28 15:16+0100\n"
 "Last-Translator: Luc Jean <ljean@apidev.fr>\n"
 "Language-Team: Apidev, Quinode <contact@quinode.fr>\n"
@@ -31,31 +31,31 @@ msgstr "Tous"
 msgid "navigable types"
 msgstr "types navigables"
 
-#: admin.py:99
+#: admin.py:98
 msgid "General"
 msgstr "Général"
 
-#: admin.py:100
+#: admin.py:99
 msgid "Settings"
 msgstr "Réglages"
 
-#: admin.py:103
+#: admin.py:102
 msgid "Advanced"
 msgstr "Avancé"
 
-#: admin.py:104
+#: admin.py:103
 msgid "Content"
 msgstr "Contenu"
 
-#: admin.py:105
+#: admin.py:104
 msgid "Debug"
 msgstr "Debug"
 
-#: admin.py:119
+#: admin.py:118
 msgid "Media filter"
 msgstr "Filtre Média"
 
-#: admin.py:170
+#: admin.py:169
 msgid "Article"
 msgstr "Article"
 
@@ -143,6 +143,22 @@ msgstr "J'accepte les conditions d'utilisation"
 msgid "You must agree to the terms to register"
 msgstr "Vous devez accepter les conditions d'utilisation"
 
+#: apps/email_auth/registration_backend/views.py:44
+msgid "Account created"
+msgstr "Compte créé"
+
+#: apps/email_auth/registration_backend/views.py:63
+msgid "Account activated"
+msgstr "Compte activé"
+
+#: apps/email_auth/templates/email_auth/activation_notification.txt:2
+msgid "A new user has activated his account"
+msgstr "Un nouvel utilisateur a activé son compte"
+
+#: apps/email_auth/templates/email_auth/registration_notification.txt:2
+msgid "A new user has registred"
+msgstr "Un nouvel utilisateur s'est inscrit"
+
 #: ci/drone_project/settings.py:47 ci/semaphore_project/settings.py:48
 msgid "English"
 msgstr ""
@@ -150,6 +166,65 @@ msgstr ""
 #: ci/drone_project/settings.py:48 ci/semaphore_project/settings.py:49
 msgid "Français"
 msgstr ""
+
+#: ci/drone_project/settings.py:49
+msgid "Deutsch"
+msgstr ""
+
+#: ci/drone_project/templates/registration/activate.html:3
+#: ci/semaphore_project/templates/registration/activate.html:3
+msgid "Activate"
+msgstr "Activer"
+
+#: ci/drone_project/templates/registration/activation_complete.html:3
+#: ci/semaphore_project/templates/registration/activation_complete.html:3
+msgid "Votre demande de création de compte a été prise en compte!"
+msgstr ""
+
+#: ci/drone_project/templates/registration/activation_complete.html:5
+#: ci/semaphore_project/templates/registration/activation_complete.html:5
+msgid "Vous pouvez à présent vous connecter"
+msgstr ""
+
+#: ci/drone_project/templates/registration/activation_complete.html:6
+#: ci/drone_project/templates/registration/login.html:3
+#: ci/drone_project/templates/registration/login.html:26
+#: ci/drone_project/templates/registration/password_reset_complete.html:5
+#: ci/drone_project/templates/registration/password_reset_form.html:13
+#: ci/semaphore_project/templates/registration/activation_complete.html:6
+#: ci/semaphore_project/templates/registration/login.html:3
+#: ci/semaphore_project/templates/registration/login.html:26
+#: ci/semaphore_project/templates/registration/password_reset_complete.html:5
+#: ci/semaphore_project/templates/registration/password_reset_form.html:13
+msgid "Login"
+msgstr "Connexion"
+
+#: ci/drone_project/templates/registration/activation_email.txt:2
+#: ci/semaphore_project/templates/registration/activation_email.txt:2
+#, python-format
+msgid ""
+"\n"
+"Hello,\n"
+"You have requested to create an account on %(site)s.\n"
+"We are happy to welcome you on the site. We hope you will enjoy it.\n"
+"\n"
+"In order to finish the account creation, please confirm your email address "
+"by visiting the following url:\n"
+msgstr ""
+
+#: ci/drone_project/templates/registration/activation_email.txt:11
+#: ci/semaphore_project/templates/registration/activation_email.txt:11
+msgid ""
+"\n"
+"If you did not request this account creation, please ignore this email.\n"
+msgstr ""
+"\n"
+"Si vous n'avez pas demandé la création d'un compre, merci d'ignorer cet email.\n"
+
+#: ci/drone_project/templates/registration/activation_email_subject.txt:2
+#: ci/semaphore_project/templates/registration/activation_email_subject.txt:2
+msgid "Account activation"
+msgstr "Activation du compte"
 
 #: ci/drone_project/templates/registration/logged_out.html:3
 #: ci/semaphore_project/templates/registration/logged_out.html:3
@@ -160,17 +235,6 @@ msgstr "Vous avez été déconnecté"
 #: ci/semaphore_project/templates/registration/logged_out.html:5
 msgid "You are going to be redirected to the"
 msgstr "Vous allez être redirigé vers"
-
-#: ci/drone_project/templates/registration/login.html:3
-#: ci/drone_project/templates/registration/login.html:26
-#: ci/drone_project/templates/registration/password_reset_complete.html:5
-#: ci/drone_project/templates/registration/password_reset_form.html:13
-#: ci/semaphore_project/templates/registration/login.html:3
-#: ci/semaphore_project/templates/registration/login.html:26
-#: ci/semaphore_project/templates/registration/password_reset_complete.html:5
-#: ci/semaphore_project/templates/registration/password_reset_form.html:13
-msgid "Login"
-msgstr "Connexion"
 
 #: ci/drone_project/templates/registration/login.html:5
 #: ci/semaphore_project/templates/registration/login.html:5
@@ -243,6 +307,45 @@ msgstr "Un email a été envoyé"
 msgid "It contains the procedure to reset the password."
 msgstr "Il contient la procédure de réinitialisation du mot de passe"
 
+#: ci/drone_project/templates/registration/registration_complete.html:3
+#: ci/semaphore_project/templates/registration/registration_complete.html:3
+msgid "Registration complete"
+msgstr "Inscription réussie"
+
+#: ci/drone_project/templates/registration/registration_complete.html:6
+#: ci/semaphore_project/templates/registration/registration_complete.html:6
+msgid ""
+"\n"
+"We sent you an email. It will help you to activate your account.\n"
+msgstr ""
+"\n"
+"NOus vous avons envoyé un email. Il vous permettra d'activer votre compte\n"
+
+#: ci/drone_project/templates/registration/registration_form.html:19
+#: ci/semaphore_project/templates/registration/registration_form.html:19
+msgid "* : required field"
+msgstr "* : champ requis"
+
+#: ci/drone_project/templates/registration/registration_form.html:21
+#: ci/semaphore_project/templates/registration/registration_form.html:21
+msgid "Registration"
+msgstr "Inscription"
+
+#: ci/drone_project/templates/registration/registration_form.html:35
+#: ci/semaphore_project/templates/registration/registration_form.html:35
+msgid "Terms of use"
+msgstr "Conditions d'utilisation"
+
+#: ci/drone_project/templates/registration/registration_form.html:40
+#: ci/semaphore_project/templates/registration/registration_form.html:40
+msgid "Go back to login page"
+msgstr "Retour à la page d'accueil"
+
+#: ci/drone_project/templates/registration/registration_form.html:42
+#: ci/semaphore_project/templates/registration/registration_form.html:42
+msgid "Register"
+msgstr "S'inscrire"
+
 #: coop_bar_cfg.py:78
 msgid "Administration"
 msgstr "Administration"
@@ -309,12 +412,12 @@ msgstr "Réglages article"
 msgid "Edit"
 msgstr "Editer"
 
-#: coop_bar_cfg.py:303 models.py:471
+#: coop_bar_cfg.py:303 models.py:479
 #: templates/coop_cms/popup_publish_article.html:36
 msgid "Draft"
 msgstr "Brouillon"
 
-#: coop_bar_cfg.py:308 models.py:472
+#: coop_bar_cfg.py:308 models.py:480
 msgid "Published"
 msgstr "Publié"
 
@@ -374,7 +477,7 @@ msgstr "< pas dans l'arborescence >"
 msgid "Select an article"
 msgstr "Choisir un article"
 
-#: forms.py:263 models.py:862
+#: forms.py:263 models.py:860
 msgid "Image"
 msgstr "Image"
 
@@ -438,7 +541,7 @@ msgstr "supprimer"
 msgid "The object has been saved properly"
 msgstr "L’objet a été enregistré avec succès"
 
-#: generic_views.py:180 views/articles.py:144
+#: generic_views.py:180 views/articles.py:145
 msgid "An error occured: {0}"
 msgstr "Une erreur est survenue: {0}"
 
@@ -486,8 +589,8 @@ msgstr "Comment générer le label"
 msgid "navigable type"
 msgstr "type navigable"
 
-#: models.py:124 models.py:363 models.py:802 models.py:814 models.py:828
-#: models.py:1133 models.py:1162
+#: models.py:124 models.py:371 models.py:800 models.py:812 models.py:826
+#: models.py:1131 models.py:1160
 msgid "name"
 msgstr "nom"
 
@@ -503,15 +606,15 @@ msgstr "libellé"
 msgid "parent"
 msgstr "parent"
 
-#: models.py:161 models.py:365 models.py:830 models.py:988
+#: models.py:161 models.py:373 models.py:828 models.py:986
 msgid "ordering"
 msgstr "ordre"
 
-#: models.py:164 models.py:985
+#: models.py:164 models.py:983
 msgid "content_type"
 msgstr "type de contenu"
 
-#: models.py:165 models.py:986
+#: models.py:165 models.py:984
 msgid "object id"
 msgstr "identifiant de l'objet"
 
@@ -527,270 +630,272 @@ msgstr "noeud de navigation"
 msgid "navigation nodes"
 msgstr "noeuds de navigation"
 
-#: models.py:351
+#: models.py:359
 msgid "A node can not be its own parent"
 msgstr "Un élément ne peut pas être son propre parent"
 
-#: models.py:357
+#: models.py:365
 msgid "A node can not be child of its own child"
 msgstr "Un élément ne peut pas être son propre enfant"
 
-#: models.py:367
+#: models.py:375
 msgid "in rss"
 msgstr "flux rss"
 
-#: models.py:368
+#: models.py:376
 msgid "The articles of this category will be listed in the main rss feed"
 msgstr "Les articles de cette catégorie seront listés dans le flux rss"
 
-#: models.py:370 models.py:502 models.py:1044
+#: models.py:378 models.py:510 models.py:1042
 msgid "site"
 msgstr "site"
 
-#: models.py:390
+#: models.py:398
 msgid "article category"
 msgstr "catégorie d'article"
 
-#: models.py:391
+#: models.py:399
 msgid "article categories"
 msgstr "catégories d'article"
 
-#: models.py:440
+#: models.py:448
 msgid "set the parent in navigation."
 msgstr "ajouter l’élément à la navigation."
 
-#: models.py:473
+#: models.py:481
 msgid "Archived"
 msgstr "Archivé"
 
-#: models.py:477 models.py:768
+#: models.py:485 models.py:766
 msgid "title"
 msgstr "titre"
 
-#: models.py:478
+#: models.py:486
 msgid "subtitle"
 msgstr "sous-titre"
 
-#: models.py:479 models.py:957 models.py:1041 models.py:1165
+#: models.py:487 models.py:955 models.py:1039 models.py:1163
 msgid "content"
 msgstr "contenu"
 
-#: models.py:480
+#: models.py:488
 msgid "publication"
 msgstr "publication"
 
-#: models.py:481 models.py:1043
+#: models.py:489 models.py:1041
 msgid "template"
 msgstr "modèle"
 
-#: models.py:484
+#: models.py:492
 msgid "Summary"
 msgstr "Résumé"
 
-#: models.py:486
+#: models.py:494
 msgid "Category"
 msgstr "Catégorie"
 
-#: models.py:490
+#: models.py:498
 msgid "In newsletter"
 msgstr "Lettre d'info"
 
-#: models.py:491
+#: models.py:499
 msgid "Make this article available for newsletters."
 msgstr ""
 "rendre cet article disponible pour insertion dans une lettre d'information"
 
-#: models.py:494
+#: models.py:502
 msgid "Homepage for site"
 msgstr "Accueil du site"
 
-#: models.py:498
+#: models.py:506
 msgid "Headline"
 msgstr "à la une"
 
-#: models.py:499
+#: models.py:507
 msgid "Make this article appear on the home page"
 msgstr "Faire apparaitre cet article à la une du site"
 
-#: models.py:501
+#: models.py:509
 msgid "Publication date"
 msgstr "Date de publication"
 
-#: models.py:505
+#: models.py:513
 msgid "login required"
 msgstr "Login requis"
 
-#: models.py:506
+#: models.py:514
 msgid "If true, only user with login/password will able to access the article"
-msgstr "Si vrai, seulement un utilisateur avec un login/mod de passe pourra accéder à cet article"
+msgstr ""
+"Si vrai, seulement un utilisateur avec un login/mod de passe pourra accéder "
+"à cet article"
 
-#: models.py:596
+#: models.py:603
 msgid "No Image"
 msgstr "Pas d'image"
 
-#: models.py:597
+#: models.py:604
 msgid "logo"
 msgstr "logo"
 
-#: models.py:601
+#: models.py:608
 msgid "article"
 msgstr "article"
 
-#: models.py:602
+#: models.py:609
 msgid "articles"
 msgstr "articles"
 
-#: models.py:768
+#: models.py:766
 msgid "Title"
 msgstr "Titre"
 
-#: models.py:769
+#: models.py:767
 msgid "URL"
 msgstr "URL"
 
-#: models.py:796
+#: models.py:794
 msgid "link"
 msgstr "lien"
 
-#: models.py:797
+#: models.py:795
 msgid "links"
 msgstr "liens"
 
-#: models.py:805
+#: models.py:803
 msgid "media filter"
 msgstr "filtre de média"
 
-#: models.py:806
+#: models.py:804
 msgid "media filters"
 msgstr "filtres de médias"
 
-#: models.py:815 models.py:842
+#: models.py:813 models.py:840
 msgid "size"
 msgstr "taille"
 
-#: models.py:816
+#: models.py:814
 msgid "crop"
 msgstr "découpage"
 
-#: models.py:819
+#: models.py:817
 msgid "Image size"
 msgstr "Taille d'image"
 
-#: models.py:820
+#: models.py:818
 msgid "Image sizes"
 msgstr "Tailles d'images"
 
-#: models.py:829
+#: models.py:827
 msgid "filters"
 msgstr "filtres"
 
-#: models.py:841 models.py:910
+#: models.py:839 models.py:908
 msgid "file"
 msgstr "fichier"
 
-#: models.py:885
+#: models.py:883
 msgid "image"
 msgstr "image"
 
-#: models.py:886
+#: models.py:884
 msgid "images"
 msgstr "images"
 
-#: models.py:912
+#: models.py:910
 msgid "is private"
 msgstr "privé"
 
-#: models.py:913
+#: models.py:911
 msgid "Check this if you do not want to publish this document to all users"
 msgstr ""
 "Cocher cette case si vous -ne voulez pas- publier ce document à tous les "
 "utilisateurs"
 
-#: models.py:915
+#: models.py:913
 msgid "category"
 msgstr "catégorie"
 
-#: models.py:950
+#: models.py:948
 msgid "document"
 msgstr "document"
 
-#: models.py:951
+#: models.py:949
 msgid "documents"
 msgstr "documents"
 
-#: models.py:956
+#: models.py:954
 msgid "identifier"
 msgstr "identifier"
 
-#: models.py:959
+#: models.py:957
 msgid "extra identifier"
 msgstr "extra id"
 
-#: models.py:966
+#: models.py:964
 msgid "piece of HTML"
 msgstr "bloc HTML"
 
-#: models.py:967
+#: models.py:965
 msgid "pieces of HTML"
 msgstr "blocs HTML"
 
-#: models.py:992
+#: models.py:990
 msgid "newsletter item"
 msgstr "élément de lettre d'information"
 
-#: models.py:993
+#: models.py:991
 msgid "newsletter items"
 msgstr "éléments de lettre d'information"
 
-#: models.py:1040
+#: models.py:1038
 msgid "subject"
 msgstr "sujet"
 
-#: models.py:1045
+#: models.py:1043
 msgid "source url"
 msgstr "url source"
 
-#: models.py:1046
+#: models.py:1044
 msgid "is_public"
 msgstr "est public"
 
-#: models.py:1094
+#: models.py:1092
 msgid "newsletter"
 msgstr "lettre d'information"
 
-#: models.py:1095
+#: models.py:1093
 msgid "newsletters"
 msgstr "lettres d'information"
 
-#: models.py:1102
+#: models.py:1100
 msgid "scheduling date"
 msgstr "date de programmation"
 
-#: models.py:1103
+#: models.py:1101
 msgid "sending date"
 msgstr "date d'envoi"
 
-#: models.py:1109
+#: models.py:1107
 msgid "newsletter sending"
 msgstr "Envoi de lettre d'information"
 
-#: models.py:1110
+#: models.py:1108
 msgid "newsletter sendings"
 msgstr "Envois de lettre d'informations"
 
-#: models.py:1120
+#: models.py:1118
 msgid "Alias"
 msgstr "Alias"
 
-#: models.py:1121
+#: models.py:1119
 msgid "Aliases"
 msgstr "Alias"
 
-#: models.py:1135
+#: models.py:1133
 msgid "allowed css classes"
 msgstr "classes CSS autorisées"
 
-#: models.py:1136
+#: models.py:1134
 msgid ""
 "the css classed proposed when editing a fragment. It must be separated by "
 "comas"
@@ -798,85 +903,73 @@ msgstr ""
 "Définit les classes CSS qui sont autorisées pour ce type de fragments. Les "
 "valeurs doivent être séparées par des virgules."
 
-#: models.py:1140
+#: models.py:1138
 msgid "Fragment type"
 msgstr "Type de fragment"
 
-#: models.py:1141
+#: models.py:1139
 msgid "Fragment types"
 msgstr "types de fragments"
 
-#: models.py:1149
+#: models.py:1147
 msgid "extra_id"
 msgstr "extra id"
 
-#: models.py:1152
+#: models.py:1150
 msgid "Fragment filter"
 msgstr "Filtre de fragment"
 
-#: models.py:1153
+#: models.py:1151
 msgid "Fragment filters"
 msgstr "Filtres de fragments"
 
-#: models.py:1161
+#: models.py:1159
 msgid "fragment type"
 msgstr "type de fragment"
 
-#: models.py:1163
+#: models.py:1161
 msgid "CSS class"
 msgstr "classe CSS"
 
-#: models.py:1164
+#: models.py:1162
 msgid "position"
 msgstr "position"
 
-#: models.py:1166
+#: models.py:1164
 msgid "fragment filter"
 msgstr "filtre de fragment"
 
-#: models.py:1169 models.py:1170
+#: models.py:1167 models.py:1168
 msgid "Fragment"
 msgstr "Fragment"
 
-#: models.py:1211
+#: models.py:1209
 msgid "Only site articles"
 msgstr "Seulement les articles du site"
 
-#: models.py:1212
+#: models.py:1210
 msgid "All articles"
 msgstr "Tous les articles"
 
-#: models.py:1215
+#: models.py:1213
 msgid "site settings"
 msgstr "Réglages article"
 
-#: models.py:1217
+#: models.py:1215
 msgid "homepage URL"
 msgstr "URL de la page d'accueil"
 
-#: models.py:1218
+#: models.py:1216
 msgid "if set, the homepage will be redirected to the given URL"
 msgstr "si défini, la page d'accueil redirigera vers l'URL"
 
-#: models.py:1226
+#: models.py:1224
 msgid "Sites settings"
 msgstr "Réglages site"
 
-#: models.py:1227
+#: models.py:1225
 msgid "Site settings"
 msgstr "Réglages site"
-
-#: templates/admin/base_site.html:4
-msgid "Django site admin"
-msgstr "Site admin de Django"
-
-#: templates/admin/base_site.html:7
-msgid "Django administration"
-msgstr "Django Administration"
-
-#: templates/admin/base_site.html:11
-msgid "Site"
-msgstr "Site"
 
 #: templates/admin/coop_cms/navtree/change_form.html:225
 msgid "Are you sure to delete the selected node?"
@@ -1014,15 +1107,15 @@ msgstr "Partagez sur Google+"
 msgid "Permission Denied"
 msgstr "Permission refusée"
 
-#: templates/coop_cms/medialib/slide_base.html:85
+#: templates/coop_cms/medialib/slide_base.html:107
 msgid "Images"
 msgstr "Images"
 
-#: templates/coop_cms/medialib/slide_base.html:86
+#: templates/coop_cms/medialib/slide_base.html:108
 msgid "Galleries"
 msgstr "Galleries"
 
-#: templates/coop_cms/medialib/slide_base.html:87
+#: templates/coop_cms/medialib/slide_base.html:109
 msgid "Documents"
 msgstr "Documents"
 
@@ -1197,23 +1290,23 @@ msgstr "navigation_children requiert un objet en argument"
 msgid "navigation_siblings requires object as argument"
 msgstr "navigation_siblings requiert un objet en argument"
 
-#: views/articles.py:118
+#: views/articles.py:119
 msgid "Permission denied"
 msgstr "Permission refusée"
 
-#: views/articles.py:139
+#: views/articles.py:140
 msgid "The article has been saved properly"
 msgstr "L’article a été enregistré avec succès"
 
-#: views/articles.py:203
+#: views/articles.py:204
 msgid "Do you want to publish this article?"
 msgstr "Voulez-vous publier cet article ?"
 
-#: views/articles.py:203
+#: views/articles.py:204
 msgid "Make it draft?"
 msgstr "Voulez-vous passez en mode brouillon?"
 
-#: views/articles.py:283
+#: views/articles.py:284
 msgid "The article has been created properly"
 msgstr "L’article a été créé avec succès"
 
@@ -1221,7 +1314,7 @@ msgstr "L’article a été créé avec succès"
 msgid "Edit fragments of this template?"
 msgstr "Editer les fragments de ce template"
 
-#: views/homepage.py:59
+#: views/homepage.py:56
 msgid "Do you want to use this article as homepage?"
 msgstr "Voulez-vous utiliser cet article comme page d'accueil ?"
 
@@ -1276,6 +1369,15 @@ msgstr "L'email de test a été envoyé à {0} adresses: {1}"
 #: views/newsletters.py:109
 msgid "An error occured! Please contact your support."
 msgstr "Une erreur est intervenue, contactez le support technique."
+
+#~ msgid "Django site admin"
+#~ msgstr "Site admin de Django"
+
+#~ msgid "Django administration"
+#~ msgstr "Django Administration"
+
+#~ msgid "Site"
+#~ msgstr "Site"
 
 #~ msgid "Feed"
 #~ msgstr "Flux"

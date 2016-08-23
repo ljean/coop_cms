@@ -268,6 +268,7 @@ class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
         ),
         label=_('Description'),
     )
+    copyright = floppyforms.CharField(required=False, label=_(u'copyright'))
     filters = HidableMultipleChoiceField(
         required=False, label=_(u"Filters"), help_text=_(u"Choose between tags to find images more easily")
     )
@@ -388,6 +389,8 @@ class NewArticleForm(WithNavigationModelForm):
             self.fields["template"] = forms.CharField()
         self.fields["title"].required = True
         self.fields["title"].widget = forms.TextInput(attrs={'size': 30})
+
+        self.fields['category'].queryset = self.fields['category'].queryset.filter(sites=settings.SITE_ID)
 
         if 'sites' in self.fields:
             self.fields['sites'].initial = [Site.objects.get_current()]

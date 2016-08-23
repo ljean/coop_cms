@@ -82,9 +82,9 @@ def set_node_ordering(node, tree, parent):
 def create_navigation_node(content_type, obj, tree, parent):
     """create navigation node"""
     node = NavNode(tree=tree, label=get_object_label(content_type, obj))
-    #add it as last child of the selected node
+    # add it as last child of the selected node
     set_node_ordering(node, tree, parent)
-    #associate with a content object
+    # associate with a content object
     node.content_type = content_type
     node.object_id = obj.id if obj else 0
     node.save()
@@ -160,7 +160,7 @@ class NavNode(models.Model):
     parent = models.ForeignKey("NavNode", blank=True, null=True, default=0, verbose_name=_("parent"))
     ordering = models.PositiveIntegerField(_("ordering"), default=0)
 
-    #generic relation
+    # generic relation
     content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"), blank=True, null=True)
     object_id = models.PositiveIntegerField(verbose_name=_("object id"), blank=True, null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
@@ -196,12 +196,11 @@ class NavNode(models.Model):
     class Meta:
         verbose_name = _(u'navigation node')
         verbose_name_plural = _(u'navigation nodes')
-        #unique_together = ('content_type', 'object_id')
 
     def get_children(self, in_navigation=None):
         """children of the node"""
         nodes = NavNode.objects.filter(parent=self).order_by("ordering")
-        #Be carful : in_navigation can be False
+        # Be careful : in_navigation can be False
         if in_navigation is not None:
             nodes = nodes.filter(in_navigation=in_navigation)
         return nodes
@@ -376,6 +375,11 @@ class ArticleCategory(models.Model):
         help_text=_(u"The articles of this category will be listed in the main rss feed")
     )
     sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
+    pagination_size = models.IntegerField(
+        default=0,
+        verbose_name=_(u'pagination size'),
+        help_text=_(u"The number of articles to display in a category page. If 0, use default")
+    )
 
     def __unicode__(self):
         return self.name
@@ -583,7 +587,7 @@ class BaseArticle(BaseNavigable):
 
     def _get_default_logo(self):
         """default logo"""
-        #copy from static to media in order to use sorl thumbnail without raising a suspicious operation
+        # copy from static to media in order to use sorl thumbnail without raising a suspicious operation
         filename = get_default_logo()
         media_filename = os.path.normpath(settings.MEDIA_ROOT + '/coop_cms/' + filename)
         if not os.path.exists(media_filename):
@@ -617,7 +621,7 @@ class BaseArticle(BaseNavigable):
         if hasattr(self, "_cache_slug"):
             delattr(self, "_cache_slug")
         
-        #autoslug localized title for creating locale_slugs
+        # autoslug localized title for creating locale_slugs
         if (not self.title) and (not self.slug):
             raise InvalidArticleError(u"coop_cms.Article: slug can not be empty")
             
@@ -631,7 +635,6 @@ class BaseArticle(BaseNavigable):
                 locale_slug = getattr(self, loc_slug_var, '')
                 
                 if locale_title and not locale_slug:
-                    #slug = self.get_unique_slug(loc_slug_var, locale_title)
                     slug = self.get_unique_slug('slug', locale_title)
                     setattr(self, loc_slug_var, slug)
         else:
@@ -648,7 +651,7 @@ class BaseArticle(BaseNavigable):
 
         return ret
 
-    def _does_slug_exist(self, slug):
+    def _does_slug_exist(self, slug_field, slug):
         """generate slug"""
         article_class = get_article_class()
 
@@ -656,10 +659,10 @@ class BaseArticle(BaseNavigable):
             from modeltranslation.utils import build_localized_fieldname  # pylint: disable=F0401
             slug_fields = []
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
-                loc_slug_var = build_localized_fieldname('slug', lang_code)
+                loc_slug_var = build_localized_fieldname(slug_field, lang_code)
                 slug_fields.append(loc_slug_var)
         else:
-            slug_fields = ('slug',)
+            slug_fields = (slug_field,)
 
         for slug_field in slug_fields:
             try:
@@ -668,11 +671,11 @@ class BaseArticle(BaseNavigable):
                     article_class.objects.get(Q(**lookup) & ~Q(id=self.id))
                 else:
                     article_class.objects.get(**lookup)
-                #the slug exists in one language: we can not use it, try another one
+                # the slug exists in one language: we can not use it, try another one
                 return True
 
             except article_class.DoesNotExist:
-                #Ok this slug is not used: try next language
+                # Ok this slug is not used: try next language
                 pass
 
         return False
@@ -689,7 +692,7 @@ class BaseArticle(BaseNavigable):
             # Check that this slug doesn't already exist
             # The slug must be unique for all sites
 
-            slug_exists = self._does_slug_exist(slug)
+            slug_exists = self._does_slug_exist(slug_field, slug)
             
             if slug_exists:
                 # oups the slug is already used: change it and try again
@@ -838,6 +841,7 @@ class Image(Media):
     """An image in media library"""
     file = models.ImageField(_(u'file'), upload_to=get_img_folder)
     size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_(u"size"))
+    copyright = models.CharField(max_length=200, verbose_name=_(u'copyright'), blank=True, default='')
 
     def __unicode__(self):
         return self.name
@@ -892,7 +896,7 @@ def get_doc_folder(document, filename):
         doc_root = getattr(settings, 'PRIVATE_DOCUMENT_FOLDER', 'documents/private')
 
     filename = os.path.basename(filename)
-    #This is required for x-sendfile
+    # This is required for x-sendfile
     name, ext = os.path.splitext(filename)
     filename = slugify(name) + ext
 

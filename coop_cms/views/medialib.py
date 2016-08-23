@@ -141,9 +141,10 @@ def upload_image(request):
             if form.is_valid():
                 src = form.cleaned_data['image']
                 description = form.cleaned_data['descr']
+                copyright = form.cleaned_data['copyright']
                 if not description:
                     description = os.path.splitext(src.name)[0]
-                image = models.Image(name=description)
+                image = models.Image(name=description, copyright=copyright)
                 image.size = form.cleaned_data["size"]
                 image.file.save(src.name, src)
                 image.save()
