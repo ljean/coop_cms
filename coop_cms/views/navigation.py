@@ -335,13 +335,13 @@ def process_nav_edition(request, tree_id):
             response['status'] = 'success'
             response.setdefault('message', 'Ok')  # if no message defined in response, add something
 
-        except KeyError, msg:
+        except KeyError as msg:
             response = {'status': 'error', 'message': u"Unsupported message : {0}".format(msg)}
         except PermissionDenied:
             response = {'status': 'error', 'message': u"You are not allowed to add a node"}
-        except ValidationError, ex:
+        except ValidationError as ex:
             response = {'status': 'error', 'message': u' - '.join(ex.messages)}
-        except Exception, msg:
+        except Exception as msg:
             logger.exception("process_nav_edition")
             response = {'status': 'error', 'message': u"An error occured : {0}".format(msg)}
 

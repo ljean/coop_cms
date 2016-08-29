@@ -134,7 +134,7 @@ class NewsletterFriendlyCssNode(template.Node):
             # avoid string.format issues with curly brackets
             try:
                 soup = BeautifulSoup(content, "html.parser")
-            except HTMLParseError, msg:
+            except HTMLParseError as msg:
                 logger.error("HTMLParseError: %s", msg)
                 logger.error(content)
                 raise
