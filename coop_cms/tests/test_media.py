@@ -853,7 +853,7 @@ class ImageListTemplateTagTest(BaseTestCase):
         mommy.make(Image, filters=[filter_])
         try:
             Template('{% load coop_utils %}{% coop_image_list "abcd" image_list %}{{image_list|length}}')
-        except TemplateSyntaxError, msg:
+        except TemplateSyntaxError as msg:
             self.assertEqual("coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}", unicode(msg))
         else:
             self.assertEqual("", "No exception")
