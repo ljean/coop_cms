@@ -7,8 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
 from django.views.generic.base import View
@@ -137,10 +136,10 @@ class EditableObjectView(View):
         
         self.form = self.get_form(instance=self.object)
         
-        return render_to_response(
+        return render(
+            request,
             self.get_template(),
-            self.get_context_data(),
-            context_instance=RequestContext(request)
+            self.get_context_data()
         )
     
     def after_save(self, object):
@@ -180,10 +179,10 @@ class EditableObjectView(View):
             error_message(request, _(u'An error occured: {0}').format(error_text))
             logger.debug(u"error: {0}".format(error_text))
     
-        return render_to_response(
+        return render(
+            request,
             self.get_template(),
-            self.get_context_data(),
-            context_instance=RequestContext(request)
+            self.get_context_data()
         )
 
 
@@ -266,10 +265,10 @@ class EditableFormsetView(TemplateView):
             raise PermissionDenied
             
         self.formset = self.get_formset()
-        return render_to_response(
+        return render(
+            request,
             self.get_template(),
-            self.get_context_data(),
-            context_instance=RequestContext(request)
+            self.get_context_data()
         )
     
     def _pre_save_object(self, form):
@@ -325,8 +324,8 @@ class EditableFormsetView(TemplateView):
                     if errors:
                         logger.warning(errors)
         
-        return render_to_response(
+        return render(
+            request,
             self.get_template(),
-            self.get_context_data(),
-            context_instance=RequestContext(request)
+            self.get_context_data()
         )

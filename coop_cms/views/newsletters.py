@@ -9,9 +9,8 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
 from django.utils.encoding import smart_text
 from django.utils.text import slugify
 from django.utils.translation import ugettext as _
@@ -52,10 +51,10 @@ def newsletter_settings(request, newsletter_id=None):
     else:
         form = form_class(request.user, instance=newsletter)
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_newsletter_settings.html',
-        locals(),
-        context_instance=RequestContext(request)
+        locals()
     )
 
 
@@ -77,10 +76,10 @@ def change_newsletter_template(request, newsletter_id):
     else:
         form = forms.NewsletterTemplateForm(newsletter, request.user)
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_change_newsletter_template.html',
-        {'form': form, 'newsletter': newsletter},
-        context_instance=RequestContext(request)
+        {'form': form, 'newsletter': newsletter}
     )
 
 
@@ -117,10 +116,10 @@ def test_newsletter(request, newsletter_id):
             )
             return HttpResponseRedirect(newsletter.get_absolute_url())
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_test_newsletter.html',
-        {'newsletter': newsletter, 'dests': dests},
-        context_instance=RequestContext(request)
+        {'newsletter': newsletter, 'dests': dests}
     )
 
 
@@ -139,10 +138,10 @@ def schedule_newsletter_sending(request, newsletter_id):
     else:
         form = forms.NewsletterSchedulingForm(instance=instance, initial={'scheduling_dt': datetime.now()})
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_schedule_newsletter_sending.html',
-        {'newsletter': newsletter, 'form': form},
-        context_instance=RequestContext(request)
+        {'newsletter': newsletter, 'form': form}
     )
 
 
