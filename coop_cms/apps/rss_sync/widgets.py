@@ -47,7 +47,7 @@ class AdminCreateArticleWidget(HiddenInput):
 
     def render(self, name, value, attrs=None):
         """returns html"""
-        widget = super(AdminCreateArticleWidget, self).render(name, value, attrs) # pylint: disable=E1002
+        widget = super(AdminCreateArticleWidget, self).render(name, value, attrs)  # pylint: disable=E1002
         html = unicode(widget)
         html += unicode(value)
         url = reverse('rss_sync_create_cms_article', args=[int(value)])

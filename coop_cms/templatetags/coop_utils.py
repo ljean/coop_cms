@@ -50,8 +50,8 @@ class ArticleLinkNode(template.Node):
             if self.lang:
                 article = get_article(slug, force_lang=self.lang)
             else:
-                #If the language is not defined, we need to get it from the context
-                #The get_language api doesn't work in templatetag
+                # If the language is not defined, we need to get it from the context
+                # The get_language api doesn't work in templatetag
                 request = context.get('request', None)
                 lang = "en"
                 if request:
@@ -145,7 +145,7 @@ class NewsletterFriendlyCssNode(template.Node):
                 key_order = self._style_to_list(css)
                 for html_tag in soup.select(tag):
                     try:
-                        #do not overwrite an inline css value
+                        # do not overwrite an inline css value
                         style = html_tag["style"]
                         style_list = self._style_to_list(style)
                         style_dict = self._style_to_dict(style)

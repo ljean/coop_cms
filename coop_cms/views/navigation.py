@@ -29,13 +29,13 @@ def view_navnode(request, tree):
         node = models.NavNode.objects.get(tree=tree, id=node_id)
         model_name = object_label = ""
 
-        #get the admin url
+        # get the admin url
         if node.content_type:
             app, mod = node.content_type.app_label, node.content_type.model
             admin_url = reverse("admin:{0}_{1}_change".format(app, mod), args=(node.object_id,))
 
-            #load and render template for the object
-            #try to load the corresponding template and if not found use the default one
+            # load and render template for the object
+            # try to load the corresponding template and if not found use the default one
             model_name = unicode(node.content_type)
             object_label = unicode(node.content_object)
             template = select_template([
@@ -47,13 +47,18 @@ def view_navnode(request, tree):
             template = select_template(["coop_cms/navtree_content/default.html"])
 
         html = template.render(
-            RequestContext(request, {
-                "node": node, "admin_url": admin_url,
-                "model_name": model_name, "object_label": object_label
-            })
+            RequestContext(
+                request,
+                {
+                    "node": node,
+                    "admin_url": admin_url,
+                    "model_name": model_name,
+                    "object_label": object_label,
+                }
+            )
         )
 
-        #return data has dictionnary
+        # return data has dictionnary
         response['html'] = html
         response['message'] = u"Node content loaded."
 
@@ -80,7 +85,7 @@ def rename_navnode(request, tree):
 
 def remove_navnode(request, tree):
     """delete a node"""
-    #Keep multi node processing even if multi select is not allowed
+    # Keep multi node processing even if multi select is not allowed
     response = {}
     node_ids = request.POST['node_ids'].split(";")
     for node_id in node_ids:
@@ -115,7 +120,7 @@ def move_navnode(request, tree):
     else:
         ref_node = None
 
-    #Update parent if changed
+    # Update parent if changed
     if parent_node != node.parent:
         if node.parent:
             ex_siblings = models.NavNode.objects.filter(tree=tree, parent=node.parent).exclude(id=node.id)
@@ -124,12 +129,12 @@ def move_navnode(request, tree):
 
         node.parent = parent_node
 
-        #restore ex-siblings
+        # restore ex-siblings
         for sib_node in ex_siblings.filter(ordering__gt=node.ordering):
             sib_node.ordering -= 1
             sib_node.save()
 
-        #move siblings if inserted
+        # move siblings if inserted
         if ref_node:
             if ref_pos == "before":
                 to_be_moved = sibling_nodes.filter(ordering__gte=ref_node.ordering)
@@ -142,16 +147,16 @@ def move_navnode(request, tree):
                 ntbm.save()
 
         else:
-            #add at the end
+            # add at the end
             max_ordering = sibling_nodes.aggregate(max_ordering=Max('ordering'))['max_ordering'] or 0
             node.ordering = max_ordering + 1
 
     else:
 
-        #Update pos if changed
+        # Update pos if changed
         if ref_node:
             if ref_node.ordering > node.ordering:
-                #move forward
+                # move forward
                 to_be_moved = sibling_nodes.filter(ordering__lt=ref_node.ordering, ordering__gt=node.ordering)
                 for next_sibling_node in to_be_moved:
                     next_sibling_node.ordering -= 1
@@ -164,7 +169,7 @@ def move_navnode(request, tree):
                     node.ordering = ref_node.ordering - 1
 
             elif ref_node.ordering < node.ordering:
-                #move backward
+                # move backward
                 to_be_moved = sibling_nodes.filter(ordering__gt=ref_node.ordering, ordering__lt=node.ordering)
                 for next_sibling_node in to_be_moved:
                     next_sibling_node.ordering += 1
@@ -191,7 +196,7 @@ def add_navnode(request, tree):
     """Add a new node"""
     response = {}
 
-    #get the type of object
+    # get the type of object
     object_type = request.POST['object_type']
     if object_type:
         app_label, model_name = object_type.split('.')
@@ -206,7 +211,7 @@ def add_navnode(request, tree):
         except model_class.DoesNotExist:
             raise ValidationError(_(u"{0} {1} not found").format(get_model_label(model_class), object_id))
 
-        #objects can not be added twice in the navigation tree
+        # objects can not be added twice in the navigation tree
         if models.NavNode.objects.filter(tree=tree, content_type=content_type, object_id=obj.id).count() > 0:
             raise ValidationError(_(u"The {0} is already in navigation").format(get_model_label(model_class)))
 
@@ -214,7 +219,7 @@ def add_navnode(request, tree):
         content_type = None
         obj = None
 
-    #Create the node
+    # Create the node
     parent_id = request.POST.get('parent_id', 0)
     if parent_id:
         parent = models.NavNode.objects.get(tree=tree, id=parent_id)
@@ -243,7 +248,7 @@ def get_suggest_list(request, tree):
     for nav_type in nav_types:
         content_type = nav_type.content_type
         if nav_type.label_rule == models.NavType.LABEL_USE_SEARCH_FIELD:
-            #Get the name of the default field for the current type (eg: Page->title, Url->url ...)
+            # Get the name of the default field for the current type (eg: Page->title, Url->url ...)
             lookup = {nav_type.search_field + '__icontains': term}
             objects = content_type.model_class().objects.filter(**lookup)
         elif nav_type.label_rule == models.NavType.LABEL_USE_GET_LABEL:
@@ -259,10 +264,10 @@ def get_suggest_list(request, tree):
             node.object_id for node in models.NavNode.objects.filter(tree=tree, content_type=content_type)
         ]
 
-        #Get suggestions as a list of {label: object.get_label() or unicode if no get_label, 'value':<object.id>}
+        # Get suggestions as a list of {label: object.get_label() or unicode if no get_label, 'value':<object.id>}
         for obj in objects:
             if obj.id not in already_in_navigation:
-                #Suggest only articles which are not in navigation yet
+                # Suggest only articles which are not in navigation yet
                 suggestions.append({
                     'label': models.get_object_label(content_type, obj),
                     'value': obj.id,
@@ -270,7 +275,7 @@ def get_suggest_list(request, tree):
                     'type': content_type.app_label + u'.' + content_type.model,
                 })
 
-    #Add suggestion for an empty node
+    # Add suggestion for an empty node
     suggestions.append({
         'label': _(u"Node"),
         'value': 0,
@@ -304,11 +309,11 @@ def process_nav_edition(request, tree_id):
     """This handle ajax request sent by the tree component"""
     if request.method == 'POST' and request.is_ajax() and 'msg_id' in request.POST:
         try:
-            #Get the current tree
+            # Get the current tree
             tree_class = get_navtree_class()
             tree = get_object_or_404(tree_class, id=tree_id)
 
-            #check permissions
+            # check permissions
             perm_name = "{0}.change_{1}".format(get_model_app(tree_class), get_model_name(tree_class))
             if not request.user.has_perm(perm_name):
                 raise PermissionDenied
@@ -318,15 +323,15 @@ def process_nav_edition(request, tree_id):
                 add_navnode, get_suggest_list, navnode_in_navigation,
             )
             supported_msg = {}
-            #create a map between message name and handler
-            #use the function name as message id
+            # create a map between message name and handler
+            # use the function name as message id
             for fct in functions:
                 supported_msg[fct.__name__] = fct
 
-            #Call the handler corresponding to the requested message
+            # Call the handler corresponding to the requested message
             response = supported_msg[request.POST['msg_id']](request, tree)
 
-            #If no exception raise: Success
+            # If no exception raise: Success
             response['status'] = 'success'
             response.setdefault('message', 'Ok')  # if no message defined in response, add something
 
@@ -340,7 +345,7 @@ def process_nav_edition(request, tree_id):
             logger.exception("process_nav_edition")
             response = {'status': 'error', 'message': u"An error occured : {0}".format(msg)}
 
-        #return the result as json object
+        # return the result as json object
         return HttpResponse(json.dumps(response), content_type='application/json')
     raise Http404
 
