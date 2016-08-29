@@ -7,7 +7,7 @@ from urlparse import urlparse
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
-from django.template import RequestContext, Context
+from django.template import RequestContext
 from django.template.loader import get_template
 from django.utils.translation import check_for_language, activate
 from django.views.decorators.csrf import csrf_exempt
@@ -101,11 +101,11 @@ def csrf_failure(request, reason=""):
 
     template = get_template('coop_cms/csrf_403.html')
 
-    context = Context({
+    context = {
         'DEBUG': settings.DEBUG,
         'cookie_disabled': reason == REASON_NO_CSRF_COOKIE,
         'no_referer': reason == REASON_NO_REFERER,
-    })
+    }
 
     html = template.render(RequestContext(request, context))
 
