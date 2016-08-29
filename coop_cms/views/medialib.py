@@ -12,8 +12,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
-from django.shortcuts import render_to_response, get_object_or_404
 from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
 
 from coop_cms import forms
@@ -24,7 +24,7 @@ from coop_cms.utils import paginate, FileWrapper
 
 def _get_photologue_media(request):
     """get photologue media"""
-    #Only if django-photologue is installed
+    # Only if django-photologue is installed
     if "photologue" in settings.INSTALLED_APPS:
         from photologue.models import Photo, Gallery
         media_url = reverse('coop_cms_media_photologue')
@@ -158,12 +158,12 @@ def upload_image(request):
         else:
             form = forms.AddImageForm()
 
-        return render_to_response(
+        return render(
+            request,
             'coop_cms/popup_upload_image.html',
             {
                 'form': form,
-            },
-            context_instance=RequestContext(request)
+            }
         )
     except Exception:
         logger.exception("upload_image")
@@ -196,10 +196,10 @@ def upload_doc(request):
         else:
             form = forms.AddDocForm()
 
-        return render_to_response(
+        return render(
+            request,
             'coop_cms/popup_upload_doc.html',
-            locals(),
-            context_instance=RequestContext(request)
+            locals()
         )
     except Exception:
         logger.exception("upload_doc")
