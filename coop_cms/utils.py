@@ -15,7 +15,6 @@ from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponseRedirect
-from django.template import Context
 from django.template.loader import get_template
 from django.utils import translation
 
@@ -224,7 +223,7 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
             context_dict.update(data)
 
     try:
-        html_text = the_template.render(Context(context_dict))
+        html_text = the_template.render(context_dict)
     except Exception:
         # import traceback
         # print traceback.print_exc()
@@ -341,7 +340,7 @@ def get_text_from_template(template_name, extra_context=None):
     """
     context = extra_context or {}
     template = get_template(template_name)
-    return template.render(Context(context))
+    return template.render(context)
 
 
 def paginate(request, queryset, items_count):

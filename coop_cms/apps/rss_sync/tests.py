@@ -3,9 +3,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User, Permission
 from django.core.urlresolvers import reverse
-from django.template import Template, Context
 from coop_cms.settings import get_article_class
-from django.core.exceptions import ValidationError
 from coop_cms.apps.rss_sync.models import RssItem, RssSource
 from coop_cms.models import BaseArticle
 from django.contrib.contenttypes.models import ContentType

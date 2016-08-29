@@ -4,7 +4,6 @@
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template import VariableDoesNotExist
-from django.template import Context
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 
@@ -68,7 +67,7 @@ class NavigationAsNestedUlNode(NavigationTemplateNode):
         root_nodes = NavNode.objects.filter(tree__name=tree_name, parent__isnull=True).order_by("ordering")
         total_nodes = root_nodes.count()    
         return u''.join([
-            node.as_navigation(node_pos=i+1, total_nodes=total_nodes, **kwargs)
+            node.as_navigation(node_pos=i + 1, total_nodes=total_nodes, **kwargs)
             for (i, node) in enumerate(root_nodes)
         ])
 
@@ -174,7 +173,7 @@ DEFAULT_NAVROOT_TEMPLATE = 'coop_cms/navigation_node.html'
 def render_template_node(node, template_name=""):
     """render to html"""
     the_template = get_template(template_name or DEFAULT_NAVROOT_TEMPLATE)
-    return the_template.render(Context({'node': node}))
+    return the_template.render({'node': node})
 
 
 class NavigationRootNode(NavigationTemplateNode):
