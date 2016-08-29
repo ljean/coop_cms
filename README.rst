@@ -27,7 +27,7 @@ Coop-cms has some sister apps to make it more usable:
 Quick start
 -----------
 
-Python 2.6+, Django 1.6+ required
+Python 2.7, Django 1.8+ required
 
 Install it with ``pip install apidev_coop_cms``
 
