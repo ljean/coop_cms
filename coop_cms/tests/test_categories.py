@@ -280,7 +280,6 @@ class CoopCategoryTemplateTagTest(BaseTestCase):
         )
         
         self.assertEqual(list(cat.get_articles_qs().all()), [art2, art1])
-        
 
     def test_view_category_articles_not_all_published(self):
         cat = mommy.make(ArticleCategory, name="abc")
