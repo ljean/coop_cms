@@ -43,7 +43,7 @@ setup(
         'Pillow',
     ],
     dependency_links=[
-        'git+https://github.com/ljean/coop_html_editor.git@64475a05ccb1528932cfd3f52fdfd4d36effd06b#egg=coop_html_editor',
+        'git+https://github.com/ljean/coop_html_editor.git@a7ab057f623402b7632f1cf838ffb6dc619c81ab#egg=coop_html_editor',
     ],
     long_description=open('README.rst').read(),
     url='https://github.com/ljean/coop_cms/',
