@@ -1,5 +1,3 @@
-/* @override http://localhost:8000/static/css/mediatheque.css */
-
 #pageslide-content {
 	height: 100%;
 }
@@ -157,22 +155,3 @@ ul.pagination li {
 ul.pagination li a{
     padding: 5px;
 }
-
-/*
-.djaloha-document {
-	position: relative;
-	width: 330px;
-	display: block;
-	margin-top: 5px;
-	cursor: move;
-	height: 70px;
-}*/
-
-/*
-.cms_doc_title {
-	z-index: 6;
-	position: absolute;
-	top: 10px;
-	left: 80px;
-}
-*/

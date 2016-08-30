@@ -20,7 +20,7 @@ edit_article_view = article_views['edit_article_view']
 install_csrf_failure_view()
 
 urlpatterns = [
-    url(r'^djaloha/', include('djaloha.urls')),
+    url(r'^htm-editor/', include('coop_html_editor.urls')),
 
     url(r'^cms/change-template/(?P<article_id>\d*)/$', articles.change_template, name="coop_cms_change_template"),
     url(r'^cms/settings/(?P<article_id>\d*)/$', articles.article_settings, name="coop_cms_article_settings"),

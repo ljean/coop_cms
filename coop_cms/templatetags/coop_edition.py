@@ -11,15 +11,10 @@ from django.template import Context
 from django.template.loader import get_template, TemplateDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
-if DJANGO_VERSION >= (1, 8, 0):
-    from django.template.base import TextNode, VariableNode
-    from django.template.loader_tags import IncludeNode
-else:
-    # Django 1.6
-    from django.template import TextNode, VariableNode
+from django.template.base import TextNode, VariableNode
+from django.template.loader_tags import IncludeNode
 
-from djaloha.templatetags.djaloha_utils import DjalohaEditNode, DjalohaMultipleEditNode
-
+from coop_html_editor.templatetags.html_editor_utils import InlineHtmlEditNode, InlineHtmlMultipleEditNode
 from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
 from coop_cms.settings import get_article_class
 from coop_cms.utils import get_text_from_template
@@ -33,14 +28,13 @@ class DummyEngine(object):
     string_if_invalid = ''
 
 
-class PieceOfHtmlEditNode(DjalohaEditNode):
+class PieceOfHtmlEditNode(InlineHtmlEditNode):
     """Template node for editing a PieceOfHtml"""
 
     def render(self, context):
         """convert to html"""
         if context.get('form', None) or context.get('formset', None):
-            context.dicts[0]['djaloha_edit'] = True
-        # context.dicts[0]['can_edit_template'] = True
+            context.dicts[0]['inline_html_edit'] = True
         return super(PieceOfHtmlEditNode, self).render(context)
 
 
@@ -65,7 +59,7 @@ def coop_piece_of_html(parser, token):
     return PieceOfHtmlEditNode(PieceOfHtml, lookup_args, 'content', read_only)
 
 
-class FragmentEditNode(DjalohaMultipleEditNode):
+class FragmentEditNode(InlineHtmlMultipleEditNode):
     """Template Node for Fragment edition"""
 
     def __init__(self, lookup, kwargs=None):
@@ -122,7 +116,7 @@ class FragmentEditNode(DjalohaMultipleEditNode):
         """convert to html"""
         self._edit_mode = False
         if context.get('form', None) or context.get('formset', None):
-            context.dicts[0]['djaloha_edit'] = True
+            context.dicts[0]['inline_html_edit'] = True
             self._edit_mode = True
         html = super(FragmentEditNode, self).render(context)
         filter_id = self.fragment_filter.id if self.fragment_filter else ""
@@ -162,13 +156,13 @@ def coop_fragments(parser, token):
     return FragmentEditNode(lookup, kwargs)
 
 
-class ArticleSummaryEditNode(DjalohaEditNode):
+class ArticleSummaryEditNode(InlineHtmlEditNode):
     """edit the article summary"""
 
     def render(self, context):
         """to html"""
         if context.get('form', None):
-            context.dicts[0]['djaloha_edit'] = True
+            context.dicts[0]['inline_html_edit'] = True
         return super(ArticleSummaryEditNode, self).render(context)
 
 

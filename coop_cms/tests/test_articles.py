@@ -261,11 +261,11 @@ class ArticleTest(BaseArticleTest):
         self.assertEquals(article.title, initial_data['title'])
         self.assertEquals(article.content, initial_data['content'])
         
-    def _is_aloha_found(self, response):
+    def _is_inline_html_editor_found(self, response):
         self.assertEqual(200, response.status_code)
-        aloha_js = reverse('aloha_init')
+        inline_editor_init_url = reverse('html_editor_init')
         content = unicode(response.content, 'utf-8')
-        return content.find(aloha_js) > 0
+        return content.find(inline_editor_init_url) > 0
         
     def test_edit_permission(self):
         initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
@@ -286,17 +286,17 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(article.get_edit_url(), follow=False)#follow was TRue?
         self.assertEqual(200, response.status_code)
         
-    def test_aloha_loaded(self):
+    def test_inline_html_editor_loaded(self):
         initial_data = {'title': u"ceci est un test", 'content': u"this is my article content"}
         article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         response = self.client.get(article.get_absolute_url())
-        self.assertFalse(self._is_aloha_found(response))
+        self.assertFalse(self._is_inline_html_editor_found(response))
         
         self._log_as_editor()
         response = self.client.get(article.get_edit_url())
-        self.assertTrue(self._is_aloha_found(response))
+        self.assertTrue(self._is_inline_html_editor_found(response))
         
-    def test_aloha_links(self):
+    def test_inline_html_editor_links(self):
         slugs = ("un", "deux", "trois", "quatre")
         for slug in slugs:
             get_article_class().objects.create(publication=BaseArticle.PUBLISHED, title=slug)
@@ -304,7 +304,7 @@ class ArticleTest(BaseArticleTest):
         article = get_article_class().objects.create(**initial_data)
         
         self._log_as_editor()
-        response = self.client.get(reverse('aloha_init'))
+        response = self.client.get(reverse('html_editor_init'))
         
         context_slugs = [article.slug for article in response.context['links']]
         for slug in slugs:
@@ -339,7 +339,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(response.status_code, 200)
         
-        #checking html content would not work. Check that the article is updated
+        # checking html content would not work. Check that the article is updated
         for b in ['paul', 'georges', 'ringo', 'john']:
             self.assertContains(response, b)
 

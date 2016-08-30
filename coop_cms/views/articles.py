@@ -18,7 +18,7 @@ from django.views.generic.base import TemplateView
 from django.utils.translation import ugettext as _
 from django.views.generic import View
 
-from djaloha import utils as djaloha_utils
+from coop_html_editor import utils as html_editor_utils
 from colorbox.decorators import popup_redirect
 
 from coop_cms import forms
@@ -122,10 +122,10 @@ def edit_article(request, url, extra_context=None, force_template=None):
     if request.method == "POST":
         form = article_form_class(request.POST, request.FILES, instance=article)
 
-        forms_args = djaloha_utils.extract_forms_args(request.POST)
-        djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)
+        forms_args = html_editor_utils.extract_forms_args(request.POST)
+        inline_html_forms = html_editor_utils.make_forms(forms_args, request.POST)
 
-        if form.is_valid() and all([f.is_valid() for f in djaloha_forms]):
+        if form.is_valid() and all([_form.is_valid() for _form in inline_html_forms]):
             article = form.save()
 
             if article.temp_logo:
@@ -133,15 +133,15 @@ def edit_article(request, url, extra_context=None, force_template=None):
                 article.temp_logo = ''
                 article.save()
 
-            if djaloha_forms:
-                for dj_form in djaloha_forms:
-                    dj_form.save()
+            if inline_html_forms:
+                for inline_form in inline_html_forms:
+                    inline_form.save()
 
             success_message(request, _(u'The article has been saved properly'))
 
             return HttpResponseRedirect(article.get_absolute_url())
         else:
-            error_text = u'<br />'.join([unicode(f.errors) for f in [form]+djaloha_forms if f.errors])
+            error_text = u'<br />'.join([unicode(_form.errors) for _form in [form]+inline_html_forms if _form.errors])
             error_message(request, _(u'An error occured: {0}'.format(error_text)))
             logger.debug("error: error_text")
     else:
