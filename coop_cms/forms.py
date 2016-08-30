@@ -12,7 +12,7 @@ from django.utils.translation import ugettext as _
 
 import floppyforms
 
-from djaloha.widgets import AlohaInput
+from coop_html_editor.widgets import get_inline_html_widget
 
 from coop_cms.models import (
     NavType, NavNode, Newsletter, NewsletterSending, Link, Document, Fragment, FragmentType,
@@ -57,15 +57,15 @@ class NavTypeForm(forms.ModelForm):
         fields = ('content_type', 'search_field', 'label_rule')
 
 
-class AlohaEditableModelForm(floppyforms.ModelForm):
-    """Base class for form with Aloha editor fields"""
+class InlineHtmlEditableModelForm(floppyforms.ModelForm):
+    """Base class for form with inline-HTML editor fields"""
 
     def __init__(self, *args, **kwargs):
-        super(AlohaEditableModelForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
+        super(InlineHtmlEditableModelForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         for field_name in self.Meta.fields:
-            no_aloha_widgets = getattr(self.Meta, 'no_aloha_widgets', ())
-            if not field_name in no_aloha_widgets: 
-                self.fields[field_name].widget = AlohaInput()
+            no_inline_html_widgets = getattr(self.Meta, 'no_inline_editable_widgets', ())
+            if not field_name in no_inline_html_widgets:
+                self.fields[field_name].widget = get_inline_html_widget()
 
     class Media:
         css = {
@@ -79,7 +79,7 @@ class AlohaEditableModelForm(floppyforms.ModelForm):
         )
 
 
-class ArticleForm(AlohaEditableModelForm):
+class ArticleForm(InlineHtmlEditableModelForm):
     """frontend edition of an article"""
 
     def __init__(self, *args, **kwargs):
@@ -87,13 +87,13 @@ class ArticleForm(AlohaEditableModelForm):
         self.article = kwargs.get('instance', None)
         self.set_logo_size()
         if getattr(settings, 'COOP_CMS_TITLE_OPTIONAL', False):
-            #Optional title : make possible to remove the title from a template
+            # Optional title : make possible to remove the title from a template
             self.fields['title'].required = False
 
     class Meta:
         model = get_article_class()
         fields = ('title', 'subtitle', 'content', 'logo')
-        no_aloha_widgets = ('logo',)
+        no_inline_html_widgets = ('logo',)
 
     def set_logo_size(self, logo_size=None, logo_crop=None):
         """change logo size"""
@@ -116,8 +116,8 @@ class ArticleForm(AlohaEditableModelForm):
         if getattr(settings, 'COOP_CMS_TITLE_OPTIONAL', False):
             title = self.cleaned_data['title']
             if not title and self.article:
-                #if the title is optional and nothing is set
-                #We do not modify it when saving
+                # if the title is optional and nothing is set
+                # We do not modify it when saving
                 return self.article.title
         else:
             title = self.cleaned_data['title'].strip()
@@ -476,7 +476,7 @@ class PublishArticleForm(forms.ModelForm):
         }
 
 
-class NewsletterForm(AlohaEditableModelForm):
+class NewsletterForm(InlineHtmlEditableModelForm):
     """form for newsletter edition"""
 
     class Meta:

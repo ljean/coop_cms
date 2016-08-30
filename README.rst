@@ -18,8 +18,8 @@ Yet another CMS ?
 
 Coop-cms has some sister apps to make it more usable:
 
-* `coop_bar <https://github.com/ljean/coop-bar/>`_, an extensible toolbar (same concept : any app you create can add links in the toolbar)
-* `djaloha <https://github.com/ljean/djaloha/>`_, a great in-site editor based on `Aloha Editor <http://aloha-editor.org/>`_
+* `coop_bar <https://github.com/ljean/coop-bar/>`_, an extensible toolbar (same concept : any app you create can add links in the toolbar).
+* `coop_html_editor <https://github.com/ljean/coop_html_editor/>`_, integration of in-site html editors._
 * `colorbox <https://github.com/ljean/coop-colorbox/>`_, make easy integration of jquery colorbox library.
 
 .. _quick-start:
@@ -37,7 +37,7 @@ urls.py
 At *the very end* of your urls.py file, add::
 
     urlpatterns += patterns('',
-        (r'^djaloha/', include('djaloha.urls')),
+        (r'^html-editor/', include('coop_html_editor.urls')),
         (r'^', include('coop_cms.urls')),
         (r'^coop_bar/', include('coop_bar.urls')),
     )
@@ -99,7 +99,7 @@ In settings.py::
 
         #apps
         'coop_bar',
-        'djaloha',
+        'coop_html_editor',
         'colorbox',
         'coop_cms',
         'coop_cms.apps.coop_bootstrap', # Optional -> utilities for Bootstrap CSS framework
@@ -128,23 +128,23 @@ In settings.py::
         'coop_cms.apps.demo_cms.my_coop_bar',
     )
 
-    #Populate the urls when editing <a> tag in Aloha editor
-    DJALOHA_LINK_MODELS = (
+    #Populate the urls when editing <a> tag in HTML editor
+    COOP_HTML_EDITOR_LINK_MODELS = (
         'demo_cms.Article',
     )
 
-    # Optional: you can overload the aloha plugins used by coop_cms --> see djaloha docs for details
-    DJALOHA_PLUGINS = (
+    # Optional: you can overload the aloha plugins used by coop_cms --> see coop_html_editor docs for details
+    ALOHA_PLUGINS = (
         "common/format",
         "common/highlighteditables",
     )
 
-    # Optional: you can change the jquery version used by aloha --> see djaloha docs for details
-    DJALOHA_JQUERY = 'js/jquery.1.7.2.js'
+    # Optional: you can change the jquery version used by aloha --> see coop_html_editor docs for details
+    ALOHA_JQUERY = 'js/jquery.1.7.2.js'
 
     # Optional : you can customize the whole behavior of aloha by proving the url of config file.
-    # It will overload the config provided by djaloha --> see djaloha for details
-    DJALOHA_INIT_URL = '/static/js/my_aloha_config.js'
+    # It will overload the config provided by coop_html_editor --> see coop_html_editor for details
+    ALOHA_INIT_URL = '/static/js/my_aloha_config.js'
 
     #Default size of the article logo. Can be changed in template
     COOP_CMS_ARTICLE_LOGO_SIZE = "128x128"

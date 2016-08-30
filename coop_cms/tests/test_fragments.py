@@ -72,9 +72,9 @@ class BaseFragmentTest(BaseTestCase):
 class FragmentsTest(BaseFragmentTest):
     """Test ragments"""
 
-    editable_field_tpl = '<div class="djaloha-editable" id="djaloha_djaloha__coop_cms__Fragment__id__{0}__content">' + \
-        '{1}</div>\n<input type="hidden" id="djaloha_djaloha__coop_cms__Fragment__id__{0}__content_hidden" ' + \
-        'name="djaloha__coop_cms__Fragment__id__{0}__content" value="{1}">'
+    editable_field_tpl = '<div class="inline-editable" id="html_editor_html_editor__coop_cms__Fragment__id__{0}__content">' + \
+        '{1}</div>\n<input type="hidden" id="html_editor_html_editor__coop_cms__Fragment__id__{0}__content_hidden" ' + \
+        'name="html_editor__coop_cms__Fragment__id__{0}__content" value="{1}" />'
     
 
     def test_fragment_position(self):
@@ -473,18 +473,18 @@ class FragmentsTest(BaseFragmentTest):
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name "hello" %}')
         html = tpl.render(Context({"ft_name": ft_name, "form": True}))
-        
+
         positions = [
-            html.find(self.editable_field_tpl.format(f.id, f.content))
-            for f in [fragments[0], fragments[1]]
+            html.find(self.editable_field_tpl.format(fragment.id, fragment.content))
+            for fragment in [fragments[0], fragments[1]]
         ]
         for pos in positions:
             self.assertTrue(pos >= 0)
         self.assertEqual(positions, sorted(positions))
         
         positions = [
-            html.find(self.editable_field_tpl.format(f.id, f.content))
-            for f in [fragments[4], fragments[2], fragments[3]]
+            html.find(self.editable_field_tpl.format(fragment.id, fragment.content))
+            for fragment in [fragments[4], fragments[2], fragments[3]]
         ]
         for pos in positions:
             self.assertTrue(pos == -1)
@@ -534,7 +534,7 @@ class FragmentsTest(BaseFragmentTest):
         soup = BeautifulSoup(html)
         self.assertEqual(1, len(soup.select('.panel')))
         self.assertEqual(1, len(soup.select('.panel input')))
-        self.assertEqual(1, len(soup.select('.panel .djaloha-editable')))
+        self.assertEqual(1, len(soup.select('.panel .inline-editable')))
     
     def test_view_fragments_with_template2(self):
         """test with another template"""
@@ -666,7 +666,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
         data = {
             "title": 'salut',
             'content': 'bonjour!',
-            'djaloha__coop_cms__Fragment__id__{0}__content'.format(fragment1.id): new_fragment1_content,
+            'html_editor__coop_cms__Fragment__id__{0}__content'.format(fragment1.id): new_fragment1_content,
         }
         
         self._log_as_editor()
@@ -690,7 +690,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
         data = {
             "title": 'salut',
             'content': 'bonjour!',
-            'djaloha__coop_cms__Fragment__id__{0}__content'.format(fragment1.id): new_fragment1_content,
+            'html_editor__coop_cms__Fragment__id__{0}__content'.format(fragment1.id): new_fragment1_content,
         }
         
         self._log_as_editor()

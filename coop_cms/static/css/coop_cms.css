@@ -23,10 +23,6 @@ img.aloha-align-right {
 	float: right;
 }
 
-img.djaloha-current-image {
-	border: solid red 1px;
-}
-
 ul.coop-cms_user-messages a.close-message{
 	text-align: right;
 	display: block;

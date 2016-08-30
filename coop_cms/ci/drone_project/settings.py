@@ -156,7 +156,7 @@ SOUTH_MIGRATION_MODULES = {
 
 TEST_RUNNER = 'coop_cms.test_runners.SafeMediaDiscoverRunner'
 
-DJALOHA_LINK_MODELS = ('basic_cms.Article',)
+COOP_HTML_EDITOR_LINK_MODELS = ('basic_cms.Article',)
 COOP_CMS_ARTICLE_LOGO_SIZE = "950x250"
 COOP_CMS_NEWSLETTER_TEMPLATES = (
     ('basic_newsletter.html', 'Basic'),
@@ -191,7 +191,7 @@ INSTALLED_APPS = (
     'registration',
 
     # externals
-    'djaloha',
+    'coop_html_editor',
     'colorbox',
     'coop_cms',
     'coop_bar',

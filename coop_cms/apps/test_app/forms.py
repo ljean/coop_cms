@@ -3,21 +3,21 @@
 
 import floppyforms as forms
 
-from djaloha.widgets import AlohaInput
+from coop_html_editor.widgets import get_inline_html_widget
 
 from coop_cms.apps.test_app.models import TestClass
-from coop_cms.forms import AlohaEditableModelForm, NewArticleForm, ArticleSettingsForm, NewsletterSettingsForm
+from coop_cms.forms import InlineHtmlEditableModelForm, NewArticleForm, ArticleSettingsForm, NewsletterSettingsForm
 
 
-class TestClassForm(AlohaEditableModelForm):
+class TestClassForm(InlineHtmlEditableModelForm):
     """for unit-testing"""
     class Meta:
         model = TestClass
         fields = ('field1', 'field2', 'field3', 'bool_field', 'int_field', 'float_field')
         widgets = {
-            'field2': AlohaInput(),
+            'field2': get_inline_html_widget(),
         }
-        no_aloha_widgets = ('field2', 'field3', 'bool_field', 'int_field', 'float_field')
+        no_inline_html_widgets = ('field2', 'field3', 'bool_field', 'int_field', 'float_field')
 
 
 class MyNewArticleForm(NewArticleForm):
