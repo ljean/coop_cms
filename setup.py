@@ -35,7 +35,7 @@ setup(
         'sorl-thumbnail',
         'apidev-coop_colorbox >= 1.2.0',
         'apidev-coop_bar >= 1.3.2',
-        'coop_html_editor >= 1.0.0',
+        'coop_html_editor >= 0.1.0',
         'feedparser',
         'beautifulsoup4',
         'django-filetransfers',
@@ -43,7 +43,7 @@ setup(
         'Pillow',
     ],
     dependency_links=[
-        'git+https://github.com/ljean/coop_html_editor.git@851bb36789bc3d7c48cd3711a3dbfa9d21495288#egg=coop_html_editor',
+        'git+https://github.com/ljean/coop_html_editor.git@64475a05ccb1528932cfd3f52fdfd4d36effd06b#egg=coop_html_editor',
     ],
     long_description=open('README.rst').read(),
     url='https://github.com/ljean/coop_cms/',
