@@ -39,6 +39,8 @@ urlpatterns += localized_patterns(
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('coop_cms.apps.email_auth.urls')),
+    url(r'^accounts/', include('coop_cms.apps.email_auth.registration_backend.urls')),
+    url(r'^accounts/', include('registration.backends.model_activation.urls')),
     url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^', include('coop_cms.urls')),
 )

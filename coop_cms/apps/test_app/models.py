@@ -5,6 +5,11 @@ from django.db import models
 from django.core.urlresolvers import reverse
 
 
+class TestTag(models.Model):
+    """for unit-testing : test_view_object_m2m_relationships"""
+    name = models.CharField(max_length=100)
+
+
 class TestClass(models.Model):
     """for unit-testing"""
 
@@ -16,6 +21,8 @@ class TestClass(models.Model):
     float_field = models.FloatField(default=0.0)
 
     other_field = models.CharField(max_length=100)
+
+    tags = models.ManyToManyField(TestTag, blank=True)
 
     def __unicode__(self):
         return u"Test Object {0}".format(self.id)

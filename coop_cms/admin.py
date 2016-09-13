@@ -135,9 +135,9 @@ class MediaFilterFilter(admin.SimpleListFilter):
 
 class ImageAdmin(admin.ModelAdmin):
     """Image admin"""
-    list_display = ['admin_image', 'name', 'file', 'size', 'ordering']
+    list_display = ['admin_image', 'name', 'file', 'size', 'ordering', 'copyright']
     list_filter = [MediaFilterFilter, 'size']
-    list_editable = ('ordering',)
+    list_editable = ('ordering', 'copyright')
     search_fields = ['name']
     actions = [clear_thumbnails_action]
 
@@ -154,8 +154,9 @@ admin.site.register(models.Fragment, FragmentAdmin)
 
 class ArticleCategoryAdmin(admin.ModelAdmin):
     """Article category Admin"""
-    list_display = ['name', 'ordering', 'in_rss']
+    list_display = ['name', 'slug', 'ordering', 'in_rss', 'pagination_size']
     list_editable = ['ordering', 'in_rss']
+    readonly_fields = ['slug']
 
 admin.site.register(models.ArticleCategory, ArticleCategoryAdmin)
 

@@ -15,6 +15,7 @@ from coop_cms.settings import get_article_class
 from coop_cms.tests import BaseTestCase
 
 
+@override_settings(COOP_CMS_ARTICLES_CATEGORY_PAGINATION=10)
 class ArticlesByCategoryTest(BaseTestCase):
     """Articles category page"""
 
@@ -28,7 +29,7 @@ class ArticlesByCategoryTest(BaseTestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, art.title)
-    
+
     def test_view_articles_ordering(self):
         """view articles by category in order"""
         article_class = get_article_class()
@@ -139,7 +140,6 @@ class ArticlesByCategoryTest(BaseTestCase):
         self.assertContains(response, art.title)
         self.assertContains(response, "This comes from custom template")
 
-    @override_settings(COOP_CMS_ARTICLES_CATEGORY_PAGINATION=10)
     def test_view_articles_category_many(self):
         """view articles by category: check pagination"""
 
@@ -166,6 +166,64 @@ class ArticlesByCategoryTest(BaseTestCase):
         for i in ids[10:20]:
             self.assertContains(response, u"AZERTY-{0}-UIOP".format(i))
         for i in ids[:10]:
+            self.assertNotContains(response, u"AZERTY-{0}-UIOP".format(i))
+
+    @override_settings(COOP_CMS_ARTICLES_CATEGORY_PAGINATION=10)
+    def test_view_articles_category_pagination_size(self):
+        """view articles by category: check pagination"""
+
+        article_class = get_article_class()
+        cat = mommy.make(ArticleCategory, pagination_size=5)
+        for i in range(30):
+            mommy.make(
+                article_class, category=cat, publication_date=datetime(2014, 3, i + 1),
+                title=u"AZERTY-{0}-UIOP".format(i), publication=BaseArticle.PUBLISHED
+            )
+
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        ids = list(range(30))
+        ids.reverse()
+        for i in ids[:5]:
+            self.assertContains(response, u"AZERTY-{0}-UIOP".format(i))
+        for i in ids[5:]:
+            self.assertNotContains(response, u"AZERTY-{0}-UIOP".format(i))
+
+        response = self.client.get(url + "?page=2")
+        self.assertEqual(response.status_code, 200)
+        for i in ids[5:10]:
+            self.assertContains(response, u"AZERTY-{0}-UIOP".format(i))
+        for i in ids[:5]:
+            self.assertNotContains(response, u"AZERTY-{0}-UIOP".format(i))
+
+    @override_settings(COOP_CMS_ARTICLES_CATEGORY_PAGINATION=5)
+    def test_view_articles_category_pagination_size_default(self):
+        """view articles by category: check pagination"""
+
+        article_class = get_article_class()
+        cat = mommy.make(ArticleCategory)
+        for i in range(30):
+            mommy.make(
+                article_class, category=cat, publication_date=datetime(2014, 3, i + 1),
+                title=u"AZERTY-{0}-UIOP".format(i), publication=BaseArticle.PUBLISHED
+            )
+
+        url = reverse('coop_cms_articles_category', args=[cat.slug])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        ids = list(range(30))
+        ids.reverse()
+        for i in ids[:5]:
+            self.assertContains(response, u"AZERTY-{0}-UIOP".format(i))
+        for i in ids[5:]:
+            self.assertNotContains(response, u"AZERTY-{0}-UIOP".format(i))
+
+        response = self.client.get(url + "?page=2")
+        self.assertEqual(response.status_code, 200)
+        for i in ids[5:10]:
+            self.assertContains(response, u"AZERTY-{0}-UIOP".format(i))
+        for i in ids[:5]:
             self.assertNotContains(response, u"AZERTY-{0}-UIOP".format(i))
         
         

@@ -167,6 +167,8 @@ COOP_CMS_TITLE_OPTIONAL = True
 
 LOGIN_REDIRECT_URL = "/"
 
+ACCOUNT_ACTIVATION_DAYS = 7
+
 INSTALLED_APPS = (
     # contribs
     'django.contrib.auth',
@@ -181,6 +183,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'floppyforms',
     'sorl.thumbnail',
+    'registration',
 
     # externals
     'djaloha',

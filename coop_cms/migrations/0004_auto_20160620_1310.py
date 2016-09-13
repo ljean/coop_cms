@@ -4,13 +4,14 @@ from __future__ import unicode_literals
 from django.db import migrations, models
 from django.core.urlresolvers import reverse
 
+
 def set_homepage(apps, schema_editor):
     # Move from homepage_for_site to SiteSettings
     site_class = apps.get_model("sites", "Site")
     for site in site_class.objects.all():
         try:
             homepage_article = site.homepage_article.all()[0]
-        except (models.ObjectDoesNotExist, IndexError):
+        except (models.ObjectDoesNotExist, IndexError, AttributeError):
             homepage_article = None
 
         if homepage_article:

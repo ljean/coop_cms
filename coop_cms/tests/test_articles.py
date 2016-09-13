@@ -404,6 +404,46 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(NavNode.objects.count(), 0)
         self.assertEqual([a.id for a in article.sites.order_by("id")], data['sites'])
 
+    def test_view_new_article(self):
+        other_site = mommy.make(Site)
+
+        category1 = mommy.make(ArticleCategory)
+        category1.sites.clear()
+        category1.sites.add(Site.objects.get_current())
+        category1.save()
+
+        category2 = mommy.make(ArticleCategory)
+        category2.sites.clear()
+        category2.sites.add(Site.objects.get_current())
+        category2.sites.add(other_site)
+        category2.save()
+
+        category3 = mommy.make(ArticleCategory)
+        category3.sites.clear()
+        category3.sites.add(other_site)
+        category3.save()
+
+        category4 = mommy.make(ArticleCategory)
+        category4.sites.clear()
+        category4.save()
+
+        self._log_as_editor()
+
+        response = self.client.get(reverse('coop_cms_new_article'))
+        self.assertEqual(response.status_code, 200)
+        soup = BeautifulSoup(response.content)
+
+        categories_select_node = soup.select("select#id_category")[0]
+
+        categories = [node.text for node in categories_select_node.select('option')]
+
+        self.assertEqual(3, len(categories))
+        self.assertTrue('---------' in categories)
+        self.assertTrue(category1.name in categories)
+        self.assertTrue(category2.name in categories)
+        self.assertTrue(category3.name not in categories)
+        self.assertTrue(category4.name not in categories)
+
     def test_new_article_two_sites(self):
         other_site = mommy.make(Site)
         article_class = get_article_class()
@@ -428,7 +468,7 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(article.template, data['template'])
         self.assertEqual(article.navigation_parent, None)
         self.assertEqual(NavNode.objects.count(), 0)
-        self.assertEqual([a.id for a in article.sites.order_by("id")], data['sites'])
+        self.assertEqual([_article.id for _article in article.sites.order_by("id")], data['sites'])
 
     def test_new_article_without_site(self):
         article_class = get_article_class()
@@ -460,6 +500,36 @@ class ArticleTest(BaseArticleTest):
             'template': get_article_templates(None, self.user)[0][0],
             'navigation_parent': None,
             'sites': [settings.SITE_ID, 999]
+        }
+
+        response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(article_class.objects.count(), 0)
+
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select("ul.errorlist")), 1)
+
+    def test_new_article_invalid_category_site(self):
+        article_class = get_article_class()
+
+        category1 = mommy.make(ArticleCategory)
+        category1.sites.clear()
+        category1.sites.add(Site.objects.get_current())
+        category1.save()
+
+        category2 = mommy.make(ArticleCategory)
+        category2.sites.clear()
+        category2.save()
+
+        self._log_as_editor()
+        data = {
+            'title': "Un titre",
+            'category': category2.id,
+            'publication': BaseArticle.DRAFT,
+            'template': get_article_templates(None, self.user)[0][0],
+            'navigation_parent': None,
+            'sites': [settings.SITE_ID]
         }
 
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
