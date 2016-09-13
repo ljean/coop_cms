@@ -1,7 +1,7 @@
-{% load i18n coop_edition coop_bar_tags %}<!DOCYTPE HTML><html lang="{{LANGUAGE_CODE}}">
+<!DOCYTPE HTML><html lang="{{LANGUAGE_CODE}}">{% load i18n coop_edition coop_bar_tags coop_utils %}
 <head>
   <meta charset="utf-8">
-  <title>{{newsletter.subject}}</title>
+  <title>{{newsletter.subject|dehtml}}</title>
   {% if editable %}
     {% include "coop_cms/_js_includes.html" %}
     <link type="text/css" href="{{ STATIC_URL }}css/coop_cms.css?v=1" rel="stylesheet">

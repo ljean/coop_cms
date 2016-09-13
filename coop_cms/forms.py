@@ -474,7 +474,7 @@ class NewsletterForm(AlohaEditableModelForm):
 
     class Meta:
         model = Newsletter
-        fields = ('content',)
+        fields = ('subject', 'content', )
 
 
 class NewsletterSchedulingForm(floppyforms.ModelForm):
