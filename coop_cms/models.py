@@ -1094,7 +1094,7 @@ class Newsletter(TimeStampedModel):
         return template
 
     def __unicode__(self):
-        return self.subject
+        return dehtml(self.subject).replace('\n', '')
 
     class Meta:
         verbose_name = _(u'newsletter')
