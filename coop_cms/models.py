@@ -711,10 +711,11 @@ class BaseArticle(BaseNavigable):
 
     def _get_slug(self):
         """get slug"""
+        from modeltranslation.utils import build_localized_fieldname
         slug = self.slug
         if not slug:
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
-                key = 'slug_{0}'.format(lang_code)
+                key = build_localized_fieldname('slug', lang_code)
                 slug = getattr(self, key)
                 if slug:
                     break

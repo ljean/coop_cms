@@ -47,6 +47,7 @@ LANGUAGES = (
     ('en', gettext(u'English')),
     ('fr', gettext(u'Français')),
     ('de', gettext(u'Deutsch')),
+    ('en-us', gettext(u'American')),
 )
 
 SITE_ID = 1

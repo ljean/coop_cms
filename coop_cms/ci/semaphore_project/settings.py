@@ -47,6 +47,7 @@ gettext = lambda s: s
 LANGUAGES = (
     ('en', gettext(u'English')),
     ('fr', gettext(u'Français')),
+    ('en-us', gettext(u'American')),
 )
 
 SITE_ID = 1
