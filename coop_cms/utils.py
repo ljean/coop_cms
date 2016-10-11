@@ -179,6 +179,35 @@ def _send_email(subject, html_text, dests, list_unsubscribe):
     return connection.send_messages(emails)
 
 
+def _activate_lang(lang=None):
+    lang = lang or get_language()
+    language_codes = [code_and_name[0] for code_and_name in settings.LANGUAGES]
+    if not (lang in language_codes):
+        # The current language is not defined in settings.LANGUAGE
+        # force it to the defined language
+        lang = settings.LANGUAGE_CODE[:2]
+    translation.activate(lang)
+
+
+def send_email(subject, template_name, context, site_domain, dests, lang=None, list_unsubscribe=None):
+    """Send an HTML email"""
+    _activate_lang(lang)
+
+    the_template = get_template(template_name)
+    context['site'] = site_domain
+
+    try:
+        html_text = the_template.render(context)
+    except Exception:
+        # import traceback
+        # print traceback.print_exc()
+        raise
+
+    html_text = make_links_absolute(html_text, site_prefix=site_domain)
+
+    return _send_email(subject, html_text, dests, list_unsubscribe=list_unsubscribe)
+
+
 def get_language():
     """returns the language or default language"""
     lang = translation.get_language()
@@ -196,7 +225,7 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
     list_unsubscribe : a list of url for unsubscribe
     """
 
-    #Force the newsletter as public
+    # Force the newsletter as public
     newsletter.is_public = True
     newsletter.save()
 

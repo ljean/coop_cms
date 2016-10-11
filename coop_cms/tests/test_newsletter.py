@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from datetime import timedelta
+from unittest import skipIf
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
@@ -11,13 +12,14 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test.utils import override_settings
 from django.utils import timezone
+from django.utils.translation import ugettext
 
 from model_mommy import mommy
 
 from coop_cms.models import Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending
 from coop_cms.settings import is_localized, get_article_class
 from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
-from coop_cms.utils import make_links_absolute, strip_a_tags, avoid_line_too_long
+from coop_cms.utils import make_links_absolute, strip_a_tags, avoid_line_too_long, send_email
 
 
 @override_settings(COOP_CMS_NEWSLETTER_SETTINGS_FORM='')
@@ -737,7 +739,7 @@ class NewsletterTest(UserBaseTestCase):
         newsletter = Newsletter.objects.get(id=newsletter.id)
         self.assertEqual(newsletter.is_public, True)
         
-        #check whet happens if command is called again
+        # check whet happens if command is called again
         mail.outbox = []
         management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
         self.assertEqual(len(mail.outbox), 0)
@@ -792,6 +794,139 @@ class NewsletterTest(UserBaseTestCase):
         self.assertEqual(sending.sending_dt, None)
         
         self.assertEqual(len(mail.outbox), 0)
+
+
+@override_settings(COOP_CMS_FROM_EMAIL='contact@toto.fr')
+class SendEmailTest(UserBaseTestCase):
+    """test utils.send_email"""
+
+    def test_send_email(self):
+        settings.SITE_ID = 1
+        site = Site.objects.get(id=settings.SITE_ID)
+        site.domain = 'toto.fr'
+        site.save()
+
+        site2 = mommy.make(Site, domain="toto.com")
+
+        # subject, template_name, context, site_domain, dests, lang = None, list_unsubscribe = None
+
+        subject = "Hello"
+        dests = ['toto@toto.fr']
+
+        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "http://" + site2.domain, dests)
+
+        self.assertEqual(
+            [[test_address] for test_address in dests],
+            [received_email.to for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, subject)
+            self.assertTrue(received_email.body.find('ABCD') >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('ABCD') >= 0)
+            site_prefix = "http://" + site2.domain
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
+
+    @skipIf('en' not in [lang_code for (lang_code, lang_name) in settings.LANGUAGES], 'English required for this test')
+    def test_send_email_en(self):
+        settings.SITE_ID = 1
+        site = Site.objects.get(id=settings.SITE_ID)
+        site.domain = 'toto.fr'
+        site.save()
+
+        site2 = mommy.make(Site, domain="toto.com")
+
+        # subject, template_name, context, site_domain, dests, lang = None, list_unsubscribe = None
+
+        subject = "Hello"
+        dests = ['toto@toto.fr']
+
+        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "http://" + site2.domain, dests, 'en')
+
+        self.assertEqual(
+            [[test_address] for test_address in dests],
+            [received_email.to for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+
+            translated = 'All'  # ugettext('All')
+
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, subject)
+            self.assertTrue(received_email.body.find('ABCD') >= 0)
+            self.assertTrue(received_email.body.find(translated) >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('ABCD') >= 0)
+            self.assertTrue(received_email.alternatives[0][0].find(translated) >= 0)
+            site_prefix = "http://" + site2.domain
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
+
+    @skipIf('fr' not in [lang_code for (lang_code, lang_name) in settings.LANGUAGES], 'French required for this test')
+    def test_send_email_fr(self):
+        settings.SITE_ID = 1
+        site = Site.objects.get(id=settings.SITE_ID)
+        site.domain = 'toto.fr'
+        site.save()
+
+        site2 = mommy.make(Site, domain="toto.com")
+
+        # subject, template_name, context, site_domain, dests, lang = None, list_unsubscribe = None
+
+        subject = "Hello"
+        dests = ['toto@toto.fr']
+
+        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "http://" + site2.domain, dests, 'fr')
+
+        self.assertEqual(
+            [[test_address] for test_address in dests],
+            [received_email.to for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+            translated = 'Tous'  # ugettext('All')
+
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, subject)
+            self.assertTrue(received_email.body.find('ABCD') >= 0)
+            self.assertTrue(received_email.body.find(translated) >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('ABCD') >= 0)
+            self.assertTrue(received_email.alternatives[0][0].find(translated) >= 0)
+            site_prefix = "http://" + site2.domain
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
+
+    @skipIf('sn' in [lang_code for (lang_code, lang_name) in settings.LANGUAGES], 'No Chinese for this test')
+    def test_send_email_sn(self):
+        settings.SITE_ID = 1
+        site = Site.objects.get(id=settings.SITE_ID)
+        site.domain = 'toto.fr'
+        site.save()
+
+        site2 = mommy.make(Site, domain="toto.com")
+
+        # subject, template_name, context, site_domain, dests, lang = None, list_unsubscribe = None
+
+        subject = "Hello"
+        dests = ['toto@toto.fr']
+
+        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "http://" + site2.domain, dests, 'sn')
+
+        self.assertEqual(
+            [[test_address] for test_address in dests],
+            [received_email.to for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+            translated = 'All'  # ugettext('All')
+
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, subject)
+            self.assertTrue(received_email.body.find('ABCD') >= 0)
+            self.assertTrue(received_email.body.find(translated) >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('ABCD') >= 0)
+            self.assertTrue(received_email.alternatives[0][0].find(translated) >= 0)
+            site_prefix = "http://" + site2.domain
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
 
 
 class AbsUrlTest(UserBaseTestCase):
