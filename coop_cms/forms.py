@@ -208,7 +208,9 @@ class ArticleAdminForm(forms.ModelForm):
         self.slug_fields = []
         if is_localized():
             for lang_and_name in settings.LANGUAGES:
-                self.slug_fields.append('slug_'+lang_and_name[0])
+                from modeltranslation.utils import build_localized_fieldname
+                field_name = build_localized_fieldname('slug', lang_and_name[0])
+                self.slug_fields.append(field_name)
         else:
             self.slug_fields = ['slug']
         
