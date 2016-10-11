@@ -189,7 +189,7 @@ def _activate_lang(lang=None):
     translation.activate(lang)
 
 
-def send_email(subject, template_name, context, site_domain, dests, lang=None, list_unsubscribe=None):
+def send_email(subject, template_name, context, site_prefix, dests, lang=None, list_unsubscribe=None):
     """Send an HTML email"""
     _activate_lang(lang)
 
@@ -203,7 +203,7 @@ def send_email(subject, template_name, context, site_domain, dests, lang=None, l
         # print traceback.print_exc()
         raise
 
-    html_text = make_links_absolute(html_text, site_prefix=site_domain)
+    html_text = make_links_absolute(html_text, site_prefix=site_prefix)
 
     return _send_email(subject, html_text, dests, list_unsubscribe=list_unsubscribe)
 
