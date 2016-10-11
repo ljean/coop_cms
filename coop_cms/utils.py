@@ -194,7 +194,6 @@ def send_email(subject, template_name, context, site_prefix, dests, lang=None, l
     _activate_lang(lang)
 
     the_template = get_template(template_name)
-    context['site'] = site_domain
 
     try:
         html_text = the_template.render(context)
