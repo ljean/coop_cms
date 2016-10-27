@@ -564,7 +564,7 @@ msgstr "Erreur: Au moins un objet est manquant. Veuillez réessayer."
 
 #: models.py:53
 msgid "The slug must only contains letters, numbers or hyphens"
-msgstr "Le slug doit seulement contenir des letters, des chiffres ou des tirets (-)"
+msgstr "Le slug doit seulement contenir des lettres, des chiffres ou des tirets (-)"
 
 #: models.py:61 views/navigation.py:275
 msgid "Node"
