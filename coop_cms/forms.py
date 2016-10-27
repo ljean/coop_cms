@@ -208,7 +208,7 @@ class ArticleAdminForm(forms.ModelForm):
         self.slug_fields = []
         if is_localized():
             for lang_and_name in settings.LANGUAGES:
-                self.slug_fields.append('slug_'+lang_and_name[0])
+                self.slug_fields.append('slug_' + lang_and_name[0])
         else:
             self.slug_fields = ['slug']
         
@@ -216,7 +216,7 @@ class ArticleAdminForm(forms.ModelForm):
         
         if not can_change_article_slug:
             can_change_article_slug = (self.article.publication != BaseArticle.PUBLISHED) if self.article else True
-        
+
         for slug_field in self.slug_fields:
             if not can_change_article_slug:
                 self.fields[slug_field].widget = ReadOnlyInput()

@@ -485,7 +485,7 @@ class BaseArticle(BaseNavigable):
         (ARCHIVED, _(u'Archived')),
     )
 
-    slug = models.CharField(max_length=100, unique=True, db_index=True, blank=False)
+    slug = models.CharField(max_length=100, unique=True, db_index=True, blank=False, null=True)
     title = models.TextField(_(u'title'), default='', blank=True)
     subtitle = models.TextField(_(u'subtitle'), default='', blank=True)
     content = models.TextField(_(u'content'), default='', blank=True)

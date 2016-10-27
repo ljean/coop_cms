@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """widgets"""
 
-from floppyforms.widgets import ClearableFileInput, Select, SelectMultiple, HiddenInput
+from floppyforms.widgets import ClearableFileInput, Select, SelectMultiple, Input
 
 from coop_cms.utils import get_text_from_template
 
 
-class ReadOnlyInput(HiddenInput):
-    """readonlyinput"""
+class ReadOnlyInput(Input):
+    """readonly input"""
     template_name = 'coop_cms/widgets/readonlyinput.html'
 
 
