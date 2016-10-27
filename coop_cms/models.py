@@ -4,6 +4,7 @@
 from datetime import datetime
 import os
 import os.path
+import re
 import shutil
 import urlparse
 
@@ -22,7 +23,7 @@ from django.contrib.sites.models import Site
 from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template import Context, RequestContext
 from django.template.defaultfilters import slugify, escape
 from django.template.loader import get_template
@@ -45,6 +46,11 @@ ADMIN_THUMBS_SIZE = '60x60'
 class InvalidArticleError(Exception):
     """The exception can be raised when article is not valid"""
     pass
+
+
+def validate_slug(value):
+    if not re.match(r"^[-\w]+$", value):
+        raise ValidationError(_('The slug must only contains letters, numbers or hyphens'), code='invalid')
 
 
 def get_object_label(content_type, obj):
@@ -484,7 +490,9 @@ class BaseArticle(BaseNavigable):
         (ARCHIVED, _(u'Archived')),
     )
 
-    slug = models.CharField(max_length=100, unique=True, db_index=True, blank=False, null=True)
+    slug = models.CharField(
+        max_length=100, unique=True, db_index=True, blank=False, null=True, validators=[validate_slug]
+    )
     title = models.TextField(_(u'title'), default='', blank=True)
     subtitle = models.TextField(_(u'subtitle'), default='', blank=True)
     content = models.TextField(_(u'content'), default='', blank=True)
@@ -521,7 +529,10 @@ class BaseArticle(BaseNavigable):
     def is_homepage(self):
         """True if is the homepage of the current site"""
         site_settings = SiteSettings.objects.get_or_create(site=Site.objects.get_current())[0]
-        return site_settings.homepage_url == self.get_absolute_url()
+        try:
+            return site_settings.homepage_url == self.get_absolute_url()
+        except NoReverseMatch:
+            return False
 
     def is_draft(self):
         """True if draft"""
