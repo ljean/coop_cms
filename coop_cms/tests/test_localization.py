@@ -103,8 +103,8 @@ class UrlLocalizationTest(BaseTestCase):
         origin_lang = settings.LANGUAGES[0][0]
         trans_lang = settings.LANGUAGES[1][0]
         
-        setattr(art1, 'title_'+trans_lang, 'Accueil')
-        setattr(art1, 'content_'+trans_lang, translated_text)
+        setattr(art1, 'title_' + trans_lang, 'Accueil')
+        setattr(art1, 'content_' + trans_lang, translated_text)
         art1.save()
         
         response = self.client.get('/{0}/home/'.format(origin_lang), follow=True)
@@ -129,8 +129,8 @@ class UrlLocalizationTest(BaseTestCase):
 
         activate(origin_lang)
 
-        setattr(art1, 'title_'+trans_lang, u'Accueil')
-        setattr(art1, 'content_'+trans_lang, translated_text)
+        setattr(art1, 'title_' + trans_lang, u'Accueil')
+        setattr(art1, 'content_' + trans_lang, translated_text)
         
         art1.save()
         
@@ -141,7 +141,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         data = {'language': trans_lang}
         response = self.client.post(
-            reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
+            reverse('coop_cms_change_language') + '?next={0}'.format(origin_url),
             data=data,
             follow=True
         )
@@ -166,8 +166,8 @@ class UrlLocalizationTest(BaseTestCase):
         origin_lang = settings.LANGUAGES[0][0]
         trans_lang = settings.LANGUAGES[1][0]
         
-        setattr(art1, 'title_'+trans_lang, 'Accueil')
-        setattr(art1, 'content_'+trans_lang, translated_text)
+        setattr(art1, 'title_' + trans_lang, 'Accueil')
+        setattr(art1, 'content_' + trans_lang, translated_text)
         
         art1.save()
         
@@ -203,7 +203,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         data = {'language': trans_lang}
         response = self.client.post(
-            reverse('coop_cms_change_language')+'?next={0}'.format(origin_url),
+            reverse('coop_cms_change_language') + '?next={0}'.format(origin_url),
             data=data,
             follow=True
         )
@@ -231,20 +231,20 @@ class UrlLocalizationTest(BaseTestCase):
         article_class = get_article_class()
         art1 = article_class.objects.create(title=u"Home", content="aa")
         trans_lang = settings.LANGUAGES[1][0]
-        setattr(art1, 'title_'+trans_lang, u'Accueil')
+        setattr(art1, 'title_' + trans_lang, u'Accueil')
         art1.save()
         
         original_slug = art1.slug
-        original_trans_slug = getattr(art1, 'slug_'+trans_lang, u'**dummy**')
+        original_trans_slug = getattr(art1, 'slug_' + trans_lang, u'**dummy**')
         
         art1.title = u"Title changed"
-        setattr(art1, 'title_'+trans_lang, u'Titre change')
+        setattr(art1, 'title_' + trans_lang, u'Titre change')
         
         art1.save()
         art1 = article_class.objects.get(id=art1.id)
         
         self.assertEqual(original_slug, art1.slug)
-        self.assertEqual(original_trans_slug, getattr(art1, 'slug_'+trans_lang))
+        self.assertEqual(original_trans_slug, getattr(art1, 'slug_' + trans_lang))
         
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing(self):
@@ -255,15 +255,15 @@ class UrlLocalizationTest(BaseTestCase):
         art2 = article_class.objects.create(title=u"Rome", content="aa")
 
         trans_lang = settings.LANGUAGES[1][0]
-        setattr(art1, 'title_'+trans_lang, art2.title)
+        setattr(art1, 'title_' + trans_lang, art2.title)
         art1.save()
         
         art2.save()
         
-        setattr(art2, 'title_'+trans_lang, art2.title)
+        setattr(art2, 'title_' + trans_lang, art2.title)
         art2.save()
         
-        self.assertNotEqual(getattr(art2, 'slug_'+trans_lang), getattr(art1, 'slug_'+trans_lang))
+        self.assertNotEqual(getattr(art2, 'slug_' + trans_lang), getattr(art1, 'slug_' + trans_lang))
         
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing2(self):
@@ -274,13 +274,13 @@ class UrlLocalizationTest(BaseTestCase):
         art2 = article_class.objects.create(title=u"Rome", content="aa")
 
         trans_lang = settings.LANGUAGES[1][0]
-        setattr(art1, 'title_'+trans_lang, art2.title)
+        setattr(art1, 'title_' + trans_lang, art2.title)
         art1.save()
         
-        setattr(art2, 'title_'+trans_lang, art2.title)
+        setattr(art2, 'title_' + trans_lang, art2.title)
         art2.save()
         
-        self.assertNotEqual(getattr(art2, 'slug_'+trans_lang), getattr(art1, 'slug_'+trans_lang))
+        self.assertNotEqual(getattr(art2, 'slug_' + trans_lang), getattr(art1, 'slug_' + trans_lang))
         
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing3(self):
@@ -292,7 +292,7 @@ class UrlLocalizationTest(BaseTestCase):
         art2 = article_class.objects.create(title=u"Rome", content="aa", template='test/article.html')
 
         trans_lang = settings.LANGUAGES[1][0]
-        setattr(art1, 'title_'+trans_lang, art2.title)
+        setattr(art1, 'title_' + trans_lang, art2.title)
         art1.save()
         
         #CHANGE LANGUAGE
@@ -310,9 +310,9 @@ class UrlLocalizationTest(BaseTestCase):
         
         art2_updated = article_class.objects.get(id=art2.id)
         
-        self.assertEqual(getattr(art2_updated, 'title_'+trans_lang), art2.title)
+        self.assertEqual(getattr(art2_updated, 'title_' + trans_lang), art2.title)
         
-        self.assertNotEqual(getattr(art2_updated, 'slug_'+trans_lang), getattr(art1, 'slug_'+trans_lang))
+        self.assertNotEqual(getattr(art2_updated, 'slug_' + trans_lang), getattr(art1, 'slug_' + trans_lang))
         
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localize_existing_article1(self):
@@ -325,7 +325,7 @@ class UrlLocalizationTest(BaseTestCase):
         origin_lang = settings.LANGUAGES[0][0]
         trans_lang = settings.LANGUAGES[1][0]
         
-        #CHANGE LANGUAGE
+        # CHANGE LANGUAGE
         activate(trans_lang)
         
         url = art1.get_edit_url()
@@ -340,8 +340,8 @@ class UrlLocalizationTest(BaseTestCase):
         
         art1_updated = article_class.objects.get(id=art1.id)
         
-        self.assertEqual(getattr(art1_updated, 'title_'+trans_lang), art1.title)
-        self.assertEqual(getattr(art1_updated, 'slug_'+trans_lang), getattr(art1, 'slug_'+origin_lang))
+        self.assertEqual(getattr(art1_updated, 'title_' + trans_lang), art1.title)
+        self.assertEqual(getattr(art1_updated, 'slug_' + trans_lang), getattr(art1, 'slug_' + origin_lang))
         
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localize_existing_article2(self):
@@ -367,10 +367,10 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         
         art1_updated = article_class.objects.get(id=art1.id)
-        self.assertEqual(getattr(art1_updated, 'title_'+origin_lang), art1.title)
-        self.assertEqual(getattr(art1_updated, 'title_'+trans_lang), data["title"])
-        self.assertEqual(getattr(art1_updated, 'slug_'+trans_lang), "home")
-        self.assertEqual(getattr(art1_updated, 'slug_'+origin_lang), "accueil")
+        self.assertEqual(getattr(art1_updated, 'title_' + origin_lang), art1.title)
+        self.assertEqual(getattr(art1_updated, 'title_' + trans_lang), data["title"])
+        self.assertEqual(getattr(art1_updated, 'slug_' + trans_lang), "home")
+        self.assertEqual(getattr(art1_updated, 'slug_' + origin_lang), "accueil")
         
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing4(self):
@@ -382,7 +382,7 @@ class UrlLocalizationTest(BaseTestCase):
 
         trans_lang = settings.LANGUAGES[1][0]
         
-        self.assertEqual(None, getattr(art2, 'slug_'+trans_lang))
+        self.assertEqual(None, getattr(art2, 'slug_' + trans_lang))
         
         #CHANGE LANGUAGE
         activate(trans_lang)
@@ -399,9 +399,9 @@ class UrlLocalizationTest(BaseTestCase):
         
         art2_updated = article_class.objects.get(id=art2.id)
         
-        self.assertEqual(getattr(art2_updated, 'title_'+trans_lang), art1.title)
+        self.assertEqual(getattr(art2_updated, 'title_' + trans_lang), art1.title)
         
-        self.assertNotEqual(getattr(art2_updated, 'slug_'+trans_lang), art1.slug)
+        self.assertNotEqual(getattr(art2_updated, 'slug_' + trans_lang), art1.slug)
         
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing5(self):
@@ -414,11 +414,11 @@ class UrlLocalizationTest(BaseTestCase):
 
         trans_lang = settings.LANGUAGES[1][0]
         
-        self.assertEqual(None, getattr(art2, 'slug_'+trans_lang))
+        self.assertEqual(None, getattr(art2, 'slug_' + trans_lang))
         
-        setattr(art2, 'title_'+trans_lang, art1.title)
+        setattr(art2, 'title_' + trans_lang, art1.title)
         art2.save()
-        self.assertNotEqual(art1.slug, getattr(art2, 'slug_'+trans_lang))
+        self.assertNotEqual(art1.slug, getattr(art2, 'slug_' + trans_lang))
         
         #CHANGE LANGUAGE
         activate(trans_lang)
@@ -435,9 +435,9 @@ class UrlLocalizationTest(BaseTestCase):
         
         art2_updated = article_class.objects.get(id=art2.id)
         
-        self.assertEqual(getattr(art2_updated, 'title_'+trans_lang), art1.title)
+        self.assertEqual(getattr(art2_updated, 'title_' + trans_lang), art1.title)
         
-        self.assertNotEqual(getattr(art2_updated, 'slug_'+trans_lang), art1.slug)
+        self.assertNotEqual(getattr(art2_updated, 'slug_' + trans_lang), art1.slug)
             
     def test_no_title(self):
         """test create article without title"""
@@ -520,7 +520,7 @@ class UrlLocalizationTest(BaseTestCase):
 
         response = redirect_to_language(art1.get_absolute_url(), other_lang)
 
-        self.assertTrue(response.url.find("/"+other_lang+"/") == 0)
+        self.assertTrue(response.url.find("/" + other_lang + "/") == 0)
         self.assertEqual(get_language(), other_lang)
 
 
