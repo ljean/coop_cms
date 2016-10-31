@@ -561,10 +561,10 @@ class ArticleFormTest(BaseTestCase):
         super(ArticleFormTest, self).setUp()
         
     def tearDown(self):
-        for s in self._settings_fields_to_backup():
-            v = self._settings_backup.get(s, None)
-            if v is not None:
-                setattr(settings, s, v)
+        for setting in self._settings_fields_to_backup():
+            value = self._settings_backup.get(setting, None)
+            if value is not None:
+                setattr(settings, setting, value)
         
         settings.LOGIN_URL = self.LOGIN_URL
         super(ArticleFormTest, self).tearDown()
@@ -608,11 +608,11 @@ class ArticleFormTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(article_class.objects.count(), 1)
         article = article_class.objects.all()[0]
-        for f in data:
-            if f == "sites":
-                self.assertEqual([x.id for x in getattr(article, f).all()], data[f])
+        for field in data:
+            if field == "sites":
+                self.assertEqual([x.id for x in getattr(article, field).all()], data[field])
             else:
-                self.assertEqual(getattr(article, f), data[f])
+                self.assertEqual(getattr(article, field), data[field])
 
     def test_new_article_anoymous(self):
         article_class = coop_settings.get_article_class()
@@ -652,7 +652,7 @@ class ArticleFormTest(BaseTestCase):
     def test_view_article_settings(self):
         self._log_as_editor()
         article_class = coop_settings.get_article_class()
-        article = mommy.make(article_class)
+        article = mommy.make(article_class, slug="test")
         url = reverse('coop_cms_article_settings', args=[article.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -661,7 +661,7 @@ class ArticleFormTest(BaseTestCase):
     
     def test_view_article_settings_anonymous(self):
         article_class = coop_settings.get_article_class()
-        article = mommy.make(article_class)
+        article = mommy.make(article_class, slug="test")
         url = reverse('coop_cms_article_settings', args=[article.id])
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
@@ -671,7 +671,7 @@ class ArticleFormTest(BaseTestCase):
     def test_view_article_settings_not_allowed(self):
         self._log_as_viewer()
         article_class = coop_settings.get_article_class()
-        article = mommy.make(article_class)
+        article = mommy.make(article_class, slug="test")
         url = reverse('coop_cms_article_settings', args=[article.id])
         response = self.client.get(url)
         self.assertEqual(response.status_code, 403)
@@ -680,7 +680,7 @@ class ArticleFormTest(BaseTestCase):
     def test_article_settings(self):
         self._log_as_editor()
         article_class = coop_settings.get_article_class()
-        article = mommy.make(article_class)
+        article = mommy.make(article_class, slug="test")
         url = reverse('coop_cms_article_settings', args=[article.id])
         
         now = datetime.now()
@@ -698,15 +698,15 @@ class ArticleFormTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(article_class.objects.count(), 1)
         article = article_class.objects.all()[0]
-        for f in data:
-            if f == "sites":
-                self.assertEqual([x.id for x in getattr(article, f).all()], data[f])
+        for field in data:
+            if field == "sites":
+                self.assertEqual([x.id for x in getattr(article, field).all()], data[field])
             else:
-                self.assertEqual(getattr(article, f), data[f])
+                self.assertEqual(getattr(article, field), data[field])
         
-    def test_article_settings_anoymous(self):
+    def test_article_settings_anonymous(self):
         article_class = coop_settings.get_article_class()
-        article = mommy.make(article_class)
+        article = mommy.make(article_class, slug="test")
         url = reverse('coop_cms_article_settings', args=[article.id])
         
         data = {
@@ -730,7 +730,7 @@ class ArticleFormTest(BaseTestCase):
     def test_article_settings_not_allowed(self):
         self._log_as_viewer()
         article_class = coop_settings.get_article_class()
-        article = mommy.make(article_class)
+        article = mommy.make(article_class, slug="test")
         url = reverse('coop_cms_article_settings', args=[article.id])
         
         data = {

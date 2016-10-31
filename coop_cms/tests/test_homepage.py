@@ -23,7 +23,7 @@ class NoHomepageTest(UserBaseTestCase):
     def test_view_article_set_homepage_no_homepage(self):
         self._log_as_editor(can_add=True)
         article_class = get_article_class()
-        art = mommy.make(article_class, is_homepage=False, publication=BaseArticle.PUBLISHED)
+        art = mommy.make(article_class, slug="test", is_homepage=False, publication=BaseArticle.PUBLISHED)
         url = art.get_edit_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -35,7 +35,7 @@ class NoHomepageTest(UserBaseTestCase):
     def test_view_article_set_homepage(self):
         self._log_as_editor(can_add=True)
         article_class = get_article_class()
-        art = mommy.make(article_class, is_homepage=False, publication=BaseArticle.PUBLISHED)
+        art = mommy.make(article_class, slug="test", is_homepage=False, publication=BaseArticle.PUBLISHED)
         url = art.get_edit_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -233,14 +233,14 @@ class HeadlineTest(BaseTestCase):
 
     def test_get_headlines_no_edit_perms(self):
         article_class = get_article_class()
-        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
-        article2 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=True)
-        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
-        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=False)
-        article5 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=True)
-        article6 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=False)
+        article1 = mommy.make(article_class, slug="test1", publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.DRAFT, headline=True)
+        article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED, headline=False)
+        article4 = mommy.make(article_class, slug="test4", publication=BaseArticle.DRAFT, headline=False)
+        article5 = mommy.make(article_class, slug="test5", publication=BaseArticle.ARCHIVED, headline=True)
+        article6 = mommy.make(article_class, slug="test6", publication=BaseArticle.ARCHIVED, headline=False)
 
-        homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        homepage = mommy.make(article_class, slug="test7", publication=BaseArticle.PUBLISHED, headline=False)
         site = Site.objects.get_current()
         SiteSettings.objects.create(site=site, homepage_url=homepage.get_absolute_url())
 
@@ -249,14 +249,14 @@ class HeadlineTest(BaseTestCase):
 
     def test_get_headlines_edit_perms(self):
         article_class = get_article_class()
-        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
-        article2 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=True)
-        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
-        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=False)
-        article5 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=True)
-        article6 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=False)
+        article1 = mommy.make(article_class, slug="test1", publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.DRAFT, headline=True)
+        article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED, headline=False)
+        article4 = mommy.make(article_class, slug="test4", publication=BaseArticle.DRAFT, headline=False)
+        article5 = mommy.make(article_class, slug="test5", publication=BaseArticle.ARCHIVED, headline=True)
+        article6 = mommy.make(article_class, slug="test6", publication=BaseArticle.ARCHIVED, headline=False)
 
-        homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        homepage = mommy.make(article_class, slug="test7", publication=BaseArticle.PUBLISHED, headline=False)
         site = Site.objects.get_current()
         SiteSettings.objects.create(site=site, homepage_url=homepage.get_absolute_url())
 
@@ -265,28 +265,28 @@ class HeadlineTest(BaseTestCase):
 
     def test_get_headlines_not_homepage(self):
         article_class = get_article_class()
-        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
-        article2 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=True)
-        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
-        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=False)
-        article5 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=True)
-        article6 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=False)
+        article1 = mommy.make(article_class, slug="test1", publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.DRAFT, headline=True)
+        article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED, headline=False)
+        article4 = mommy.make(article_class, slug="test4", publication=BaseArticle.DRAFT, headline=False)
+        article5 = mommy.make(article_class, slug="test5", publication=BaseArticle.ARCHIVED, headline=True)
+        article6 = mommy.make(article_class, slug="test6", publication=BaseArticle.ARCHIVED, headline=False)
 
-        not_homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        not_homepage = mommy.make(article_class, slug="test7", publication=BaseArticle.PUBLISHED, headline=False)
 
         headlines = list(get_headlines(not_homepage))
         self.assertEqual([], headlines)
 
     def test_get_headlines_other_homepage(self):
         article_class = get_article_class()
-        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
-        article2 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=True)
-        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
-        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT, headline=False)
-        article5 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=True)
-        article6 = mommy.make(article_class, publication=BaseArticle.ARCHIVED, headline=False)
+        article1 = mommy.make(article_class, slug="test1", publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.DRAFT, headline=True)
+        article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED, headline=False)
+        article4 = mommy.make(article_class, slug="test4", publication=BaseArticle.DRAFT, headline=False)
+        article5 = mommy.make(article_class, slug="test5", publication=BaseArticle.ARCHIVED, headline=True)
+        article6 = mommy.make(article_class, slug="test6", publication=BaseArticle.ARCHIVED, headline=False)
 
-        other_homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        other_homepage = mommy.make(article_class, slug="test7", publication=BaseArticle.PUBLISHED, headline=False)
 
         site = mommy.make(Site)
         SiteSettings.objects.create(site=site, homepage_url=other_homepage.get_absolute_url())
@@ -296,9 +296,9 @@ class HeadlineTest(BaseTestCase):
 
     def test_get_headlines_other_site(self):
         article_class = get_article_class()
-        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
-        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
-        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=True)
+        article1 = mommy.make(article_class, slug="test1", publication=BaseArticle.PUBLISHED, headline=True)
+        article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.PUBLISHED, headline=True)
+        article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED, headline=True)
 
         other_site = mommy.make(Site)
         article2.sites.clear()
@@ -308,7 +308,7 @@ class HeadlineTest(BaseTestCase):
         article3.sites.clear()
         article3.save()
 
-        homepage = mommy.make(article_class, publication=BaseArticle.PUBLISHED, headline=False)
+        homepage = mommy.make(article_class, slug="test4", publication=BaseArticle.PUBLISHED, headline=False)
         site = Site.objects.get_current()
         SiteSettings.objects.create(site=site, homepage_url=homepage.get_absolute_url())
 

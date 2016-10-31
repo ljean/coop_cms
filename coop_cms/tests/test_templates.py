@@ -28,7 +28,7 @@ class TemplateTest(BaseArticleTest):
     def test_view_article(self):
         """Check that we are do not using the PrivateArticle anymore"""
         article_class = get_article_class()
-        article = mommy.make(article_class, publication=article_class.PUBLISHED)
+        article = mommy.make(article_class, slug="test", publication=article_class.PUBLISHED)
         response = self.client.get(article.get_absolute_url())
         self.assertTemplateUsed(response, 'coop_cms/article.html')
         self.assertEqual(200, response.status_code)
@@ -36,7 +36,7 @@ class TemplateTest(BaseArticleTest):
     def test_view_article_custom_template(self):
         """Check that we are do not using the PrivateArticle anymore"""
         article_class = get_article_class()
-        article = mommy.make(article_class, publication=article_class.PUBLISHED, template='test/article.html')
+        article = mommy.make(article_class, slug="test", publication=article_class.PUBLISHED, template='test/article.html')
         response = self.client.get(article.get_absolute_url())
         self.assertTemplateUsed(response, 'test/article.html')
         self.assertEqual(200, response.status_code)
@@ -44,7 +44,7 @@ class TemplateTest(BaseArticleTest):
     def test_change_template(self):
         """Check that we are do not using the PrivateArticle anymore"""
         article_class = get_article_class()
-        article = mommy.make(article_class)
+        article = mommy.make(article_class, slug="test")
         self._log_as_editor()
         url = reverse('coop_cms_change_template', args=[article.id])
         response = self.client.post(url, data={'template': 'test/article.html'}, follow=True)
@@ -55,7 +55,7 @@ class TemplateTest(BaseArticleTest):
     def test_change_template_permission(self):
         """Check that we are do not using the PrivateArticle anymore"""
         article_class = get_article_class()
-        article = mommy.make(article_class)
+        article = mommy.make(article_class, slug="test")
         url = reverse('coop_cms_change_template', args=[article.id])
         response = self.client.post(url, data={'template': 'test/article.html'}, follow=True)
         self.assertEqual(200, response.status_code)

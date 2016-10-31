@@ -37,10 +37,10 @@ class SitemapTest(BaseTestCase):
         
         article_class = get_article_class()
         
-        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT)
+        article1 = mommy.make(article_class, slug="test1", publication=BaseArticle.PUBLISHED)
+        article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.PUBLISHED)
+        article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(article_class, slug="test4", publication=BaseArticle.DRAFT)
         
         article2.sites.add(site2)
         article2.save()
@@ -68,10 +68,10 @@ class SitemapTest(BaseTestCase):
 
         article_class = get_article_class()
 
-        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT)
+        article1 = mommy.make(article_class, slug="test1", publication=BaseArticle.PUBLISHED)
+        article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.PUBLISHED)
+        article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(article_class, slug="test4", publication=BaseArticle.DRAFT)
 
         article2.sites.add(site2)
         article2.save()
@@ -99,10 +99,10 @@ class SitemapTest(BaseTestCase):
 
         article_class = get_article_class()
 
-        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT)
+        article1 = mommy.make(article_class, slug="test1", publication=BaseArticle.PUBLISHED)
+        article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.PUBLISHED)
+        article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(article_class, slug="test4", publication=BaseArticle.DRAFT)
 
         article2.sites.add(site2)
         article2.save()
@@ -140,10 +140,10 @@ class LocaleSitemapTest(SitemapTest):
 
         article_class = get_article_class()
 
-        article1 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article2 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article3 = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
-        article4 = mommy.make(article_class, publication=BaseArticle.DRAFT)
+        article1 = mommy.make(article_class, slug="test1", publication=BaseArticle.PUBLISHED)
+        article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.PUBLISHED)
+        article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(article_class, slug="test4", publication=BaseArticle.DRAFT)
 
         article2.sites.add(site2)
         article2.save()

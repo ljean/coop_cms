@@ -11,19 +11,16 @@ class LoadClassTest(BaseTestCase):
 
     @override_settings(COOP_CMS_ARTICLE_SETTINGS_FORM='coop_cms.forms.ArticleSettingsForm')
     def test_load_value(self):
-
         form_class = load_class('COOP_CMS_ARTICLE_SETTINGS_FORM', 'coop_cms.forms.NewArticleForm')
         self.assertEqual(form_class, ArticleSettingsForm)
 
     @override_settings(COOP_CMS_ARTICLE_SETTINGS_FORM='')
     def test_load_default(self):
-
         form_class = load_class('COOP_CMS_ARTICLE_SETTINGS_FORM', 'coop_cms.forms.NewArticleForm')
         self.assertEqual(form_class, NewArticleForm)
 
     @override_settings(COOP_CMS_ARTICLE_SETTINGS_FORM='')
     def test_load_no_default(self):
-
         form_class = load_class('COOP_CMS_ARTICLE_SETTINGS_FORM', '')
         self.assertEqual(form_class, None)
 

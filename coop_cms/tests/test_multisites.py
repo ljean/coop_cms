@@ -94,21 +94,22 @@ class MultiSiteCategoryTest(BaseArticleTest):
          settings.SITE_ID = self.settings_site_id
 
     def test_article_category_other_site(self):
-        Article = get_article_class()
+        article_class = get_article_class()
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = mommy.make(Site)
 
         cat = mommy.make(ArticleCategory)
 
-        art1 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED)
+        art1 = mommy.make(article_class, slug="test1", category=cat, publication=BaseArticle.PUBLISHED)
 
-        art2 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED,
+        art2 = mommy.make(
+            article_class, slug="test2", category=cat, publication=BaseArticle.PUBLISHED,
             publication_date=art1.publication_date+timedelta(1))
         art2.sites.add(site2)
         art2.sites.remove(site1)
         art2.save()
 
-        art3 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED,
+        art3 = mommy.make(article_class, slug="test3", category=cat, publication=BaseArticle.PUBLISHED,
             publication_date=art1.publication_date-timedelta(1))
         art3.sites.add(site2)
         art3.sites.remove(site1)
@@ -118,18 +119,18 @@ class MultiSiteCategoryTest(BaseArticleTest):
         self.assertEqual(art1.next_in_category(), None)
 
     def test_article_category_same_site(self):
-        Article = get_article_class()
+        article_class = get_article_class()
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = mommy.make(Site)
 
         cat = mommy.make(ArticleCategory)
 
-        art1 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED)
+        art1 = mommy.make(article_class, slug="test1", category=cat, publication=BaseArticle.PUBLISHED)
 
-        art2 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED,
+        art2 = mommy.make(article_class, slug="test2", category=cat, publication=BaseArticle.PUBLISHED,
             publication_date=art1.publication_date+timedelta(1))
 
-        art3 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED,
+        art3 = mommy.make(article_class, slug="test3", category=cat, publication=BaseArticle.PUBLISHED,
             publication_date=art1.publication_date-timedelta(1))
         art3.sites.add(site2)
         art3.save()
@@ -138,18 +139,18 @@ class MultiSiteCategoryTest(BaseArticleTest):
         self.assertEqual(art1.next_in_category(), art2)
 
     def test_article_category_not_published(self):
-        Article = get_article_class()
+        article_class = get_article_class()
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = mommy.make(Site)
 
         cat = mommy.make(ArticleCategory)
 
-        art1 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED)
+        art1 = mommy.make(article_class, slug="test1", category=cat, publication=BaseArticle.PUBLISHED)
 
-        art2 = mommy.make(Article, category=cat, publication=BaseArticle.DRAFT,
+        art2 = mommy.make(article_class, slug="test2", category=cat, publication=BaseArticle.DRAFT,
             publication_date=art1.publication_date+timedelta(1))
 
-        art3 = mommy.make(Article, category=cat, publication=BaseArticle.DRAFT,
+        art3 = mommy.make(article_class, slug="test3", category=cat, publication=BaseArticle.DRAFT,
             publication_date=art1.publication_date-timedelta(1))
         art3.sites.add(site2)
         art3.save()
@@ -160,7 +161,7 @@ class MultiSiteCategoryTest(BaseArticleTest):
     def test_article_category(self):
         self._log_as_editor()
 
-        Article = get_article_class()
+        article_class = get_article_class()
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = mommy.make(Site)
 
@@ -178,7 +179,7 @@ class MultiSiteCategoryTest(BaseArticleTest):
         cat3.save()
         self.assertEqual(list(cat3.sites.all()), [])
 
-        art1 = mommy.make(Article, category=cat, publication=BaseArticle.PUBLISHED)
+        art1 = mommy.make(article_class, slug="test", category=cat, publication=BaseArticle.PUBLISHED)
 
         url = reverse('coop_cms_article_settings', args=[art1.id])
         response = self.client.get(url)
@@ -191,11 +192,10 @@ class MultiSiteCategoryTest(BaseArticleTest):
         self.assertEqual(str(cat.id), cat_choices[1]["value"])
         self.assertEqual(cat.name, cat_choices[1].text)
 
-
     def test_view_category_articles(self):
         cat = mommy.make(ArticleCategory, name="abc")
 
-        Article = get_article_class()
+        article_class = get_article_class()
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = mommy.make(Site)
 
@@ -204,8 +204,8 @@ class MultiSiteCategoryTest(BaseArticleTest):
         cat.sites.add(site2)
         cat.save()
 
-        art1 = mommy.make(Article, category=cat, publication=True, title=u"#THis is crazy")
-        art2 = mommy.make(Article, category=cat, publication=True, title=u"#Call me maybe")
+        art1 = mommy.make(article_class, category=cat, publication=True, title=u"#THis is crazy")
+        art2 = mommy.make(article_class, category=cat, publication=True, title=u"#Call me maybe")
 
         art2.sites.remove(site1)
         art2.save()
@@ -219,7 +219,7 @@ class MultiSiteCategoryTest(BaseArticleTest):
     def test_view_category_of_other_site(self):
         cat = mommy.make(ArticleCategory, name="abc")
 
-        Article = get_article_class()
+        article_class = get_article_class()
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = mommy.make(Site)
 
@@ -231,8 +231,8 @@ class MultiSiteCategoryTest(BaseArticleTest):
         cat2.sites.add(site2)
         cat2.save()
 
-        art1 = mommy.make(Article, category=cat, publication=True)
-        art2 = mommy.make(Article, category=cat2, publication=True)
+        art1 = mommy.make(article_class, slug="test1", category=cat, publication=True)
+        art2 = mommy.make(article_class, slug="test2", category=cat2, publication=True)
 
         url = reverse('coop_cms_articles_category', args=[cat2.slug])
         response = self.client.get(url)

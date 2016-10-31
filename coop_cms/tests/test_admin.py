@@ -27,7 +27,7 @@ class ArticleAdminTest(BaseArticleTest):
         
         article_class = get_article_class()
         
-        article = mommy.make(article_class, publication=BaseArticle.DRAFT)
+        article = mommy.make(article_class, slug="test", publication=BaseArticle.DRAFT)
 
         view_name = 'admin:%s_%s_change' % (get_model_app(article_class), get_model_name(article_class))
         url = reverse(view_name, args=[article.id])
@@ -50,7 +50,7 @@ class ArticleAdminTest(BaseArticleTest):
         
         article_class = get_article_class()
         
-        article = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article = mommy.make(article_class, slug="test", publication=BaseArticle.PUBLISHED)
         
         view_name = 'admin:%s_%s_change' % (get_model_app(article_class), get_model_name(article_class))
         url = reverse(view_name, args=[article.id])
@@ -73,7 +73,7 @@ class ArticleAdminTest(BaseArticleTest):
         
         article_class = get_article_class()
         
-        article = mommy.make(article_class, publication=BaseArticle.PUBLISHED)
+        article = mommy.make(article_class, slug="test", publication=BaseArticle.PUBLISHED)
         
         view_name = 'admin:%s_%s_change' % (get_model_app(article_class), get_model_name(article_class))
         url = reverse(view_name, args=[article.id])

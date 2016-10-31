@@ -34,7 +34,7 @@ class ArticleTest(BaseArticleTest):
         
     def tearDown(self):
         super(ArticleTest, self).tearDown()
-        #restore
+        # restore
         settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
         settings.DJALOHA_LINK_MODELS = self._DJALOHA_LINK_MODELS
 
@@ -687,7 +687,7 @@ class ArticleTest(BaseArticleTest):
     def test_article_settings(self, move_nav=False):
         initial_data = {'title': "test", 'content': "this is my article content"}
         article_class = get_article_class()
-        art0 = mommy.make(article_class)
+        art0 = mommy.make(article_class, slug="art0" )
         
         art1 = article_class.objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         
@@ -731,7 +731,7 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(node.content_object, art1)
         self.assertEqual(node.parent, node1)
         
-        #Update the article
+        # Update the article
         category2 = mommy.make(ArticleCategory)
         
         node_id = node2.id if move_nav else node1.id
@@ -761,8 +761,7 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(art1.headline, data['headline'])
         self.assertEqual(art1.in_newsletter, data['in_newsletter'])
         self.assertEqual(art1.summary, data['summary'])
-        #self.assertEqual(art1.navigation_parent, data['navigation_parent'])
-        
+
         if move_nav:
             self.assertEqual(NavNode.objects.count(), 4)
             node = NavNode.objects.exclude(id__in=(node1.id, node2.id, node.id))[0]

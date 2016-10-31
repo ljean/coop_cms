@@ -107,10 +107,10 @@ class NewsletterSettingsTest(UserBaseTestCase):
         site = Site.objects.get_current()
         other_site = mommy.make(Site)
 
-        article_1 = mommy.make(article_class, in_newsletter=True)
-        article_2 = mommy.make(article_class, in_newsletter=True, sites=[other_site])
-        article_3 = mommy.make(article_class, in_newsletter=True)
-        article_4 = mommy.make(article_class, in_newsletter=False)
+        article_1 = mommy.make(article_class, slug="test1", in_newsletter=True)
+        article_2 = mommy.make(article_class, slug="test2", in_newsletter=True, sites=[other_site])
+        article_3 = mommy.make(article_class, slug="test3", in_newsletter=True)
+        article_4 = mommy.make(article_class, slug="test4", in_newsletter=False)
 
         article_2.sites.clear()
         article_2.sites.add(other_site)
@@ -157,9 +157,9 @@ class NewsletterSettingsTest(UserBaseTestCase):
         site = Site.objects.get_current()
         other_site = mommy.make(Site)
 
-        article_1 = mommy.make(article_class, in_newsletter=True)
-        article_2 = mommy.make(article_class, in_newsletter=True)
-        article_3 = mommy.make(article_class, in_newsletter=True)
+        article_1 = mommy.make(article_class, slug="test1", in_newsletter=True)
+        article_2 = mommy.make(article_class, slug="test2", in_newsletter=True)
+        article_3 = mommy.make(article_class, slug="test3", in_newsletter=True)
 
         ct = ContentType.objects.get_for_model(article_class)
         self.assertEqual(3, NewsletterItem.objects.count())
@@ -200,19 +200,19 @@ class NewsletterSettingsTest(UserBaseTestCase):
         site = Site.objects.get_current()
         other_site = mommy.make(Site)
 
-        article_1 = mommy.make(article_class, in_newsletter=True)
-        article_2 = mommy.make(article_class, in_newsletter=True)
-        article_3 = mommy.make(article_class, in_newsletter=True)
+        article_1 = mommy.make(article_class, slug="test1", in_newsletter=True)
+        article_2 = mommy.make(article_class, slug="test2", in_newsletter=True)
+        article_3 = mommy.make(article_class, slug="test3", in_newsletter=True)
 
         article_2.sites.clear()
         article_2.sites.add(other_site)
         article_2.save()
 
-        ct = ContentType.objects.get_for_model(article_class)
+        content_type = ContentType.objects.get_for_model(article_class)
         self.assertEqual(3, NewsletterItem.objects.count())
-        item_1 = NewsletterItem.objects.get(content_type=ct, object_id=article_1.id)
-        item_2 = NewsletterItem.objects.get(content_type=ct, object_id=article_2.id)
-        item_3 = NewsletterItem.objects.get(content_type=ct, object_id=article_3.id)
+        item_1 = NewsletterItem.objects.get(content_type=content_type, object_id=article_1.id)
+        item_2 = NewsletterItem.objects.get(content_type=content_type, object_id=article_2.id)
+        item_3 = NewsletterItem.objects.get(content_type=content_type, object_id=article_3.id)
 
         newsletter = mommy.make(
             Newsletter,
@@ -248,15 +248,15 @@ class NewsletterSettingsTest(UserBaseTestCase):
         site = Site.objects.get_current()
         other_site = mommy.make(Site)
 
-        article_1 = mommy.make(article_class, in_newsletter=True)
-        article_2 = mommy.make(article_class, in_newsletter=True)
-        article_3 = mommy.make(article_class, in_newsletter=True)
+        article_1 = mommy.make(article_class, slug="test1", in_newsletter=True)
+        article_2 = mommy.make(article_class, slug="test2", in_newsletter=True)
+        article_3 = mommy.make(article_class, slug="test3", in_newsletter=True)
 
-        ct = ContentType.objects.get_for_model(article_class)
+        content_type = ContentType.objects.get_for_model(article_class)
         self.assertEqual(3, NewsletterItem.objects.count())
-        item_1 = NewsletterItem.objects.get(content_type=ct, object_id=article_1.id)
-        item_2 = NewsletterItem.objects.get(content_type=ct, object_id=article_2.id)
-        item_3 = NewsletterItem.objects.get(content_type=ct, object_id=article_3.id)
+        item_1 = NewsletterItem.objects.get(content_type=content_type, object_id=article_1.id)
+        item_2 = NewsletterItem.objects.get(content_type=content_type, object_id=article_2.id)
+        item_3 = NewsletterItem.objects.get(content_type=content_type, object_id=article_3.id)
 
         article_2.in_newsletter = False
         article_2.save()
@@ -352,7 +352,7 @@ class NewsletterTest(UserBaseTestCase):
         article_class = get_article_class()
         content_type = ContentType.objects.get_for_model(article_class)
         
-        art = mommy.make(article_class, in_newsletter=True)
+        art = mommy.make(article_class, slug="test", in_newsletter=True)
         
         self.assertEqual(1, NewsletterItem.objects.count())
         item = NewsletterItem.objects.get(content_type=content_type, object_id=art.id)
@@ -365,7 +365,7 @@ class NewsletterTest(UserBaseTestCase):
         article_class = get_article_class()
         ContentType.objects.get_for_model(article_class)
         
-        art = mommy.make(article_class, in_newsletter=False)
+        art = mommy.make(article_class, slug="test", in_newsletter=False)
         self.assertEqual(0, NewsletterItem.objects.count())
         
         art.delete()
@@ -374,9 +374,9 @@ class NewsletterTest(UserBaseTestCase):
     def test_create_article_commands(self):
         article_class = get_article_class()
         content_type = ContentType.objects.get_for_model(article_class)
-        art1 = mommy.make(article_class, in_newsletter=True)
-        art2 = mommy.make(article_class, in_newsletter=True)
-        art3 = mommy.make(article_class, in_newsletter=False)
+        art1 = mommy.make(article_class, slug="test1", in_newsletter=True)
+        art2 = mommy.make(article_class, slug="test2", in_newsletter=True)
+        art3 = mommy.make(article_class, slug="test3", in_newsletter=False)
         self.assertEqual(2, NewsletterItem.objects.count())
         NewsletterItem.objects.all().delete()
         self.assertEqual(0, NewsletterItem.objects.count())

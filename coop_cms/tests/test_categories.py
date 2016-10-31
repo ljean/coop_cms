@@ -252,6 +252,7 @@ class CoopCategoryTemplateTagTest(BaseTestCase):
     
     def test_use_template_many_calls_not_slug(self):
         tpl = Template('{% load coop_utils %}{% coop_category "Ab CD" def %}!!{{def}}!!')
+        html = ""
         for i in range(10):
             html = tpl.render(Context({}))
         self.assertEqual(ArticleCategory.objects.count(), 1)
@@ -273,18 +274,19 @@ class CoopCategoryTemplateTagTest(BaseTestCase):
         
     def test_view_category_articles(self):
         cat = mommy.make(ArticleCategory, name="abc")
-        art1 = mommy.make(get_article_class(), category=cat, publication=True, publication_date=datetime.now())
+        art1 = mommy.make(
+            get_article_class(), slug="test1", category=cat, publication=True, publication_date=datetime.now()
+        )
         art2 = mommy.make(
-            get_article_class(), category=cat, publication=True,
+            get_article_class(), slug="test2", category=cat, publication=True,
             publication_date=datetime.now()-timedelta(1)
         )
         
         self.assertEqual(list(cat.get_articles_qs().all()), [art2, art1])
-        
 
     def test_view_category_articles_not_all_published(self):
         cat = mommy.make(ArticleCategory, name="abc")
-        art1 = mommy.make(get_article_class(), category=cat, publication=False)
-        art2 = mommy.make(get_article_class(), category=cat, publication=True)
+        art1 = mommy.make(get_article_class(), slug="test1", category=cat, publication=False)
+        art2 = mommy.make(get_article_class(), slug="test2", category=cat, publication=True)
 
         self.assertEqual(list(cat.get_articles_qs().all()), [art2])

@@ -1359,7 +1359,7 @@ class NavigationLiNodeTest(NavigationTreeBaseTest):
         """check that request context is use for rendering li_node arg template"""
         li_nav_node_menu = get_navtree_class().objects.create(name="li_nav_node_menu")
 
-        article = mommy.make(get_article_class(), template='test/article_li_node.html')
+        article = mommy.make(get_article_class(), slug="test", template='test/article_li_node.html')
 
         link1 = Link.objects.create(url='http://www.google.fr', title="http://www.google.fr")
         node1 = NavNode.objects.create(
@@ -1385,7 +1385,7 @@ class NavigationLiNodeTest(NavigationTreeBaseTest):
 
         li_nav_node_menu = get_navtree_class().objects.create(name="li_nav_node_menu")
 
-        article = mommy.make(get_article_class(), template='test/article_li_node.html')
+        article = mommy.make(get_article_class(), slug="test", template='test/article_li_node.html')
 
         link1 = Link.objects.create(url='http://www.google.fr', title="http://www.google.fr")
         node1 = NavNode.objects.create(
