@@ -11,7 +11,9 @@ from coop_bar.utils import make_link
 from coop_html_editor.settings import get_html_editor
 
 from coop_cms.models import Link, Fragment
-from coop_cms.settings import get_article_class, get_navtree_class, cms_no_homepage, hide_media_library_menu
+from coop_cms.settings import (
+    get_article_class, get_navtree_class, cms_no_homepage, hide_media_library_menu, is_localized
+)
 from coop_cms.utils import get_model_name, get_model_app, get_model_label
 
 
@@ -442,39 +444,10 @@ def publication_css_classes(request, context):
             return 'is-archived'    
 
 
-class LanguageSwitcher(object):
-
-    def __init__(self, lang_code, lang_name):
-        self.lang_code = lang_code
-        self.lang_name = lang_name
-
-    def __call__(self, request, context):
-        if request and request.user.is_staff:
-            object_var_name = ''
-            for var_name in ('newsletter', 'article', 'object'):
-                if var_name in context:
-                    object_var_name = var_name
-                    break
-
-            url = ''
-            if object_var_name:
-                object_var = context[object_var_name]
-                try:
-                    url = object_var.get_absolute_url()
-                except AttributeError:
-                    pass
-
-            if url:
-                is_localized = False
-                lang = get_language()
-                if url.find("/" + lang + "/") == 0:
-                    is_localized = True
-                    url = url[3:]
-
-                if is_localized and lang != self.lang_code:
-                    url = "/" + self.lang_code + url
-                    icon = "/fugue/locale.png"
-                    return make_link(url, _(u'Switch to {0}').format(self.lang_name), icon, classes=['icon'])
+def switch_language(request, context):
+    if request and request.user.is_staff and is_localized():
+        url = reverse('coop_cms_switch_language_popup')
+        return make_link(url, _(u'Switch language'), 'fugue/globe-green.png', classes=['colorbox-form', 'icon'])
 
 
 def load_commands(coop_bar):
@@ -522,15 +495,10 @@ def load_commands(coop_bar):
         [
             cms_publish,
         ],
+        [
+            switch_language,
+        ],
     ]
-
-    # Create a menu to switch language on newsletters
-    language_switchers = []
-    if len(settings.LANGUAGES) > 1:
-        for lang_code, lang_name in settings.LANGUAGES:
-            language_switchers.append(LanguageSwitcher(lang_code, lang_name))
-        if language_switchers:
-            menu_list.append(language_switchers)
 
     coop_bar.register(menu_list)
     

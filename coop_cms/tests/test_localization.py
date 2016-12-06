@@ -13,7 +13,7 @@ from django.utils.translation import activate, get_language
 
 from coop_cms.models import BaseArticle, InvalidArticleError
 from coop_cms.settings import is_localized, is_multilang, multilang_mode, get_article_class
-from coop_cms.tests import BaseTestCase
+from coop_cms.tests import BaseTestCase, BeautifulSoup
 from coop_cms.utils import redirect_to_language, strip_locale_path, get_url_in_language, make_locale_path
 
 
@@ -295,7 +295,7 @@ class UrlLocalizationTest(BaseTestCase):
         setattr(art1, 'title_' + trans_lang, art2.title)
         art1.save()
         
-        #CHANGE LANGUAGE
+        # CHANGE LANGUAGE
         activate(trans_lang)
         
         url = art2.get_edit_url()
@@ -353,7 +353,7 @@ class UrlLocalizationTest(BaseTestCase):
         origin_lang = settings.LANGUAGES[0][0]
         trans_lang = settings.LANGUAGES[1][0]
         
-        #CHANGE LANGUAGE
+        # CHANGE LANGUAGE
         activate(trans_lang)
         
         url = art1.get_edit_url()
@@ -384,7 +384,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertEqual(None, getattr(art2, 'slug_' + trans_lang))
         
-        #CHANGE LANGUAGE
+        # CHANGE LANGUAGE
         activate(trans_lang)
         
         url = art2.get_edit_url()
@@ -420,7 +420,7 @@ class UrlLocalizationTest(BaseTestCase):
         art2.save()
         self.assertNotEqual(art1.slug, getattr(art2, 'slug_' + trans_lang))
         
-        #CHANGE LANGUAGE
+        # CHANGE LANGUAGE
         activate(trans_lang)
         
         url = art2.get_edit_url()
@@ -446,10 +446,10 @@ class UrlLocalizationTest(BaseTestCase):
         try:
             article_class.objects.create(title=u"", content="a!*%:"*10, publication=BaseArticle.PUBLISHED)
         except InvalidArticleError:
-            #OK
+            # OK
             return
 
-        #Force to fail
+        # Force to fail
         self.assertFalse(True)
         
     @skipIf(not is_localized() or not is_multilang(), "not localized")
@@ -513,7 +513,6 @@ class UrlLocalizationTest(BaseTestCase):
         """check redirect_to_language utility"""
         article_class = get_article_class()
 
-        #default_lang = settings.LANGUAGES[0][0]
         other_lang = settings.LANGUAGES[1][0]
 
         art1 = article_class.objects.create(title=u"abcd", publication=BaseArticle.PUBLISHED)
@@ -523,17 +522,73 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertTrue(response.url.find("/" + other_lang + "/") == 0)
         self.assertEqual(get_language(), other_lang)
 
-
     @skipIf(not is_localized() or not is_multilang(), "not localized")
     def test_redirect_to_invalid_language(self):
         """check redirect_to_language uitiliy raise error if ImproperlyConfigured"""
 
         article_class = get_article_class()
 
-        #default_lang = settings.LANGUAGES[0][0]
-        #other_lang = settings.LANGUAGES[1][0]
-
         art1 = article_class.objects.create(title=u"abcd", publication=BaseArticle.PUBLISHED)
 
         self.assertRaises(ImproperlyConfigured, redirect_to_language, art1.get_absolute_url(), "zz")
 
+
+class SwitchLanguageTest(BaseTestCase):
+    """change the language from coop-bar popup"""
+
+    def setUp(self):
+        self.user = None
+        activate(settings.LANGUAGES[0][0])
+
+    def tearDown(self):
+        activate(settings.LANGUAGES[0][0])
+
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    def test_get_language_switcher(self):
+        """get article with locale slug"""
+
+        original_text = '*!-+' * 10
+        translated_text = ':%@/' * 9
+
+        art1 = get_article_class().objects.create(title="Home", content=original_text)
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+
+        setattr(art1, 'title_' + trans_lang, 'Accueil')
+        setattr(art1, 'content_' + trans_lang, translated_text)
+        art1.save()
+
+        url = reverse('coop_cms_switch_language_popup')
+
+        response = self.client.get(url)
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select('select#id_language option')), len(settings.LANGUAGES))
+
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    def test_change_lang(self):
+        """change language"""
+
+        original_text = u'*!-+' * 10
+        translated_text = u':%@/' * 9
+
+        art1 = get_article_class().objects.create(title="Home", content=original_text)
+
+        origin_lang = settings.LANGUAGES[0][0]
+        trans_lang = settings.LANGUAGES[1][0]
+
+        activate(origin_lang)
+
+        setattr(art1, 'title_' + trans_lang, u'Accueil')
+        setattr(art1, 'content_' + trans_lang, translated_text)
+
+        art1.save()
+
+        data = {'language': trans_lang}
+        response = self.client.post(
+            reverse('coop_cms_switch_language_popup'),
+            data=data,
+            follow=True
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(trans_lang, get_language())

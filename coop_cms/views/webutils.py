@@ -5,15 +5,20 @@ import json
 from urlparse import urlparse
 
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
+from django.shortcuts import render
 from django.template import RequestContext
 from django.template.loader import get_template
-from django.utils.translation import check_for_language, activate
+from django.utils.translation import check_for_language, activate, get_language
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
+from colorbox.decorators import popup_redirect
+
 from coop_cms.logger import logger
+from coop_cms.forms.webutils import LanguageSelectionForm
 from coop_cms.settings import get_article_class, is_localized
 from coop_cms.utils import strip_locale_path, make_locale_path
 
@@ -26,6 +31,36 @@ def hide_accept_cookies_message(request):
         data = {"Ok": True}
         return HttpResponse(json.dumps(data), content_type="application/json")
     raise Http404
+
+
+def _change_language(request, lang_code, current_url):
+    """change the language and returns redirect URL"""
+    if lang_code and check_for_language(lang_code):
+
+        # path is the locale-independent url
+        path = strip_locale_path(current_url)[1]
+
+        article_class = get_article_class()
+        try:
+            # get the translated slug of the current article
+            # If switching from French to English and path is /fr/accueil/
+            # The next should be : /en/home/
+
+            # Get the article
+            next_article = article_class.objects.get(slug=path.strip('/'))
+
+        except article_class.DoesNotExist:
+            next_article = None
+
+        if hasattr(request, 'session'):
+            request.session['django_language'] = lang_code
+        activate(lang_code)
+
+        if next_article:
+            next_url = next_article.get_absolute_url()
+        else:
+            next_url = make_locale_path(path, lang_code)
+        return next_url
 
 
 @csrf_exempt
@@ -47,31 +82,9 @@ def change_language(request):
         if after_change_url:
             next_url = after_change_url
 
-        if lang_code and check_for_language(lang_code):
-
-            # path is the locale-independent url
-            path = strip_locale_path(next_url)[1]
-
-            article_class = get_article_class()
-            try:
-                # get the translated slug of the current article
-                # If switching from French to English and path is /fr/accueil/
-                # The next should be : /en/home/
-
-                # Get the article
-                next_article = article_class.objects.get(slug=path.strip('/'))
-
-            except article_class.DoesNotExist:
-                next_article = None
-
-            if hasattr(request, 'session'):
-                request.session['django_language'] = lang_code
-            activate(lang_code)
-
-            if next_article:
-                next_url = next_article.get_absolute_url()
-            else:
-                next_url = make_locale_path(path, lang_code)
+        go_to_url = _change_language(request, lang_code, next_url)
+        if go_to_url:
+            next_url = go_to_url
 
     if not next_url:
         next_url = '/'
@@ -110,3 +123,30 @@ def csrf_failure(request, reason=""):
     html = template.render(RequestContext(request, context))
 
     return HttpResponseForbidden(html, content_type='text/html')
+
+
+@popup_redirect
+def switch_language_popup(request):
+    """new article"""
+
+    if request.method == "POST":
+        form = LanguageSelectionForm(request.POST)
+        if form.is_valid():
+            lang_code = form.cleaned_data['language']
+            url = urlparse(request.META.get('HTTP_REFERER', ''))
+            if url:
+                prev_url = url.path
+            else:
+                prev_url = ''
+            url = _change_language(request, lang_code, prev_url)
+            if url:
+                return HttpResponseRedirect(url)
+
+    else:
+        form = LanguageSelectionForm(initial={'language': get_language()})
+
+    return render(
+        request,
+        'coop_cms/popup_swicth_language.html',
+        {'form': form}
+    )

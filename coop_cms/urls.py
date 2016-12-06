@@ -90,6 +90,8 @@ urlpatterns = [
     url(r'^cms/private-download/(?P<doc_id>\d*)/$', medialib.download_doc, name='coop_cms_download_doc'),
 
     url(r'cms/change-language/$', webutils.change_language, name='coop_cms_change_language'),
+    url(r'cms/swicth-language/$', webutils.switch_language_popup, name='coop_cms_switch_language_popup'),
+
     url(
         r'^cms/hide-accept-cookies-message/',
         webutils.hide_accept_cookies_message,
