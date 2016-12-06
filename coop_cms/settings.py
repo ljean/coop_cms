@@ -342,7 +342,7 @@ def is_perm_middleware_installed():
     return 'coop_cms.middleware.PermissionsMiddleware' in django_settings.MIDDLEWARE_CLASSES
 
 
-#Check that languages are correctly set
+# Check that languages are correctly set
 if is_localized():
     if django_settings.LANGUAGE_CODE[:2] != django_settings.LANGUAGES[0][0]:
         text = "coop_cms settings error: LANGUAGE_CODE ({0}) should be first in LANGUAGES (currently first is {1})"
