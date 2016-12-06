@@ -1,4 +1,4 @@
-Coop-cms, a really pluggable CMS
+coop_cms is a Content Management System (CMS) for Django
 ===============================================
 * `Yet another CMS ?`_
 * `Quick start`_
@@ -91,13 +91,13 @@ In settings.py::
         'django.contrib.admin',
         'django.contrib.admindocs',
 
-        #3rd parties
+        # 3rd parties
         'django_extensions',
         'sorl.thumbnail',
         'floppyforms',
         'registration', # Optional
 
-        #apps
+        # apps
         'coop_bar',
         'coop_html_editor',
         'colorbox',
@@ -105,30 +105,30 @@ In settings.py::
         'coop_cms.apps.coop_bootstrap', # Optional -> utilities for Bootstrap CSS framework
         'coop_cms.apps.email_auth', # Optional -> login with email rather than username
 
-        #The coop_cms Article is an abstract model, you must define an Article in one of your app
-        #We provide 2 apps that can be used if needed. Choose one or the other
-        #'coop_cms.apps.basic_cms', #Nothing else than a concrete Article model.
-        'coop_cms.apps.demo_cms', #A ready-to-use example app.
+        # The coop_cms Article is an abstract model, you must define an Article in one of your app
+        # We provide 2 apps that can be used if needed. Choose one or the other
+        # 'coop_cms.apps.basic_cms', # Nothing else than a concrete Article model.
+        'coop_cms.apps.demo_cms', # A ready-to-use example app.
 
-        #The app below make possible to create articles from a RSS feed. Add it if needed
+        # The app below make possible to create articles from a RSS feed. Add it if needed
         'coop_cms.apps.rss_sync',
     )
 
-    #These are settings to customize the CMS behavior. The values are just examples and correspond to the demo_cms app.
+    # These are settings to customize the CMS behavior. The values are just examples and correspond to the demo_cms app.
 
-    #Define the Concrete Article to use. Not required if basic_cms is used
+    # Define the Concrete Article to use. Not required if basic_cms is used
     COOP_CMS_ARTICLE_CLASS = 'coop_cms.apps.demo_cms.models.Article'
 
-    #Define a custom form for Article editing. Not required if basic_cms is used
+    # Define a custom form for Article editing. Not required if basic_cms is used
     COOP_CMS_ARTICLE_FORM = 'coop_cms.apps.demo_cms.forms.ArticleForm'
 
-    #Make possible to customize the menus in the admin bar. Optional.
-    #If not defined, the tuple is build with the coop_bar_cfg modules of all INSTALLED_APPS
+    # Make possible to customize the menus in the admin bar. Optional.
+    # If not defined, the tuple is build with the coop_bar_cfg modules of all INSTALLED_APPS
     COOPBAR_MODULES = (
         'coop_cms.apps.demo_cms.my_coop_bar',
     )
 
-    #Populate the urls when editing <a> tag in HTML editor
+    # Populate the urls when editing <a> tag in HTML editor
     COOP_HTML_EDITOR_LINK_MODELS = (
         'demo_cms.Article',
     )
@@ -146,25 +146,25 @@ In settings.py::
     # It will overload the config provided by coop_html_editor --> see coop_html_editor for details
     ALOHA_INIT_URL = '/static/js/my_aloha_config.js'
 
-    #Default size of the article logo. Can be changed in template
+    # Default size of the article logo. Can be changed in template
     COOP_CMS_ARTICLE_LOGO_SIZE = "128x128"
 
-    #Templates that can be used for an article
-    #It can be a tuple or a function returning a tuple
+    # Templates that can be used for an article
+    # It can be a tuple or a function returning a tuple
     COOP_CMS_ARTICLE_TEMPLATES = 'coop_cms.apps.demo_cms.get_article_templates'
-    #COOP_CMS_ARTICLE_TEMPLATES = (
-    #    ('standard.html', 'Standard'),
-    #    ('homepage.html', 'Homepage'),
-    #    ('blog.html', 'Blog'),
-    #)
+    # COOP_CMS_ARTICLE_TEMPLATES = (
+    #     ('standard.html', 'Standard'),
+    #     ('homepage.html', 'Homepage'),
+    #     ('blog.html', 'Blog'),
+    # )
 
-    #Prefix for making absolute links
+    # Prefix for making absolute links
     COOP_CMS_SITE_PREFIX = 'http://127.0.0.1:8000'
 
-    #from email : the domain of this address should allow the IP of your SMTP server : See SPF
+    # from email : the domain of this address should allow the IP of your SMTP server : See SPF
     COOP_CMS_FROM_EMAIL = '"Your name" <your@email.com>'
 
-    #TODO : REPLY-TO
+    # TODO : REPLY-TO
     COOP_CMS_REPLY_TO = '"Your name" <your@email.com>'
 
     # Email address to send a newsletter test
@@ -172,13 +172,13 @@ In settings.py::
         '"Your name" <your@email.com>',
     )
 
-    #tuples of templates that can be used for a newsletter.
+    # tuples of templates that can be used for a newsletter.
     COOP_CMS_NEWSLETTER_TEMPLATES = (
         ('basic_newsletter.html', 'Basic'),
         ('special_newsletter.html', 'With sections'),
         ('sortable_newsletter.html', 'Sortable sections'),
     )
-    #optional : A custom form for editing the newsletter
+    # optional : A custom form for editing the newsletter
     COOP_CMS_NEWSLETTER_FORM = 'coop_cms.apps.demo_cms.forms.SortableNewsletterForm'
 
 Base template
@@ -212,7 +212,7 @@ The navigation_as_nested_ul templatetag accepts several args
  * tree="english" --> The name of the navigation_tree to use. "default" if missing
  * li_template="dropdown_li.html" --> a template for every <li> tags
  * ul_template="dropdown_ul.html" --> a template for every <ul> tags
- * li_args="dropdown_li_class.html" ---> args to be used for any <li> tags
+ * li_args="dropdown_li_class.html" --> args to be used for any <li> tags
 
 There are others templatetags for navigation : ``navigation_breadcrumb``, ``navigation_children``, ``navigation_siblings`` with similar behavior
 
@@ -250,7 +250,7 @@ If you want to make an international site, coop_cms works well with `django-mode
 We recommend to remove `django-modeltranslation` from the apps when making the model migrations
 
 
-    if not (len(sys.argv) > 1 and sys.argv[1] in ('makemigrations', 'schemamigration', 'datamigration')):
+    if not (len(sys.argv) > 1 and sys.argv[1] in ('makemigrations', )):
         INSTALLED_APPS = ('modeltranslation', ) + INSTALLED_APPS
 
 The model migrations wil not take the translation fields into account and it will be easier to add or remove languages
