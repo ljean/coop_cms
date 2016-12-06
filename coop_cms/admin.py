@@ -8,7 +8,9 @@ from django.contrib import admin
 from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
-from coop_cms.forms import NavTypeForm, ArticleAdminForm, NewsletterItemAdminForm, NewsletterAdminForm
+from coop_cms.forms.articles import ArticleAdminForm
+from coop_cms.forms.navigation import NavTypeForm
+from coop_cms.forms.newsletters import NewsletterItemAdminForm, NewsletterAdminForm
 from coop_cms import models
 from coop_cms.settings import get_article_class, get_navtree_class, import_module
 

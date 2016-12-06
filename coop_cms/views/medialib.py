@@ -16,7 +16,7 @@ from django.template import RequestContext
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
 
-from coop_cms import forms
+from coop_cms.forms.content import AddDocForm, AddImageForm
 from coop_cms.logger import logger
 from coop_cms import models
 from coop_cms.utils import paginate, FileWrapper
@@ -137,7 +137,7 @@ def upload_image(request):
             raise PermissionDenied()
 
         if request.method == "POST":
-            form = forms.AddImageForm(request.POST, request.FILES)
+            form = AddImageForm(request.POST, request.FILES)
             if form.is_valid():
                 src = form.cleaned_data['image']
                 description = form.cleaned_data['descr']
@@ -156,7 +156,7 @@ def upload_image(request):
 
                 return HttpResponse("close_popup_and_media_slide")
         else:
-            form = forms.AddImageForm()
+            form = AddImageForm()
 
         return render(
             request,
@@ -178,7 +178,7 @@ def upload_doc(request):
             raise PermissionDenied()
 
         if request.method == "POST":
-            form = forms.AddDocForm(request.POST, request.FILES)
+            form = AddDocForm(request.POST, request.FILES)
             if form.is_valid():
                 doc = form.save()
                 if not doc.name:
@@ -194,7 +194,7 @@ def upload_doc(request):
 
                 return HttpResponse("close_popup_and_media_slide")
         else:
-            form = forms.AddDocForm()
+            form = AddDocForm()
 
         return render(
             request,
@@ -217,7 +217,7 @@ def download_doc(request, doc_id):
         from filetransfers.api import serve_file # pylint: disable=F0401
         return serve_file(request, doc.file)
     else:
-        #legacy version just kept for compatibility if filetransfers is not installed
+        # legacy version just kept for compatibility if filetransfers is not installed
         logger.warning("install django-filetransfers for better download support")
         the_file = doc.file
         the_file.open('rb')

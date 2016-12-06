@@ -2,7 +2,7 @@
 
 from django.test.utils import override_settings
 
-from coop_cms.forms import ArticleSettingsForm, NewArticleForm
+from coop_cms.forms.articles import ArticleSettingsForm, NewArticleForm
 from coop_cms.settings import load_class
 from coop_cms.tests import BaseTestCase
 

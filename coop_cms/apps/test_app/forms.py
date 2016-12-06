@@ -6,7 +6,9 @@ import floppyforms as forms
 from coop_html_editor.widgets import get_inline_html_widget
 
 from coop_cms.apps.test_app.models import TestClass
-from coop_cms.forms import InlineHtmlEditableModelForm, NewArticleForm, ArticleSettingsForm, NewsletterSettingsForm
+from coop_cms.forms.articles import NewArticleForm, ArticleSettingsForm
+from coop_cms.forms.base import InlineHtmlEditableModelForm
+from coop_cms.forms.newsletters import NewsletterSettingsForm
 
 
 class TestClassForm(InlineHtmlEditableModelForm):

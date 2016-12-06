@@ -21,7 +21,7 @@ from django.views.generic import View
 from coop_html_editor import utils as html_editor_utils
 from colorbox.decorators import popup_redirect
 
-from coop_cms import forms
+from coop_cms.forms.articles import ArticleLogoForm, ArticleTemplateForm, PublishArticleForm
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
@@ -190,12 +190,12 @@ def publish_article(request, url):
         article.publication = models.BaseArticle.DRAFT
 
     if request.method == "POST":
-        form = forms.PublishArticleForm(request.POST, instance=article)
+        form = PublishArticleForm(request.POST, instance=article)
         if form.is_valid():
             article = form.save()
             return HttpResponseRedirect(article.get_absolute_url())
     else:
-        form = forms.PublishArticleForm(instance=article)
+        form = PublishArticleForm(instance=article)
 
     context_dict = {
         'form': form,
@@ -218,13 +218,13 @@ def change_template(request, article_id):
 
     article = get_object_or_404(get_article_class(), id=article_id)
     if request.method == "POST":
-        form = forms.ArticleTemplateForm(article, request.user, request.POST, request.FILES)
+        form = ArticleTemplateForm(article, request.user, request.POST, request.FILES)
         if form.is_valid():
             article.template = form.cleaned_data['template']
             article.save()
             return HttpResponseRedirect(article.get_edit_url())
     else:
-        form = forms.ArticleTemplateForm(article, request.user)
+        form = ArticleTemplateForm(article, request.user)
 
     return render(
         request,
@@ -299,7 +299,7 @@ def update_logo(request, article_id):
     try:
         article = get_object_or_404(get_article_class(), id=article_id)
         if request.method == "POST":
-            form = forms.ArticleLogoForm(request.POST, request.FILES)
+            form = ArticleLogoForm(request.POST, request.FILES)
             if form.is_valid():
                 article.temp_logo = form.cleaned_data['image']
                 article.save()
@@ -312,7 +312,7 @@ def update_logo(request, article_id):
                 data = {'ok': False, 'html': html}
                 return HttpResponse(json.dumps(data), content_type='application/json')
         else:
-            form = forms.ArticleLogoForm()
+            form = ArticleLogoForm()
 
         return render(
             request,

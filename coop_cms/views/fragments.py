@@ -10,7 +10,7 @@ from django.utils.translation import ugettext as _
 
 from colorbox.decorators import popup_close
 
-from coop_cms import forms
+from coop_cms.forms.fragments import AddFragmentForm, EditFragmentForm
 from coop_cms import models
 
 
@@ -25,13 +25,13 @@ def add_fragment(request):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = forms.AddFragmentForm(request.POST)
+        form = AddFragmentForm(request.POST)
         if form.is_valid():
             form.save()
-            #popup_close decorator will close and refresh
+            # popup_close decorator will close and refresh
             return None
     else:
-        form = forms.AddFragmentForm()
+        form = AddFragmentForm()
 
     context_dict = {
         'form': form,
@@ -54,7 +54,7 @@ def edit_fragments(request):
     if not request.user.has_perm(perm):
         raise PermissionDenied
 
-    edit_fragment_formset = modelformset_factory(models.Fragment, forms.EditFragmentForm, extra=0)
+    edit_fragment_formset = modelformset_factory(models.Fragment, EditFragmentForm, extra=0)
 
     if request.method == "POST":
         formset = edit_fragment_formset(request.POST, queryset=models.Fragment.objects.all())

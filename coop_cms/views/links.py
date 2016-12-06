@@ -12,7 +12,7 @@ from django.utils.translation import ugettext as _
 
 from colorbox.decorators import popup_redirect
 
-from coop_cms import forms
+from coop_cms.forms.content import NewLinkForm
 from coop_cms import models
 
 
@@ -27,7 +27,7 @@ def new_link(request):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = forms.NewLinkForm(request.POST)
+        form = NewLinkForm(request.POST)
         if form.is_valid():
             form.save()
             homepage_url = reverse('coop_cms_homepage')
@@ -35,7 +35,7 @@ def new_link(request):
             success_message(request, _(u'The link has been created properly'))
             return HttpResponseRedirect(next_url)
     else:
-        form = forms.NewLinkForm()
+        form = NewLinkForm()
 
     context = {
         'form': form,

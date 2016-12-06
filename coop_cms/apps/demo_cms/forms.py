@@ -5,8 +5,8 @@ Example of custom forms
 
 import floppyforms as forms
 
-from coop_cms.forms import ArticleForm as CmsArticleForm
-from coop_cms.forms import NewsletterForm
+from coop_cms.forms.articles import ArticleForm as CmsArticleForm
+from coop_cms.forms.newsletters import NewsletterForm
 from coop_cms.settings import get_article_class
 from coop_cms.models import ArticleCategory
 

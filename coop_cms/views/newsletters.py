@@ -23,7 +23,7 @@ try:
 except ImportError:
     pass
 
-from coop_cms import forms
+from coop_cms.forms.newsletters import NewsletterSchedulingForm, NewsletterTemplateForm
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
@@ -68,13 +68,13 @@ def change_newsletter_template(request, newsletter_id):
         raise PermissionDenied
 
     if request.method == "POST":
-        form = forms.NewsletterTemplateForm(newsletter, request.user, request.POST)
+        form = NewsletterTemplateForm(newsletter, request.user, request.POST)
         if form.is_valid():
             newsletter.template = form.cleaned_data['template']
             newsletter.save()
             return HttpResponseRedirect(newsletter.get_edit_url())
     else:
-        form = forms.NewsletterTemplateForm(newsletter, request.user)
+        form = NewsletterTemplateForm(newsletter, request.user)
 
     return render(
         request,
@@ -131,12 +131,12 @@ def schedule_newsletter_sending(request, newsletter_id):
     instance = models.NewsletterSending(newsletter=newsletter)
 
     if request.method == "POST":
-        form = forms.NewsletterSchedulingForm(request.POST, instance=instance)
+        form = NewsletterSchedulingForm(request.POST, instance=instance)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(newsletter.get_edit_url())
     else:
-        form = forms.NewsletterSchedulingForm(instance=instance, initial={'scheduling_dt': datetime.now()})
+        form = NewsletterSchedulingForm(instance=instance, initial={'scheduling_dt': datetime.now()})
 
     return render(
         request,
