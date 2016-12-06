@@ -27,16 +27,16 @@ class ArticleTest(BaseArticleTest):
             ('test/newsletter_red.html', 'Red'),
             ('test/newsletter_blue.html', 'Blue'),
         )
-        self._DJALOHA_LINK_MODELS = getattr(settings, 'DJALOHA_LINK_MODELS', [])
+        self._HTML_EDITOR_LINK_MODELS = getattr(settings, 'HTML_EDITOR_LINK_MODELS', [])
         article_class = get_article_class()
         content_type = ContentType.objects.get_for_model(article_class)
-        settings.DJALOHA_LINK_MODELS = ['{0}.{1}'.format(content_type.app_label, content_type.model)]
+        settings.HTML_EDITOR_LINK_MODELS = ['{0}.{1}'.format(content_type.app_label, content_type.model)]
         
     def tearDown(self):
         super(ArticleTest, self).tearDown()
         # restore
         settings.COOP_CMS_ARTICLE_TEMPLATES = self._default_article_templates
-        settings.DJALOHA_LINK_MODELS = self._DJALOHA_LINK_MODELS
+        settings.HTML_EDITOR_LINK_MODELS = self._HTML_EDITOR_LINK_MODELS
 
     def _check_article(self, response, data):
         for (key, value) in data.items():
