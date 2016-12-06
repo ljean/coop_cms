@@ -2,6 +2,7 @@
 <script>
   {% if on_popup %}
     $(document).bind('cbox_complete', function() {
+       setTimeout(function () {$.colorbox.resize();}, 500);
   {% else %}
     $(function() {
   {% endif %}
