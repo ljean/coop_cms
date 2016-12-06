@@ -33,6 +33,37 @@ class ImageEdit(ClearableFileInput):
 class ChosenWidgetMixin(object):
     """chosen jquery widget"""
 
+    def _patch(self, kwargs):
+
+        self._extra_context = {}
+        if kwargs.pop("force_template", False):
+            # chosen inherit from super template
+            self._extra_context['super_template'] = self.template_name
+            self.template_name = 'coop_cms/widgets/chosen.html'
+
+        self._extra_context['on_popup'] = kwargs.pop("on_popup", False)
+
+        return kwargs
+
+
+class ChosenSelectMultiple(ChosenWidgetMixin, SelectMultiple):
+    """chosen select multiple"""
+
+    def __init__(self, attrs=None, *args, **kwargs):
+
+        kwargs = self._patch(kwargs)
+
+        if not attrs:
+            attrs = {}
+        attrs['data-placeholder'] = kwargs.pop('overlay', None)
+        super(ChosenSelectMultiple, self).__init__(attrs, *args, **kwargs)
+
+    def get_context(self, *args, **kwargs):
+        """context"""
+        context = super(ChosenSelectMultiple, self).get_context(*args, **kwargs)  # pylint: disable=E1002
+        context.update(self._extra_context)
+        return context
+
     class Media:
         """css and js required by widget"""
         js = (
@@ -42,36 +73,29 @@ class ChosenWidgetMixin(object):
             "all": ("{0}?v=1".format("chosen/chosen.css"),),
         }
 
-    def __init__(self, attrs=None, *args, **kwargs):
-        
-        self._extra_context = {}
-        if kwargs.pop("force_template", False):
-            #chosen inherit from super template
-            self._extra_context['super_template'] = self.template_name
-            self.template_name = 'coop_cms/widgets/chosen.html'
-
-        if not attrs:
-            attrs = {}
-        attrs['data-placeholder'] = kwargs.pop('overlay', None)
-        super(ChosenWidgetMixin, self).__init__(attrs, *args, **kwargs)
-
-
-class ChosenSelectMultiple(ChosenWidgetMixin, SelectMultiple):
-    """chosen select multiple"""
-    #template_name = 'coop_cms/widgets/chosen.html'
-    
-    def get_context(self, *args, **kwargs):
-        """context"""
-        context = super(ChosenSelectMultiple, self).get_context(*args, **kwargs) # pylint: disable=E1002
-        context.update(self._extra_context)
-        return context
-
 
 class ChosenSelect(ChosenWidgetMixin, Select):
     """chosen select"""
 
+    def __init__(self, attrs=None, *args, **kwargs):
+        kwargs = self._patch(kwargs)
+
+        if not attrs:
+            attrs = {}
+        attrs['data-placeholder'] = kwargs.pop('overlay', None)
+        super(ChosenSelect, self).__init__(attrs, *args, **kwargs)
+
     def get_context(self, *args, **kwargs):
         """context"""
-        context = super(ChosenSelect, self).get_context(*args, **kwargs) # pylint: disable=E1002
+        context = super(ChosenSelect, self).get_context(*args, **kwargs)  # pylint: disable=E1002
         context.update(self._extra_context)
         return context
+
+    class Media:
+        """css and js required by widget"""
+        js = (
+            "{0}?v=1".format("chosen/chosen.jquery.min.js"),
+        )
+        css = {
+            "all": ("{0}?v=1".format("chosen/chosen.css"),),
+        }
