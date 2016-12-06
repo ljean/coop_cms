@@ -36,8 +36,8 @@ def view_navnode(request, tree):
 
             # load and render template for the object
             # try to load the corresponding template and if not found use the default one
-            model_name = unicode(node.content_type)
-            object_label = unicode(node.content_object)
+            model_name = u"{0}".format(node.content_type)
+            object_label = u"{0}".format(node.content_object)
             template = select_template([
                 "coop_cms/navtree_content/{0}.html".format(node.content_type.name),
                 "coop_cms/navtree_content/default.html"
