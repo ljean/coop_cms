@@ -17,7 +17,7 @@ from coop_cms.settings import (
 from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt
 from coop_cms.utils import get_login_url
 
-    
+
 class ArticleTest(BaseArticleTest):
     
     def setUp(self):
@@ -194,7 +194,6 @@ class ArticleTest(BaseArticleTest):
         response = self.client.post(article.get_edit_url(), data=data, follow=True)
 
         self.assertEqual(response.status_code, 200)
-        #print response.content
 
         expected_content = '<p><img class="" src="moby-dick.jpg" style="height: 207px; width: 269px;"/></p>'
         data['content'] = expected_content
@@ -283,7 +282,7 @@ class ArticleTest(BaseArticleTest):
             self.assertEqual(403, response.status_code)
     
         self._log_as_editor()
-        response = self.client.get(article.get_edit_url(), follow=False)#follow was TRue?
+        response = self.client.get(article.get_edit_url(), follow=False)
         self.assertEqual(200, response.status_code)
         
     def test_inline_html_editor_loaded(self):
@@ -301,7 +300,7 @@ class ArticleTest(BaseArticleTest):
         for slug in slugs:
             get_article_class().objects.create(publication=BaseArticle.PUBLISHED, title=slug)
         initial_data = {'title': "test", 'content': "this is my article content"}
-        article = get_article_class().objects.create(**initial_data)
+        get_article_class().objects.create(**initial_data)
         
         self._log_as_editor()
         response = self.client.get(reverse('html_editor_init'))

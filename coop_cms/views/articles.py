@@ -82,7 +82,7 @@ def view_article(request, url, extra_context=None, force_template=None):
     """view the article"""
     try:
         not_archived = Q(publication=models.BaseArticle.ARCHIVED)
-        article = get_article_or_404(Q(slug=url) & Q(sites=settings.SITE_ID) & ~not_archived) #Draft & Published
+        article = get_article_or_404(Q(slug=url) & Q(sites=settings.SITE_ID) & ~not_archived) # Draft & Published
     except Http404:
         return redirect_if_alias(path=url)
 

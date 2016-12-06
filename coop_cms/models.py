@@ -8,10 +8,7 @@ import re
 import shutil
 import urlparse
 
-from django.db import models
-from django.db.models import Q
-from django.db.models.aggregates import Max
-from django.db.models.signals import pre_delete, post_save
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
@@ -19,6 +16,10 @@ from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.urlresolvers import reverse
+from django.db import models
+from django.db.models import Q
+from django.db.models.aggregates import Max
+from django.db.models.signals import pre_delete, post_save
 from django.template import RequestContext, Context
 from django.template.defaultfilters import slugify, escape
 from django.template.loader import get_template
@@ -61,9 +62,9 @@ def get_object_label(content_type, obj):
         elif nav_type.label_rule == NavType.LABEL_USE_GET_LABEL:
             label = obj.get_label()
         else:
-            label = unicode(obj)
+            label = u'{0}'.format(obj)
     except NavType.DoesNotExist:
-        label = unicode(obj)
+        label = u'{0}'.format(obj)
     return label
 
 

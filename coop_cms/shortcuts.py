@@ -27,9 +27,9 @@ def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwa
     try:
         return article_class.objects.get(slug=slug, **kwargs)
     except article_class.DoesNotExist:
-        #if modeltranslation is installed,
-        #if no article correspond to the current language article
-        #try to look for slug in default language
+        # if modeltranslation is installed,
+        # if no article correspond to the current language article
+        # try to look for slug in default language
         if is_localized():
             from modeltranslation import settings as mt_settings
             default_lang = mt_settings.DEFAULT_LANGUAGE
