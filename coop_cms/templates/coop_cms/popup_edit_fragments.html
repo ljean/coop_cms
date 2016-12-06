@@ -9,8 +9,9 @@
         $(document).bind('cbox_complete', function() {
             var extra_ids = {};
             parent.$(".coop-fragment-type").each(function (idx, elt) {
-                $("select#fragment-types").append('<option value="' + $(elt).attr("rel") + '">' + $(elt).text() + '</option>');
-                ;
+                $("select#fragment-types").append(
+                  '<option value="' + $(elt).attr("rel") + '">' + $(elt).text() + '</option>'
+                );
                 extra_ids[$(elt).attr('rel')] = $(elt).attr('data-filter');
             });
             $("select#fragment-types").change(function () {
@@ -28,7 +29,7 @@
                             $(elt).closest("tr").show();
                         }
                     }
-                })
+                });
                 parent.$.colorbox.resize();
             });
             $("select#fragment-types").change();
