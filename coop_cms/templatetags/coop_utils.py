@@ -35,6 +35,18 @@ class ArticleLinkNode(template.Node):
         self.title = title
         self.lang = lang
 
+    def get_language(self, context):
+        """get language from context"""
+        request = context.get('request', None)
+        lang = "en"
+        if request:
+            lang = getattr(request, 'LANGUAGE_CODE', lang)
+        elif hasattr(settings, 'LANGUAGES'):
+            lang = settings.LANGUAGES[0][0]
+        elif hasattr(settings, 'LANGUAGE_CODE'):
+            lang = settings.LANGUAGE_CODE[:2]
+        return lang
+
     def render(self, context):
         """to html"""
         article_class = get_article_class()
@@ -51,16 +63,8 @@ class ArticleLinkNode(template.Node):
                 article = get_article(slug, force_lang=self.lang)
             else:
                 # If the language is not defined, we need to get it from the context
-                # The get_language api doesn't work in templatetag
-                request = context.get('request', None)
-                lang = "en"
-                if request:
-                    lang = getattr(request, 'LANGUAGE_CODE', lang)
-                elif hasattr(settings, 'LANGUAGES'):
-                    lang = settings.LANGUAGES[0][0]
-                elif hasattr(settings, 'LANGUAGE_CODE'):
-                    lang = settings.LANGUAGE_CODE[:2]
-                article = get_article(slug, current_lang=lang)
+                # The Django get_language api doesn't work in template-tag
+                article = get_article(slug, current_lang=self.get_language(context))
         except article_class.DoesNotExist:
             try:
                 article = get_article(slug, all_langs=True)

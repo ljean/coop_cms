@@ -23,7 +23,7 @@ def get_article_slug(*args, **kwargs):
 def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwargs):
     """get article"""
     article_class = get_article_class()
-    current_lang = get_language()
+    current_lang = current_lang or get_language()
     try:
         return article_class.objects.get(slug=slug, **kwargs)
     except article_class.DoesNotExist:
@@ -40,7 +40,8 @@ def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwa
                     if current_lang != default_lang:
                         lang = default_lang
                 if lang:
-                    kwargs.update({'slug_{0}'.format(lang): slug})
+                    field_name = build_localized_fieldname('slug', lang)
+                    kwargs.update({field_name: slug})
                     return article_class.objects.get(**kwargs)
                 else:
                     raise article_class.DoesNotExist()
