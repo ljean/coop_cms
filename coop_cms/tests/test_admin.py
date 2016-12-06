@@ -38,8 +38,10 @@ class ArticleAdminTest(BaseArticleTest):
         soup = BeautifulSoup(response.content)
         
         if is_localized():
+            from modeltranslation.utils import build_localized_fieldname
             for (lang, _name) in settings.LANGUAGES:
-                self.assertEqual(soup.select("#id_"+'slug_'+lang)[0]["type"], "text")
+                field_name = build_localized_fieldname('slug', lang)
+                self.assertEqual(soup.select("#id_" + field_name)[0]["type"], "text")
         else:
             self.assertEqual(soup.select("#id_slug")[0]["type"], "text")
                 
@@ -61,8 +63,10 @@ class ArticleAdminTest(BaseArticleTest):
         soup = BeautifulSoup(response.content)
         
         if is_localized():
+            from modeltranslation.utils import build_localized_fieldname
             for (lang, _name) in settings.LANGUAGES:
-                self.assertEqual(soup.select("#id_"+'slug_'+lang)[0]["type"], "hidden")
+                field_name = build_localized_fieldname('slug', lang)
+                self.assertEqual(soup.select("#id_" + field_name)[0]["type"], "hidden")
         else:
             self.assertEqual(soup.select("#id_slug")[0]["type"], "hidden")
                 
@@ -84,7 +88,9 @@ class ArticleAdminTest(BaseArticleTest):
         soup = BeautifulSoup(response.content)
         
         if is_localized():
+            from modeltranslation.utils import build_localized_fieldname
             for (lang, _name) in settings.LANGUAGES:
-                self.assertEqual(soup.select("#id_"+'slug_'+lang)[0]["type"], "text")
+                field_name = build_localized_fieldname('slug', lang)
+                self.assertEqual(soup.select("#id_" + field_name)[0]["type"], "text")
         else:
             self.assertEqual(soup.select("#id_slug")[0]["type"], "text")

@@ -32,6 +32,7 @@ def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwa
         # try to look for slug in default language
         if is_localized():
             from modeltranslation import settings as mt_settings
+            from modeltranslation.utils import build_localized_fieldname
             default_lang = mt_settings.DEFAULT_LANGUAGE
             try:
                 lang = force_lang
@@ -48,7 +49,7 @@ def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwa
                     # Try to find in another lang
                     # The article might be created in another language than the default one
                     for (lang_code, lang_name) in settings.LANGUAGES:
-                        key = 'slug_{0}'.format(lang_code)
+                        key = build_localized_fieldname('slug', lang_code)
                         try:
                             kwargs.update({key: slug})
                             return article_class.objects.get(**kwargs)
