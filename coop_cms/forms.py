@@ -195,16 +195,16 @@ class WithNavigationModelForm(forms.ModelForm):
         return instance
 
 
-class ArticleAdminForm(forms.ModelForm):
-    """admin form for article"""
+class BaseArticleAdminForm(forms.ModelForm):
+    """base form for article admin"""
 
     def __init__(self, *args, **kwargs):
-        super(ArticleAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
+        super(BaseArticleAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.article = kwargs.get('instance', None)
         templates = get_article_templates(self.article, getattr(self, "current_user", None))
         if templates:
             self.fields['template'].widget = forms.Select(choices=templates)
-        
+
         self.slug_fields = []
         if is_localized():
             for lang_and_name in settings.LANGUAGES:
@@ -213,15 +213,19 @@ class ArticleAdminForm(forms.ModelForm):
                 self.slug_fields.append(field_name)
         else:
             self.slug_fields = ['slug']
-        
+
         can_change_article_slug = can_rewrite_url()
-        
+
         if not can_change_article_slug:
             can_change_article_slug = (self.article.publication != BaseArticle.PUBLISHED) if self.article else True
-        
+
         for slug_field in self.slug_fields:
             if not can_change_article_slug:
                 self.fields[slug_field].widget = ReadOnlyInput()
+
+
+class ArticleAdminForm(BaseArticleAdminForm):
+    """admin form for article"""
 
     class Meta:
         model = get_article_class()
