@@ -3,11 +3,10 @@
 
 import json
 
-from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.messages.api import success as success_message, error as error_message
+from django.contrib.messages.api import success as success_message
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -18,7 +17,6 @@ from django.views.generic.base import TemplateView
 from django.utils.translation import ugettext as _
 from django.views.generic import View
 
-from coop_html_editor import utils as html_editor_utils
 from colorbox.decorators import popup_redirect
 
 from coop_cms.forms.articles import ArticleLogoForm, ArticleTemplateForm, PublishArticleForm
