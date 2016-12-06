@@ -193,9 +193,14 @@ class NewArticleForm(WithNavigationModelForm):
         self.fields['category'].queryset = self.fields['category'].queryset.filter(sites=settings.SITE_ID)
 
         if 'sites' in self.fields:
-            self.fields['sites'].initial = [Site.objects.get_current()]
+            self.fields['sites'].initial = self.get_initials('sites')
             if not is_multi_site():
                 self.fields['sites'].widget = forms.MultipleHiddenInput()
+
+    def get_initials(self, field_name):
+        """return the initial values"""
+        if field_name == 'sites':
+            return [Site.objects.get_current()]
 
     def clean_site(self):
         """check that the current site is selected"""
