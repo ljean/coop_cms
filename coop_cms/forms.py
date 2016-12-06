@@ -97,7 +97,7 @@ class ArticleForm(InlineHtmlEditableModelForm):
 
     def set_logo_size(self, logo_size=None, logo_crop=None):
         """change logo size"""
-        if self.fields.has_key('logo'):
+        if 'logo' in self.fields:
             thumbnail_src = self.logo_thumbnail(logo_size, logo_crop)
             update_url = reverse('coop_cms_update_logo', args=[self.article.id])
             self.fields['logo'].widget = ImageEdit(
@@ -239,7 +239,7 @@ class MediaBaseAddMixin(object):
 
     def __init__(self, *args, **kwargs):
         super(MediaBaseAddMixin, self).__init__(*args, **kwargs)  # pylint: disable=E1002
-        #Media filters
+        # Media filters
         queryset1 = MediaFilter.objects.all()
         if queryset1.count():
             self.fields['filters'].choices = [(x.id, x.name) for x in queryset1]
