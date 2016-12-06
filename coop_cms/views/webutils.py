@@ -33,7 +33,7 @@ def hide_accept_cookies_message(request):
     raise Http404
 
 
-def _change_language(request, lang_code, current_url):
+def _do_change_language(request, lang_code, current_url):
     """change the language and returns redirect URL"""
     if lang_code and check_for_language(lang_code):
 
@@ -82,7 +82,7 @@ def change_language(request):
         if after_change_url:
             next_url = after_change_url
 
-        go_to_url = _change_language(request, lang_code, next_url)
+        go_to_url = _do_change_language(request, lang_code, next_url)
         if go_to_url:
             next_url = go_to_url
 
@@ -138,7 +138,7 @@ def switch_language_popup(request):
                 prev_url = url.path
             else:
                 prev_url = ''
-            url = _change_language(request, lang_code, prev_url)
+            url = _do_change_language(request, lang_code, prev_url)
             if url:
                 return HttpResponseRedirect(url)
 
