@@ -8,23 +8,18 @@ import re
 import shutil
 import urlparse
 
-from django import VERSION
 from django.db import models
 from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.signals import pre_delete, post_save
-from django.conf import settings
-if VERSION < (1, 7):
-    from django.contrib.contenttypes.generic import GenericForeignKey
-else:
-    from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.core.urlresolvers import reverse, NoReverseMatch
-from django.template import Context, RequestContext
+from django.core.urlresolvers import reverse
+from django.template import RequestContext, Context
 from django.template.defaultfilters import slugify, escape
 from django.template.loader import get_template
 from django.utils.translation import get_language, ugettext, ugettext_lazy as _
@@ -256,19 +251,17 @@ class NavNode(models.Model):
         request = RequestManager().get_request()
         if li_template:
             template_ = li_template if hasattr(li_template, 'render') else get_template(li_template)
+            context_dict = {
+                'node': self,
+                'node_pos': node_pos,
+                'total_nodes': total_nodes,
+                'STATIC_URL': settings.STATIC_URL,
+            }
             if request:
-                return template_.render(
-                    RequestContext(request, {
-                        'node': self,  'node_pos': node_pos, 'total_nodes': total_nodes,
-                    })
-                )
+                context = RequestContext(request, context_dict)
             else:
-                return template_.render(
-                    Context(request, {
-                        'STATIC_URL': settings.STATIC_URL,
-                        'node': self,  'node_pos': node_pos, 'total_nodes': total_nodes,
-                    })
-                )
+                context = Context(context_dict)
+            return template_.render(context)
         else:
             url = self.get_absolute_url()
             if url is None:
@@ -280,7 +273,7 @@ class NavNode(models.Model):
         """format ul tag"""
         if ul_template:
             template_ = ul_template if hasattr(ul_template, 'render') else get_template(ul_template)
-            return template_.render(Context({'node': self}))
+            return template_.render({'node': self})
         else:
             return u'<ul>{0}</ul>'
 
@@ -288,7 +281,7 @@ class NavNode(models.Model):
         """li tag arguments"""
         if li_args:
             template_ = li_args if hasattr(li_args, 'render') else get_template(li_args)
-            return template_.render(Context({'node': self}))
+            return template_.render({'node': self})
         else:
             return u''
 
@@ -727,10 +720,11 @@ class BaseArticle(BaseNavigable):
 
     def _get_slug(self):
         """get slug"""
+        from modeltranslation.utils import build_localized_fieldname
         slug = self.slug
         if not slug:
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
-                key = 'slug_{0}'.format(lang_code)
+                key = build_localized_fieldname('slug', lang_code)
                 slug = getattr(self, key)
                 if slug:
                     break

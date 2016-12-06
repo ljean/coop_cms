@@ -5,8 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.forms.models import modelformset_factory
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
 from colorbox.decorators import popup_close
@@ -38,10 +37,10 @@ def add_fragment(request):
         'form': form,
     }
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_add_fragment.html',
-        context_dict,
-        context_instance=RequestContext(request)
+        context_dict
     )
 
 
@@ -61,7 +60,7 @@ def edit_fragments(request):
         formset = edit_fragment_formset(request.POST, queryset=models.Fragment.objects.all())
         if formset.is_valid():
             formset.save()
-            #popup_close decorator will close and refresh
+            # popup_close decorator will close and refresh
             return None
     else:
         formset = edit_fragment_formset(queryset=models.Fragment.objects.all())
@@ -71,8 +70,8 @@ def edit_fragments(request):
         'title': _(u"Edit fragments of this template?"),
     }
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_edit_fragments.html',
-        context_dict,
-        context_instance=RequestContext(request)
+        context_dict
     )

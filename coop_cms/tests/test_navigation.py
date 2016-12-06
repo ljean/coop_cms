@@ -780,8 +780,8 @@ class NavigationTest(BaseTestCase):
 
         tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul%}')
         html = tpl.render(Context({}))
-        self.assertTrue(html.find(node1.label)>0)
-        self.assertTrue(html.find(node2.label)>0)
+        self.assertTrue(html.find(node1.label) > 0)
+        self.assertTrue(html.find(node2.label) > 0)
 
     def test_delete_parent(self):
         Article = get_article_class()
@@ -802,8 +802,8 @@ class NavigationTest(BaseTestCase):
 
         tpl = Template('{% load coop_navigation %}{%navigation_as_nested_ul%}')
         html = tpl.render(Context({}))
-        self.assertTrue(html.find(node1.label)>0)
-        self.assertTrue(html.find(node2.label)>0)
+        self.assertTrue(html.find(node1.label) > 0)
+        self.assertTrue(html.find(node2.label) > 0)
 
 
 class TemplateTagsTest(BaseTestCase):
@@ -914,9 +914,9 @@ class TemplateTagsTest(BaseTestCase):
         soup = BeautifulSoup(html)
         self.assertEqual(len(soup.select('li')), 3)
 
-        self.assertTrue(html.find(n1.get_absolute_url())>0)
-        self.assertTrue(html.find(n2.get_absolute_url())>0)
-        self.assertTrue(html.find(n3.get_absolute_url())>0)
+        self.assertTrue(html.find(n1.get_absolute_url()) > 0)
+        self.assertTrue(html.find(n2.get_absolute_url()) > 0)
+        self.assertTrue(html.find(n3.get_absolute_url()) > 0)
 
         self.assertTrue(html.find(self.nodes[0].get_absolute_url()) < 0)
         self.assertTrue(html.find(self.nodes[1].get_absolute_url()) < 0)

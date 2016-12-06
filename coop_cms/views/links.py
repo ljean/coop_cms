@@ -7,8 +7,7 @@ from django.contrib.messages.api import success as success_message
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.utils.translation import ugettext as _
 
 from colorbox.decorators import popup_redirect
@@ -42,8 +41,8 @@ def new_link(request):
         'form': form,
     }
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_new_link.html',
-        context,
-        context_instance=RequestContext(request)
+        context
     )

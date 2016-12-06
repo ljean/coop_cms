@@ -150,7 +150,7 @@ def get_article_templates(article, user):
             #  - a function name that will return a tuple
             #  - a variable name that contains a tuple
 
-            #extract module and function/var names
+            # extract module and function/var names
             module_name, object_name = coop_cms_article_templates.rsplit('.', 1)
             module = import_module(module_name) # import module
             article_templates_object = getattr(module, object_name)  # get the object
@@ -377,7 +377,9 @@ def get_url_patterns():
     if is_localized():
         return i18n_patterns
     else:
-        return patterns
+        def url_list(*args):
+            return list(args)
+        return url_list
 
 
 def get_unit_test_media_root():

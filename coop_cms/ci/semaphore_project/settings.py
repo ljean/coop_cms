@@ -47,6 +47,7 @@ gettext = lambda s: s
 LANGUAGES = (
     ('en', gettext(u'English')),
     ('fr', gettext(u'Français')),
+    ('en-us', gettext(u'American')),
 )
 
 SITE_ID = 1
@@ -64,7 +65,7 @@ USE_TZ = False
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
-MEDIA_ROOT = os.path.abspath(PROJECT_PATH+'/public/media/')
+MEDIA_ROOT = os.path.abspath(PROJECT_PATH + '/public/media/')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
@@ -130,11 +131,11 @@ TEMPLATE_DIRS = (
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.request",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
+    "django.template.context_processors.debug",
+    "django.template.context_processors.i18n",
+    "django.template.context_processors.request",
+    "django.template.context_processors.media",
+    "django.template.context_processors.static",
     "django.contrib.messages.context_processors.messages",
 )
 
@@ -151,7 +152,7 @@ SOUTH_TESTS_MIGRATE = False
 
 TEST_RUNNER = 'coop_cms.test_runners.SafeMediaDiscoverRunner'
 
-DJALOHA_LINK_MODELS = ('basic_cms.Article',)
+COOP_HTML_EDITOR_LINK_MODELS = ('basic_cms.Article',)
 COOP_CMS_ARTICLE_LOGO_SIZE = "950x250"
 COOP_CMS_NEWSLETTER_TEMPLATES = (
     ('basic_newsletter.html', 'Basic'),
@@ -186,7 +187,7 @@ INSTALLED_APPS = (
     'registration',
 
     # externals
-    'djaloha',
+    'coop_html_editor',
     'colorbox',
     'coop_cms',
     'coop_bar',

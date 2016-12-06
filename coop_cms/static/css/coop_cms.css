@@ -23,10 +23,6 @@ img.aloha-align-right {
 	float: right;
 }
 
-img.djaloha-current-image {
-	border: solid red 1px;
-}
-
 ul.coop-cms_user-messages a.close-message{
 	text-align: right;
 	display: block;
@@ -103,4 +99,9 @@ ul.coop-cms_user-messages li a.close-message:hover {
 .inline-checkboxes ul li{
     margin: 0;
     padding: 0;
+}
+
+.inline-editable {
+	box-shadow: inset 0 0 0 3px #ffa84c;
+
 }

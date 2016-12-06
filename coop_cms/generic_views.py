@@ -7,14 +7,13 @@ from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext
+from django.shortcuts import render, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.views.generic import TemplateView
 from django.views.generic.base import View
 from django.views.generic.list import ListView as DjangoListView
 
-from djaloha import utils as djaloha_utils
+from coop_html_editor import utils as html_editor_utils
 
 from coop_cms.logger import logger
 
@@ -39,7 +38,7 @@ class ListView(DjangoListView):
 
 
 class EditableObjectView(View):
-    """Base class for aloha-editable objects"""
+    """Base class for html-inline editable objects"""
     model = None
     template_name = ""
     form_class = None
@@ -137,10 +136,10 @@ class EditableObjectView(View):
         
         self.form = self.get_form(instance=self.object)
         
-        return render_to_response(
+        return render(
+            request,
             self.get_template(),
-            self.get_context_data(),
-            context_instance=RequestContext(request)
+            self.get_context_data()
         )
     
     def after_save(self, object):
@@ -160,30 +159,30 @@ class EditableObjectView(View):
 
         self.form = self.get_form(request.POST, request.FILES, instance=self.object)
 
-        forms_args = djaloha_utils.extract_forms_args(request.POST)
-        djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)
+        forms_args = html_editor_utils.extract_forms_args(request.POST)
+        inline_html_forms = html_editor_utils.make_forms(forms_args, request.POST)
 
-        if self.form.is_valid() and all([f.is_valid() for f in djaloha_forms]):
+        if self.form.is_valid() and all([_form.is_valid() for _form in inline_html_forms]):
 
             self.object = self.form.save()
             
             self.after_save(self.object)
             
-            if djaloha_forms:
-                [f.save() for f in djaloha_forms]
+            if inline_html_forms:
+                [_the_form.save() for _the_form in inline_html_forms]
 
             success_message(request, _(u'The object has been saved properly'))
 
             return HttpResponseRedirect(self.object.get_absolute_url())
         else:
-            error_text = u'<br />'.join([unicode(f.errors) for f in [self.form]+djaloha_forms if f.errors])
+            error_text = u'<br />'.join([unicode(_form.errors) for _form in [self.form]+inline_html_forms if _form.errors])
             error_message(request, _(u'An error occured: {0}').format(error_text))
             logger.debug(u"error: {0}".format(error_text))
     
-        return render_to_response(
+        return render(
+            request,
             self.get_template(),
-            self.get_context_data(),
-            context_instance=RequestContext(request)
+            self.get_context_data()
         )
 
 
@@ -266,10 +265,10 @@ class EditableFormsetView(TemplateView):
             raise PermissionDenied
             
         self.formset = self.get_formset()
-        return render_to_response(
+        return render(
+            request,
             self.get_template(),
-            self.get_context_data(),
-            context_instance=RequestContext(request)
+            self.get_context_data()
         )
     
     def _pre_save_object(self, form):
@@ -290,10 +289,10 @@ class EditableFormsetView(TemplateView):
         
         self.formset = self.get_formset(request.POST, request.FILES)
         
-        forms_args = djaloha_utils.extract_forms_args(request.POST)
-        djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)
+        forms_args = html_editor_utils.extract_forms_args(request.POST)
+        inline_html_forms = html_editor_utils.make_forms(forms_args, request.POST)
 
-        #Handle case where formset post data has value which are not in the queryset
+        # Handle case where formset post data has value which are not in the queryset
         formset_index_error = False
         try:
             formset_is_valid = self.formset.is_valid()
@@ -301,14 +300,14 @@ class EditableFormsetView(TemplateView):
             formset_index_error = True
             formset_is_valid = False
 
-        if formset_is_valid and all([f.is_valid() for f in djaloha_forms]):
+        if formset_is_valid and all([_form.is_valid() for _form in inline_html_forms]):
             for form in self.formset:
                 if self._pre_save_object(form):
                     obj = form.save()
                     self._post_save_object(obj, form)
             
-            if djaloha_forms:
-                [f.save() for f in djaloha_forms]
+            if inline_html_forms:
+                [_html_form.save() for _html_form in inline_html_forms]
             
             success_message(request, _(u'The objects have been saved properly'))
 
@@ -320,13 +319,13 @@ class EditableFormsetView(TemplateView):
                 error_message(request, _(u'An error occured: At least one object is missing. Please try again.'))
                 return HttpResponseRedirect(self.get_cancel_url())
             else:
-                for f in self.formset:
-                    errors = f.errors
+                for _form in self.formset:
+                    errors = _form.errors
                     if errors:
                         logger.warning(errors)
         
-        return render_to_response(
+        return render(
+            request,
             self.get_template(),
-            self.get_context_data(),
-            context_instance=RequestContext(request)
+            self.get_context_data()
         )

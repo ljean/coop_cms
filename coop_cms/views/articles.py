@@ -11,14 +11,14 @@ from django.contrib.messages.api import success as success_message, error as err
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
-from django.shortcuts import render_to_response, get_object_or_404
-from django.template import RequestContext, Context, TemplateDoesNotExist
+from django.shortcuts import render, get_object_or_404
+from django.template import TemplateDoesNotExist
 from django.template.loader import get_template
 from django.views.generic.base import TemplateView
 from django.utils.translation import ugettext as _
 from django.views.generic import View
 
-from djaloha import utils as djaloha_utils
+from coop_html_editor import utils as html_editor_utils
 from colorbox.decorators import popup_redirect
 
 from coop_cms import forms
@@ -63,7 +63,8 @@ def view_all_articles(request):
     if request.user.has_perm(perm):
         add_article_url = reverse('coop_cms_new_article')
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/view_all_articles.html',
         {
             'articles': article_class.objects.filter(sites__id=settings.SITE_ID).order_by('-id')[:10],
@@ -73,8 +74,7 @@ def view_all_articles(request):
             'newsletters_list_url': newsletters_admin_url,
             'add_article_url': add_article_url,
             'add_newsletter_url': add_newsletter_url,
-        },
-        RequestContext(request)
+        }
     )
 
 
@@ -100,10 +100,10 @@ def view_article(request, url, extra_context=None, force_template=None):
     if extra_context:
         context_dict.update(extra_context)
 
-    return render_to_response(
+    return render(
+        request,
         force_template or get_article_template(article),
-        context_dict,
-        context_instance=RequestContext(request)
+        context_dict
     )
 
 
@@ -122,10 +122,10 @@ def edit_article(request, url, extra_context=None, force_template=None):
     if request.method == "POST":
         form = article_form_class(request.POST, request.FILES, instance=article)
 
-        forms_args = djaloha_utils.extract_forms_args(request.POST)
-        djaloha_forms = djaloha_utils.make_forms(forms_args, request.POST)
+        forms_args = html_editor_utils.extract_forms_args(request.POST)
+        inline_html_forms = html_editor_utils.make_forms(forms_args, request.POST)
 
-        if form.is_valid() and all([f.is_valid() for f in djaloha_forms]):
+        if form.is_valid() and all([_form.is_valid() for _form in inline_html_forms]):
             article = form.save()
 
             if article.temp_logo:
@@ -133,15 +133,15 @@ def edit_article(request, url, extra_context=None, force_template=None):
                 article.temp_logo = ''
                 article.save()
 
-            if djaloha_forms:
-                for dj_form in djaloha_forms:
-                    dj_form.save()
+            if inline_html_forms:
+                for inline_form in inline_html_forms:
+                    inline_form.save()
 
             success_message(request, _(u'The article has been saved properly'))
 
             return HttpResponseRedirect(article.get_absolute_url())
         else:
-            error_text = u'<br />'.join([unicode(f.errors) for f in [form]+djaloha_forms if f.errors])
+            error_text = u'<br />'.join([unicode(_form.errors) for _form in [form]+inline_html_forms if _form.errors])
             error_message(request, _(u'An error occured: {0}'.format(error_text)))
             logger.debug("error: error_text")
     else:
@@ -157,10 +157,10 @@ def edit_article(request, url, extra_context=None, force_template=None):
     if extra_context:
         context_dict.update(extra_context)
 
-    return render_to_response(
+    return render(
+        request,
         force_template or get_article_template(article),
-        context_dict,
-        context_instance=RequestContext(request)
+        context_dict
     )
 
 
@@ -204,10 +204,10 @@ def publish_article(request, url):
         'title': _(u"Do you want to publish this article?") if draft else _(u"Make it draft?"),
     }
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_publish_article.html',
-        context_dict,
-        context_instance=RequestContext(request)
+        context_dict
     )
 
 
@@ -226,10 +226,10 @@ def change_template(request, article_id):
     else:
         form = forms.ArticleTemplateForm(article, request.user)
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_change_template.html',
-        locals(),
-        context_instance=RequestContext(request)
+        locals()
     )
 
 
@@ -256,10 +256,10 @@ def article_settings(request, article_id):
         'article': article,
         'form': form,
     }
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_article_settings.html',
-        context,
-        context_instance=RequestContext(request)
+        context
     )
 
 
@@ -286,10 +286,10 @@ def new_article(request):
     else:
         form = new_article_form(request.user)
 
-    return render_to_response(
+    return render(
+        request,
         'coop_cms/popup_new_article.html',
-        locals(),
-        context_instance=RequestContext(request)
+        locals()
     )
 
 
@@ -308,16 +308,16 @@ def update_logo(request, article_id):
                 return HttpResponse(json.dumps(data), content_type='application/json')
             else:
                 template = get_template('coop_cms/popup_update_logo.html')
-                html = template.render(Context(locals()))
+                html = template.render(locals())
                 data = {'ok': False, 'html': html}
                 return HttpResponse(json.dumps(data), content_type='application/json')
         else:
             form = forms.ArticleLogoForm()
 
-        return render_to_response(
+        return render(
+            request,
             'coop_cms/popup_update_logo.html',
-            locals(),
-            context_instance=RequestContext(request)
+            locals()
         )
     except Exception:
         logger.exception("update_logo")

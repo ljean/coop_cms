@@ -3,7 +3,6 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
-from django.template import Context
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 
@@ -21,9 +20,7 @@ def notify_event(emails_to_notify, subject, template_name, extra_context):
         context_dict = {'site': site}
         if extra_context:
             context_dict.update(extra_context)
-        message = the_template.render(
-            Context(context_dict)
-        )
+        message = the_template.render(context_dict)
         send_mail(full_subject, message, settings.DEFAULT_FROM_EMAIL, list(emails_to_notify))
 
 

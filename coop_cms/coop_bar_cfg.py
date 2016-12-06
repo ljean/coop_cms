@@ -8,6 +8,7 @@ from django.template.loader import get_template
 from django.utils.translation import get_language, ugettext as _
 
 from coop_bar.utils import make_link
+from coop_html_editor.settings import get_html_editor
 
 from coop_cms.models import Link, Fragment
 from coop_cms.settings import get_article_class, get_navtree_class, cms_no_homepage, hide_media_library_menu
@@ -312,6 +313,7 @@ def cms_publish(request, context):
 
 def cms_extra_js(request, context):
     """add javascript code"""
+    context['html_editor'] = get_html_editor()
     template_ = get_template("coop_cms/_coop_bar_js.html")
     return template_.render(context)
 
@@ -320,8 +322,7 @@ def log_out(request, context):
     """show menu"""
     if request and request.user.is_authenticated() and request.user.is_staff:
         return make_link(
-            reverse("django.contrib.auth.views.logout"), _(u'Log out'), 'fugue/control-power.png',
-            classes=['alert_on_click', 'icon']
+            reverse("logout"), _(u'Log out'), 'fugue/control-power.png', classes=['alert_on_click', 'icon']
         )
 
 

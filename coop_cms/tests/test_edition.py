@@ -41,15 +41,15 @@ class PieceOfHtmlTagsTest(BaseTestCase):
         
     def test_create_edit_poc(self):
         tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" %}')
-        html = tpl.render(Context({"djaloha_edit": True}))
+        html = tpl.render(Context({"inline_html_edit": True}))
         self.assertNotEqual(html, "")
         
         soup = BeautifulSoup(html)
-        tags = soup.select("#djaloha_djaloha__coop_cms__PieceOfHtml__div_id__test__content")
+        tags = soup.select("#html_editor_html_editor__coop_cms__PieceOfHtml__div_id__test__content")
         self.assertEqual(len(tags), 1)
         self.assertEqual(tags[0].text, "")
         
-        tags_hidden = soup.select("#djaloha_djaloha__coop_cms__PieceOfHtml__div_id__test__content_hidden")
+        tags_hidden = soup.select("#html_editor_html_editor__coop_cms__PieceOfHtml__div_id__test__content_hidden")
         self.assertEqual(len(tags_hidden), 1)
         self.assertEqual(tags_hidden[0].get("value", ""), "")
         
@@ -60,15 +60,15 @@ class PieceOfHtmlTagsTest(BaseTestCase):
     def test_edit_poc(self):
         poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!")
         tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" %}')
-        html = tpl.render(Context({"djaloha_edit": True}))
+        html = tpl.render(Context({"inline_html_edit": True}))
         self.assertNotEqual(html, poc.content)
         
         soup = BeautifulSoup(html)
-        tags = soup.select("#djaloha_djaloha__coop_cms__PieceOfHtml__div_id__test__content")
+        tags = soup.select("#html_editor_html_editor__coop_cms__PieceOfHtml__div_id__test__content")
         self.assertEqual(len(tags), 1)
         self.assertEqual(tags[0].text, poc.content)
         
-        tags_hidden = soup.select("#djaloha_djaloha__coop_cms__PieceOfHtml__div_id__test__content_hidden")
+        tags_hidden = soup.select("#html_editor_html_editor__coop_cms__PieceOfHtml__div_id__test__content_hidden")
         self.assertEqual(len(tags_hidden), 1)
         self.assertEqual(tags_hidden[0]["value"], poc.content)
         
@@ -79,7 +79,7 @@ class PieceOfHtmlTagsTest(BaseTestCase):
     def test_edit_poc_read_only(self):
         poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!")
         tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" read-only %}')
-        html = tpl.render(Context({"djaloha_edit": True}))
+        html = tpl.render(Context({"inline_html_edit": True}))
         self.assertEqual(html, poc.content)
         self.assertEqual(PieceOfHtml.objects.count(), 1)
         poc = PieceOfHtml.objects.all()[0]
@@ -88,7 +88,7 @@ class PieceOfHtmlTagsTest(BaseTestCase):
     def test_view_poc_extra_id(self):
         poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
         tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=1 %}')
-        html = tpl.render(Context({"djaloha_edit": False}))
+        html = tpl.render(Context({"inline_html_edit": False}))
         self.assertEqual(html, poc.content)
         self.assertEqual(PieceOfHtml.objects.count(), 1)
         poc = PieceOfHtml.objects.all()[0]
@@ -98,7 +98,7 @@ class PieceOfHtmlTagsTest(BaseTestCase):
     def test_edit_poc_extra_id(self):
         poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
         tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=1 %}')
-        html = tpl.render(Context({"djaloha_edit": True}))
+        html = tpl.render(Context({"inline_html_edit": True}))
         
         soup = BeautifulSoup(html)
         #print html
@@ -118,7 +118,7 @@ class PieceOfHtmlTagsTest(BaseTestCase):
         
     def test_create_poc_extra_id(self):
         tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=1 %}')
-        html = tpl.render(Context({"djaloha_edit": False}))
+        html = tpl.render(Context({"inline_html_edit": False}))
         self.assertEqual(html, "")
         self.assertEqual(PieceOfHtml.objects.count(), 1)
         poc = PieceOfHtml.objects.all()[0]
@@ -128,7 +128,7 @@ class PieceOfHtmlTagsTest(BaseTestCase):
     def test_create_new_poc_extra_id(self):
         poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
         tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" extra_id=2 %}')
-        html = tpl.render(Context({"djaloha_edit": False}))
+        html = tpl.render(Context({"inline_html_edit": False}))
         self.assertEqual(html, "")
         self.assertEqual(PieceOfHtml.objects.count(), 2)
         PieceOfHtml.objects.get(div_id="test", extra_id="1")
@@ -137,7 +137,7 @@ class PieceOfHtmlTagsTest(BaseTestCase):
     def test_poc_extra_id_readonly(self):
         poc = mommy.make(PieceOfHtml, div_id="test", content="HELLO!!!", extra_id="1")
         tpl = Template('{% load coop_edition %}{% coop_piece_of_html "test" read-only extra_id=1 %}')
-        html = tpl.render(Context({"djaloha_edit": True}))
+        html = tpl.render(Context({"inline_html_edit": True}))
         self.assertEqual(html, poc.content)
         self.assertEqual(PieceOfHtml.objects.count(), 1)
         PieceOfHtml.objects.get(div_id="test", extra_id="1")
