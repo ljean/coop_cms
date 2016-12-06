@@ -10,11 +10,17 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.utils.translation import activate, get_language
+from django.test.utils import override_settings
 
 from coop_cms.models import BaseArticle, InvalidArticleError
 from coop_cms.settings import is_localized, is_multilang, multilang_mode, get_article_class
 from coop_cms.tests import BaseTestCase, BeautifulSoup
 from coop_cms.utils import redirect_to_language, strip_locale_path, get_url_in_language, make_locale_path
+
+
+def language_fallbacks():
+    """return fallback"""
+    return tuple([lang_code for (lang_code, lang_name) in settings.LANGUAGES])
 
 
 @skipIf(not is_localized(), "not localized")
@@ -444,18 +450,19 @@ class UrlLocalizationTest(BaseTestCase):
         article_class = get_article_class()
         
         try:
-            article_class.objects.create(title=u"", content="a!*%:"*10, publication=BaseArticle.PUBLISHED)
+            article_class.objects.create(title=u"", content="a!*%:" * 10, publication=BaseArticle.PUBLISHED)
         except InvalidArticleError:
             # OK
             return
 
         # Force to fail
         self.assertFalse(True)
-        
+
     @skipIf(not is_localized() or not is_multilang(), "not localized")
-    def test_create_article_in_additional_lang(self):
+    @override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=language_fallbacks())
+    def test_create_article_in_additional_lang_fallback(self):
         """test create article into an other language than the default"""
-        
+
         article_class = get_article_class()
         
         default_lang = settings.LANGUAGES[0][0]
@@ -463,7 +470,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         activate(other_lang)
         
-        art1 = article_class.objects.create(title=u"abcd", content="a!*%:"*10, publication=BaseArticle.PUBLISHED)
+        art1 = article_class.objects.create(title=u"abcd", content="a!*%:" * 10, publication=BaseArticle.PUBLISHED)
         
         response = self.client.get(art1.get_absolute_url())
         self.assertEqual(200, response.status_code)
@@ -474,6 +481,28 @@ class UrlLocalizationTest(BaseTestCase):
         response = self.client.get(art1.get_absolute_url())
         self.assertEqual(200, response.status_code)
         self.assertContains(response, art1.content)
+
+    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    def test_create_article_in_additional_lang_no_fallback(self):
+        """test create article into an other language than the default"""
+
+        article_class = get_article_class()
+
+        default_lang = settings.LANGUAGES[0][0]
+        other_lang = settings.LANGUAGES[1][0]
+
+        activate(other_lang)
+
+        art1 = article_class.objects.create(title=u"abcd", content="a!*%:" * 10, publication=BaseArticle.PUBLISHED)
+
+        response = self.client.get(art1.get_absolute_url())
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, art1.content)
+
+        activate(default_lang)
+
+        response = self.client.get(art1.get_absolute_url())
+        self.assertEqual(404, response.status_code)
 
     @skipIf(not is_localized() or multilang_mode() < 3, "not localized")
     def test_create_article_in_third_lang(self):

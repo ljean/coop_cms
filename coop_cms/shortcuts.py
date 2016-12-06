@@ -22,8 +22,8 @@ def get_article_slug(*args, **kwargs):
 
 def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwargs):
     """get article"""
+
     article_class = get_article_class()
-    current_lang = current_lang or get_language()
     try:
         return article_class.objects.get(slug=slug, **kwargs)
     except article_class.DoesNotExist:
@@ -31,33 +31,33 @@ def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwa
         # if no article correspond to the current language article
         # try to look for slug in default language
         if is_localized():
+
             from modeltranslation import settings as mt_settings
             from modeltranslation.utils import build_localized_fieldname
-            default_lang = mt_settings.DEFAULT_LANGUAGE
-            try:
-                lang = force_lang
-                if not lang:
-                    if current_lang != default_lang:
-                        lang = default_lang
-                if lang:
-                    field_name = build_localized_fieldname('slug', lang)
-                    kwargs.update({field_name: slug})
-                    return article_class.objects.get(**kwargs)
-                else:
-                    raise article_class.DoesNotExist()
-            except article_class.DoesNotExist:
-                if current_lang == default_lang:
-                    # Try to find in another lang
-                    # The article might be created in another language than the default one
-                    for (lang_code, lang_name) in settings.LANGUAGES:
-                        key = build_localized_fieldname('slug', lang_code)
-                        try:
-                            kwargs.update({key: slug})
-                            return article_class.objects.get(**kwargs)
-                        except article_class.DoesNotExist:
-                            kwargs.pop(key)
-                raise article_class.DoesNotExist()
-        raise  # re-raise previous error
+
+            fallback_languages = []
+            if current_lang:
+                fallback_languages += [current_lang, ]
+            if force_lang:
+                fallback_languages += [force_lang, ]
+
+            mt_fallbacks = getattr(settings, 'MODELTRANSLATION_FALLBACK_LANGUAGES', None)
+            if mt_fallbacks is None:
+                fallback_languages += [mt_settings.DEFAULT_LANGUAGE, ]
+            else:
+                fallback_languages += list(mt_fallbacks)
+
+            for lang in fallback_languages:
+                field_name = build_localized_fieldname('slug', lang)
+                try:
+                    lookup = kwargs.copy()
+                    lookup.update({field_name: slug})
+                    return article_class.objects.get(**lookup)
+                except article_class.DoesNotExist:
+                    pass
+
+        # Not found
+        raise article_class.DoesNotExist()
 
 
 def get_article_or_404(slug, **kwargs):
