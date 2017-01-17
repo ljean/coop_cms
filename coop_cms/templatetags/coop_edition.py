@@ -11,6 +11,7 @@ from django.template.base import TextNode, VariableNode
 from django.template.context_processors import csrf
 from django.template.loader import get_template, TemplateDoesNotExist
 from django.template.loader_tags import IncludeNode
+from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 
@@ -102,6 +103,8 @@ class FragmentEditNode(InlineHtmlMultipleEditNode):
             object_content = template_.render(template.Context({
                 'css_class': obj.css_class,
                 'name': obj.name,
+                'slug': slugify(obj.name),
+                'id': obj.id,
                 'index': idx,
                 'objects_count': objects_count,
                 'fragment': self._render_value(context, self._get_object_lookup(obj), value),
