@@ -15,7 +15,7 @@ from django.contrib.sites.models import Site
 from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models import Q
 from django.db.models.aggregates import Max

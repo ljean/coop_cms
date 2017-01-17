@@ -389,6 +389,7 @@ def paginate(request, queryset, items_count):
 
 
 def get_login_url():
+    """returns the URL of the login page"""
     try:
         return reverse("auth_login")
     except NoReverseMatch:

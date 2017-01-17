@@ -5,7 +5,7 @@ from django.conf import settings
 
 
 def cms_settings(request):
-    """add jquey version to context"""
+    """add jquery version to context"""
     context = {}
 
     if hasattr(settings, 'COOP_CMS_JQUERY_VERSION'):

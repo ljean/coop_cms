@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """homepage management"""
 
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied

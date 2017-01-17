@@ -7,6 +7,7 @@ from django.contrib.auth.views import redirect_to_login
 
 from coop_cms.utils import get_login_url
 
+
 class PermissionsMiddleware(object):
     """Handle permission"""
 
