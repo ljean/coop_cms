@@ -10,7 +10,8 @@ from traceback import print_exc
 
 from django import VERSION
 from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from django.contrib.sites.models import Site
+from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse, NoReverseMatch
@@ -18,7 +19,8 @@ from django.http import HttpResponseRedirect
 from django.template.loader import get_template
 from django.utils import translation
 
-from coop_cms.settings import get_newsletter_context_callbacks
+from coop_cms.settings import get_newsletter_context_callbacks, cms_no_homepage
+
 
 if VERSION >= (1, 9, 0):
     from wsgiref.util import FileWrapper
@@ -394,3 +396,16 @@ def get_login_url():
         return reverse("auth_login")
     except NoReverseMatch:
         return reverse("login")
+
+
+def get_homepage_url():
+    """returns the URL of the home page"""
+    if not cms_no_homepage():
+        site = Site.objects.get_current()
+        # Try site settings
+        try:
+            site_settings = site.sitesettings
+            if site_settings.homepage_url:
+                return site_settings.homepage_url
+        except ObjectDoesNotExist:
+            pass

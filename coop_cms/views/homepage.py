@@ -13,6 +13,7 @@ from colorbox.decorators import popup_redirect
 
 from coop_cms import models
 from coop_cms.settings import cms_no_homepage, get_article_class
+from coop_cms.utils import get_homepage_url
 
 
 def homepage(request):
@@ -20,15 +21,9 @@ def homepage(request):
     if cms_no_homepage():
         raise Http404
 
-    site = Site.objects.get_current()
-
-    # Try site settings
-    try:
-        site_settings = models.SiteSettings.objects.get(site=site)
-        if site_settings.homepage_url:
-            return HttpResponseRedirect(site_settings.homepage_url)
-    except models.SiteSettings.DoesNotExist:
-        pass
+    homepage_url = get_homepage_url()
+    if homepage_url:
+        return HttpResponseRedirect(homepage_url)
 
     return HttpResponseRedirect(reverse('coop_cms_view_all_articles'))
 
