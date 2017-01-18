@@ -32,7 +32,7 @@ clear_thumbnails_action.short_description = _(u"Clear thumbnails")
 class NavNodeAdmin(admin.ModelAdmin):
     """Navigation node admin"""
     list_display = ["label", 'parent', 'ordering', 'in_navigation', 'content_type', 'object_id']
-    list_filter = ['in_navigation', 'parent']
+    list_filter = ['tree', 'in_navigation', 'parent']
     list_editable = ["label", 'parent', 'ordering', 'in_navigation', ]
 
 admin.site.register(models.NavNode, NavNodeAdmin)
