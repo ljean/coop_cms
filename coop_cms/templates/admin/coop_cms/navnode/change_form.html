@@ -1,0 +1,26 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_modify admin_static %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script type="text/javascript">
+  var d$ = django.jQuery;
+  d$(function () {
+    // Change the Url of the object lookup dynamically depending of the selected content-type
+    d$('ul.nav_type_urls').hide();
+    d$(document).on('change', '#id_content_type', function () {
+      var value = d$(this).val();
+      var url = d$('ul.nav_type_urls li[rel="' + value + '"]').text();
+      if (value) {
+        d$('a#lookup_id_object_id').show().attr('href', url);
+      } else {
+        d$('a#lookup_id_object_id').hide();
+      }
+    });
+    d$('#id_content_type').change();
+  })
+  </script>
+{% endblock %}
+
+{% block extrastyle %}{{ block.super }}{% endblock %}
+

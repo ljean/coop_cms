@@ -9,7 +9,7 @@ from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
 from coop_cms.forms.articles import ArticleAdminForm
-from coop_cms.forms.navigation import NavTypeForm
+from coop_cms.forms.navigation import NavTypeForm, NavNodeAdminForm
 from coop_cms.forms.newsletters import NewsletterItemAdminForm, NewsletterAdminForm
 from coop_cms import models
 from coop_cms.settings import get_article_class, get_navtree_class, import_module
@@ -31,9 +31,12 @@ clear_thumbnails_action.short_description = _(u"Clear thumbnails")
 
 class NavNodeAdmin(admin.ModelAdmin):
     """Navigation node admin"""
-    list_display = ["label", 'parent', 'ordering', 'in_navigation', 'content_type', 'object_id']
+    list_display = ["__unicode__", "label", 'parent', 'ordering', 'in_navigation', 'content_type', 'object_id']
     list_filter = ['tree', 'in_navigation', 'parent']
     list_editable = ["label", 'parent', 'ordering', 'in_navigation', ]
+    ordering = ["tree", "parent", "ordering"]
+    form = NavNodeAdminForm
+
 
 admin.site.register(models.NavNode, NavNodeAdmin)
 
@@ -47,7 +50,7 @@ admin.site.register(models.NavType, NavTypeAdmin)
 
 class NavTreeAdmin(admin.ModelAdmin):
     """Navigation tree admin"""
-    list_display = ['__unicode__', 'name', 'navtypes_list']
+    list_display = ['__unicode__', 'name', 'navtypes_list', 'get_root_nodes_count']
     list_editable = ['name']
     list_filters = ['id']
 

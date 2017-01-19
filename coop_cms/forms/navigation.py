@@ -5,8 +5,9 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 
-from coop_cms.models import NavType, NavNode
+from coop_cms.models import NavType, NavNode, get_navigable_type_choices
 from coop_cms.settings import get_navigable_content_types, get_article_class, get_navtree_class
+from coop_cms.widgets import GenericFieldRawIdWidget
 
 
 class NavTypeForm(forms.ModelForm):
@@ -32,6 +33,20 @@ class NavTypeForm(forms.ModelForm):
         fields = ('content_type', 'search_field', 'label_rule')
 
 
+class NavNodeAdminForm(forms.ModelForm):
+    """Navigation Type Form"""
+
+    def __init__(self, *args, **kwargs):
+        print "******"
+        super(NavNodeAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
+        self.fields['content_type'].widget = forms.Select(choices=get_navigable_type_choices())
+        self.fields['object_id'].widget = GenericFieldRawIdWidget(kwargs.get('instance', None))
+
+    class Meta:
+        model = NavNode
+        exclude = []
+
+
 def get_node_choices():
     """used for node selection in article settings form"""
     prefix = "--"
@@ -40,7 +55,7 @@ def get_node_choices():
         choices.append((-tree.id, tree.name))
         for root_node in NavNode.objects.filter(tree=tree, parent__isnull=True).order_by('ordering'):
             for (progeny, level) in root_node.get_progeny():
-                choices.append((progeny.id, prefix*(level+1)+progeny.label))
+                choices.append((progeny.id, prefix * (level + 1) + progeny.label))
     return choices
 
 

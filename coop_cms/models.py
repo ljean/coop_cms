@@ -92,6 +92,16 @@ def create_navigation_node(content_type, obj, tree, parent):
     return node
 
 
+def get_navigable_type_choices():
+    """returns the list of choice of navigable types"""
+    types = [('', '')]
+    types += [
+        (nav_type.content_type.id, u'{0}'.format(nav_type.content_type))
+        for nav_type in NavType.objects.all()
+    ]
+    return types
+
+
 class NavType(models.Model):
     """Define which ContentTypes can be inserted in the tree as content"""
 
@@ -135,6 +145,11 @@ class BaseNavTree(models.Model):
     def get_root_nodes(self):
         """nodes with no parents"""
         return NavNode.objects.filter(tree=self, parent__isnull=True).order_by("ordering")
+
+    def get_root_nodes_count(self):
+        """number of nodes without parents"""
+        return self.get_root_nodes().count()
+    get_root_nodes_count.short_description = _(u'root nodes')
 
     class Meta:
         verbose_name = _(u'Navigation tree')
@@ -192,6 +207,8 @@ class NavNode(models.Model):
         return get_model_label(self.content_type.model_class())
 
     def __unicode__(self):
+        if self.parent:
+            return u'{0} > {1}'.format(self.parent, self.label)
         return self.label
 
     class Meta:

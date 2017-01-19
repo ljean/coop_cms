@@ -1,9 +1,17 @@
 # -*- coding: utf-8 -*-
 """widgets"""
 
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import reverse
+from django.forms import TextInput as DjangoTextInput
+from django.utils.text import mark_safe
+from django.utils.translation import ugettext as _
+
 from floppyforms.widgets import ClearableFileInput, Select, SelectMultiple, Input
 
+from coop_cms.models import NavType
 from coop_cms.utils import get_text_from_template
+
 
 
 class ReadOnlyInput(Input):
@@ -99,3 +107,73 @@ class ChosenSelect(ChosenWidgetMixin, Select):
         css = {
             "all": ("{0}?v=1".format("chosen/chosen.css"),),
         }
+
+
+class GenericFieldRawIdWidget(DjangoTextInput):
+    """
+    A Widget for displaying Generic "raw_id" interface rather than
+    in a <select> box.
+    """
+    def __init__(self, instance, attrs=None):
+        super(GenericFieldRawIdWidget, self).__init__(attrs)
+        nav_types = NavType.objects.all()
+        self.base_nav_urls = []
+        self.instance = instance
+        for nav_type in nav_types:
+            self.base_nav_urls.append(
+                (
+                    nav_type.content_type.id,
+                    reverse(
+                        'admin:{0}_{1}_changelist'.format(
+                            nav_type.content_type.app_label,
+                            nav_type.content_type.model
+                        )
+                    )
+                )
+            )
+
+    def get_nav_types_url_html(self):
+        """returns html for JS"""
+        html = u'<ul class="nav_type_urls">{0}</ul>'.format(
+            u''.join(
+                [
+                    u'<li rel="{0}">{1}</li>'.format(nav_type_id, nav_type_url)
+                    for nav_type_id, nav_type_url in self.base_nav_urls
+                ]
+            )
+        )
+        return html
+
+    def render(self, name, value, attrs=None):
+        if attrs is None:
+            attrs = {}
+        extra = []
+
+        if "class" not in attrs:
+            attrs['class'] = u'vGenericRawIdAdminField'  # The JavaScript code looks for this hook.
+            # the correct API to determine the ID dynamically.
+            extra.append(u'<a href="" class="related-lookup" id="lookup_id_{0}" title="{1}"></a>'.format(
+                name, _(u'Lookup'))
+            )
+        output = [super(GenericFieldRawIdWidget, self).render(name, value, attrs)] + extra
+        output.append(self.get_nav_types_url_html())
+        if self.instance:
+            output.append(self.label_for_value(self.instance))
+        return mark_safe(''.join(output))
+
+    def label_for_value(self, instance):
+        try:
+            model_class = instance.content_type.model_class()
+            label = model_class.objects.get(id=instance.object_id)
+        except AttributeError:
+            label = u''
+        except ObjectDoesNotExist:
+            label = u"<Not Found>"
+
+        if label:
+            return u"{0}:{1} ({2})".format(
+                instance.content_type,
+                instance.object_id,
+                label
+            )
+        return u''
