@@ -9,6 +9,8 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 
 from model_mommy import mommy
+
+from coop_cms.forms import ArticleForm
 from coop_cms.models import BaseArticle, Fragment, FragmentType, FragmentFilter
 from coop_cms.settings import get_article_class
 from coop_cms.tests import BaseTestCase, BeautifulSoup
@@ -189,9 +191,11 @@ class FragmentsTest(BaseFragmentTest):
             mommy.make(Fragment, type=fragment_type1, content="Wxcvbn", filter=fragment_filter2),
             mommy.make(Fragment, type=fragment_type1, content="Zsxdrg", filter=None),
         ]
+
+        article = mommy.make(get_article_class(), title='test')
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name x %}')
-        html = tpl.render(Context({"ft_name": ft_name, "x": 1, "form": "dummy_form"}))
+        html = tpl.render(Context({"ft_name": ft_name, "x": 1, "form": ArticleForm(instance=article)}))
         
         positions = [html.find('{0}'.format(f.content)) for f in [fragments[0], fragments[1]]]
         for pos in positions:
@@ -439,9 +443,11 @@ class FragmentsTest(BaseFragmentTest):
             mommy.make(Fragment, type=fragment_type2, content="POIUYT"),
         ]
 
+        article = mommy.make(get_article_class(), title='test')
+
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name %}')
-        html = tpl.render(Context({"ft_name": ft_name, "form": True}))
-        
+        html = tpl.render(Context({"ft_name": ft_name, "form": ArticleForm(instance=article)}))
+
         positions = [
             html.find(self.editable_field_tpl.format(f.id, f.content))
             for f in [fragments[0], fragments[1], fragments[2]]
@@ -462,6 +468,8 @@ class FragmentsTest(BaseFragmentTest):
         
         fragment_filter1 = mommy.make(FragmentFilter, extra_id="hello")
         fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
+
+        article = mommy.make(get_article_class(), title='test')
         
         fragments = [
             mommy.make(Fragment, type=fragment_type1, content="Azerty", filter=fragment_filter1),
@@ -472,7 +480,7 @@ class FragmentsTest(BaseFragmentTest):
         ]
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name "hello" %}')
-        html = tpl.render(Context({"ft_name": ft_name, "form": True}))
+        html = tpl.render(Context({"ft_name": ft_name, "form": ArticleForm(instance=article)}))
 
         positions = [
             html.find(self.editable_field_tpl.format(fragment.id, fragment.content))
@@ -524,9 +532,11 @@ class FragmentsTest(BaseFragmentTest):
         fragment_type = mommy.make(FragmentType, name=ft_name)
         
         mommy.make(Fragment, type=fragment_type)
+
+        article = mommy.make(get_article_class(), title='test')
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
-        html = tpl.render(Context({"ft_name": ft_name, 'form': True}))
+        html = tpl.render(Context({"ft_name": ft_name, "form": ArticleForm(instance=article)}))
         
         self.assertEqual(FragmentType.objects.count(), 1)
         self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)
@@ -543,7 +553,7 @@ class FragmentsTest(BaseFragmentTest):
         
         mommy.make(Fragment, type=fragment_type)
         mommy.make(Fragment, type=fragment_type)
-        
+
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
         html = tpl.render(Context({"ft_name": ft_name}))
         
@@ -559,9 +569,11 @@ class FragmentsTest(BaseFragmentTest):
         
         mommy.make(Fragment, type=fragment_type)
         mommy.make(Fragment, type=fragment_type)
+
+        article = mommy.make(get_article_class(), title='test')
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
-        html = tpl.render(Context({"ft_name": ft_name, 'form': True}))
+        html = tpl.render(Context({"ft_name": ft_name, "form": ArticleForm(instance=article)}))
         
         self.assertEqual(FragmentType.objects.count(), 1)
         self.assertEqual(FragmentType.objects.filter(name=ft_name).count(), 1)

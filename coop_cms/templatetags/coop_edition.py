@@ -30,12 +30,18 @@ class DummyEngine(object):
     string_if_invalid = ''
 
 
+class DummyEditableForm(object):
+    """Used for monkey patching Context"""
+    is_inline_editable = True
+
+
 class PieceOfHtmlEditNode(InlineHtmlEditNode):
     """Template node for editing a PieceOfHtml"""
 
     def render(self, context):
         """convert to html"""
-        if context.get('form', None) or context.get('formset', None):
+        form = context.get('form', None) or context.get('formset', None)
+        if getattr(form, 'is_inline_editable', False):
             context.dicts[0]['inline_html_edit'] = True
         return super(PieceOfHtmlEditNode, self).render(context)
 
@@ -108,7 +114,7 @@ class FragmentEditNode(InlineHtmlMultipleEditNode):
                 'index': idx,
                 'objects_count': objects_count,
                 'fragment': self._render_value(context, self._get_object_lookup(obj), value),
-                'form': self._edit_mode
+                'form': DummyEditableForm() if self._edit_mode else None,
             }))
         else:
             object_content = self._pre_object_render(obj)
@@ -119,7 +125,8 @@ class FragmentEditNode(InlineHtmlMultipleEditNode):
     def render(self, context):
         """convert to html"""
         self._edit_mode = False
-        if context.get('form', None) or context.get('formset', None):
+        form = context.get('form', None) or context.get('formset', None)
+        if getattr(form, 'is_inline_editable', False):
             context.dicts[0]['inline_html_edit'] = True
             self._edit_mode = True
         html = super(FragmentEditNode, self).render(context)
@@ -165,7 +172,8 @@ class ArticleSummaryEditNode(InlineHtmlEditNode):
 
     def render(self, context):
         """to html"""
-        if context.get('form', None):
+        form = context.get('form', None)
+        if form and getattr(form, 'is_inline_editable', False):
             context.dicts[0]['inline_html_edit'] = True
         return super(ArticleSummaryEditNode, self).render(context)
 
@@ -248,7 +256,10 @@ class IfCmsEditionNode(template.Node):
 
     def _check_condition(self, context):
         """check condition of the if"""
-        return context.get('form', None) or context.get('formset', None) 
+        form = context.get('form', None) or context.get('formset', None)
+        if form:
+            if getattr(form, 'is_inline_editable', False):
+                return form
 
     def render(self, context):
         """to html"""
@@ -489,7 +500,13 @@ class CmsEditNode(template.Node):
         formset = context.get('formset', None)
         objects = context.get('objects', None)
 
-        if form or formset:
+        is_inline_editable = False
+        if form:
+            is_inline_editable = getattr(form, 'is_inline_editable', False)
+        elif formset:
+            is_inline_editable = getattr(formset, 'is_inline_editable', False)
+
+        if is_inline_editable:
             node_template = template.Template(CMS_FORM_TEMPLATE)
             if form:
                 safe_context[self.var_name] = FormWrapper(
