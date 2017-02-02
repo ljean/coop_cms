@@ -2,7 +2,7 @@
 """This can be added to default context"""
 
 from django.conf import settings
-from coop_cms.utils import get_homepage_url
+from coop_cms.models import get_homepage_url
 
 def cms_settings(request):
     """add jquery version to context"""

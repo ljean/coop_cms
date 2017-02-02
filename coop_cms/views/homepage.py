@@ -13,7 +13,7 @@ from colorbox.decorators import popup_redirect
 
 from coop_cms import models
 from coop_cms.settings import cms_no_homepage, get_article_class
-from coop_cms.utils import get_homepage_url
+from coop_cms.models import get_homepage_url
 
 
 def homepage(request):

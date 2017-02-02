@@ -33,6 +33,7 @@ from coop_cms.settings import (
     get_article_class, get_article_logo_size, get_article_logo_crop, get_article_templates, get_default_logo,
     get_headline_image_size, get_headline_image_crop, get_img_folder, get_newsletter_item_classes,
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
+    cms_no_homepage,
 )
 from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path
 
@@ -1254,3 +1255,16 @@ class SiteSettings(models.Model):
         verbose_name = _(u'Sites settings')
         verbose_name_plural = _(u'Site settings')
         ordering = ("site__id",)
+
+
+def get_homepage_url():
+    """returns the URL of the home page"""
+    if not cms_no_homepage():
+        site = Site.objects.get_current()
+        # Try site settings
+        try:
+            site_settings = SiteSettings.objects.get(site=site)
+            if site_settings.homepage_url:
+                return site_settings.homepage_url
+        except SiteSettings.DoesNotExist:
+            pass

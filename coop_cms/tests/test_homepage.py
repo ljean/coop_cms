@@ -70,14 +70,14 @@ class HomepageTest(UserBaseTestCase):
         a1 = get_article_class().objects.create(title="python", content='python')
         a2 = get_article_class().objects.create(title="django", content='django', homepage_for_site=site)
         site_settings = mommy.make(SiteSettings, site=site, homepage_url=a1.get_absolute_url())
-    
+
         response = self.client.get(reverse('coop_cms_homepage'))
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response['Location'].find(a1.get_absolute_url()) >= 0)
     
     def test_user_settings_homepage_not_set(self):
         site = Site.objects.get(id=settings.SITE_ID)
-        a1 = get_article_class().objects.create(title="python", content='python')
+        a1 = get_article_class().objects.create(title="pythonx", content='pythonx')
         a2 = get_article_class().objects.create(title="django", content='django', homepage_for_site=site)
         site_settings = mommy.make(SiteSettings, site=site, homepage_url="")
 
@@ -89,10 +89,10 @@ class HomepageTest(UserBaseTestCase):
     def test_view_change_homepage(self):
         self._log_as_editor()
         a1 = get_article_class().objects.create(title="python", content='python')
-        
+
         response = self.client.get(reverse('coop_cms_set_homepage', args=[a1.id]))
         self.assertEqual(response.status_code, 200)
-        
+
         a1 = get_article_class().objects.get(id=a1.id)
         self.assertEqual(a1.is_homepage, False)
     
@@ -102,7 +102,7 @@ class HomepageTest(UserBaseTestCase):
         a1 = get_article_class().objects.create(title="python", content='python')
         a2 = get_article_class().objects.create(title="django", content='django')
         a3 = get_article_class().objects.create(title="home1", content='homepage1')
-        
+
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a2.id]), data={'confirm': '1'})
         self.assertEqual(response.status_code, 200)
         a2 = get_article_class().objects.get(id=a2.id)
@@ -112,7 +112,7 @@ class HomepageTest(UserBaseTestCase):
         self.assertEqual(a2.homepage_for_site, None)
         site_settings = SiteSettings.objects.get(site__id=settings.SITE_ID)
         self.assertEqual(site_settings.homepage_url, a2.get_absolute_url())
-        
+
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a3.id]), data={'confirm': '1'})
         self.assertEqual(response.status_code, 200)
         home_url = reverse("coop_cms_homepage")
@@ -132,7 +132,7 @@ class HomepageTest(UserBaseTestCase):
         a1 = get_article_class().objects.create(title="python", content='python')
         a2 = get_article_class().objects.create(title="django", content='django')
         a3 = get_article_class().objects.create(title="home1", content='homepage1')
-        
+
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a2.id]), data={'confirm': '1'}, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.redirect_chain[0][0], 302)
@@ -145,14 +145,14 @@ class HomepageTest(UserBaseTestCase):
         self._log_as_editor()
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = Site.objects.create(domain="wooooooaa.com", name="wooaa")
-        
+
         a1 = get_article_class().objects.create(title="python", content='python')
         a2 = get_article_class().objects.create(title="django", content='django')
         a3 = get_article_class().objects.create(title="home1", content='homepage1')
-        
+
         settings.SITE_ID = site2.id
         a4 = get_article_class().objects.create(title="home1", content='homepage2')
-        
+
         settings.SITE_ID = site1.id
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a3.id]), data={'confirm': '1'})
         home_url = reverse("coop_cms_homepage")
@@ -180,7 +180,7 @@ class HomepageTest(UserBaseTestCase):
     def test_homepage_multisites(self):
         site1 = Site.objects.get(id=settings.SITE_ID)
         site2 = Site.objects.create(domain="wooooooaa.com", name="wooaa")
-        
+
         article1 = get_article_class().objects.create(title="python", content='python')
         article2 = get_article_class().objects.create(title="django", content='django')
         article3 = get_article_class().objects.create(title="home1", content='homepage1')

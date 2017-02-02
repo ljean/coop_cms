@@ -397,15 +397,3 @@ def get_login_url():
     except NoReverseMatch:
         return reverse("login")
 
-
-def get_homepage_url():
-    """returns the URL of the home page"""
-    if not cms_no_homepage():
-        site = Site.objects.get_current()
-        # Try site settings
-        try:
-            site_settings = site.sitesettings
-            if site_settings.homepage_url:
-                return site_settings.homepage_url
-        except ObjectDoesNotExist:
-            pass
