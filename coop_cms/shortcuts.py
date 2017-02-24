@@ -4,9 +4,8 @@
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
-from django.http import Http404, HttpResponsePermanentRedirect
+from django.http import Http404, HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
-from django.utils.translation import get_language
 
 from coop_cms.models import BaseArticle, Alias
 from coop_cms.settings import get_article_class, is_localized
@@ -93,6 +92,9 @@ def redirect_if_alias(path):
             raise Http404
 
     if alias.redirect_url:
-        return HttpResponsePermanentRedirect(alias.redirect_url)
+        if alias.redirect_code == 301:
+            return HttpResponsePermanentRedirect(alias.redirect_url)
+        else:
+            return HttpResponseRedirect(alias.redirect_url)
     else:
         raise Http404

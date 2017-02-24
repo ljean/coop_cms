@@ -1141,9 +1141,15 @@ class NewsletterSending(models.Model):
 
 class Alias(models.Model):
     """redirections"""
-    
+
+    CODE_CHOICES = (
+        (301, _(u'301 - Permanent')),
+        (302, _(u'302 - Non permanent')),
+    )
+
     path = models.CharField(max_length=200)
     redirect_url = models.CharField(max_length=200, default="", blank=True)
+    redirect_code = models.IntegerField(default=301, choices=CODE_CHOICES)
     
     class Meta:
         verbose_name = _(u'Alias')

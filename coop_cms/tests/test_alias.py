@@ -86,3 +86,33 @@ class AliasTest(BaseTestCase):
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, article.title)
+
+    def test_redirect_non_permanent(self):
+        article_class = get_article_class()
+        article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")
+        alias = Alias.objects.create(path='toto', redirect_url=article.get_absolute_url(), redirect_code=302)
+
+        url = alias.get_absolute_url()
+        self.assertNotEqual(url[-1], "/")
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
+
+    def test_redirect_permanent(self):
+        article_class = get_article_class()
+        article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")
+        alias = Alias.objects.create(path='toto', redirect_url=article.get_absolute_url(), redirect_code=301)
+
+        url = alias.get_absolute_url()
+        self.assertNotEqual(url[-1], "/")
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 301)
+
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
