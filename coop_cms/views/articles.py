@@ -299,6 +299,13 @@ class ArticleView(EditableObjectView):
         """get object"""
         return get_article_or_404(slug=self.kwargs['slug'], sites=settings.SITE_ID)
 
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            return super(ArticleView, self).dispatch(request, *args, **kwargs)
+        except Http404:
+            slug = self.kwargs['slug']
+            return redirect_if_alias(slug)
+
     def can_access_object(self):
         """perms -> 404 if no perms"""
 

@@ -42,3 +42,47 @@ class AliasTest(BaseTestCase):
         response = self.client.get(alias.get_absolute_url(), follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, article.title)
+
+    def test_redirect_no_slash(self):
+        article_class = get_article_class()
+        article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")
+        alias = Alias.objects.create(path='toto', redirect_url=article.get_absolute_url())
+
+        url = alias.get_absolute_url()
+        self.assertNotEqual(url[-1], "/")
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 301)
+
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
+
+    def test_redirect_slash(self):
+        article_class = get_article_class()
+        article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")
+        alias = Alias.objects.create(path='toto', redirect_url=article.get_absolute_url())
+
+        self.assertNotEqual(alias.get_absolute_url()[-1], "/")
+        url = alias.get_absolute_url() + "/"
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 301)
+
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
+
+    def test_redirect_several_slashes(self):
+        article_class = get_article_class()
+        article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")
+        alias = Alias.objects.create(path='toto/and/titi/', redirect_url=article.get_absolute_url())
+
+        url = alias.get_absolute_url()
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 301)
+
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
