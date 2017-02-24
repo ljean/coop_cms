@@ -200,7 +200,7 @@ class AliasAdmin(BASE_ADMIN_CLASS):
     """Alias admin"""
     list_display = ['path', 'redirect_url', 'redirect_code']
     list_editable = ['redirect_url', 'redirect_code']
-    list_filter = ['redirect_url', ]
+    list_filter = ['redirect_code', ]
     search_fields = ['path', 'redirect_url']
     ordering = ['path', ]
 
