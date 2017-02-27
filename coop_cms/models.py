@@ -1162,6 +1162,11 @@ class Alias(models.Model):
     def __unicode__(self):
         return self.path
 
+    def save(self, **kwargs):
+        if self.path and self.path[-1] == u'/':
+            self.path = self.path[:-1]
+        return super(Alias, self).save(**kwargs)
+
 
 class FragmentType(models.Model):
     """Type of fragments"""

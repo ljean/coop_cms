@@ -58,13 +58,43 @@ class AliasTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, article.title)
 
-    def test_redirect_slash(self):
+    def test_redirect_no_slash(self):
         article_class = get_article_class()
         article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")
         alias = Alias.objects.create(path='toto', redirect_url=article.get_absolute_url())
 
         self.assertNotEqual(alias.get_absolute_url()[-1], "/")
         url = alias.get_absolute_url() + "/"
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 301)
+
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
+
+    def test_redirect_slash(self):
+        article_class = get_article_class()
+        article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")
+        alias = Alias.objects.create(path='toto/', redirect_url=article.get_absolute_url())
+
+        self.assertNotEqual(alias.get_absolute_url()[-1], "/")
+        url = alias.get_absolute_url()
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 301)
+
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
+
+    def test_redirect_slash2(self):
+        article_class = get_article_class()
+        article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")
+        alias = Alias.objects.create(path='/fr/en-us/home', redirect_url=article.get_absolute_url())
+
+        self.assertNotEqual(alias.get_absolute_url()[-1], "/")
+        url = alias.get_absolute_url()
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, 301)
@@ -86,6 +116,14 @@ class AliasTest(BaseTestCase):
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, article.title)
+
+    def test_redirect_unknown(self):
+        response = self.client.get('/fr/en-us/home')
+        self.assertEqual(response.status_code, 404)
+
+    def test_redirect_unknown_slashes(self):
+        response = self.client.get('/fr/en-us/home/')
+        self.assertEqual(response.status_code, 404)
 
     def test_redirect_non_permanent(self):
         article_class = get_article_class()
