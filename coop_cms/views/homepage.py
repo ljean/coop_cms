@@ -14,7 +14,6 @@ from colorbox.decorators import popup_redirect
 from coop_cms import models
 from coop_cms.settings import cms_no_homepage, get_article_class, homepage_no_redirection, get_article_views
 from coop_cms.models import get_homepage_url, get_homepage_article
-from coop_cms.views.articles import ArticleView
 
 
 def homepage(request):
@@ -28,7 +27,7 @@ def homepage(request):
         if article_slug:
             article_views = get_article_views()
             article_view = article_views['article_view']
-            return article_view.as_view()(request, slug=article_slug)
+            return article_view.as_view(as_homepage=True)(request, slug=article_slug)
 
     else:
         homepage_url = get_homepage_url()

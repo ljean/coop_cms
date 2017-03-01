@@ -754,6 +754,8 @@ class BaseArticle(BaseNavigable):
 
     def get_absolute_url(self):
         """url for viewing"""
+        if homepage_no_redirection() and self.is_homepage:
+            return reverse('coop_cms_homepage')
         return reverse('coop_cms_view_article', args=[self._get_slug()])
 
     def get_edit_url(self):
@@ -1116,7 +1118,7 @@ class Newsletter(TimeStampedModel):
         """template"""
         template = self.template
         if not template:
-            self = 'coop_cms/newsletter.html'
+            template = 'coop_cms/newsletter.html'
         return template
 
     def __unicode__(self):

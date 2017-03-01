@@ -25,7 +25,7 @@ from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
 from coop_cms.settings import (
     get_article_class, get_article_form, get_article_settings_form, get_new_article_form,
-    get_articles_category_page_size
+    get_articles_category_page_size, homepage_no_redirection
 )
 from coop_cms.shortcuts import get_article_or_404, get_headlines, redirect_if_alias
 from coop_cms.utils import get_model_name, get_model_app, paginate
@@ -294,10 +294,16 @@ class ArticleView(EditableObjectView):
     form_class = get_article_form()
     field_lookup = "slug"
     varname = "article"
+    as_homepage = False
 
     def get_object(self):
         """get object"""
-        return get_article_or_404(slug=self.kwargs['slug'], sites=settings.SITE_ID)
+        article = get_article_or_404(slug=self.kwargs['slug'], sites=settings.SITE_ID)
+        if not self.edit_mode:
+            if article.is_homepage and homepage_no_redirection() and not self.as_homepage:
+                # Do not authorize access to homepage with its urls in 'homepage_no_redirection' mode
+                raise Http404
+        return article
 
     def dispatch(self, request, *args, **kwargs):
         try:

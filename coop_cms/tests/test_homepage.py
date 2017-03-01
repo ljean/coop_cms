@@ -55,6 +55,13 @@ class HomepageRedirectionTest(UserBaseTestCase):
     def tearDown(self):
         super(HomepageRedirectionTest, self).tearDown()
         settings.SITE_ID = self.site_id
+
+    def test_homepage_url(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        article1 = get_article_class().objects.create(title="pythonx", content='pythonx')
+        article1_url = reverse('coop_cms_view_article', args=[article1.slug])
+        mommy.make(SiteSettings, site=site, homepage_url=article1_url)
+        self.assertEqual(article1.get_absolute_url(), article1_url)
         
     def test_user_settings_homepage(self):
         site = Site.objects.get(id=settings.SITE_ID)
@@ -235,6 +242,38 @@ class HomepageRedirectionTest(UserBaseTestCase):
         self.assertEqual(article3.is_homepage, True)
         self.assertEqual(article4.is_homepage, False)
 
+    def test_edit_homepage(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        SiteSettings.objects.create(site=site, homepage_url=article.get_absolute_url())
+
+        data = {"title": 'salut', 'content': 'bonjour!'}
+
+        self._log_as_editor()
+
+        response = self.client.get(article.get_edit_url())
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        article = get_article_class().objects.get(id=article.id)
+        self.assertEqual(article.title, data['title'])
+        self.assertEqual(article.content, data['content'])
+
+    def test_view_homepage(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        SiteSettings.objects.create(site=site, homepage_url=article.get_absolute_url())
+
+        article_url = reverse('coop_cms_view_article', args=[article.slug])
+
+        response = self.client.get(article_url)
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.get(reverse('coop_cms_homepage'), follow=True)
+        self.assertRedirects(response, article.get_absolute_url())
+
 
 @override_settings(COOP_CMS_NO_HOMEPAGE=False, COOP_CMS_HOMEPAGE_NO_REDIRECTION=False)
 class HeadlineTest(BaseTestCase):
@@ -374,6 +413,14 @@ class HomepageDirectTest(UserBaseTestCase):
         super(HomepageDirectTest, self).tearDown()
         settings.SITE_ID = self.site_id
 
+    def test_homepage_url(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        article1 = get_article_class().objects.create(title="pythonx", content='pythonx')
+        article1_url = reverse('coop_cms_view_article', args=[article1.slug])
+        mommy.make(SiteSettings, site=site, homepage_article=article1.slug)
+        self.assertNotEqual(article1.get_absolute_url(), article1_url)
+        self.assertEqual(article1.get_absolute_url(), reverse('coop_cms_homepage'))
+
     def test_user_settings_homepage(self):
         site = Site.objects.get(id=settings.SITE_ID)
         article1 = get_article_class().objects.create(title="python", content='python')
@@ -399,7 +446,8 @@ class HomepageDirectTest(UserBaseTestCase):
         site = Site.objects.get(id=settings.SITE_ID)
         article1 = get_article_class().objects.create(title="pythonx", content='pythonx')
         article2 = get_article_class().objects.create(title="django", content='django')
-        mommy.make(SiteSettings, site=site, homepage_url=article2.get_absolute_url(), homepage_article=article1.slug)
+        article2_url = reverse('coop_cms_view_article', args=[article2.slug])
+        mommy.make(SiteSettings, site=site, homepage_url=article2_url, homepage_article=article1.slug)
 
         response = self.client.get(reverse('coop_cms_homepage'))
         self.assertEqual(response.status_code, 200)
@@ -411,7 +459,8 @@ class HomepageDirectTest(UserBaseTestCase):
         site = Site.objects.get(id=settings.SITE_ID)
         article1 = get_article_class().objects.create(title="pythonx", content='pythonx')
         article2 = get_article_class().objects.create(title="django", content='django')
-        mommy.make(SiteSettings, site=site, homepage_url=article2.get_absolute_url())
+        article2_url = reverse('coop_cms_view_article', args=[article2.slug])
+        mommy.make(SiteSettings, site=site, homepage_url=article2_url)
 
         response = self.client.get(reverse('coop_cms_homepage'), follow=True)
         self.assertRedirects(response, reverse('coop_cms_view_all_articles'))
@@ -573,3 +622,37 @@ class HomepageDirectTest(UserBaseTestCase):
         self.assertContains(response, article3.content)
         self.assertEqual(article3.is_homepage, True)
         self.assertEqual(article4.is_homepage, False)
+
+    def test_edit_homepage(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        SiteSettings.objects.create(site=site, homepage_article=article.slug)
+
+        data = {"title": 'salut', 'content': 'bonjour!'}
+
+        self._log_as_editor()
+
+        response = self.client.get(article.get_edit_url())
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(article.get_edit_url(), data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        article = get_article_class().objects.get(id=article.id)
+        self.assertEqual(article.title, data['title'])
+        self.assertEqual(article.content, data['content'])
+
+    def test_view_homepage(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        SiteSettings.objects.create(site=site, homepage_article=article.slug)
+
+        article_url = reverse('coop_cms_view_article', args=[article.slug])
+
+        response = self.client.get(article_url)
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.get(reverse('coop_cms_homepage'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
+        self.assertContains(response, article.content)
