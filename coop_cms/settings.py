@@ -264,9 +264,11 @@ def get_newsletter_context_callbacks():
 
 def is_localized():
     """return True if site is localized"""
-    if ('modeltranslation' in django_settings.INSTALLED_APPS):
-        return True
-    return False
+    coop_cms_is_localized = getattr(django_settings, 'COOP_CMS_IS_LOCALIZED', None)
+    if coop_cms_is_localized is None:
+        if 'modeltranslation' in django_settings.INSTALLED_APPS:
+            return True
+    return coop_cms_is_localized
 
 
 def is_multilang():
