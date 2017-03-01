@@ -2,16 +2,16 @@
 
 from django.conf import settings
 
-from unittest import skipIf
-
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
+from django.test import RequestFactory
 from django.test.utils import override_settings
 
 from model_mommy import mommy
 
+from coop_cms.context_processors import homepage_url
 from coop_cms.models import BaseArticle, SiteSettings
-from coop_cms.settings import get_article_class, cms_no_homepage
+from coop_cms.settings import get_article_class
 from coop_cms.shortcuts import get_headlines
 from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
 
@@ -62,6 +62,15 @@ class HomepageRedirectionTest(UserBaseTestCase):
         article1_url = reverse('coop_cms_view_article', args=[article1.slug])
         mommy.make(SiteSettings, site=site, homepage_url=article1_url)
         self.assertEqual(article1.get_absolute_url(), article1_url)
+
+    def test_homepage_url_context_processor(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        article1 = get_article_class().objects.create(title="pythonx", content='pythonx')
+        article2 = get_article_class().objects.create(title="django", content='django')
+        article1_url = reverse('coop_cms_view_article', args=[article1.slug])
+        mommy.make(SiteSettings, site=site, homepage_url=article1_url)
+        request = RequestFactory().get(article2.get_absolute_url())
+        self.assertEqual(homepage_url(request), {'homepage_url': article1.get_absolute_url()})
         
     def test_user_settings_homepage(self):
         site = Site.objects.get(id=settings.SITE_ID)
@@ -420,6 +429,14 @@ class HomepageDirectTest(UserBaseTestCase):
         mommy.make(SiteSettings, site=site, homepage_article=article1.slug)
         self.assertNotEqual(article1.get_absolute_url(), article1_url)
         self.assertEqual(article1.get_absolute_url(), reverse('coop_cms_homepage'))
+
+    def test_homepage_url_context_processor(self):
+        site = Site.objects.get(id=settings.SITE_ID)
+        article1 = get_article_class().objects.create(title="pythonx", content='pythonx')
+        article2 = get_article_class().objects.create(title="django", content='django')
+        mommy.make(SiteSettings, site=site, homepage_article=article1.slug)
+        request = RequestFactory().get(article2.get_absolute_url())
+        self.assertEqual(homepage_url(request), {'homepage_url': reverse('coop_cms_homepage')})
 
     def test_user_settings_homepage(self):
         site = Site.objects.get(id=settings.SITE_ID)

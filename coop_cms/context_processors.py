@@ -2,7 +2,10 @@
 """This can be added to default context"""
 
 from django.conf import settings
+from django.core.urlresolvers import reverse
+
 from coop_cms.models import get_homepage_url
+from coop_cms.settings import homepage_no_redirection
 
 
 def cms_settings(request):
@@ -18,6 +21,6 @@ def cms_settings(request):
 def homepage_url(request):
     """add hoempage url to context"""
     context = {
-        'homepage_url': get_homepage_url(),
+        'homepage_url': reverse('coop_cms_homepage') if homepage_no_redirection() else get_homepage_url() ,
     }
     return context
