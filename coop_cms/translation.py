@@ -32,7 +32,7 @@ translator.register(ArticleCategory, ArticleCategoryTranslationOptions)
 
 class SiteSettingsTranslationOptions(TranslationOptions):
     """translation"""
-    fields = ('homepage_url',)
+    fields = ('homepage_url', 'homepage_article',)
 translator.register(SiteSettings, SiteSettingsTranslationOptions)
 
 

@@ -384,3 +384,8 @@ def get_media_root():
         return get_unit_test_media_root()
     else:
         return django_settings.MEDIA_ROOT
+
+
+def homepage_no_redirection():
+    """Indicates if the homepage should be served directly or as a redirection (default)"""
+    return getattr(django_settings, 'COOP_CMS_HOMEPAGE_NO_REDIRECTION', False)

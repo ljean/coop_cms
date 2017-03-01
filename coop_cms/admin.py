@@ -223,4 +223,9 @@ admin.site.register(models.FragmentFilter)
 admin.site.register(models.Link)
 admin.site.register(models.Document)
 
-admin.site.register(models.SiteSettings, BASE_ADMIN_CLASS)
+
+class SiteSettingsAdmin(BASE_ADMIN_CLASS):
+    list_display = ('site', 'homepage_url', 'homepage_article', 'sitemap_mode')
+
+
+admin.site.register(models.SiteSettings, SiteSettingsAdmin)

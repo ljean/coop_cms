@@ -33,7 +33,7 @@ from coop_cms.settings import (
     get_article_class, get_article_logo_size, get_article_logo_crop, get_article_templates, get_default_logo,
     get_headline_image_size, get_headline_image_crop, get_img_folder, get_newsletter_item_classes,
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
-    cms_no_homepage,
+    cms_no_homepage, homepage_no_redirection
 )
 from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path
 
@@ -542,7 +542,10 @@ class BaseArticle(BaseNavigable):
         """True if is the homepage of the current site"""
         site_settings = SiteSettings.objects.get_or_create(site=Site.objects.get_current())[0]
         try:
-            return site_settings.homepage_url == self.get_absolute_url()
+            if homepage_no_redirection():
+                return site_settings.homepage_article == self.slug
+            else:
+                return site_settings.homepage_url == self.get_absolute_url()
         except NoReverseMatch:
             return False
 
@@ -1254,10 +1257,14 @@ class SiteSettings(models.Model):
 
     site = models.OneToOneField(Site, verbose_name=_(u'site settings'))
     homepage_url = models.CharField(
-        max_length=256, blank=True, default="", verbose_name=_(u'homepage URL'),
-        help_text=_(u"if set, the homepage will be redirected to the given URL")
+        max_length=256, blank=True, default=u"", verbose_name=_(u'homepage URL'),
+        help_text=_(u"if set, the homepage will be redirected to the given URL"), db_index=True
     )
     sitemap_mode = models.IntegerField(default=SITEMAP_ONLY_SITE, choices=SITEMAP_MODES)
+    homepage_article = models.CharField(
+        max_length=256, blank=True, default=u"", verbose_name=_(u'homepage article'),
+        help_text=_(u"if set, the homepage will be get the article with the given slug"), db_index=True
+    )
     
     def __unicode__(self):
         return u"{0}".format(self.site)
@@ -1277,5 +1284,18 @@ def get_homepage_url():
             site_settings = SiteSettings.objects.get(site=site)
             if site_settings.homepage_url:
                 return site_settings.homepage_url
+        except SiteSettings.DoesNotExist:
+            pass
+
+
+def get_homepage_article():
+    """returns the URL of the home page"""
+    if not cms_no_homepage():
+        site = Site.objects.get_current()
+        # Try site settings
+        try:
+            site_settings = SiteSettings.objects.get(site=site)
+            if site_settings.homepage_article:
+                return site_settings.homepage_article
         except SiteSettings.DoesNotExist:
             pass

@@ -12,8 +12,9 @@ from django.utils.translation import ugettext as _
 from colorbox.decorators import popup_redirect
 
 from coop_cms import models
-from coop_cms.settings import cms_no_homepage, get_article_class
-from coop_cms.models import get_homepage_url
+from coop_cms.settings import cms_no_homepage, get_article_class, homepage_no_redirection, get_article_views
+from coop_cms.models import get_homepage_url, get_homepage_article
+from coop_cms.views.articles import ArticleView
 
 
 def homepage(request):
@@ -21,9 +22,18 @@ def homepage(request):
     if cms_no_homepage():
         raise Http404
 
-    homepage_url = get_homepage_url()
-    if homepage_url:
-        return HttpResponseRedirect(homepage_url)
+    if homepage_no_redirection():
+        article_slug = get_homepage_article()
+
+        if article_slug:
+            article_views = get_article_views()
+            article_view = article_views['article_view']
+            return article_view.as_view()(request, slug=article_slug)
+
+    else:
+        homepage_url = get_homepage_url()
+        if homepage_url:
+            return HttpResponseRedirect(homepage_url)
 
     return HttpResponseRedirect(reverse('coop_cms_view_all_articles'))
 
@@ -39,7 +49,13 @@ def set_homepage(request, article_id):
 
     if request.method == "POST":
         site_settings = models.SiteSettings.objects.get_or_create(site=Site.objects.get_current())[0]
-        site_settings.homepage_url = article.get_absolute_url()
+
+        if homepage_no_redirection():
+            site_settings.homepage_url = ''
+            site_settings.homepage_article = article.slug
+        else:
+            site_settings.homepage_url = article.get_absolute_url()
+            site_settings.homepage_article = ''
         site_settings.save()
 
         return HttpResponseRedirect(reverse('coop_cms_homepage'))
