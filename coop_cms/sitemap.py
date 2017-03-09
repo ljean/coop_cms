@@ -13,56 +13,17 @@ from coop_cms.settings import get_article_class, is_localized
 
 
 class LocaleSitemap(Sitemap):
+    _current_site = None
+
     def __init__(self, language=''):
         super(LocaleSitemap, self).__init__()
         self.language = language
-
-    def location(self, obj):
-        if is_localized() and self.language:
-            activate(self.language)
-        return obj.get_absolute_url()
-
-
-class ViewSitemap(LocaleSitemap):
-    """Sitemap base class for django view"""
-    view_names = []
-    
-    def items(self):
-        """get items"""
-        class Klass(object):
-            """a klass wrapper"""
-            def __init__(self, name):
-                self.name = name
-            
-            def get_absolute_url(self):
-                """get url"""
-                return reverse(self.name)
-            
-        return [Klass(x) for x in self.view_names]
-
-
-class BaseSitemap(LocaleSitemap):
-    """Base class"""
-    _current_site = None
-
-    def get_urls(self, page=1, site=None, protocol=None):
-        """get urls"""
-        urls = []
-        for site in Site.objects.all():
-            urls.extend(super(BaseSitemap, self).get_urls(page, site, protocol=protocol))
-        return urls
 
     def get_current_site(self):
         """get current site"""
         if not self._current_site:
             self._current_site = Site.objects.get_current()
         return self._current_site
-
-
-class ArticleSitemap(BaseSitemap):
-    """article sitemap"""
-    changefreq = "weekly"
-    priority = 0.5
 
     def get_sitemap_mode(self):
         """define which articles must be included in sitemap"""
@@ -73,26 +34,63 @@ class ArticleSitemap(BaseSitemap):
         except SiteSettings.DoesNotExist:
             return SiteSettings.SITEMAP_ONLY_SITE
 
+    def location(self, obj):
+        if is_localized() and self.language:
+            activate(self.language)
+        return obj.get_absolute_url()
+
+    def sites(self):
+        sitemap_mode = self.get_sitemap_mode()
+
+        if sitemap_mode == SiteSettings.SITEMAP_ALL:
+            return Site.objects.all()
+
+        return Site.objects.filter(id=settings.SITE_ID)
+
+    def get_urls(self, page=1, site=None, protocol=None):
+        """get urls"""
+        urls = []
+        for site in self.sites():
+            urls.extend(super(LocaleSitemap, self).get_urls(page, site, protocol=protocol))
+        return urls
+
+
+class BaseSitemap(LocaleSitemap):
+    """Base class"""
+    pass
+
+
+class ViewSitemap(BaseSitemap):
+    """Sitemap base class for django view"""
+    view_names = []
+    
+    def items(self):
+        """get items"""
+
+        class item_class(object):
+            """a klass wrapper"""
+            def __init__(self, view_name):
+                self.view_name = view_name
+            
+            def get_absolute_url(self):
+                """get url"""
+                return reverse(self.view_name)
+            
+        return [item_class(view_name) for view_name in self.view_names]
+
+
+class ArticleSitemap(BaseSitemap):
+    """article sitemap"""
+    changefreq = "weekly"
+    priority = 0.5
+
     def items(self):
         """items"""
         article_class = get_article_class()
-
-        sitemap_mode = self.get_sitemap_mode()
-
         queryset = article_class.objects.filter(publication=BaseArticle.PUBLISHED)
-
         items = []
-        for site in Site.objects.all():
-            if site == self.get_current_site():
-                items.extend(queryset.filter(sites=site))
-            else:
-                if sitemap_mode == SiteSettings.SITEMAP_ONLY_SITE:
-                    #Only the articles of current sites. Don't add anything
-                    pass
-                elif sitemap_mode == SiteSettings.SITEMAP_ALL:
-                    #Articles of which are only on the site and not in current site
-                    items.extend(queryset.filter(sites=site).exclude(sites=self.get_current_site()))
-
+        for site in self.sites():
+            items.extend(queryset.filter(sites=site))
         return items
 
     def lastmod(self, obj):
