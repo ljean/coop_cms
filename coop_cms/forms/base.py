@@ -25,5 +25,5 @@ class InlineHtmlEditableModelForm(floppyforms.ModelForm):
             'js/jquery.form.js',
             'js/jquery.pageslide.js',
             'js/jquery.colorbox-min.js?v=2',
-            'js/colorbox.coop.js?v=2',
+            'js/colorbox.coop.js?v=3',
         )
