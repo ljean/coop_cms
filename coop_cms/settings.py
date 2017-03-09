@@ -389,3 +389,20 @@ def get_media_root():
 def homepage_no_redirection():
     """Indicates if the homepage should be served directly or as a redirection (default)"""
     return getattr(django_settings, 'COOP_CMS_HOMEPAGE_NO_REDIRECTION', False)
+
+
+def get_eastern_languages():
+    """returns list of eastern language (not having the english alphabet)"""
+    eastern_langs = getattr(django_settings, 'COOP_CMS_EASTERN_LANGUAGES', None)
+    if eastern_langs is None:
+        eastern_langs = (
+            'ru',  # Russian
+            'ja',  # Japanese
+            'ko',  # Korean
+            'iw',  # Hebrew
+            'el',  # Greek
+            'ar',  # Arabic
+            'zh',  # Chinese
+            'cn',  # Chinese
+        )
+    return eastern_langs

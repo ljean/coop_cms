@@ -12,7 +12,6 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils.encoding import smart_text
-from django.utils.text import slugify
 from django.utils.translation import ugettext as _
 from django.views.generic import View
 
@@ -28,7 +27,7 @@ from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
 from coop_cms.settings import get_newsletter_form, get_newsletter_settings_form
-from coop_cms.utils import send_newsletter
+from coop_cms.utils import send_newsletter, slugify
 
 
 @login_required

@@ -3,23 +3,25 @@
 
 from bs4 import BeautifulSoup
 from HTMLParser import HTMLParser
-from re import sub, match
+from re import sub
 from sys import stderr
 from threading import current_thread
 from traceback import print_exc
 
+from slugify import slugify as unicode_slugify
+
 from django import VERSION
 from django.conf import settings
-from django.contrib.sites.models import Site
-from django.core.exceptions import ImproperlyConfigured, ObjectDoesNotExist
+from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponseRedirect
 from django.template.loader import get_template
 from django.utils import translation
+from django.utils.text import slugify as ascii_slugify
 
-from coop_cms.settings import get_newsletter_context_callbacks, cms_no_homepage
+from coop_cms.settings import get_newsletter_context_callbacks, get_eastern_languages
 
 
 if VERSION >= (1, 9, 0):
@@ -397,3 +399,22 @@ def get_login_url():
     except NoReverseMatch:
         return reverse("login")
 
+
+def slugify(text, lang=None):
+    """
+    slugify a text. Use different method according to language
+    "Here COmme the Sun" --> "here-come-the-sun"
+    "Voici l'été" --> "voici-l-ete"
+    "Миниаль бом" --> "Миниаль-бом"
+    Args:
+        text: a text to turn into a slug
+        lang: the language of this text
+    Returns: a slug
+    """
+    if lang is None:
+        lang = get_language()
+
+    if lang in get_eastern_languages():
+        return unicode_slugify(text)
+    else:
+        return ascii_slugify(text)

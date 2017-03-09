@@ -11,7 +11,6 @@ from django.template.base import TextNode, VariableNode
 from django.template.context_processors import csrf
 from django.template.loader import get_template, TemplateDoesNotExist
 from django.template.loader_tags import IncludeNode
-from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.utils.safestring import mark_safe
 
@@ -19,7 +18,7 @@ from coop_html_editor.templatetags.html_editor_utils import InlineHtmlEditNode, 
 
 from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
 from coop_cms.settings import get_article_class
-from coop_cms.utils import get_text_from_template
+from coop_cms.utils import get_text_from_template, slugify
 
 register = template.Library()
 

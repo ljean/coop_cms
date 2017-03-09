@@ -7,7 +7,6 @@ from django.contrib.sites.models import Site
 from django.contrib.sitemaps.views import sitemap as sitemap_view
 from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
-from django.utils.text import slugify
 from django.utils.translation import activate
 
 from model_mommy import mommy
@@ -16,7 +15,7 @@ from coop_cms.models import BaseArticle, SiteSettings
 from coop_cms.settings import get_article_class, is_localized, is_multilang
 from coop_cms.sitemap import get_sitemaps
 from coop_cms.tests import BaseTestCase
-from coop_cms.utils import get_url_in_language
+from coop_cms.utils import get_url_in_language, slugify
 
 
 class SitemapTest(BaseTestCase):

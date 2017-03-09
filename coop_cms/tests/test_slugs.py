@@ -4,11 +4,12 @@ from unittest import skipIf
 
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.test.utils import override_settings
 from django.utils.translation import get_language
 
 from coop_cms.settings import is_localized, is_multilang, get_article_class
 from coop_cms.tests import BaseTestCase
-from coop_cms.utils import make_locale_path
+from coop_cms.utils import make_locale_path, slugify
 
 
 class ArticleSlugTestCase(BaseTestCase):
@@ -104,3 +105,12 @@ class ArticleSlugTestCase(BaseTestCase):
         self.assertEqual(200, response.status_code)
         expected_title = self._get_localized_slug("/titre-de-larticle/")
         self.assertEqual(article1.get_absolute_url(), expected_title)
+
+    @override_settings(LANGUAGE_CODE='ru', LANGUAGES=(('ru', u'Russian'), ))
+    def create_article_non_ascii_char(self):
+        """create an article with russian characters"""
+        title = u"Миниальбом"
+        article_class = get_article_class()
+        article1 = article_class.objects.create(title=title)
+        response = self.client.get(article1.get_absolute_url())
+        self.assertEqual(200, response.status_code)

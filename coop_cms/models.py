@@ -21,9 +21,9 @@ from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.signals import pre_delete, post_save
 from django.template import RequestContext, Context
-from django.template.defaultfilters import slugify, escape
 from django.template.loader import get_template
 from django.utils.translation import get_language, ugettext, ugettext_lazy as _
+from django.utils.html import escape
 
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
@@ -35,7 +35,7 @@ from coop_cms.settings import (
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
     cms_no_homepage, homepage_no_redirection
 )
-from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path
+from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path, slugify
 
 ADMIN_THUMBS_SIZE = '60x60'
 
@@ -653,14 +653,15 @@ class BaseArticle(BaseNavigable):
         if is_localized():
             from modeltranslation.utils import build_localized_fieldname  # pylint: disable=F0401
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:
+
                 loc_title_var = build_localized_fieldname('title', lang_code)
                 locale_title = getattr(self, loc_title_var, '')
             
                 loc_slug_var = build_localized_fieldname('slug', lang_code)
                 locale_slug = getattr(self, loc_slug_var, '')
-                
+
                 if locale_title and not locale_slug:
-                    slug = self.get_unique_slug('slug', locale_title)
+                    slug = self.get_unique_slug('slug', locale_title, lang_code)
                     setattr(self, loc_slug_var, slug)
         else:
             if not self.slug:
@@ -705,11 +706,11 @@ class BaseArticle(BaseNavigable):
 
         return False
 
-    def get_unique_slug(self, slug_field, title):
+    def get_unique_slug(self, slug_field, title, lang=None):
         """unique slug"""
         # no html in title
         title = dehtml(title)
-        slug = slugify(title)
+        slug = slugify(title, lang)
         next_suffix, origin_slug = 2, slug
         slug_exists = True
 

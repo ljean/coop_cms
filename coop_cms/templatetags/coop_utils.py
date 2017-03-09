@@ -16,14 +16,13 @@ from django.template import RequestContext
 from django.template.base import TemplateSyntaxError
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
-from django.utils.text import slugify
 
 from floppyforms import CheckboxInput
 
 from coop_cms.models import ArticleCategory, Image, Document
 from coop_cms.settings import get_article_class, logger
 from coop_cms.shortcuts import get_article
-from coop_cms.utils import dehtml as do_dehtml
+from coop_cms.utils import dehtml as do_dehtml, slugify
 
 register = template.Library()
 
@@ -448,3 +447,9 @@ def reduced_page_range(page_obj, max_num=10):
         return pages
     else:
         return page_obj.paginator.page_range
+
+
+@register.filter
+def unicode_slugify(value):
+    """open_tag if condition"""
+    return slugify(value)
