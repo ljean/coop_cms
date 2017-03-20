@@ -1146,7 +1146,7 @@ class NewsletterSending(models.Model):
 
 
 class Alias(models.Model):
-    """redirections"""
+    """Alias : makes possinle to redirect an url ton another one"""
 
     CODE_CHOICES = (
         (301, _(u'301 - Permanent')),
@@ -1156,6 +1156,7 @@ class Alias(models.Model):
     path = models.CharField(max_length=200)
     redirect_url = models.CharField(max_length=200, default="", blank=True)
     redirect_code = models.IntegerField(default=301, choices=CODE_CHOICES)
+    sites = models.ManyToManyField(Site, blank=True, verbose_name=_(u'sites'))
     
     class Meta:
         verbose_name = _(u'Alias')

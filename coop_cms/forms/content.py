@@ -2,6 +2,7 @@
 """forms"""
 
 from django import forms
+from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 
@@ -9,8 +10,7 @@ import floppyforms
 
 from coop_cms.forms.fields import HidableMultipleChoiceField
 from coop_cms.forms.navigation import WithNavigationModelForm
-from coop_cms.models import Link, Document, MediaFilter, ImageSize
-
+from coop_cms.models import Alias, Link, Document, MediaFilter, ImageSize
 from coop_cms.widgets import ChosenSelectMultiple
 
 
@@ -21,7 +21,7 @@ class MediaBaseAddMixin(object):
         # Media filters
         queryset1 = MediaFilter.objects.all()
         if queryset1.count():
-            self.fields['filters'].choices = [(x.id, x.name) for x in queryset1]
+            self.fields['filters'].choices = [(media_filter.id, media_filter.name) for media_filter in queryset1]
             try:
                 self.fields['filters'].widget = ChosenSelectMultiple(
                     choices=self.fields['filters'].choices, force_template=True,
@@ -97,3 +97,17 @@ class NewLinkForm(WithNavigationModelForm):
     class Meta:
         model = Link
         fields = ('title', 'url',)
+
+
+class AliasAdminForm(forms.ModelForm):
+    """New link form"""
+    class Meta:
+        model = Alias
+        fields = ('path', 'redirect_code', 'redirect_url', 'sites')
+
+    def __init__(self, *args, **kwargs):
+        super(AliasAdminForm, self).__init__(*args, **kwargs)
+        self.fields['sites'].queryset = Site.objects.all()
+        site_choices = [(site.id, site.domain) for site in Site.objects.all()]
+        self.fields['sites'].widget = ChosenSelectMultiple(choices=site_choices, force_template=True)
+        self.fields['sites'].help_text = u''

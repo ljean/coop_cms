@@ -84,7 +84,7 @@ def get_headlines(article, editable=False):
 def redirect_if_alias(path):
     """redirect if path correspond to an alias"""
     try:
-        alias = Alias.objects.get(path=path)
+        alias = Alias.objects.get(path=path, sites=Site.objects.get_current())
     except Alias.DoesNotExist:
         if path and path[-1] == '/':
             alias = get_object_or_404(Alias, path=path[:-1])
