@@ -6,6 +6,7 @@ used for magic form
 
 from django import VERSION as DJANGO_VERSION
 from django import template
+from django.forms.formsets import BaseFormSet
 from django.template import Context
 from django.template.base import TextNode, VariableNode
 from django.template.context_processors import csrf
@@ -257,8 +258,14 @@ class IfCmsEditionNode(template.Node):
         """check condition of the if"""
         form = context.get('form', None) or context.get('formset', None)
         if form:
-            if getattr(form, 'is_inline_editable', False):
-                return form
+            if isinstance(form, BaseFormSet):
+                for form_item in form:
+                    if getattr(form_item, 'is_inline_editable', False):
+                        return True
+            else:
+                if getattr(form, 'is_inline_editable', False):
+                    return True
+        return False
 
     def render(self, context):
         """to html"""
