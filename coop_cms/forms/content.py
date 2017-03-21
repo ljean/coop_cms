@@ -2,6 +2,7 @@
 """forms"""
 
 from django import forms
+from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
@@ -103,11 +104,12 @@ class AliasAdminForm(forms.ModelForm):
     """New link form"""
     class Meta:
         model = Alias
-        fields = ('path', 'redirect_code', 'redirect_url', 'sites')
+        fields = ('path', 'sites', 'redirect_code', 'redirect_url', )
 
     def __init__(self, *args, **kwargs):
         super(AliasAdminForm, self).__init__(*args, **kwargs)
         self.fields['sites'].queryset = Site.objects.all()
+        self.fields['sites'].initial = Site.objects.filter(id=settings.SITE_ID)
         site_choices = [(site.id, site.domain) for site in Site.objects.all()]
         self.fields['sites'].widget = ChosenSelectMultiple(choices=site_choices, force_template=True)
         self.fields['sites'].help_text = u''
