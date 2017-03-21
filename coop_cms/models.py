@@ -45,7 +45,9 @@ class InvalidArticleError(Exception):
     pass
 
 
+
 def validate_slug(value):
+    """check a slug only contains letters, numbers or hyphens (undercores are allowed)"""
     if not re.match(r"^[-\w]+$", value):
         raise ValidationError(_('The slug must only contains letters, numbers or hyphens'), code='invalid')
 
