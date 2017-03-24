@@ -4,7 +4,7 @@
 from modeltranslation.translator import translator, TranslationOptions  # pylint: disable=F0401
 
 from coop_cms.models import (
-    Alias, ArticleCategory, Fragment, NavNode, Newsletter, PieceOfHtml, SiteSettings, validate_slug
+    Alias, ArticleCategory, Fragment, NavNode, Newsletter, PieceOfHtml, SiteSettings, validate_slug, Link
 )
 from coop_cms.utils import get_eastern_languages
 
@@ -49,6 +49,12 @@ class NewsletterTranslationOptions(TranslationOptions):
     """translation"""
     fields = ('subject', 'content',)
 translator.register(Newsletter, NewsletterTranslationOptions)
+
+
+class LinkTranslationOptions(TranslationOptions):
+    """translation"""
+    fields = ('url',)
+translator.register(Link, LinkTranslationOptions)
 
 
 class BaseArticleTranslationOptions(TranslationOptions):
