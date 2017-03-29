@@ -365,7 +365,11 @@ def get_url_patterns():
         return i18n_patterns
     else:
         def url_list(*args):
-            return list(args[1:])
+            if args and isinstance(args[0], (str, unicode, )):
+                # remove prefix if any
+                return list(args[1:])
+            else:
+                return list(args)
         return url_list
 
 
