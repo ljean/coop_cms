@@ -410,3 +410,8 @@ def get_eastern_languages():
             'cn',  # Chinese
         )
     return eastern_langs
+
+
+def is_cache_enabled():
+    """True if cache editable content"""
+    return getattr(django_settings, 'COOP_CMS_CACHE', False)
