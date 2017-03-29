@@ -365,7 +365,7 @@ def get_url_patterns():
         return i18n_patterns
     else:
         def url_list(*args):
-            return list(args)
+            return list(args[1:])
         return url_list
 
 

@@ -115,7 +115,7 @@ if 'coop_cms.apps.rss_sync' in settings.INSTALLED_APPS:
     urlpatterns += [
         url(r'^rss-sync/', include('coop_cms.apps.rss_sync.urls')),
     ]
-    
+
 if 'coop_cms.apps.test_app' in settings.INSTALLED_APPS:
     urlpatterns += [
         url(r'^this-should-be-only-in-test-mode', include('coop_cms.apps.test_app.urls')),
