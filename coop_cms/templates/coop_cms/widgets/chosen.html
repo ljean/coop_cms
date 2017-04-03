@@ -5,15 +5,18 @@
        setTimeout(function () {$.colorbox.resize();}, 500);
   {% else %}
     $(function() {
+
   {% endif %}
       $("#id_{{name}}").chosen();
       $("#id_{{name}}_chosen").css({width:"100%"});
       $("#id_{{name}}_chosen").find("li.search-field").css({height:"25px"});
-      //$("#id_filters_chosen").find("input").css({width:"30px"});
     });
 </script>
 <style>
     #id_{{name}} {
         width: 100%;
+    }
+    .form-row {
+      overflow: visible;
     }
 </style>

@@ -9,6 +9,7 @@ from django.http import Http404
 from django.utils.translation import ugettext_lazy as _
 
 from coop_cms.forms.articles import ArticleAdminForm
+from coop_cms.forms.content import AliasAdminForm
 from coop_cms.forms.navigation import NavTypeForm, NavNodeAdminForm
 from coop_cms.forms.newsletters import NewsletterItemAdminForm, NewsletterAdminForm
 from coop_cms import models
@@ -200,9 +201,10 @@ class AliasAdmin(BASE_ADMIN_CLASS):
     """Alias admin"""
     list_display = ['path', 'redirect_url', 'redirect_code']
     list_editable = ['redirect_url', 'redirect_code']
-    list_filter = ['redirect_code', ]
+    list_filter = ['redirect_code', 'sites']
     search_fields = ['path', 'redirect_url']
     ordering = ['path', ]
+    form = AliasAdminForm
 
 admin.site.register(models.Alias, AliasAdmin)
 

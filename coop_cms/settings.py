@@ -365,7 +365,11 @@ def get_url_patterns():
         return i18n_patterns
     else:
         def url_list(*args):
-            return list(args)
+            if args and isinstance(args[0], (str, unicode, )):
+                # remove prefix if any
+                return list(args[1:])
+            else:
+                return list(args)
         return url_list
 
 
@@ -406,3 +410,8 @@ def get_eastern_languages():
             'cn',  # Chinese
         )
     return eastern_langs
+
+
+def is_cache_enabled():
+    """True if cache editable content"""
+    return getattr(django_settings, 'COOP_CMS_CACHE', False)

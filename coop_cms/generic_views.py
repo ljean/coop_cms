@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 """generic views"""
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message, error as error_message
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, get_language
 from django.views.generic import TemplateView
 from django.views.generic.base import View
 from django.views.generic.list import ListView as DjangoListView
@@ -16,6 +18,7 @@ from django.views.generic.list import ListView as DjangoListView
 from coop_html_editor import utils as html_editor_utils
 
 from coop_cms.logger import logger
+from coop_cms.settings import is_cache_enabled
 
 
 class ListView(DjangoListView):
@@ -47,6 +50,21 @@ class EditableObjectView(View):
     varname = "object"
     object = None
     form = None
+    cache_enabled = None
+
+    def is_cache_enabled(self):
+        """check if cache is enable for this view"""
+        if self.cache_enabled is None:
+            return is_cache_enabled()
+        return self.cache_enabled
+
+    def can_cache(self):
+        """check if content can be set/get from cache"""
+        if self.can_edit_object():
+            # Never cache for editors
+            return False
+
+        return self.is_cache_enabled()
 
     def can_edit_object(self):
         """check edit perms"""
@@ -77,13 +95,13 @@ class EditableObjectView(View):
             'form': self.form if self.edit_mode else None,
             'editable': self.can_edit_object(),
             'edit_mode': self.edit_mode,
-            'title': getattr(self.object, 'title', unicode(self.object)),
+            'title': getattr(self.object, 'title', u'{0}'.format(self.object)),
             'coop_cms_edit_url': self.get_edit_url(),
             'coop_cms_cancel_url': self.get_cancel_url(),
             'coop_cms_can_view_callback': self.can_view_object,
             'coop_cms_can_edit_callback': self.can_edit_object,
             self.varname: self.object,
-            'raw_'+self.varname: self.object,
+            'raw_' + self.varname: self.object,
         }
         
     def get_edit_url(self):
@@ -116,8 +134,15 @@ class EditableObjectView(View):
         form_class = self.get_form_class()
         return form_class(*args, **kwargs)
 
+    def get_cache_key(self, obj):
+        language = get_language()
+        class_name = obj.__class__
+        cache_key = u'{0}-{1}-{2}-{3}'.format(settings.SITE_ID, language, class_name, obj.id)
+        return cache_key
+
     def get(self, request, *args, **kwargs):
         """handle http get -> view"""
+
         try:
             self.object = self.get_object()
         except Http404:
@@ -133,15 +158,25 @@ class EditableObjectView(View):
         if not self.can_view_object():
             logger.warning("PermissionDenied")
             raise PermissionDenied
+
+        if self.can_cache():
+            response_content = cache.get(self.get_cache_key(self.object))
+            if response_content:
+                return HttpResponse(response_content)
         
         self.form = self.get_form(instance=self.object)
         
-        return render(
+        response = render(
             request,
             self.get_template(),
             self.get_context_data()
         )
-    
+
+        if response.status_code == 200 and self.can_cache():
+            cache.set(self.get_cache_key(self.object), response.content)
+
+        return response
+
     def after_save(self, object):
         """called after save"""
         pass
@@ -164,6 +199,9 @@ class EditableObjectView(View):
 
         if self.form.is_valid() and all([_form.is_valid() for _form in inline_html_forms]):
 
+            if self.is_cache_enabled():
+                cache.delete(self.get_cache_key(self.object))
+
             self.object = self.form.save()
             
             self.after_save(self.object)
@@ -175,8 +213,10 @@ class EditableObjectView(View):
 
             return HttpResponseRedirect(self.object.get_absolute_url())
         else:
-            error_text = u'<br />'.join([unicode(_form.errors) for _form in [self.form]+inline_html_forms if _form.errors])
-            error_message(request, _(u'An error occured: {0}').format(error_text))
+            error_text = u'<br />'.join(
+                [u'{0}'.format(_form.errors) for _form in [self.form]+inline_html_forms if _form.errors]
+            )
+            error_message(request, _(u'An error occurred: {0}').format(error_text))
             logger.debug(u"error: {0}".format(error_text))
     
         return render(
