@@ -12,7 +12,7 @@
   <div class="library-items library-images">
   {% for img in images %}
       <div class="library-image">
-        <img class="library-thumbnail" src="{{ img.as_thumbnail.url }}" title="{{img.name}}" rel="{{img.get_absolute_url}}" />
+        <img data-class="library-thumbnail" class="library-thumbnail" src="{{ img.as_thumbnail.url }}" title="{{img.name}}" rel="{{img.get_absolute_url}}" />
         <div class="library-image-controls" style="">
           {{ img.name }}<br />
           <a href="{% url 'admin:coop_cms_image_change' img.id %}" target="_blank">{% trans "Edit" %}</a>
