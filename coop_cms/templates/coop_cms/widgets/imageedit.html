@@ -1,31 +1,3 @@
 <a class="update-logo" href="{{update_url}}">
     <img onmousedown="return false" onmousemove="return false" class="logo {{extra_classes}}" src="{{thumbnail_src}}">
 </a>
-<script>
-    $(function() {
-        $('a.update-logo').colorbox({
-            title: function(data){
-                return document.title;
-            },
-            onComplete : function(){
-                $("form.colorbox-form").ajaxForm({
-                    dataType: 'json',
-                    success: function (data) {
-                        if (data['src']){
-                            $.colorbox.close();
-                            $('a.update-logo img').attr('src', data['src']);
-                            $('a.update-logo img').change();
-                        } else {
-                            $.colorbox({
-                                title: function(data){
-                                    return document.title;
-                                },
-                                html:data['html']
-                            }); 
-                        }
-                    }
-                })
-            }
-        })
-    });
-</script>

@@ -57,8 +57,32 @@ $(document).ready(function(){
 	$(".inline-editable").keypress(function() {
 		toggle_save();
 	});
-	
-	$("a.update-logo img").change(toggle_save);
+
+  $('a.update-logo').colorbox({
+      title: function(data){
+          return document.title;
+      },
+      onComplete : function(){
+          $("form.colorbox-form").ajaxForm({
+              dataType: 'json',
+              success: function (data) {
+                  if (data['src']){
+                      $.colorbox.close();
+                      $('a.update-logo img').attr('src', data['src']);
+                      $('a.update-logo img').change();
+                  } else {
+                      $.colorbox({
+                          title: function(data){
+                              return document.title;
+                          },
+                          html:data['html']
+                      });
+                  }
+              }
+          })
+      }
+  });
+  $("a.update-logo img").change(toggle_save);
 	$(".article select").change(toggle_save);
 	$(".article input").change(toggle_save);
 	
