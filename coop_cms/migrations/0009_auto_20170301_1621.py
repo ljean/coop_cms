@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sitesettings',
             name='homepage_article',
-            field=models.CharField(default='', max_length=256, blank=True, help_text='if set, the homepage will be get the article with the given slug', verbose_name='homepage article', db_index=True),
+            field=models.CharField(default='', max_length=256, blank=True, help_text='if set, the homepage will get the article with the given slug', verbose_name='homepage article', db_index=True),
         ),
         migrations.AlterField(
             model_name='sitesettings',

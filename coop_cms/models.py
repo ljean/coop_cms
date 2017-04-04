@@ -1269,7 +1269,7 @@ class SiteSettings(models.Model):
     sitemap_mode = models.IntegerField(default=SITEMAP_ONLY_SITE, choices=SITEMAP_MODES)
     homepage_article = models.CharField(
         max_length=256, blank=True, default=u"", verbose_name=_(u'homepage article'),
-        help_text=_(u"if set, the homepage will be get the article with the given slug"), db_index=True
+        help_text=_(u"if set, the homepage will get the article with the given slug"), db_index=True
     )
     
     def __unicode__(self):
