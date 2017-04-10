@@ -35,6 +35,16 @@ class DehtmlTest(BaseArticleTest):
         html_text = u"This &ouml;is &auml; simple text&uuml;"
         self.assertEqual(dehtml(html_text, allow_html_chars=True), text)
 
+    def test_charset_chars(self):
+        text = u"à l'Opéra Grand Avignon"
+        html_text = u"<p>&agrave; l&#39;Op&eacute;ra Grand Avignon</p>"
+        self.assertEqual(dehtml(html_text, allow_html_chars=False), text)
+
+    def test_charset_chars_allowed(self):
+        text = u"&agrave; l&#39;Op&eacute;ra Grand Avignon"
+        html_text = u"<p>&agrave; l&#39;Op&eacute;ra Grand Avignon</p>"
+        self.assertEqual(dehtml(html_text, allow_html_chars=True), text)
+
     def test_special_chars_two(self):
         text = u"This \xf6is \xe4 simple text\xfc"
         html_text = u"This &ouml;is &auml; simple text&uuml;"

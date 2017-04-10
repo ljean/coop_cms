@@ -54,6 +54,9 @@ class _DeHTMLParser(HTMLParser):
             value = self.unescape(html_char).replace(u'\xa0', u' ')
         self._text.append(value)
 
+    def handle_charref(self, name):
+        self.handle_entityref(u"#" + name)
+
     def handle_starttag(self, tag, attrs):
         """parser"""
         if tag == u'p':
