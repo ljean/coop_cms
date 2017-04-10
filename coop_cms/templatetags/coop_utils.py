@@ -83,9 +83,20 @@ def article_link(parser, token):
 
 @register.filter
 def dehtml(value):
-    """html to text"""
+    """
+    html to text : Remove all tags
+    <p>Hello&nbsp;World<p> --> Hello World
+    """
     return do_dehtml(value)
 
+
+@register.filter
+def detagiffy(value):
+    """
+    html to text: Remove tags but keep html chars
+    <p>Hello&nbsp;World<p> --> Hello&nbsp;World
+    """
+    return do_dehtml(value, allow_html_chars=True)
 
 @register.filter
 def sp_rt_lb(value):
