@@ -96,7 +96,7 @@ def detagiffy(value):
     html to text: Remove tags but keep html chars
     <p>Hello&nbsp;World<p> --> Hello&nbsp;World
     """
-    return do_dehtml(value, allow_html_chars=True)
+    return mark_safe(do_dehtml(value, allow_html_chars=True))
 
 @register.filter
 def sp_rt_lb(value):
