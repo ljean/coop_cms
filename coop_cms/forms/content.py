@@ -97,7 +97,10 @@ class NewLinkForm(WithNavigationModelForm):
     """New link form"""
     class Meta:
         model = Link
-        fields = ('title', 'url',)
+        fields = ('title', 'url', 'sites', )
+        widgets = {
+            'sites': forms.CheckboxSelectMultiple(),
+        }
 
 
 class AliasAdminForm(forms.ModelForm):

@@ -1,9 +1,13 @@
 {% load i18n %}
 <script>
-{% if node.in_navigation %}
-$("#navnode_in_navigation").html('{% trans "Hide node in navigation" %}');
+{% if not node.is_accessible %}
+  $("#navnode_in_navigation").closest('li').hide();
 {% else %}
-$("#navnode_in_navigation").html('{% trans "Show node in navigation" %}');
+  {% if node.in_navigation %}
+  $("#navnode_in_navigation").html('{% trans "Hide node in navigation" %}');
+  {% else %}
+  $("#navnode_in_navigation").html('{% trans "Show node in navigation" %}');
+  {% endif %}
 {% endif %}
 </script>
 
@@ -24,7 +28,7 @@ $("#navnode_in_navigation").html('{% trans "Show node in navigation" %}');
     {% if node.content_object %}
     <li><a href="{{node.content_object.get_absolute_url}}">{% trans "View on site"%}</a></li>
     {% endif %}
-    
+
     {% block navtree_content_extracommand%}
     {% endblock %}
 

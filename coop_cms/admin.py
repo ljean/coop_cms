@@ -111,6 +111,7 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
         (_(u'Content'), {'fields': ('content', 'summary', )}),
         (_(u'Debug'), {'fields': ('temp_logo', )}),
     )
+    filter_vertical = ('sites', )
 
     def get_form(self, request, obj=None, **kwargs):
         """return custom form: It adds the current user"""
@@ -218,11 +219,19 @@ class ImageSizeAdmin(admin.ModelAdmin):
 admin.site.register(models.ImageSize, ImageSizeAdmin)
 
 
+class LinkAdmin(BASE_ADMIN_CLASS):
+    list_display = ('title', 'url', )
+    filter_vertical = ('sites', )
+    list_filter = ('sites', )
+    search_fields = ('title', )
+
+admin.site.register(models.Link, LinkAdmin)
+
 admin.site.register(models.PieceOfHtml)
 admin.site.register(models.NewsletterSending)
 admin.site.register(models.FragmentType)
 admin.site.register(models.FragmentFilter)
-admin.site.register(models.Link)
+
 admin.site.register(models.Document)
 
 

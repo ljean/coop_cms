@@ -126,3 +126,11 @@ aside, #aside {
 }
 
 
+.article-status {
+    padding: 4px 32px;
+    background: #CC3434;
+    margin: 10px;
+    font-weight: bold;
+    display: inline-block;
+    color: #fff;
+}

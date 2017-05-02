@@ -7,6 +7,7 @@ from unittest import skipIf
 from django.conf import settings
 from django.contrib.auth.models import User, Permission, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test.client import RequestFactory
@@ -25,7 +26,12 @@ class CmsEditTagTest(BaseTestCase):
     def setUp(self):
         super(CmsEditTagTest, self).setUp()
         self.user = None
+        current_site = Site.objects.get_current()
+
         self.link1 = Link.objects.create(url='http://www.google.fr')
+        self.link1.sites.add(current_site)
+        self.link1.save()
+
         self.tree = tree = get_navtree_class().objects.create()
         NavNode.objects.create(tree=tree, label=self.link1.url, content_object=self.link1, ordering=1, parent=None)
 

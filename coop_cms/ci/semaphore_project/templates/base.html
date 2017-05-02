@@ -28,7 +28,7 @@
 				$("select[name=language]").val($(this).attr('href'));
 				$(".lang-selector form").submit();
 				return false;
-			})
+			});
 			
 			$("ul.nav a").each(function(idx, elt) {
 				if ($(elt).attr('href') == window.location.pathname) {

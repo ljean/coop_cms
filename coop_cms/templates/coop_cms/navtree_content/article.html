@@ -1,6 +1,16 @@
 {% extends "coop_cms/navtree_content/default.html" %}
 {% load i18n %}
     
-    {% block navtree_content_extracommand%}
+    {% block navtree_content_extracommand %}
+
     <li><a href="{{node.content_object.get_edit_url}}">{% trans "Edit on site"%}</a></li>
+
+    {% if node.content_object.is_draft %}
+      <div class="article-status">{% trans "This article is draft" %}</div>
+    {% endif %}
+
+    {% if not node.is_accessible %}
+    <div class="article-status">{% trans "This article is not accessible" %}</div>
+    {% endif %}
+
     {% endblock %}

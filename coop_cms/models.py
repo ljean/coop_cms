@@ -218,12 +218,42 @@ class NavNode(models.Model):
         verbose_name = _(u'navigation node')
         verbose_name_plural = _(u'navigation nodes')
 
-    def get_children(self, in_navigation=None):
+    def is_accessible(self):
+        """returns True if the content can be accessed"""
+
+        # If I point to a content : returns True if content can be accesssed
+        if self.content_object:
+            is_accessible_method = getattr(self.content_object, 'is_accessible', None)
+            if callable(is_accessible_method):
+                return is_accessible_method()
+            else:
+                if is_accessible_method is None:
+                    return True
+                else:
+                    return is_accessible_method
+
+        # returns True if I have children which can be accessed
+        for child in self.get_children(in_navigation=True):
+            if child.is_accessible():
+                return True
+
+        return False
+
+    def get_children(self, in_navigation=None, allow_all=False):
         """children of the node"""
         nodes = NavNode.objects.filter(parent=self).order_by("ordering")
         # Be careful : in_navigation can be False
         if in_navigation is not None:
             nodes = nodes.filter(in_navigation=in_navigation)
+
+        if not allow_all:
+            exclude_ids = []
+            for node in nodes:
+                if not node.is_accessible():
+                    exclude_ids.append(node.id)
+            if exclude_ids:
+                nodes = nodes.exclude(id__in=exclude_ids)
+
         return nodes
 
     def has_children(self):
@@ -243,13 +273,21 @@ class NavNode(models.Model):
         nodes = NavNode.objects.filter(parent=self.parent).order_by("ordering")
         if in_navigation is not None:
             nodes = nodes.filter(in_navigation=in_navigation)
+
+        exclude_ids = []
+        for node in nodes:
+            if not node.is_accessible():
+                exclude_ids.append(node.id)
+        if exclude_ids:
+            nodes = nodes.exclude(id__in=exclude_ids)
+
         return nodes
 
     def get_progeny(self, level=0):
         """children, grand-children ..."""
         progeny = [(self, level)]
         for child in NavNode.objects.filter(parent=self).order_by("ordering"):
-            progeny.extend(child.get_progeny(level+1))
+            progeny.extend(child.get_progeny(level + 1))
         return progeny
 
     def as_jstree(self):
@@ -261,10 +299,12 @@ class NavNode(models.Model):
         else:
             li_content = u'<a href="{0}">{1}</a>'.format(url, label)
 
-        children_li = [child.as_jstree() for child in self.get_children()]
+        children_li = [child.as_jstree() for child in self.get_children(allow_all=True)]
 
         return u'<li id="node_{0}" rel={3}>{1}<ul>{2}</ul></li>'.format(
-            self.id, li_content, u''.join(children_li), "in_nav" if self.in_navigation else "out_nav"
+            self.id,
+            li_content, u''.join(children_li),
+            "in_nav" if self.in_navigation and self.is_accessible() else "out_nav"
         )
 
     def _get_li_content(self, li_template, node_pos=0, total_nodes=0):
@@ -312,7 +352,7 @@ class NavNode(models.Model):
         li_template is a custom template that can be passed
         """
 
-        if not self.in_navigation:
+        if not self.in_navigation or not self.is_accessible():
             return ""
         
         li_node = kwargs.get("li_node", None)
@@ -332,7 +372,7 @@ class NavNode(models.Model):
                 node_pos=node_pos + 1,
                 total_nodes=self.get_children_count()
             )
-            for child in self.get_children(in_navigation=True)
+            for child in self.get_children(in_navigation=True) if child.is_accessible()
         ]
         ul_format = self._get_ul_format(ul_template)
         children_html = ul_format.format(u''.join(children_li)) if children_li else ""
@@ -359,7 +399,7 @@ class NavNode(models.Model):
         """get children as navigation"""
         children_li = [
             u'<li class="{0}">{1}</li>'.format(css_class, child._get_li_content(li_template))
-            for child in self.get_children(in_navigation=True)
+            for child in self.get_children(in_navigation=True) if child.is_accessible()
         ]
         return u''.join(children_li)
 
@@ -367,7 +407,7 @@ class NavNode(models.Model):
         """get siblings as navigation"""
         siblings_li = [
             u'<li class="{0}">{1}</li>'.format(css_class, sibling._get_li_content(li_template))
-            for sibling in self.get_siblings(in_navigation=True)
+            for sibling in self.get_siblings(in_navigation=True) if sibling.is_accessible()
         ]
         return u''.join(siblings_li)
 
@@ -440,6 +480,10 @@ class BaseNavigable(TimeStampedModel):
     class Meta:
         abstract = True
 
+    def is_accessible(self):
+        """returns True if the content can be accessed. It most cases, it should be overridden"""
+        return True
+
     def _get_navigation_parent(self):
         """getter for parent"""
         content_type = ContentType.objects.get_for_model(self.__class__)
@@ -476,7 +520,7 @@ class BaseNavigable(TimeStampedModel):
         ret = super(BaseNavigable, self).save(*args, **kwargs)
         if not do_not_create_nav:
             parent_id = getattr(self, '_navigation_parent', None)
-            if parent_id != None:
+            if parent_id is not None:
                 self.navigation_parent = parent_id
         return ret
 
@@ -794,11 +838,34 @@ class BaseArticle(BaseNavigable):
         """publish perm"""
         return self._can_change(user)
 
+    def is_accessible(self):
+        """returns True if the content can be accessed. It most cases, it should be overridden"""
+
+        current_site = Site.objects.get_current()
+
+        if current_site not in self.sites.all():
+            return False
+
+        if self.is_draft():
+            if is_requestprovider_installed():
+                try:
+                    http_request = RequestManager().get_request()
+                    return http_request.user.is_staff
+                except RequestNotFound:
+                    pass
+            return False
+
+        if self.is_archived():
+            return False
+
+        return True
+
 
 class Link(BaseNavigable):
     """Link to a given url"""
     title = models.CharField(_(u'Title'), max_length=200, default=_(u"title"))
     url = models.CharField(_(u'URL'), max_length=200)
+    sites = models.ManyToManyField(Site, blank=True)
 
     def get_absolute_url(self):
         """url"""
@@ -820,6 +887,13 @@ class Link(BaseNavigable):
         if scheme:
             return u"{0}{1}".format(netloc, path)
         return self.url
+
+    def is_accessible(self):
+        """returns True if the content can be accessed. It most cases, it should be overridden"""
+        current_site = Site.objects.get_current()
+        if current_site not in self.sites.all():
+            return False
+        return True
 
     def __unicode__(self):
         return dehtml(self.title)
