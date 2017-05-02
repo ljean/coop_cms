@@ -2,7 +2,7 @@
 <div class="library-items library-docs">
   {% for doc in documents %}
   <div class="library-doc-item">
-    <img src="{{doc.get_fileicon_url}}" class="library-document{% if doc.is_private %} private-doc{% endif %}" rel="{{doc.get_download_url}}" title="{{doc.name}}" />
+    <img src="{{doc.get_fileicon_url}}" data-class="library-document" class="library-document{% if doc.is_private %} private-doc{% endif %}" rel="{{doc.get_download_url}}" title="{{doc.name}}" />
     <span class="cms_doc_title">{{doc.name}}</span>
   </div>
   {% endfor %}

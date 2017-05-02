@@ -33,43 +33,54 @@ FileWrapper = FileWrapper
 
 class _DeHTMLParser(HTMLParser):
     """html to text parser"""
-    def __init__(self, allow_spaces=False):
+    def __init__(self, allow_spaces=False, allow_html_chars=False):
         HTMLParser.__init__(self)
-        self.__text = []
+        self._text = []
         self._allow_spaces = allow_spaces
+        self._allow_html_chars = allow_html_chars
 
     def handle_data(self, data):
         """parser"""
-        text = data.strip()
-        if len(text) > 0:
-            if not self._allow_spaces:
-                text = sub('[ \t\r\n]+', ' ', text)
-            self.__text.append(text + ' ')
+        text = data
+        if not self._allow_spaces:
+            text = sub('[ \t\r\n]+', u' ', text)
+        self._text.append(text)
+
+    def handle_entityref(self, name):
+        html_char = u'&' + name + u";"
+        if self._allow_html_chars:
+            value = html_char
+        else:
+            value = self.unescape(html_char).replace(u'\xa0', u' ')
+        self._text.append(value)
+
+    def handle_charref(self, name):
+        self.handle_entityref(u"#" + name)
 
     def handle_starttag(self, tag, attrs):
         """parser"""
-        if tag == 'p':
-            self.__text.append('\n\n')
-        elif tag == 'br':
-            self.__text.append('\n')
+        if tag == u'p':
+            self._text.append('\n\n')
+        elif tag == u'br':
+            self._text.append('\n')
 
     def handle_startendtag(self, tag, attrs):
         """parser"""
-        if tag == 'br':
-            self.__text.append('\n\n')
+        if tag == u'br':
+            self._text.append('\n\n')
 
     def text(self):
         """parser"""
-        return ''.join(self.__text).strip()
+        return u''.join(self._text).strip()
 
 
-def dehtml(text, allow_spaces=False):
+def dehtml(text, allow_spaces=False, allow_html_chars=False):
     """
     html to text
     copied from http://stackoverflow.com/a/3987802/117092
     """
     try:
-        parser = _DeHTMLParser(allow_spaces=allow_spaces)
+        parser = _DeHTMLParser(allow_spaces=allow_spaces, allow_html_chars=allow_html_chars)
         parser.feed(text)
         parser.close()
         return parser.text()

@@ -202,6 +202,17 @@ def cms_upload_image(request, context):
         )
 
 
+@can_edit_article
+def cms_update_logo(request, context):
+    """show menu"""
+    article = context.get('article', None)
+    if article and context.get('edit_mode'):
+        return make_link(
+            reverse('coop_cms_update_logo', args=[article.id]), _(u'Update logo'), 'fugue/image.png',
+            classes=['update-logo', 'icon']
+        )
+
+
 @can_edit_object
 def cms_upload_doc(request, context):
     """show menu"""
@@ -469,6 +480,7 @@ def load_commands(coop_bar):
             cms_edit_fragments,
         ],
         [
+            cms_update_logo,
             cms_media_library,
             cms_upload_image,
             cms_upload_doc,

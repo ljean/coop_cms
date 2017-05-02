@@ -57,8 +57,32 @@ $(document).ready(function(){
 	$(".inline-editable").keypress(function() {
 		toggle_save();
 	});
-	
-	$("a.update-logo img").change(toggle_save);
+
+  $('a.update-logo').colorbox({
+      title: function(data){
+          return document.title;
+      },
+      onComplete : function(){
+          $("form.colorbox-form").ajaxForm({
+              dataType: 'json',
+              success: function (data) {
+                  if (data['src']){
+                      $.colorbox.close();
+                      $('a.update-logo img').attr('src', data['src']);
+                      $('a.update-logo img').change();
+                  } else {
+                      $.colorbox({
+                          title: function(data){
+                              return document.title;
+                          },
+                          html:data['html']
+                      });
+                  }
+              }
+          })
+      }
+  });
+  $("a.update-logo img").change(toggle_save);
 	$(".article select").change(toggle_save);
 	$(".article input").change(toggle_save);
 	
@@ -66,11 +90,13 @@ $(document).ready(function(){
 
     $(".inline-editable img.library-thumbnail").each(function(idx, elt) {
       $(elt).removeClass("library-thumbnail");
+      $(elt).removeAttr("data-class");
       $(elt).attr("src", $(this).attr("rel"));
       $(elt).removeAttr('rel');
     });
 
     $(".inline-editable img.library-document").each(function(idx, elt) {
+      $(elt).removeAttr("data-class");
       var doc_url = $(elt).attr('rel');
       var doc_title = $(elt).attr('title');
       var icon_url = $(elt).attr('src');
