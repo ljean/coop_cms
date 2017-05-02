@@ -41,8 +41,8 @@ class PieceOfHtmlEditNode(InlineHtmlEditNode):
     def render(self, context):
         """convert to html"""
         form = context.get('form', None) or context.get('formset', None)
-        if getattr(form, 'is_inline_editable', False):
-            context.dicts[0]['inline_html_edit'] = True
+        if form:
+            context.dicts[0]['inline_html_edit'] = _is_inline_editable(form)
         return super(PieceOfHtmlEditNode, self).render(context)
 
 
@@ -217,8 +217,8 @@ class CmsFormMediaNode(template.Node):
         if form or formset:
             template_ = template.Template("{{form.media}}")
             html = template_.render(template.Context({'form': form or formset}))
-            #django 1.5 fix : " are escaped as &quot; and cause script tag 
-            #for aloha to be broken
+            # django 1.5 fix : " are escaped as &quot; and cause script tag
+            # for aloha to be broken
             return html.replace("&quot;", '"') 
         else:
             return ""
