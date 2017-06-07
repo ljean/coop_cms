@@ -41,8 +41,8 @@ class PieceOfHtmlEditNode(InlineHtmlEditNode):
     def render(self, context):
         """convert to html"""
         form = context.get('form', None) or context.get('formset', None)
-        if getattr(form, 'is_inline_editable', False):
-            context.dicts[0]['inline_html_edit'] = True
+        if form:
+            context.dicts[0]['inline_html_edit'] = _is_inline_editable(form)
         return super(PieceOfHtmlEditNode, self).render(context)
 
 
@@ -213,11 +213,12 @@ class CmsFormMediaNode(template.Node):
     def render(self, context):
         form = context.get('form', None)
         formset = context.get('formset', None)
+
         if form or formset:
             template_ = template.Template("{{form.media}}")
             html = template_.render(template.Context({'form': form or formset}))
-            #django 1.5 fix : " are escaped as &quot; and cause script tag 
-            #for aloha to be broken
+            # django 1.5 fix : " are escaped as &quot; and cause script tag
+            # for aloha to be broken
             return html.replace("&quot;", '"') 
         else:
             return ""
@@ -241,6 +242,21 @@ def _extract_if_node_args(parser, token):
     return nodelist_true, nodelist_false
 
 
+def _is_inline_editable(form):
+    """
+    :param form: form or formset
+    :return: True if edit mode, False if not
+    """
+    if isinstance(form, BaseFormSet):
+        for form_item in form:
+            if getattr(form_item, 'is_inline_editable', False):
+                return True
+    else:
+        if getattr(form, 'is_inline_editable', False):
+            return True
+    return False
+
+
 class IfCmsEditionNode(template.Node):
     """Do something if edition mode"""
 
@@ -258,13 +274,7 @@ class IfCmsEditionNode(template.Node):
         """check condition of the if"""
         form = context.get('form', None) or context.get('formset', None)
         if form:
-            if isinstance(form, BaseFormSet):
-                for form_item in form:
-                    if getattr(form_item, 'is_inline_editable', False):
-                        return True
-            else:
-                if getattr(form, 'is_inline_editable', False):
-                    return True
+            return _is_inline_editable(form)
         return False
 
     def render(self, context):
@@ -508,9 +518,10 @@ class CmsEditNode(template.Node):
 
         is_inline_editable = False
         if form:
-            is_inline_editable = getattr(form, 'is_inline_editable', False)
+            is_inline_editable = _is_inline_editable(form)
         elif formset:
-            is_inline_editable = getattr(formset, 'is_inline_editable', False)
+
+            is_inline_editable = _is_inline_editable(formset)
 
         if is_inline_editable:
             node_template = template.Template(CMS_FORM_TEMPLATE)
