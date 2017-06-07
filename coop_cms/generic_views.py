@@ -213,8 +213,9 @@ class EditableObjectView(View):
 
             return HttpResponseRedirect(self.object.get_absolute_url())
         else:
+
             error_text = u'<br />'.join(
-                [u'{0}'.format(_form.errors) for _form in [self.form]+inline_html_forms if _form.errors]
+                [u'{0}'.format(_form.errors) for _form in [self.form] + inline_html_forms if _form.errors]
             )
             error_message(request, _(u'An error occurred: {0}').format(error_text))
             logger.debug(u"error: {0}".format(error_text))
