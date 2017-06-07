@@ -72,12 +72,11 @@ class BaseFragmentTest(BaseTestCase):
 
 
 class FragmentsTest(BaseFragmentTest):
-    """Test ragments"""
+    """Test fragments"""
 
     editable_field_tpl = '<div class="inline-editable" id="html_editor_html_editor__coop_cms__Fragment__id__{0}__content">' + \
         '{1}</div>\n<input type="hidden" id="html_editor_html_editor__coop_cms__Fragment__id__{0}__content_hidden" ' + \
         'name="html_editor__coop_cms__Fragment__id__{0}__content" value="{1}" />'
-    
 
     def test_fragment_position(self):
         """test position is taken into account"""
@@ -965,6 +964,21 @@ class FragmentsInArticleTest(BaseFragmentTest):
         self.assertEqual(403, response.status_code)
         
         self.assertEqual(0, Fragment.objects.count())
+
+    def test_add_fragment_duplicated(self):
+        """add fragment"""
+        fragment_type = mommy.make(FragmentType, name="parts")
+
+        fragment = mommy.make(Fragment, name=u"abcd", type=fragment_type)
+
+        data = {
+            'type': fragment.type.id,
+            'name': fragment.name,
+            'position': 0,
+            'filter': '',
+        }
+
+        self._add_fragment(data, errors_count=1)
         
     def test_view_edit_fragments_empty(self):
         """view edit fragment form: no fragments yet"""

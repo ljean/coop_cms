@@ -1292,6 +1292,7 @@ class Fragment(models.Model):
         verbose_name = _(u'Fragment')
         verbose_name_plural = _(u'Fragment')
         ordering = ("position", "id")
+        unique_together = ('type', 'name', )
         
     def _can_change(self, user):
         """perms"""
