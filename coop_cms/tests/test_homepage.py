@@ -11,6 +11,8 @@ from django.test.utils import override_settings
 
 from model_mommy import mommy
 
+from colorbox.utils import assert_popup_redirects
+
 from coop_cms.context_processors import homepage_url
 from coop_cms.models import BaseArticle, SiteSettings
 from coop_cms.settings import get_article_class
@@ -25,7 +27,7 @@ class NoHomepageTest(UserBaseTestCase):
     def test_view_article_set_homepage_no_homepage(self):
         self._log_as_editor(can_add=True)
         article_class = get_article_class()
-        art = mommy.make(article_class, slug="test", is_homepage=False, publication=BaseArticle.PUBLISHED)
+        art = mommy.make(article_class, slug="test", publication=BaseArticle.PUBLISHED)
         url = art.get_edit_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -37,7 +39,7 @@ class NoHomepageTest(UserBaseTestCase):
     def test_view_article_set_homepage(self):
         self._log_as_editor(can_add=True)
         article_class = get_article_class()
-        art = mommy.make(article_class, slug="test", is_homepage=False, publication=BaseArticle.PUBLISHED)
+        art = mommy.make(article_class, slug="test", publication=BaseArticle.PUBLISHED)
         url = art.get_edit_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -125,10 +127,8 @@ class HomepageRedirectionTest(UserBaseTestCase):
         self.assertEqual(response.status_code, 200)
         a2 = get_article_class().objects.get(id=a2.id)
         home_url = reverse("coop_cms_homepage")
-        self.assertEqual(
-            response.content,
-            '<script>$.colorbox.close(); window.location="{0}";</script>'.format(home_url)
-        )
+
+        assert_popup_redirects(response, home_url)
         self.assertEqual(a2.homepage_for_site, None)
         site_settings = SiteSettings.objects.get(site__id=settings.SITE_ID)
         self.assertEqual(site_settings.homepage_url, a2.get_absolute_url())
@@ -137,10 +137,8 @@ class HomepageRedirectionTest(UserBaseTestCase):
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a3.id]), data={'confirm': '1'})
         self.assertEqual(response.status_code, 200)
         home_url = reverse("coop_cms_homepage")
-        self.assertEqual(
-            response.content,
-            '<script>$.colorbox.close(); window.location="{0}";</script>'.format(home_url)
-        )
+        assert_popup_redirects(response, home_url)
+
         a2 = get_article_class().objects.get(id=a2.id)
         a3 = get_article_class().objects.get(id=a3.id)
         site_settings = SiteSettings.objects.get(site__id=settings.SITE_ID)
@@ -179,20 +177,16 @@ class HomepageRedirectionTest(UserBaseTestCase):
         settings.SITE_ID = site1.id
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a3.id]), data={'confirm': '1'})
         home_url = reverse("coop_cms_homepage")
-        self.assertEqual(
-            response.content,
-            '<script>$.colorbox.close(); window.location="{0}";</script>'.format(home_url)
-        )
+        assert_popup_redirects(response, home_url)
+
         site_settings1 = SiteSettings.objects.get(site=site1)
         self.assertEqual(site_settings1.homepage_url, a3.get_absolute_url())
 
         settings.SITE_ID = site2.id
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a4.id]), data={'confirm': '1'})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.content,
-            '<script>$.colorbox.close(); window.location="{0}";</script>'.format(home_url)
-        )
+        assert_popup_redirects(response, home_url)
+
         a4 = get_article_class().objects.get(id=a4.id)
         a3 = get_article_class().objects.get(id=a3.id)
 
@@ -505,10 +499,8 @@ class HomepageDirectTest(UserBaseTestCase):
         self.assertEqual(response.status_code, 200)
         article2 = get_article_class().objects.get(id=article2.id)
         home_url = reverse("coop_cms_homepage")
-        self.assertEqual(
-            response.content,
-            '<script>$.colorbox.close(); window.location="{0}";</script>'.format(home_url)
-        )
+        assert_popup_redirects(response, home_url)
+
         self.assertEqual(article2.homepage_for_site, None)
         site_settings = SiteSettings.objects.get(site__id=settings.SITE_ID)
         self.assertEqual(site_settings.homepage_article, article2.slug)
@@ -517,10 +509,7 @@ class HomepageDirectTest(UserBaseTestCase):
         response = self.client.post(reverse('coop_cms_set_homepage', args=[article3.id]), data={'confirm': '1'})
         self.assertEqual(response.status_code, 200)
         home_url = reverse("coop_cms_homepage")
-        self.assertEqual(
-            response.content,
-            '<script>$.colorbox.close(); window.location="{0}";</script>'.format(home_url)
-        )
+        assert_popup_redirects(response, home_url)
 
         article2 = get_article_class().objects.get(id=article2.id)
         article3 = get_article_class().objects.get(id=article3.id)
@@ -560,10 +549,8 @@ class HomepageDirectTest(UserBaseTestCase):
         settings.SITE_ID = site1.id
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a3.id]), data={'confirm': '1'})
         home_url = reverse("coop_cms_homepage")
-        self.assertEqual(
-            response.content,
-            '<script>$.colorbox.close(); window.location="{0}";</script>'.format(home_url)
-        )
+        assert_popup_redirects(response, home_url)
+
         site_settings1 = SiteSettings.objects.get(site=site1)
         self.assertEqual(site_settings1.homepage_url, '')
         self.assertEqual(site_settings1.homepage_article, a3.slug)
@@ -571,10 +558,8 @@ class HomepageDirectTest(UserBaseTestCase):
         settings.SITE_ID = site2.id
         response = self.client.post(reverse('coop_cms_set_homepage', args=[a4.id]), data={'confirm': '1'})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.content,
-            '<script>$.colorbox.close(); window.location="{0}";</script>'.format(home_url)
-        )
+        assert_popup_redirects(response, home_url)
+
         a4 = get_article_class().objects.get(id=a4.id)
         a3 = get_article_class().objects.get(id=a3.id)
 

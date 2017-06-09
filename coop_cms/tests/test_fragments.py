@@ -11,6 +11,7 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 
 from model_mommy import mommy
+from colorbox.utils import assert_popup_refresh
 
 from coop_cms.forms import ArticleForm
 from coop_cms.models import BaseArticle, Fragment, FragmentType, FragmentFilter
@@ -807,8 +808,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
             self.assertEqual(errors_count, len(errs))
         else:
             self.assertEqual([], errs)
-            expected = '<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-            self.assertEqual(response.content, expected)
+            assert_popup_refresh(response)
         
         return response        
         
@@ -1067,10 +1067,9 @@ class FragmentsInArticleTest(BaseFragmentTest):
         soup = BeautifulSoup(response.content)
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
-        
-        expected = '<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-        self.assertEqual(response.content, expected)
-        
+
+        assert_popup_refresh(response)
+
         self.assertEqual(2, Fragment.objects.count())
         fragment1 = Fragment.objects.get(id=fragment1.id)
         fragment2 = Fragment.objects.get(id=fragment2.id)
@@ -1126,8 +1125,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
 
-        expected = '<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-        self.assertEqual(response.content, expected)
+        assert_popup_refresh(response)
 
         self.assertEqual(2, Fragment.objects.count())
         fragment1 = Fragment.objects.get(id=fragment1.id)
@@ -1341,10 +1339,9 @@ class FragmentsInArticleTest(BaseFragmentTest):
         soup = BeautifulSoup(response.content)
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
-        
-        expected = '<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-        self.assertEqual(response.content, expected)
-        
+
+        assert_popup_refresh(response)
+
         self.assertEqual(1, Fragment.objects.count())
         fragment1 = Fragment.objects.get(id=fragment1.id)
         self.assertEqual(Fragment.objects.filter(id=fragment2.id).count(), 0)
