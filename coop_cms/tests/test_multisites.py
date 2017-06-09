@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from datetime import timedelta
 
 from django.contrib.sites.models import Site
@@ -204,8 +206,8 @@ class MultiSiteCategoryTest(BaseArticleTest):
         cat.sites.add(site2)
         cat.save()
 
-        art1 = mommy.make(article_class, category=cat, publication=True, title=u"#THis is crazy")
-        art2 = mommy.make(article_class, category=cat, publication=True, title=u"#Call me maybe")
+        art1 = mommy.make(article_class, category=cat, publication=True, title="#THis is crazy")
+        art2 = mommy.make(article_class, category=cat, publication=True, title="#Call me maybe")
 
         art2.sites.remove(site1)
         art2.save()

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """utilities for developpers"""
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site

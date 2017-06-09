@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """utils"""
 
+from __future__ import unicode_literals
+
 from bs4 import BeautifulSoup
 try:
     from html.parser import HTMLParser
@@ -46,35 +48,35 @@ class _DeHTMLParser(HTMLParser):
         """parser"""
         text = data
         if not self._allow_spaces:
-            text = sub('[ \t\r\n]+', u' ', text)
+            text = sub('[ \t\r\n]+', ' ', text)
         self._text.append(text)
 
     def handle_entityref(self, name):
-        html_char = u'&' + name + u";"
+        html_char = '&' + name + ";"
         if self._allow_html_chars:
             value = html_char
         else:
-            value = self.unescape(html_char).replace(u'\xa0', u' ')
+            value = self.unescape(html_char).replace('\xa0', ' ')
         self._text.append(value)
 
     def handle_charref(self, name):
-        self.handle_entityref(u"#" + name)
+        self.handle_entityref("#" + name)
 
     def handle_starttag(self, tag, attrs):
         """parser"""
-        if tag == u'p':
+        if tag == 'p':
             self._text.append('\n\n')
-        elif tag == u'br':
+        elif tag == 'br':
             self._text.append('\n')
 
     def handle_startendtag(self, tag, attrs):
         """parser"""
-        if tag == u'br':
+        if tag == 'br':
             self._text.append('\n\n')
 
     def text(self):
         """parser"""
-        return u''.join(self._text).strip()
+        return ''.join(self._text).strip()
 
 
 def dehtml(text, allow_spaces=False, allow_html_chars=False):
@@ -97,7 +99,7 @@ def strip_a_tags(pretty_html_text):
     Reformat prettified html to remove spaces in <a> tags
     """
     pos = 0
-    fixed_html = u''
+    fixed_html = ''
     while True:
         new_pos = pretty_html_text.find('<a', pos)
         if new_pos > 0:
@@ -126,7 +128,7 @@ def avoid_line_too_long(pretty_html_text):
     """
     detect any line with more than 998 characters
     """
-    lines = pretty_html_text.split(u'\n')
+    lines = pretty_html_text.split('\n')
     new_lines = []
     for line in lines:
         line_length = len(line)
@@ -138,11 +140,11 @@ def avoid_line_too_long(pretty_html_text):
             while part_size * len(parts) < line_length:
                 parts.append(line[part_index*part_size:(part_index + 1)*part_size])
                 part_index = len(parts)
-            parts = [_replace_from_end(part, u' ', u'\n', 1) for part in parts]
-            new_lines.append(u''.join(parts))
+            parts = [_replace_from_end(part, ' ', '\n', 1) for part in parts]
+            new_lines.append(''.join(parts))
         else:
             new_lines.append(line)
-    return u'\n'.join(new_lines)
+    return '\n'.join(new_lines)
 
 
 def make_links_absolute(html_content, newsletter=None, site_prefix=""):
@@ -349,7 +351,7 @@ def strip_locale_path(locale_path):
 
 def make_locale_path(path, lang):
     """returns locale url - /home/ --> /en/home/"""
-    return u'/{0}{1}'.format(lang, path)
+    return '/{0}{1}'.format(lang, path)
 
 
 def redirect_to_language(url, lang_code):

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """navigation tags"""
 
+from __future__ import unicode_literals
+
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template import VariableDoesNotExist
@@ -66,7 +68,7 @@ class NavigationAsNestedUlNode(NavigationTemplateNode):
         tree_name = kwargs.pop('tree', 'default')
         root_nodes = NavNode.objects.filter(tree__name=tree_name, parent__isnull=True).order_by("ordering")
         total_nodes = root_nodes.count()    
-        return u''.join([
+        return ''.join([
             node.as_navigation(node_pos=i + 1, total_nodes=total_nodes, **kwargs)
             for (i, node) in enumerate(root_nodes)
         ])
@@ -95,7 +97,7 @@ class NavigationBreadcrumbNode(NavigationTemplateNode):
         nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=content_type, object_id=obj.id)
         if nav_nodes.count() > 0:
             return nav_nodes[0].as_breadcrumb(**kwargs)
-        return u''
+        return ''
 
 
 @register.tag
@@ -124,7 +126,7 @@ class NavigationChildrenNode(NavigationTemplateNode):
         nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=content_type, object_id=obj.id)
         if nav_nodes.exists():
             return nav_nodes[0].children_as_navigation(**kwargs)
-        return u''
+        return ''
 
 @register.tag
 def navigation_children(parser, token):
@@ -153,7 +155,7 @@ class NavigationSiblingsNode(NavigationTemplateNode):
         nav_nodes = NavNode.objects.filter(tree__name=tree_name, content_type=content_type, object_id=obj.id)
         if nav_nodes.count() > 0:
             return nav_nodes[0].siblings_as_navigation(**kwargs)
-        return u''
+        return ''
 
 
 @register.tag
@@ -187,7 +189,7 @@ class NavigationRootNode(NavigationTemplateNode):
         root_nodes = NavNode.objects.filter(
             tree__name=tree_name, parent__isnull=True, in_navigation=True
         ).order_by("ordering")
-        return u''.join([render_template_node(node, template_name) for node in root_nodes])
+        return ''.join([render_template_node(node, template_name) for node in root_nodes])
 
 
 @register.tag

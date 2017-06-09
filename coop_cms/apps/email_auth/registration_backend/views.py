@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
@@ -15,7 +17,7 @@ def notify_event(emails_to_notify, subject, template_name, extra_context):
     """notify an event to site managers"""
     if emails_to_notify:
         site = Site.objects.get_current()
-        full_subject = u"{0} - {1}".format(site, subject)
+        full_subject = "{0} - {1}".format(site, subject)
         the_template = get_template(template_name)
         context_dict = {'site': site}
         if extra_context:
@@ -38,7 +40,7 @@ class EmailRegistrationView(RegistrationView):
         emails_to_notify = getattr(settings, 'COOP_CMS_ACCOUNT_REGISTRATION_NOTIFICATION_EMAILS', None)
         notify_event(
             emails_to_notify,
-            _(u"Account created"),
+            _("Account created"),
             'email_auth/registration_notification.txt',
             {'user': new_user, }
         )
@@ -57,7 +59,7 @@ class EmailActivationView(ActivationView):
         emails_to_notify = getattr(settings, 'COOP_CMS_ACCOUNT_ACTION_NOTIFICATION_EMAILS', None)
         notify_event(
             emails_to_notify,
-            _(u"Account activated"),
+            _("Account activated"),
             'email_auth/activation_notification.txt',
             {'user': activated_user, }
         )

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """web utilities"""
 
+from __future__ import unicode_literals
+
 import json
 from six.moves.urllib.parse import urlparse
 
@@ -108,7 +110,7 @@ def csrf_failure(request, reason=""):
     ENABLED by default by coop_cms unless you set COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW=True in settings.py
     """
 
-    warn_text = u"csrf_failure, reason: {0}".format(reason)
+    warn_text = "csrf_failure, reason: {0}".format(reason)
     logger.warn(warn_text)
 
     template = get_template('coop_cms/csrf_403.html')

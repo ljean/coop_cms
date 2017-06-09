@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """permission backend"""
 
+from __future__ import unicode_literals
+
 
 class ArticlePermissionBackend(object):
     """Permission backend : check if a user is allowed to view/edit an editable object"""

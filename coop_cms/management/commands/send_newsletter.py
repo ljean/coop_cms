@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """send newsletter"""
 
-from __future__ import print_function
+from __future__ import unicode_literals, print_function
 
 from datetime import datetime
 
@@ -13,7 +13,7 @@ from coop_cms.models import NewsletterSending
 
 class Command(BaseCommand):
     """send newsletter"""
-    help = u"send newsletter"
+    help = "send newsletter"
     use_argparse = False
 
     def handle(self, email_addresses, *args, **options):

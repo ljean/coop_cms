@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 import json
 
 from django.conf import settings
@@ -17,7 +19,7 @@ from coop_cms.tests import BaseTestCase, BeautifulSoup
 from coop_cms.utils import get_model_app, get_model_name
 
 
-def _create_link(url, title=u""):
+def _create_link(url, title=""):
     """create a link"""
     link = Link.objects.create(url=url, title=title)
     link.sites.add(Site.objects.get_current())
@@ -902,7 +904,7 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'cst_tpl': cst_tpl}))
 
         for node in self.nodes:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertTrue(html.find('<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_navigation_other_tree(self):
@@ -938,7 +940,7 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({}))
 
         for node in self.nodes:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertTrue(html.find('<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_view_navigation_css(self):
@@ -954,7 +956,7 @@ class TemplateTagsTest(BaseTestCase):
         self.assertEqual(html.count('<li class="toto " >'), len(self.nodes))
 
         for node in self.nodes:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertTrue(html.find('<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_view_breadcrumb(self):
@@ -988,7 +990,7 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'obj': self.nodes[5].content_object, 'cst_tpl': cst_tpl}))
 
         for node in (self.nodes[2], self.nodes[3], self.nodes[5]) :
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertTrue(html.find('<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_view_breadcrumb_custom_template_file(self):
@@ -997,7 +999,7 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'obj': self.nodes[5].content_object}))
 
         for node in (self.nodes[2], self.nodes[3], self.nodes[5]) :
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertTrue(html.find('<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_view_children(self):
@@ -1032,7 +1034,7 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'obj': self.nodes[3].content_object, 'cst_tpl': cst_tpl}))
 
         for node in self.nodes[4:]:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertTrue(html.find('<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_view_children_custom_template_file(self):
@@ -1040,7 +1042,7 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'obj': self.nodes[3].content_object}))
 
         for node in self.nodes[4:]:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertTrue(html.find('<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_view_children_order(self):
@@ -1099,7 +1101,7 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'obj': self.nodes[0].content_object, 'cst_tpl': cst_tpl}))
 
         for node in self.nodes[:3]:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertTrue(html.find('<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_view_siblings_custom_template_file(self):
@@ -1107,7 +1109,7 @@ class TemplateTagsTest(BaseTestCase):
         html = tpl.render(Context({'obj': self.nodes[0].content_object}))
 
         for node in self.nodes[:3]:
-            self.assertTrue(html.find(u'<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
+            self.assertTrue(html.find('<span id="{0.id}">{0.label}</span>'.format(node)) >= 0)
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_navigation_no_nodes(self):
@@ -1285,10 +1287,10 @@ class NavigationTreeTest(NavigationTreeBaseTest):
         html = tpl.render(Context({}))
 
         for node in nodes_in:
-            self.assertTrue(html.find(u'{0}'.format(node)) >= 0)
+            self.assertTrue(html.find('{0}'.format(node)) >= 0)
 
         for node in nodes_out:
-            self.assertFalse(html.find(u'{0}'.format(node)) >= 0)
+            self.assertFalse(html.find('{0}'.format(node)) >= 0)
 
     def test_view_alternative_navigation(self):
         tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul tree=tree1 %}')
@@ -1317,10 +1319,10 @@ class NavigationTreeTest(NavigationTreeBaseTest):
         html = tpl.render(Context({}))
 
         for node in nodes_in:
-            self.assertTrue(html.find(u'{0}'.format(node)) >= 0)
+            self.assertTrue(html.find('{0}'.format(node)) >= 0)
 
         for node in nodes_out:
-            self.assertFalse(html.find(u'{0}'.format(node)) >= 0)
+            self.assertFalse(html.find('{0}'.format(node)) >= 0)
 
     def test_view_several_navigation(self):
         tpl = Template(
@@ -1356,7 +1358,7 @@ class NavigationTreeTest(NavigationTreeBaseTest):
         html = tpl.render(Context({}))
 
         for node in nodes_in:
-            self.assertTrue(html.find(u'{0}'.format(node)) >= 0)
+            self.assertTrue(html.find('{0}'.format(node)) >= 0)
 
 
 class NavigationLiNodeTest(NavigationTreeBaseTest):
@@ -1458,11 +1460,11 @@ class NavigationLiNodeTest(NavigationTreeBaseTest):
         tree = get_navtree_class().objects.get(name="default")
 
         parent1 = NavNode.objects.create(
-            tree=tree, label=u'Node 1', content_object=None, parent=None
+            tree=tree, label='Node 1', content_object=None, parent=None
         )
 
         parent2 = NavNode.objects.create(
-            tree=tree, label=u'Node 2', content_object=None, parent=None
+            tree=tree, label='Node 2', content_object=None, parent=None
         )
 
         article1 = mommy.make(get_article_class(), title="test1", publication=BaseArticle.PUBLISHED)

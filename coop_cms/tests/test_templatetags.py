@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """unitesting of templatetags"""
 
+from __future__ import unicode_literals
+
 import json
 from unittest import skipIf
 

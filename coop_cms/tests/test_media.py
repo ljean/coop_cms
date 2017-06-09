@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """media library unit testing"""
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 
 import json
@@ -856,7 +858,7 @@ class ImageListTemplateTagTest(BaseTestCase):
         except TemplateSyntaxError as msg:
             self.assertEqual(
                 "coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}",
-                u'{0}'.format(msg)
+                '{0}'.format(msg)
             )
         else:
             self.assertEqual("", "No exception")
@@ -894,8 +896,8 @@ class ArticleLogoTest(BaseArticleTest):
         article_class = get_article_class()
         article = mommy.make(
             article_class,
-            title=u"This is my article",
-            content=u"<p>This is my <b>content</b></p>",
+            title="This is my article",
+            content="<p>This is my <b>content</b></p>",
             template=settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0]
         )
         if image:
@@ -926,8 +928,8 @@ class ArticleLogoTest(BaseArticleTest):
         if image:
             article = mommy.make(
                 article_class,
-                title=u"This is my article",
-                content=u"<p>This is my <b>content</b></p>",
+                title="This is my article",
+                content="<p>This is my <b>content</b></p>",
                 slug="",
                 template=settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0],
                 logo=File(self._get_image())
@@ -935,8 +937,8 @@ class ArticleLogoTest(BaseArticleTest):
         else:
             article = mommy.make(
                 article_class,
-                title=u"This is my article",
-                content=u"<p>This is my <b>content</b></p>",
+                title="This is my article",
+                content="<p>This is my <b>content</b></p>",
                 slug="",
                 template=settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0]
             )

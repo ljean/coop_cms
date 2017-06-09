@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """manage.py"""
 
+from __future__ import unicode_literals
+
 import os
 import sys
 

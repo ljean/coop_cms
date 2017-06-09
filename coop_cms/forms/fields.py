@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
+from __future__ import unicode_literals
+
 import floppyforms
 
 

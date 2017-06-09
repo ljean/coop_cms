@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """newsleters"""
 
+from __future__ import unicode_literals
+
 from datetime import datetime
 import sys
 from tempfile import NamedTemporaryFile
@@ -99,12 +101,12 @@ def test_newsletter(request, newsletter_id):
 
             messages.add_message(
                 request, messages.SUCCESS,
-                _(u"The test email has been sent to {0} addresses: {1}").format(nb_sent, u', '.join(dests))
+                _("The test email has been sent to {0} addresses: {1}").format(nb_sent, ', '.join(dests))
             )
             return HttpResponseRedirect(newsletter.get_absolute_url())
 
         except Exception:
-            messages.add_message(request, messages.ERROR, _(u"An error occured! Please contact your support."))
+            messages.add_message(request, messages.ERROR, _("An error occured! Please contact your support."))
             logger.error(
                 'Internal Server Error: {0}'.format(request.path),
                 exc_info=sys.exc_info,
@@ -200,7 +202,7 @@ class NewsletterPdfView(View):
         )
 
         # Generate name of the pdf file
-        filename = u'newsletter_{0}.pdf'.format(slugify(newsletter.subject))
+        filename = 'newsletter_{0}.pdf'.format(slugify(newsletter.subject))
 
         # returns PDF response
         return PDFResponse(pdf_content, show_content_in_browser=False, filename=filename)

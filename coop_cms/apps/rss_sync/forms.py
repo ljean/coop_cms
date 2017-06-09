@@ -2,6 +2,7 @@
 """
 Admin forms
 """
+from __future__ import unicode_literals
 
 from django import forms
 from django.conf import settings
@@ -27,7 +28,7 @@ class RssSourceAdminForm(forms.ModelForm):
 
 class RssItemAdminForm(forms.ModelForm):
     """Admin form"""
-    #id = forms.IntegerField(widget=widgets.AdminCreateArticleWidget, label=u'Id')
+    # id = forms.IntegerField(widget=widgets.AdminCreateArticleWidget, label='Id')
 
     class Meta:
         model = models.RssItem

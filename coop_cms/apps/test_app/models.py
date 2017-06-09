@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """models"""
 
+from __future__ import unicode_literals
+
 from django.db import models
 from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
@@ -27,7 +29,7 @@ class TestClass(models.Model):
     tags = models.ManyToManyField(TestTag, blank=True)
 
     def __str__(self):
-        return u"Test Object {0}".format(self.id)
+        return "Test Object {0}".format(self.id)
 
     def get_list_url(self):
         """for unit-testing"""

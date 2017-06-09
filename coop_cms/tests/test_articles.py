@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 
 from datetime import datetime
@@ -125,7 +127,7 @@ class ArticleTest(BaseArticleTest):
             self.assertEqual('/test/', article.get_absolute_url())
 
     def test_create_slug(self):
-        article = get_article_class().objects.create(title=u"voici l'été", publication=BaseArticle.PUBLISHED)
+        article = get_article_class().objects.create(title="voici l'été", publication=BaseArticle.PUBLISHED)
         self.assertEqual(article.slug, 'voici-lete')
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
@@ -263,7 +265,7 @@ class ArticleTest(BaseArticleTest):
     def _is_inline_html_editor_found(self, response):
         self.assertEqual(200, response.status_code)
         inline_editor_init_url = reverse('html_editor_init')
-        content = u'{0}'.format(response.content, 'utf-8')
+        content = '{0}'.format(response.content, 'utf-8')
         return content.find(inline_editor_init_url) > 0
         
     def test_edit_permission(self):
@@ -286,7 +288,7 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(200, response.status_code)
         
     def test_inline_html_editor_loaded(self):
-        initial_data = {'title': u"ceci est un test", 'content': u"this is my article content"}
+        initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
         article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         response = self.client.get(article.get_absolute_url())
         self.assertFalse(self._is_inline_html_editor_found(response))

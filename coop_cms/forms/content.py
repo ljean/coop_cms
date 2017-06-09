@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
+from __future__ import unicode_literals
+
 from django import forms
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -46,16 +48,16 @@ class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
     descr = floppyforms.CharField(
         required=False,
         widget=floppyforms.TextInput(
-            attrs={'size': '35', 'placeholder': _(u'Optional description'), }
+            attrs={'size': '35', 'placeholder': _('Optional description'), }
         ),
         label=_('Description'),
     )
-    copyright = floppyforms.CharField(required=False, label=_(u'copyright'))
+    copyright = floppyforms.CharField(required=False, label=_('copyright'))
     filters = HidableMultipleChoiceField(
-        required=False, label=_(u"Filters"), help_text=_(u"Choose between tags to find images more easily")
+        required=False, label=_("Filters"), help_text=_("Choose between tags to find images more easily")
     )
     size = floppyforms.ChoiceField(
-        required=False, label=_(u"Size"), help_text=_(u"Define a size if you want to resize the image")
+        required=False, label=_("Size"), help_text=_("Define a size if you want to resize the image")
     )
 
     def __init__(self, *args, **kwargs):
@@ -63,9 +65,9 @@ class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
         img_size_queryset = ImageSize.objects.all()
         if img_size_queryset.count():
             self.fields['size'].choices = [
-                (u'', u'')
+                ('', '')
             ] + [
-                (img_size.id, u'{0}'.format(img_size)) for img_size in img_size_queryset
+                (img_size.id, '{0}'.format(img_size)) for img_size in img_size_queryset
             ]
         else:
             self.fields['size'].widget = floppyforms.HiddenInput()
@@ -78,14 +80,14 @@ class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
         try:
             return ImageSize.objects.get(id=size_id)
         except (ValueError, ImageSize.DoesNotExist):
-            raise ValidationError(_(u"Invalid choice"))
+            raise ValidationError(_("Invalid choice"))
 
 
 class AddDocForm(MediaBaseAddMixin, forms.ModelForm):
     """add document form"""
 
     filters = floppyforms.MultipleChoiceField(
-        required=False, label=_(u"Filters"), help_text=_(u"Choose between tags to find images more easily")
+        required=False, label=_("Filters"), help_text=_("Choose between tags to find images more easily")
     )
 
     class Meta:
@@ -115,4 +117,4 @@ class AliasAdminForm(forms.ModelForm):
         self.fields['sites'].initial = Site.objects.filter(id=settings.SITE_ID)
         site_choices = [(site.id, site.domain) for site in Site.objects.all()]
         self.fields['sites'].widget = ChosenSelectMultiple(choices=site_choices, force_template=True)
-        self.fields['sites'].help_text = u''
+        self.fields['sites'].help_text = ''

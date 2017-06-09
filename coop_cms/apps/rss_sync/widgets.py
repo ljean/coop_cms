@@ -1,6 +1,8 @@
 #-*- coding: utf-8 -*-
 """widgets"""
 
+from __future__ import unicode_literals
+
 from django.core.urlresolvers import reverse
 from django.forms import HiddenInput
 from django.utils.safestring import mark_safe
@@ -12,13 +14,13 @@ from coop_cms.apps.rss_sync.models import RssSource
 def get_button_code(label, url, is_default=False):
     """create a html button"""
     css_class = u' default' if is_default else ''
-    html = u"&nbsp;&nbsp;"
+    html = "&nbsp;&nbsp;"
     html += """<button class="btn btn-primary cust-btn{2}" onclick="window.location=\'{1}\'">{0}</button>""".format(
         label, url, css_class
     )
 
     #javascript code for moving the button to the submit-row at the bottom of the page
-    html += u"<script>django.jQuery(function() {django.jQuery('.cust-btn').appendTo('.submit-row')});</script>"
+    html += "<script>django.jQuery(function() {django.jQuery('.cust-btn').appendTo('.submit-row')});</script>"
     return html
 
 
@@ -31,7 +33,7 @@ class AdminCollectRssWidget(HiddenInput):
     def render(self, name, value, attrs=None):
         """returns html"""
         widget = super(AdminCollectRssWidget, self).render(name, value, attrs) # pylint: disable=E1002
-        html = u'{0}'.format(widget)
+        html = '{0}'.format(widget)
         html += value
         src_id = RssSource.objects.get(url=value).id
         url = reverse('rss_sync_collect_rss_items', args=[src_id])
@@ -48,8 +50,8 @@ class AdminCreateArticleWidget(HiddenInput):
     def render(self, name, value, attrs=None):
         """returns html"""
         widget = super(AdminCreateArticleWidget, self).render(name, value, attrs)  # pylint: disable=E1002
-        html = u'{0}'.format(widget)
-        html += u'{0}'.format(value)
+        html = '{0}'.format(widget)
+        html += '{0}'.format(value)
         url = reverse('rss_sync_create_cms_article', args=[int(value)])
         html += get_button_code(_('Create CMS article'), url)
         return mark_safe(html)

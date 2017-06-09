@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from __future__ import print_function
+from __future__ import unicode_literals, print_function
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -13,7 +13,7 @@ from coop_cms.settings import is_localized
 
 class Command(BaseCommand):
     """patch alias redirect"""
-    help = u"patch alias redirect"
+    help = "patch alias redirect"
     use_argparse = False
 
     def handle(self, *args, **options):

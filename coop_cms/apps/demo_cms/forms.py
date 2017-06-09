@@ -3,6 +3,8 @@
 Example of custom forms
 """
 
+from __future__ import unicode_literals
+
 import floppyforms as forms
 
 from coop_cms.forms.articles import ArticleForm as CmsArticleForm

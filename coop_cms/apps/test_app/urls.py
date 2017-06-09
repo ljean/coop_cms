@@ -2,6 +2,7 @@
 """for unit-testing"""
 
 from django.conf.urls import patterns, url
+from __future__ import unicode_literals
 
 from coop_cms.apps.test_app import views
 

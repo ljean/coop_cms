@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """models"""
 
+from __future__ import unicode_literals
+
 from datetime import datetime
 import os
 import os.path
@@ -57,7 +59,7 @@ def get_object_label(content_type, obj):
     returns the label used in navigation according to the configured rule
     """
     if not obj:
-        return ugettext(u"Node")
+        return ugettext("Node")
     try:
         nav_type = NavType.objects.get(content_type=content_type)
         if nav_type.label_rule == NavType.LABEL_USE_SEARCH_FIELD:
@@ -65,9 +67,9 @@ def get_object_label(content_type, obj):
         elif nav_type.label_rule == NavType.LABEL_USE_GET_LABEL:
             label = obj.get_label()
         else:
-            label = u'{0}'.format(obj)
+            label = '{0}'.format(obj)
     except NavType.DoesNotExist:
-        label = u'{0}'.format(obj)
+        label = '{0}'.format(obj)
     return label
 
 
@@ -99,7 +101,7 @@ def get_navigable_type_choices():
     """returns the list of choice of navigable types"""
     types = [('', '')]
     types += [
-        (nav_type.content_type.id, u'{0}'.format(nav_type.content_type))
+        (nav_type.content_type.id, '{0}'.format(nav_type.content_type))
         for nav_type in NavType.objects.all()
     ]
     return types
@@ -114,30 +116,30 @@ class NavType(models.Model):
     LABEL_USE_GET_LABEL = 2
 
     LABEL_RULE_CHOICES = (
-        (LABEL_USE_UNICODE, _(u'Use object unicode')),
-        (LABEL_USE_SEARCH_FIELD, _(u'Use search field')),
-        (LABEL_USE_GET_LABEL, _(u'Use get_label')),
+        (LABEL_USE_UNICODE, _('Use object unicode')),
+        (LABEL_USE_SEARCH_FIELD, _('Use search field')),
+        (LABEL_USE_GET_LABEL, _('Use get_label')),
     )
 
-    content_type = models.OneToOneField(ContentType, verbose_name=_(u'django model'))
-    search_field = models.CharField(max_length=200, blank=True, default="", verbose_name=_(u'search field'))
+    content_type = models.OneToOneField(ContentType, verbose_name=_('django model'))
+    search_field = models.CharField(max_length=200, blank=True, default="", verbose_name=_('search field'))
     label_rule = models.IntegerField(
-        verbose_name=_(u'How to generate the label'), choices=LABEL_RULE_CHOICES, default=LABEL_USE_UNICODE
+        verbose_name=_('How to generate the label'), choices=LABEL_RULE_CHOICES, default=LABEL_USE_UNICODE
     )
 
     def __str__(self):
         return self.content_type.app_label + '.' + self.content_type.model
 
     class Meta:
-        verbose_name = _(u'navigable type')
-        verbose_name_plural = _(u'navigable types')
+        verbose_name = _('navigable type')
+        verbose_name_plural = _('navigable types')
 
 
 @python_2_unicode_compatible
 class BaseNavTree(models.Model):
     """Base class for navigation tree. It is deprecated (not recommended) to use your own"""
     last_update = models.DateTimeField(auto_now=True)
-    name = models.CharField(_(u'name'), max_length=100, db_index=True, unique=True, default='default')
+    name = models.CharField(_('name'), max_length=100, db_index=True, unique=True, default='default')
     types = models.ManyToManyField('coop_cms.NavType', blank=True, related_name="%(app_label)s_%(class)s_set")
 
     def __str__(self):
@@ -157,11 +159,11 @@ class BaseNavTree(models.Model):
     def get_root_nodes_count(self):
         """number of nodes without parents"""
         return self.get_root_nodes().count()
-    get_root_nodes_count.short_description = _(u'root nodes')
+    get_root_nodes_count.short_description = _('root nodes')
 
     class Meta:
-        verbose_name = _(u'Navigation tree')
-        verbose_name_plural = _(u'Navigation trees')
+        verbose_name = _('Navigation tree')
+        verbose_name_plural = _('Navigation trees')
         abstract = True
 
 
@@ -223,12 +225,12 @@ class NavNode(models.Model):
 
     def as_text(self):
         if self.parent:
-            return u'{0} > {1}'.format(self.parent, self.label)
+            return '{0} > {1}'.format(self.parent, self.label)
         return self.label
 
     class Meta:
-        verbose_name = _(u'navigation node')
-        verbose_name_plural = _(u'navigation nodes')
+        verbose_name = _('navigation node')
+        verbose_name_plural = _('navigation nodes')
 
     def is_accessible(self):
         """returns True if the content can be accessed"""
@@ -307,15 +309,15 @@ class NavNode(models.Model):
         url = self.get_absolute_url()
         label = escape(self.label)
         if url is None:
-            li_content = u'<a>{0}</a>'.format(label)
+            li_content = '<a>{0}</a>'.format(label)
         else:
-            li_content = u'<a href="{0}">{1}</a>'.format(url, label)
+            li_content = '<a href="{0}">{1}</a>'.format(url, label)
 
         children_li = [child.as_jstree() for child in self.get_children(allow_all=True)]
 
-        return u'<li id="node_{0}" rel={3}>{1}<ul>{2}</ul></li>'.format(
+        return '<li id="node_{0}" rel={3}>{1}<ul>{2}</ul></li>'.format(
             self.id,
-            li_content, u''.join(children_li),
+            li_content, ''.join(children_li),
             "in_nav" if self.in_navigation and self.is_accessible() else "out_nav"
         )
 
@@ -338,9 +340,9 @@ class NavNode(models.Model):
         else:
             url = self.get_absolute_url()
             if url is None:
-                return u'<a>{0}</a>'.format(self.label)
+                return '<a>{0}</a>'.format(self.label)
             else:
-                return u'<a href="{0}">{1}</a>'.format(url, self.label)
+                return '<a href="{0}">{1}</a>'.format(url, self.label)
 
     def _get_ul_format(self, ul_template):
         """format ul tag"""
@@ -348,7 +350,7 @@ class NavNode(models.Model):
             template_ = ul_template if hasattr(ul_template, 'render') else get_template(ul_template)
             return template_.render({'node': self})
         else:
-            return u'<ul>{0}</ul>'
+            return '<ul>{0}</ul>'
 
     def _get_li_args(self, li_args):
         """li tag arguments"""
@@ -356,7 +358,7 @@ class NavNode(models.Model):
             template_ = li_args if hasattr(li_args, 'render') else get_template(li_args)
             return template_.render({'node': self})
         else:
-            return u''
+            return ''
 
     def as_navigation(self, **kwargs):
         """
@@ -387,16 +389,16 @@ class NavNode(models.Model):
             for child in self.get_children(in_navigation=True) if child.is_accessible()
         ]
         ul_format = self._get_ul_format(ul_template)
-        children_html = ul_format.format(u''.join(children_li)) if children_li else ""
+        children_html = ul_format.format(''.join(children_li)) if children_li else ""
 
         args = self._get_li_args(li_args)
         if args.find("class=") < 0:
-            css_class = u'class="{0} {1}"'.format(css_class, active_class if self.is_active_node() else "")
+            css_class = 'class="{0} {1}"'.format(css_class, active_class if self.is_active_node() else "")
         else:
             css_class = ""
 
         if not li_node:
-            return u'<li {0} {1}>{2}{3}</li>'.format(
+            return '<li {0} {1}>{2}{3}</li>'.format(
                 css_class, args, self._get_li_content(li_template), children_html
             )
         else:
@@ -404,53 +406,53 @@ class NavNode(models.Model):
 
     def as_breadcrumb(self, li_template=None, css_class=""):
         """iterate node by parents through root node"""
-        html = self.parent.as_breadcrumb(li_template) if self.parent else u""
-        return html + u'<li class="{0}">{1}</li>'.format(css_class, self._get_li_content(li_template))
+        html = self.parent.as_breadcrumb(li_template) if self.parent else ""
+        return html + '<li class="{0}">{1}</li>'.format(css_class, self._get_li_content(li_template))
 
     def children_as_navigation(self, li_template=None, css_class=""):
         """get children as navigation"""
         children_li = [
-            u'<li class="{0}">{1}</li>'.format(css_class, child._get_li_content(li_template))
+            '<li class="{0}">{1}</li>'.format(css_class, child._get_li_content(li_template))
             for child in self.get_children(in_navigation=True) if child.is_accessible()
         ]
-        return u''.join(children_li)
+        return ''.join(children_li)
 
     def siblings_as_navigation(self, li_template=None, css_class=""):
         """get siblings as navigation"""
         siblings_li = [
-            u'<li class="{0}">{1}</li>'.format(css_class, sibling._get_li_content(li_template))
+            '<li class="{0}">{1}</li>'.format(css_class, sibling._get_li_content(li_template))
             for sibling in self.get_siblings(in_navigation=True) if sibling.is_accessible()
         ]
-        return u''.join(siblings_li)
+        return ''.join(siblings_li)
 
     def check_new_navigation_parent(self, parent_id):
         """check if parent is valid"""
         if parent_id == self.id:
-            raise ValidationError(_(u'A node can not be its own parent'))
+            raise ValidationError(_('A node can not be its own parent'))
 
         if parent_id:
             cur_node = NavNode.objects.get(id=parent_id)
             while cur_node:
                 if cur_node.id == self.id:
-                    raise ValidationError(_(u'A node can not be child of its own child'))
+                    raise ValidationError(_('A node can not be child of its own child'))
                 cur_node = cur_node.parent
 
 
 @python_2_unicode_compatible
 class ArticleCategory(models.Model):
     """Article category"""
-    name = models.CharField(_(u'name'), max_length=100)
+    name = models.CharField(_('name'), max_length=100)
     slug = AutoSlugField(populate_from='name', max_length=100, unique=True)
-    ordering = models.IntegerField(_(u'ordering'), default=0)
+    ordering = models.IntegerField(_('ordering'), default=0)
     in_rss = models.BooleanField(
-        _(u'in rss'), default=False,
-        help_text=_(u"The articles of this category will be listed in the main rss feed")
+        _('in rss'), default=False,
+        help_text=_("The articles of this category will be listed in the main rss feed")
     )
-    sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
+    sites = models.ManyToManyField(Site, verbose_name=_('site'), default=[settings.SITE_ID])
     pagination_size = models.IntegerField(
         default=0,
-        verbose_name=_(u'pagination size'),
-        help_text=_(u"The number of articles to display in a category page. If 0, use default")
+        verbose_name=_('pagination size'),
+        help_text=_("The number of articles to display in a category page. If 0, use default")
     )
 
     def __str__(self):
@@ -471,8 +473,8 @@ class ArticleCategory(models.Model):
         ).distinct().order_by('publication_date')
 
     class Meta:
-        verbose_name = _(u'article category')
-        verbose_name_plural = _(u'article categories')
+        verbose_name = _('article category')
+        verbose_name_plural = _('article categories')
         
     def save(self, *args, **kwargs):
         """save"""
@@ -525,7 +527,7 @@ class BaseNavigable(TimeStampedModel):
             create_navigation_node(content_type, self, tree, parent)
 
     navigation_parent = property(
-        _get_navigation_parent, _set_navigation_parent, doc=_(u"set the parent in navigation.")
+        _get_navigation_parent, _set_navigation_parent, doc=_("set the parent in navigation.")
     )
 
     def save(self, do_not_create_nav=False, *args, **kwargs):
@@ -545,7 +547,7 @@ def get_logo_folder(article, filename):
     except AttributeError:
         img_root = 'cms_logos'
     basename = os.path.basename(filename)
-    return u'{0}/{1}/{2}'.format(img_root, article.id, basename)
+    return '{0}/{1}/{2}'.format(img_root, article.id, basename)
 
 
 @python_2_unicode_compatible
@@ -557,44 +559,44 @@ class BaseArticle(BaseNavigable):
     ARCHIVED = 2
 
     PUBLICATION_STATUS = (
-        (DRAFT, _(u'Draft')),
-        (PUBLISHED, _(u'Published')),
-        (ARCHIVED, _(u'Archived')),
+        (DRAFT, _('Draft')),
+        (PUBLISHED, _('Published')),
+        (ARCHIVED, _('Archived')),
     )
 
     slug = models.CharField(
         max_length=100, unique=True, db_index=True, blank=False, null=True, validators=[validate_slug]
     )
-    title = models.TextField(_(u'title'), default='', blank=True)
-    subtitle = models.TextField(_(u'subtitle'), default='', blank=True)
-    content = models.TextField(_(u'content'), default='', blank=True)
-    publication = models.IntegerField(_(u'publication'), choices=PUBLICATION_STATUS, default=PUBLISHED)
-    template = models.CharField(_(u'template'), max_length=200, default='', blank=True)
+    title = models.TextField(_('title'), default='', blank=True)
+    subtitle = models.TextField(_('subtitle'), default='', blank=True)
+    content = models.TextField(_('content'), default='', blank=True)
+    publication = models.IntegerField(_('publication'), choices=PUBLICATION_STATUS, default=PUBLISHED)
+    template = models.CharField(_('template'), max_length=200, default='', blank=True)
     logo = models.ImageField(upload_to=get_logo_folder, blank=True, null=True, default='')
     temp_logo = models.ImageField(upload_to=get_logo_folder, blank=True, null=True, default='')
-    summary = models.TextField(_(u'Summary'), blank=True, default='')
+    summary = models.TextField(_('Summary'), blank=True, default='')
     category = models.ForeignKey(
-        ArticleCategory, verbose_name=_(u'Category'), blank=True, null=True, default=None,
+        ArticleCategory, verbose_name=_('Category'), blank=True, null=True, default=None,
         related_name="%(app_label)s_%(class)s_rel"
     )
     in_newsletter = models.BooleanField(
-        _(u'In newsletter'), default=True,
-        help_text=_(u'Make this article available for newsletters.')
+        _('In newsletter'), default=True,
+        help_text=_('Make this article available for newsletters.')
     )
     homepage_for_site = models.ForeignKey(
-        Site, verbose_name=_(u'Homepage for site'), blank=True, null=True, default=None,
+        Site, verbose_name=_('Homepage for site'), blank=True, null=True, default=None,
         related_name="homepage_article"
     )
     headline = models.BooleanField(
-        _(u"Headline"), default=False,
-        help_text=_(u'Make this article appear on the home page')
+        _("Headline"), default=False,
+        help_text=_('Make this article appear on the home page')
     )
-    publication_date = models.DateTimeField(_(u"Publication date"), default=datetime.now)
-    sites = models.ManyToManyField(Site, verbose_name=_(u'site'), default=[settings.SITE_ID])
+    publication_date = models.DateTimeField(_("Publication date"), default=datetime.now)
+    sites = models.ManyToManyField(Site, verbose_name=_('site'), default=[settings.SITE_ID])
     login_required = models.BooleanField(
         default=False,
-        verbose_name=_(u'login required'),
-        help_text=_(u'If true, only user with login/password will able to access the article')
+        verbose_name=_('login required'),
+        help_text=_('If true, only user with login/password will able to access the article')
     )
     
     @property
@@ -689,17 +691,17 @@ class BaseArticle(BaseNavigable):
             thumb = sorl_thumbnail.backend.get_thumbnail(self.logo.file, ADMIN_THUMBS_SIZE)
             return '<img width="%s" src="%s" />' % (thumb.width, thumb.url)
         else:
-            return _(u"No Image")
-    logo_list_display.short_description = _(u"logo")
+            return _("No Image")
+    logo_list_display.short_description = _("logo")
     logo_list_display.allow_tags = True
 
     class Meta:
-        verbose_name = _(u"article")
-        verbose_name_plural = _(u"articles")
+        verbose_name = _("article")
+        verbose_name_plural = _("articles")
         abstract = True
 
     def __str__(self):
-        return u"{0} {1}".format(dehtml(self.title), dehtml(self.subtitle)).strip()
+        return "{0} {1}".format(dehtml(self.title), dehtml(self.subtitle)).strip()
 
     def save(self, *args, **kwargs):
         """save"""
@@ -708,7 +710,7 @@ class BaseArticle(BaseNavigable):
         
         # autoslug localized title for creating locale_slugs
         if (not self.title) and (not self.slug):
-            raise InvalidArticleError(u"coop_cms.Article: slug can not be empty")
+            raise InvalidArticleError("coop_cms.Article: slug can not be empty")
             
         if is_localized():
             from modeltranslation.utils import build_localized_fieldname  # pylint: disable=F0401
@@ -784,7 +786,7 @@ class BaseArticle(BaseNavigable):
                 # oups the slug is already used: change it and try again
                 next_suffix_len = len(str(next_suffix))
                 safe_slug = origin_slug[:(100 - next_suffix_len)]
-                slug = u"{0}{1}".format(safe_slug, next_suffix)
+                slug = "{0}{1}".format(safe_slug, next_suffix)
                 next_suffix += 1
 
         return slug
@@ -795,7 +797,7 @@ class BaseArticle(BaseNavigable):
         for (template, name) in possible_templates:
             if template == self.template:
                 return name
-        return u"?"
+        return "?"
 
     def get_label(self):
         """label for navigation"""
@@ -878,8 +880,8 @@ class BaseArticle(BaseNavigable):
 @python_2_unicode_compatible
 class Link(BaseNavigable):
     """Link to a given url"""
-    title = models.CharField(_(u'Title'), max_length=200, default=_(u"title"))
-    url = models.CharField(_(u'URL'), max_length=200)
+    title = models.CharField(_('Title'), max_length=200, default=_("title"))
+    url = models.CharField(_('URL'), max_length=200)
     sites = models.ManyToManyField(Site, blank=True)
 
     def get_absolute_url(self):
@@ -900,7 +902,7 @@ class Link(BaseNavigable):
         parsed_url = urlparse(self.url)
         scheme, netloc, path = parsed_url[0], parsed_url[1], parsed_url[2]
         if scheme:
-            return u"{0}{1}".format(netloc, path)
+            return "{0}{1}".format(netloc, path)
         return self.url
 
     def is_accessible(self):
@@ -914,8 +916,8 @@ class Link(BaseNavigable):
         return dehtml(self.title)
 
     class Meta:
-        verbose_name = _(u"link")
-        verbose_name_plural = _(u"links")
+        verbose_name = _("link")
+        verbose_name_plural = _("links")
 
 
 @python_2_unicode_compatible
@@ -924,8 +926,8 @@ class MediaFilter(models.Model):
     name = models.CharField(_('name'), max_length=100)
     
     class Meta:
-        verbose_name = _(u'media filter')
-        verbose_name_plural = _(u'media filters')
+        verbose_name = _('media filter')
+        verbose_name_plural = _('media filters')
         
     def __str__(self):
         return self.name
@@ -934,24 +936,24 @@ class MediaFilter(models.Model):
 @python_2_unicode_compatible
 class ImageSize(models.Model):
     """Image size for auto resizing"""
-    name = models.CharField(_(u'name'), max_length=100)
-    size = models.CharField(_(u'size'), max_length=100)
-    crop = models.CharField(_(u'crop'), max_length=100, blank=True, default="")
+    name = models.CharField(_('name'), max_length=100)
+    size = models.CharField(_('size'), max_length=100)
+    crop = models.CharField(_('crop'), max_length=100, blank=True, default="")
     
     class Meta:
-        verbose_name = _(u'Image size')
-        verbose_name_plural = _(u'Image sizes')
+        verbose_name = _('Image size')
+        verbose_name_plural = _('Image sizes')
         
     def __str__(self):
-        return u"{0} ({1}{2})".format(self.name, self.size, (" "+self.crop if self.crop else ""))
+        return "{0} ({1}{2})".format(self.name, self.size, (" "+self.crop if self.crop else ""))
 
 
 @python_2_unicode_compatible
 class Media(TimeStampedModel):
     """Base class for something you can put in Media library"""
     name = models.CharField(_('name'), max_length=200, blank=True, default='')
-    filters = models.ManyToManyField(MediaFilter, blank=True, default=None, verbose_name=_(u"filters"))
-    ordering = models.IntegerField(_(u"ordering"), default=100)
+    filters = models.ManyToManyField(MediaFilter, blank=True, default=None, verbose_name=_("filters"))
+    ordering = models.IntegerField(_("ordering"), default=100)
 
     def __str__(self):
         return self.name
@@ -963,9 +965,9 @@ class Media(TimeStampedModel):
 @python_2_unicode_compatible
 class Image(Media):
     """An image in media library"""
-    file = models.ImageField(_(u'file'), upload_to=get_img_folder)
-    size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_(u"size"))
-    copyright = models.CharField(max_length=200, verbose_name=_(u'copyright'), blank=True, default='')
+    file = models.ImageField(_('file'), upload_to=get_img_folder)
+    size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_("size"))
+    copyright = models.CharField(max_length=200, verbose_name=_('copyright'), blank=True, default='')
 
     def __str__(self):
         return self.name
@@ -985,7 +987,7 @@ class Image(Media):
         """admin"""
         return '<img src="{0}"/>'.format(self.as_thumbnail().url)
     admin_image.allow_tags = True
-    admin_image.short_description = _(u"Image")
+    admin_image.short_description = _("Image")
 
     def get_absolute_url(self):
         """url"""
@@ -1008,8 +1010,8 @@ class Image(Media):
             return self.file.url
 
     class Meta:
-        verbose_name = _(u'image')
-        verbose_name_plural = _(u'images')
+        verbose_name = _('image')
+        verbose_name_plural = _('images')
 
 
 def get_doc_folder(document, filename):
@@ -1024,7 +1026,7 @@ def get_doc_folder(document, filename):
     name, ext = os.path.splitext(filename)
     filename = slugify(name) + ext
 
-    return u'{0}/{1}'.format(doc_root, filename)
+    return '{0}/{1}'.format(doc_root, filename)
 
 
 @python_2_unicode_compatible
@@ -1037,9 +1039,9 @@ class Document(Media):
     file = models.FileField(_('file'), upload_to=get_doc_folder)
     is_private = models.BooleanField(
         _('is private'), default=False,
-        help_text=_(u"Check this if you do not want to publish this document to all users")
+        help_text=_("Check this if you do not want to publish this document to all users")
     )
-    category = models.ForeignKey(ArticleCategory, blank=True, null=True, default=None, verbose_name=_(u'category'))
+    category = models.ForeignKey(ArticleCategory, blank=True, null=True, default=None, verbose_name=_('category'))
 
     def can_download_file(self, user):
         """is user allowed to download"""
@@ -1061,9 +1063,9 @@ class Document(Media):
             'rtf', 'zip', 'avi', 'mov', 'mp4',
         )
         if ext in supported_ext:
-            return settings.STATIC_URL + u'img/filetypes/' + icotype + '/{0}.png'.format(ext)
+            return settings.STATIC_URL + 'img/filetypes/' + icotype + '/{0}.png'.format(ext)
         else:
-            return settings.STATIC_URL + u'img/filetypes/' + icotype + '/default.png'
+            return settings.STATIC_URL + 'img/filetypes/' + icotype + '/default.png'
 
     def get_block_url(self):
         """icon url"""
@@ -1074,25 +1076,25 @@ class Document(Media):
         return self.get_ico_url('icon')
 
     class Meta:
-        verbose_name = _(u'document')
-        verbose_name_plural = _(u'documents')
+        verbose_name = _('document')
+        verbose_name_plural = _('documents')
 
 
 @python_2_unicode_compatible
 class PieceOfHtml(models.Model):
     """This is a block of text thant can be added to a page and edited on it"""
-    div_id = models.CharField(verbose_name=_(u"identifier"), max_length=100, db_index=True)
-    content = models.TextField(_(u"content"), default="", blank=True)
+    div_id = models.CharField(verbose_name=_("identifier"), max_length=100, db_index=True)
+    content = models.TextField(_("content"), default="", blank=True)
     extra_id = models.CharField(
-        verbose_name=_(u"extra identifier"), blank=True, default="", max_length=100, db_index=True
+        verbose_name=_("extra identifier"), blank=True, default="", max_length=100, db_index=True
     )
 
     def __str__(self):
-        return u" ".join([self.div_id, self.extra_id])
+        return " ".join([self.div_id, self.extra_id])
 
     class Meta:
-        verbose_name = _(u'piece of HTML')
-        verbose_name_plural = _(u'pieces of HTML')
+        verbose_name = _('piece of HTML')
+        verbose_name_plural = _('pieces of HTML')
 
 
 def remove_from_navigation(sender, instance, **kwargs):
@@ -1118,15 +1120,15 @@ class NewsletterItem(models.Model):
 
     class Meta:
         unique_together = (("content_type", "object_id"),)
-        verbose_name = _(u'newsletter item')
-        verbose_name_plural = _(u'newsletter items')
+        verbose_name = _('newsletter item')
+        verbose_name_plural = _('newsletter items')
         ordering = ['ordering']
 
     def __str__(self):
         try:
-            return u'{0}: {1}'.format(self.content_type, self.content_object)
+            return '{0}: {1}'.format(self.content_type, self.content_object)
         except AttributeError:
-            return u''
+            return ''
 
 
 def on_delete_newsletterable_item(sender, instance, **kwargs):
@@ -1170,14 +1172,14 @@ post_save.connect(on_create_newsletterable_instance)
 @python_2_unicode_compatible
 class Newsletter(TimeStampedModel):
     """Newsletter"""
-    subject = models.CharField(max_length=200, verbose_name=_(u'subject'), blank=True, default="")
-    content = models.TextField(_(u"content"), default="<br>", blank=True)
+    subject = models.CharField(max_length=200, verbose_name=_('subject'), blank=True, default="")
+    content = models.TextField(_("content"), default="<br>", blank=True)
     items = models.ManyToManyField(NewsletterItem, blank=True)
-    template = models.CharField(_(u'template'), max_length=200, default='', blank=True)
-    site = models.ForeignKey(Site, verbose_name=_(u'site'), default=settings.SITE_ID)
-    source_url = models.URLField(verbose_name=_(u'source url'), default="", blank=True)
-    is_public = models.BooleanField(default=False, verbose_name=_(u'is_public'))
-    newsletter_date = models.DateField(blank=True, null=True, default=None, verbose_name=_(u'newsletter date'))
+    template = models.CharField(_('template'), max_length=200, default='', blank=True)
+    site = models.ForeignKey(Site, verbose_name=_('site'), default=settings.SITE_ID)
+    source_url = models.URLField(verbose_name=_('source url'), default="", blank=True)
+    is_public = models.BooleanField(default=False, verbose_name=_('is_public'))
+    newsletter_date = models.DateField(blank=True, null=True, default=None, verbose_name=_('newsletter date'))
 
     def get_items(self):
         """associated items"""
@@ -1225,8 +1227,8 @@ class Newsletter(TimeStampedModel):
         return dehtml(self.subject).replace('\n', '')
 
     class Meta:
-        verbose_name = _(u'newsletter')
-        verbose_name_plural = _(u'newsletters')
+        verbose_name = _('newsletter')
+        verbose_name_plural = _('newsletters')
 
 
 @python_2_unicode_compatible
@@ -1234,15 +1236,15 @@ class NewsletterSending(models.Model):
     """Schedule newsletter sending"""
 
     newsletter = models.ForeignKey(Newsletter)
-    scheduling_dt = models.DateTimeField(_(u"scheduling date"), blank=True, default=None, null=True)
-    sending_dt = models.DateTimeField(_(u"sending date"), blank=True, default=None, null=True)
+    scheduling_dt = models.DateTimeField(_("scheduling date"), blank=True, default=None, null=True)
+    sending_dt = models.DateTimeField(_("sending date"), blank=True, default=None, null=True)
 
     def __str__(self):
         return self.newsletter.subject
 
     class Meta:
-        verbose_name = _(u'newsletter sending')
-        verbose_name_plural = _(u'newsletter sendings')
+        verbose_name = _('newsletter sending')
+        verbose_name_plural = _('newsletter sendings')
 
 
 @python_2_unicode_compatible
@@ -1250,18 +1252,18 @@ class Alias(models.Model):
     """Alias : makes possinle to redirect an url ton another one"""
 
     CODE_CHOICES = (
-        (301, _(u'301 - Permanent')),
-        (302, _(u'302 - Non permanent')),
+        (301, _('301 - Permanent')),
+        (302, _('302 - Non permanent')),
     )
 
     path = models.CharField(max_length=200)
     redirect_url = models.CharField(max_length=200, default="", blank=True)
     redirect_code = models.IntegerField(default=301, choices=CODE_CHOICES)
-    sites = models.ManyToManyField(Site, blank=True, verbose_name=_(u'sites'))
+    sites = models.ManyToManyField(Site, blank=True, verbose_name=_('sites'))
     
     class Meta:
-        verbose_name = _(u'Alias')
-        verbose_name_plural = _(u'Aliases')
+        verbose_name = _('Alias')
+        verbose_name_plural = _('Aliases')
     
     def get_absolute_url(self):
         """urls"""
@@ -1271,7 +1273,7 @@ class Alias(models.Model):
         return self.path
 
     def save(self, **kwargs):
-        if self.path and self.path[-1] == u'/':
+        if self.path and self.path[-1] == '/':
             self.path = self.path[:-1]
         return super(Alias, self).save(**kwargs)
 
@@ -1279,15 +1281,15 @@ class Alias(models.Model):
 @python_2_unicode_compatible
 class FragmentType(models.Model):
     """Type of fragments"""
-    name = models.CharField(max_length=100, db_index=True, verbose_name=_(u"name"))
+    name = models.CharField(max_length=100, db_index=True, verbose_name=_("name"))
     allowed_css_classes = models.CharField(
-        max_length=200, verbose_name=_(u"allowed css classes"), default="",
-        help_text=_(u"the css classed proposed when editing a fragment. It must be separated by comas")
+        max_length=200, verbose_name=_("allowed css classes"), default="",
+        help_text=_("the css classed proposed when editing a fragment. It must be separated by comas")
     )
     
     class Meta:
-        verbose_name = _(u'Fragment type')
-        verbose_name_plural = _(u'Fragment types')
+        verbose_name = _('Fragment type')
+        verbose_name_plural = _('Fragment types')
         
     def __str__(self):
         return self.name
@@ -1296,11 +1298,11 @@ class FragmentType(models.Model):
 @python_2_unicode_compatible
 class FragmentFilter(models.Model):
     """filter fragments"""
-    extra_id = models.CharField(max_length=100, db_index=True, verbose_name=_(u"extra_id"))
+    extra_id = models.CharField(max_length=100, db_index=True, verbose_name=_("extra_id"))
     
     class Meta:
-        verbose_name = _(u'Fragment filter')
-        verbose_name_plural = _(u'Fragment filters')
+        verbose_name = _('Fragment filter')
+        verbose_name_plural = _('Fragment filters')
         
     def __str__(self):
         return self.extra_id
@@ -1309,16 +1311,16 @@ class FragmentFilter(models.Model):
 @python_2_unicode_compatible
 class Fragment(models.Model):
     """small piece of html which can be dynamically added to the page"""
-    type = models.ForeignKey(FragmentType, verbose_name=_(u'fragment type'))
-    name = models.CharField(max_length=100, db_index=True, verbose_name=_(u'name'))
-    css_class = models.CharField(max_length=100, default=u"", blank=True, verbose_name=_(u'CSS class'))
+    type = models.ForeignKey(FragmentType, verbose_name=_('fragment type'))
+    name = models.CharField(max_length=100, db_index=True, verbose_name=_('name'))
+    css_class = models.CharField(max_length=100, default="", blank=True, verbose_name=_('CSS class'))
     position = models.IntegerField(verbose_name=_("position"), default=0)
-    content = models.TextField(default=u"", blank=True, verbose_name=_(u'content'))
-    filter = models.ForeignKey(FragmentFilter, verbose_name=_(u'fragment filter'), blank=True, null=True, default=None)
+    content = models.TextField(default="", blank=True, verbose_name=_('content'))
+    filter = models.ForeignKey(FragmentFilter, verbose_name=_('fragment filter'), blank=True, null=True, default=None)
     
     class Meta:
-        verbose_name = _(u'Fragment')
-        verbose_name_plural = _(u'Fragment')
+        verbose_name = _('Fragment')
+        verbose_name_plural = _('Fragment')
         ordering = ("position", "id")
         unique_together = ('type', 'name', )
         
@@ -1350,7 +1352,7 @@ class Fragment(models.Model):
         return super(Fragment, self).save(*args, **kwargs)
 
     def __str__(self):
-        return u"{0} {1} {2}".format(self.type, self.position, self.name)
+        return "{0} {1} {2}".format(self.type, self.position, self.name)
 
 
 @python_2_unicode_compatible
@@ -1361,27 +1363,27 @@ class SiteSettings(models.Model):
     SITEMAP_ALL = 2
 
     SITEMAP_MODES = (
-        (SITEMAP_ONLY_SITE, _(u"Only site articles")),
-        (SITEMAP_ALL, _(u"All articles")),
+        (SITEMAP_ONLY_SITE, _("Only site articles")),
+        (SITEMAP_ALL, _("All articles")),
     )
 
-    site = models.OneToOneField(Site, verbose_name=_(u'site settings'))
+    site = models.OneToOneField(Site, verbose_name=_('site settings'))
     homepage_url = models.CharField(
-        max_length=256, blank=True, default=u"", verbose_name=_(u'homepage URL'),
-        help_text=_(u"if set, the homepage will be redirected to the given URL"), db_index=True
+        max_length=256, blank=True, default="", verbose_name=_('homepage URL'),
+        help_text=_("if set, the homepage will be redirected to the given URL"), db_index=True
     )
     sitemap_mode = models.IntegerField(default=SITEMAP_ONLY_SITE, choices=SITEMAP_MODES)
     homepage_article = models.CharField(
-        max_length=256, blank=True, default=u"", verbose_name=_(u'homepage article'),
-        help_text=_(u"if set, the homepage will get the article with the given slug"), db_index=True
+        max_length=256, blank=True, default="", verbose_name=_('homepage article'),
+        help_text=_("if set, the homepage will get the article with the given slug"), db_index=True
     )
     
     def __str__(self):
-        return u"{0}".format(self.site)
+        return "{0}".format(self.site)
     
     class Meta:
-        verbose_name = _(u'Sites settings')
-        verbose_name_plural = _(u'Site settings')
+        verbose_name = _('Sites settings')
+        verbose_name_plural = _('Site settings')
         ordering = ("site__id",)
 
 

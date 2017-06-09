@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 
@@ -9,6 +11,6 @@ import floppyforms
 class LanguageSelectionForm(floppyforms.Form):
     """Propose the different languages"""
     language = floppyforms.ChoiceField(
-        label=_(u'Language'),
+        label=_('Language'),
         choices=getattr(settings, 'LANGUAGES', [])
     )

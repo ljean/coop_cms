@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """"""
 
+from __future__ import unicode_literals
+
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse, resolve, NoReverseMatch
 from django.contrib.auth.views import redirect_to_login

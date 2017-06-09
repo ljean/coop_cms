@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
+from __future__ import unicode_literals
+
 from django.template import Template, Context
 from django.test.utils import override_settings
 
@@ -153,7 +155,7 @@ class BlockInheritanceTest(BaseArticleTest):
         article_class = get_article_class()
         article = mommy.make(
             article_class,
-            title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+            title="This is my article", content="<p>This is my <b>content</b></p>",
             template='test/article_with_blocks.html'
         )
 
@@ -173,14 +175,14 @@ class BlockInheritanceTest(BaseArticleTest):
         article_class = get_article_class()
         article = mommy.make(
             article_class,
-            title=u"This is my article", content=u"<p>This is my <b>content</b></p>",
+            title="This is my article", content="<p>This is my <b>content</b></p>",
             template='test/article_with_blocks.html'
         )
 
         self._log_as_editor()
 
         data = {
-            "title": u"This is a new title",
+            "title": "This is a new title",
             'content': "<p>This is a <i>*** NEW ***</i> <b>content</b></p>"
         }
         response = self.client.post(article.get_edit_url(), data=data, follow=True)

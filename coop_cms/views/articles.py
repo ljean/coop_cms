@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """articles"""
 
+from __future__ import unicode_literals
+
 import json
 
 from django.conf import settings
@@ -113,7 +115,7 @@ def publish_article(request, url):
         'form': form,
         'article': article,
         'draft': draft,
-        'title': _(u"Do you want to publish this article?") if draft else _(u"Make it draft?"),
+        'title': _("Do you want to publish this article?") if draft else _("Make it draft?"),
     }
 
     return render(
@@ -193,7 +195,7 @@ def new_article(request):
         if form.is_valid():
             article = form.save()
             form.save_m2m()
-            success_message(request, _(u'The article has been created properly'))
+            success_message(request, _('The article has been created properly'))
             return HttpResponseRedirect(article.get_edit_url())
     else:
         form = new_article_form(request.user)
@@ -280,7 +282,7 @@ class ArticlesByCategoryView(TemplateView):
     def get_template_names(self):
         """template to use"""
         try:
-            category_template = u"coop_cms/categories/{0}.html".format(self.get_category().slug)
+            category_template = "coop_cms/categories/{0}.html".format(self.get_category().slug)
             get_template(category_template)
         except TemplateDoesNotExist:
             category_template = "coop_cms/articles_category.html"

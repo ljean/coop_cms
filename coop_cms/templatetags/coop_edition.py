@@ -4,6 +4,8 @@ coop_edition template tags
 used for magic form
 """
 
+from __future__ import unicode_literals
+
 from django import VERSION as DJANGO_VERSION
 from django import template
 from django.forms.formsets import BaseFormSet
@@ -92,11 +94,11 @@ class FragmentEditNode(InlineHtmlMultipleEditNode):
 
     def _pre_object_render(self, obj):
         """call before rendering an object"""
-        return u'<div class="coop-fragment {0}" rel="{1}">'.format(obj.css_class, obj.id)
+        return '<div class="coop-fragment {0}" rel="{1}">'.format(obj.css_class, obj.id)
     
     def _post_object_render(self, obj):
         """call after rendering an object"""
-        return u'</div>'
+        return '</div>'
     
     def _object_render(self, idx, obj, context):
         """convert object to html"""
@@ -132,13 +134,13 @@ class FragmentEditNode(InlineHtmlMultipleEditNode):
         html = super(FragmentEditNode, self).render(context)
         filter_id = self.fragment_filter.id if self.fragment_filter else ""
         if self._edit_mode:
-            html_layout = u'<div style="display: none; visibility: hidden;" class="coop-fragment-type" '
-            html_layout += u'rel="{0}" data-filter="{2}">{1}</div>'
+            html_layout = '<div style="display: none; visibility: hidden;" class="coop-fragment-type" '
+            html_layout += 'rel="{0}" data-filter="{2}">{1}</div>'
             pre_html = html_layout.format(
                 self.fragment_type.id, self.fragment_type.name, filter_id
             )
         else:
-            pre_html = u''
+            pre_html = ''
         return pre_html + html
 
 
@@ -193,11 +195,11 @@ class ArticleTitleNode(template.Node):
         """to html"""
         is_edition_mode = context.get('form', None) is not None
         article = context.get('article')
-        return u"{0}{1}{2}{3}".format(
+        return "{0}{1}{2}{3}".format(
             article.title,
-            _(u" [EDITION]") if is_edition_mode else u"",
-            _(u" [DRAFT]") if article.publication == BaseArticle.PUBLISHED else u"",
-            _(u" [ARCHIVED]") if article.publication == BaseArticle.ARCHIVED else u"",
+            _(" [EDITION]") if is_edition_mode else "",
+            _(" [DRAFT]") if article.publication == BaseArticle.PUBLISHED else "",
+            _(" [ARCHIVED]") if article.publication == BaseArticle.ARCHIVED else "",
         )
 
 
@@ -336,9 +338,9 @@ class SafeWrapper(object):
                         )
                     )
                 except TemplateDoesNotExist:
-                    value = u'<img class="logo" src="{0}" />'.format(src.url)
+                    value = '<img class="logo" src="{0}" />'.format(src.url)
             else:
-                value = u''
+                value = ''
             return mark_safe(value)
         elif callable(value):
             try:

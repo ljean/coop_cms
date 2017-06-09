@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """custom backend for sorl-thumbnail: keep image file name"""
 
+from __future__ import unicode_literals
+
 import os.path
 
 from sorl.thumbnail.base import ThumbnailBackend, EXTENSIONS
@@ -22,7 +24,7 @@ class KeepNameThumbnailBackend(ThumbnailBackend):
         
         filename, _ext = os.path.splitext(os.path.basename(source.name))
         
-        path = u'{0}/{1}'.format(key, filename)
+        path = '{0}/{1}'.format(key, filename)
         image_format = options['format']
 
-        return u'{0}{1}.{2}'.format(settings.THUMBNAIL_PREFIX, path, EXTENSIONS[image_format])
+        return '{0}{1}.{2}'.format(settings.THUMBNAIL_PREFIX, path, EXTENSIONS[image_format])

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """send newsletter"""
 
+from __future__ import unicode_literals
+
 import sys
 
 from django import VERSION as DJANGO_VERSION
@@ -27,8 +29,8 @@ def get_and_configure_base_class():
 
 class Command(get_and_configure_base_class()):
     """send newsletter"""
-    help = u"migrate"
     #use_argparse = False
+    help = "migrate"
 
     def handle(self, *args, **options):
         """command"""

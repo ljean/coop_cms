@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
+from __future__ import unicode_literals
+
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
@@ -22,9 +24,9 @@ class NewsletterItemAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(NewsletterItemAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.item = kwargs.get('instance', None)
-        article_choices = [(a.id, u'{0}'.format(a)) for a in get_article_class().objects.all()]
+        article_choices = [(a.id, '{0}'.format(a)) for a in get_article_class().objects.all()]
         self.fields['object_id'] = forms.ChoiceField(
-            choices=article_choices, required=True, help_text=_(u"Select an article")
+            choices=article_choices, required=True, help_text=_("Select an article")
         )
         self.fields['content_type'].required = False
         self.fields['content_type'].widget = forms.HiddenInput()
@@ -84,7 +86,7 @@ class NewsletterSettingsForm(forms.ModelForm):
         choice_ids = [choice[0] for choice in self.fields['items'].choices]
         for item in items:
             if item.id not in choice_ids:
-                raise ValidationError(_(u"Invalid choice"))
+                raise ValidationError(_("Invalid choice"))
         return items
 
 
@@ -117,10 +119,10 @@ class NewsletterSchedulingForm(floppyforms.ModelForm):
         sch_dt = self.cleaned_data['scheduling_dt']
 
         if not sch_dt:
-            raise ValidationError(_(u"This field is required"))
+            raise ValidationError(_("This field is required"))
 
         if sch_dt < dt_now():
-            raise ValidationError(_(u"The scheduling date must be in future"))
+            raise ValidationError(_("The scheduling date must be in future"))
 
         return sch_dt
 

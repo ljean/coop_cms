@@ -3,6 +3,8 @@
 Email authentication Unit tests
 """
 
+from __future__ import unicode_literals
+
 from bs4 import BeautifulSoup
 from unittest import skipUnless
 
@@ -15,6 +17,7 @@ from django.test.utils import override_settings
 
 from model_mommy import mommy
 from registration.models import RegistrationProfile
+
 
 TEST_AUTHENTICATION_BACKENDS = (
     'coop_cms.perms_backends.ArticlePermissionBackend',

@@ -3,6 +3,8 @@
 misc. templatetags
 """
 
+from __future__ import unicode_literals
+
 import os.path
 import time
 import unicodedata
@@ -134,11 +136,11 @@ class NewsletterFriendlyCssNode(template.Node):
         for elt in order_of_items:
             value = style_dict.pop(elt, '')
             if value:
-                values.append(u"{0}: {1}".format(elt, value))
-        values.extend([u"{0}: {1}".format(key, value) for (key, value) in style_dict.items()])
+                values.append("{0}: {1}".format(elt, value))
+        values.extend(["{0}: {1}".format(key, value) for (key, value) in style_dict.items()])
         if values:
-            return u"; ".join(values) + ";"
-        return u""
+            return "; ".join(values) + ";"
+        return ""
 
     def render(self, context):
         """to html"""
@@ -173,14 +175,14 @@ class NewsletterFriendlyCssNode(template.Node):
                     html_tag["style"] = self._dict_to_style(style_dict, style_list)
 
             # Do not prettify : it may cause some display problems
-            content = u'{0}'.format(soup)  # .prettify(formatter="minimal")
+            content = '{0}'.format(soup)  # .prettify(formatter="minimal")
 
         else:
             style = ""
             for tag in reversed(self.css.keys()):
                 value = self.css[tag]
-                style += u"{0} {{ {1} }}\n".format(tag, value)
-            content = u"<style>\n{0}</style>\n".format(style) + content
+                style += "{0} {{ {1} }}\n".format(tag, value)
+            content = "<style>\n{0}</style>\n".format(style) + content
         return content
 
 
@@ -323,7 +325,7 @@ def coop_image_list(parser, token):
         # as_name = args[2]
         var_name = args[3]
     except IndexError:
-        raise TemplateSyntaxError(u"coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
+        raise TemplateSyntaxError("coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}")
     return MediaListNode(Image, filter_name, var_name)
 
 
@@ -362,7 +364,7 @@ def open_tag_if(index_, args):
     """open_tag if condition"""
     tag, nb_per_block = args.split("/")
     nb_per_block = int(nb_per_block)
-    return mark_safe(u"<{0}>".format(tag) if (index_ % nb_per_block) == 0 else "")
+    return mark_safe("<{0}>".format(tag) if (index_ % nb_per_block) == 0 else "")
 
 
 @register.filter
@@ -370,7 +372,7 @@ def close_tag_if(index_, args):
     """close_tag if condition"""
     tag, nb_per_block = args.split("/")
     nb_per_block = int(nb_per_block)
-    return mark_safe(u"</{0}>".format(tag) if (index_ % nb_per_block) == nb_per_block else "")
+    return mark_safe("</{0}>".format(tag) if (index_ % nb_per_block) == nb_per_block else "")
 
 
 @register.filter
@@ -397,7 +399,7 @@ class VersionedStaticFileNode(template.Node):
                 version = os.path.getmtime(static_file_path)
             except OSError:
                 version = 'x'
-        return u"{0}{1}?v={2}".format(settings.STATIC_URL, self.static_path, version)
+        return "{0}{1}?v={2}".format(settings.STATIC_URL, self.static_path, version)
 
 
 @register.tag
@@ -407,7 +409,7 @@ def versioned_static_file(parser, token):
     try:
         static_path = args[1]
     except IndexError:
-        raise TemplateSyntaxError(u"coop_image_list: usage --> {% versioned_static_file 'static_path' %}")
+        raise TemplateSyntaxError("coop_image_list: usage --> {% versioned_static_file 'static_path' %}")
     return VersionedStaticFileNode(static_path)
 
 
@@ -420,7 +422,7 @@ def coop_docs_list(parser, token):
         # as_name = args[2]
         var_name = args[3]
     except IndexError:
-        raise TemplateSyntaxError(u"coop_docs_list: usage --> {% coop_docs_list 'filter_name' as var_name %}")
+        raise TemplateSyntaxError("coop_docs_list: usage --> {% coop_docs_list 'filter_name' as var_name %}")
     return MediaListNode(Document, filter_name, var_name)
 
 

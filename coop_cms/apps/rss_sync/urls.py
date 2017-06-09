@@ -4,6 +4,7 @@ urls
 """
 
 from django.conf.urls import patterns, url
+from __future__ import unicode_literals
 
 from coop_cms.apps.rss_sync import views
 

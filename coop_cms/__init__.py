@@ -3,6 +3,8 @@
 coop_cms is a Content Management System for Django
 """
 
+from __future__ import unicode_literals
+
 VERSION = (1, 2, 27)
 
 

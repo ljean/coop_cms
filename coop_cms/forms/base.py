@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
+from __future__ import unicode_literals
+
 import floppyforms
 
 from coop_html_editor.widgets import get_inline_html_widget

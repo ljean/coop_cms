@@ -2,6 +2,7 @@
 """unit test i18n support"""
 
 from django.conf import settings
+from __future__ import unicode_literals
 
 from unittest import skipIf
 
@@ -125,8 +126,8 @@ class UrlLocalizationTest(BaseTestCase):
     def test_change_lang(self):
         """change language"""
 
-        original_text = u'*!-+' * 10
-        translated_text = u':%@/' * 9
+        original_text = '*!-+' * 10
+        translated_text = ':%@/' * 9
         
         art1 = get_article_class().objects.create(title="Home", content=original_text)
         
@@ -135,7 +136,7 @@ class UrlLocalizationTest(BaseTestCase):
 
         activate(origin_lang)
 
-        setattr(art1, 'title_' + trans_lang, u'Accueil')
+        setattr(art1, 'title_' + trans_lang, 'Accueil')
         setattr(art1, 'content_' + trans_lang, translated_text)
         
         art1.save()
@@ -223,7 +224,7 @@ class UrlLocalizationTest(BaseTestCase):
     def test_keep_slug(self):
         """test slug are not modified when changing title"""
         article_class = get_article_class()
-        art1 = article_class.objects.create(title=u"Home", content="aa")
+        art1 = article_class.objects.create(title="Home", content="aa")
         original_slug = art1.slug
         art1.title = "Title changed"
         art1.save()
@@ -235,16 +236,16 @@ class UrlLocalizationTest(BaseTestCase):
         """test translation of slug are not modified when changing title"""
         
         article_class = get_article_class()
-        art1 = article_class.objects.create(title=u"Home", content="aa")
+        art1 = article_class.objects.create(title="Home", content="aa")
         trans_lang = settings.LANGUAGES[1][0]
-        setattr(art1, 'title_' + trans_lang, u'Accueil')
+        setattr(art1, 'title_' + trans_lang, 'Accueil')
         art1.save()
         
         original_slug = art1.slug
-        original_trans_slug = getattr(art1, 'slug_' + trans_lang, u'**dummy**')
+        original_trans_slug = getattr(art1, 'slug_' + trans_lang, '**dummy**')
         
-        art1.title = u"Title changed"
-        setattr(art1, 'title_' + trans_lang, u'Titre change')
+        art1.title = "Title changed"
+        setattr(art1, 'title_' + trans_lang, 'Titre change')
         
         art1.save()
         art1 = article_class.objects.get(id=art1.id)
@@ -257,8 +258,8 @@ class UrlLocalizationTest(BaseTestCase):
         """test localized slug already exists"""
         
         article_class = get_article_class()
-        art1 = article_class.objects.create(title=u"Home", content="aa")
-        art2 = article_class.objects.create(title=u"Rome", content="aa")
+        art1 = article_class.objects.create(title="Home", content="aa")
+        art2 = article_class.objects.create(title="Rome", content="aa")
 
         trans_lang = settings.LANGUAGES[1][0]
         setattr(art1, 'title_' + trans_lang, art2.title)
@@ -276,8 +277,8 @@ class UrlLocalizationTest(BaseTestCase):
         """test localized slug already exists 2 """
         
         article_class = get_article_class()
-        art1 = article_class.objects.create(title=u"Home", content="aa")
-        art2 = article_class.objects.create(title=u"Rome", content="aa")
+        art1 = article_class.objects.create(title="Home", content="aa")
+        art2 = article_class.objects.create(title="Rome", content="aa")
 
         trans_lang = settings.LANGUAGES[1][0]
         setattr(art1, 'title_' + trans_lang, art2.title)
@@ -294,8 +295,8 @@ class UrlLocalizationTest(BaseTestCase):
         self._log_as_editor()
         article_class = get_article_class()
 
-        art1 = article_class.objects.create(title=u"Home", content="aa")
-        art2 = article_class.objects.create(title=u"Rome", content="aa", template='test/article.html')
+        art1 = article_class.objects.create(title="Home", content="aa")
+        art2 = article_class.objects.create(title="Rome", content="aa", template='test/article.html')
 
         trans_lang = settings.LANGUAGES[1][0]
         setattr(art1, 'title_' + trans_lang, art2.title)
@@ -326,7 +327,7 @@ class UrlLocalizationTest(BaseTestCase):
 
         self._log_as_editor()
         article_class = get_article_class()
-        art1 = article_class.objects.create(title=u"Home", template='test/article.html')
+        art1 = article_class.objects.create(title="Home", template='test/article.html')
 
         origin_lang = settings.LANGUAGES[0][0]
         trans_lang = settings.LANGUAGES[1][0]
@@ -337,7 +338,7 @@ class UrlLocalizationTest(BaseTestCase):
         url = art1.get_edit_url()
         
         data = {
-            'title': u"Home",
+            'title': "Home",
             'content': 'translation', 
         }
         
@@ -354,7 +355,7 @@ class UrlLocalizationTest(BaseTestCase):
         """test localized existing article 2 """
         self._log_as_editor()
         article_class = get_article_class()
-        art1 = article_class.objects.create(title=u"Accueil", template='test/article.html')
+        art1 = article_class.objects.create(title="Accueil", template='test/article.html')
 
         origin_lang = settings.LANGUAGES[0][0]
         trans_lang = settings.LANGUAGES[1][0]
@@ -365,7 +366,7 @@ class UrlLocalizationTest(BaseTestCase):
         url = art1.get_edit_url()
         
         data = {
-            'title': u"Home",
+            'title': "Home",
             'content': 'translation', 
         }
         
@@ -383,8 +384,8 @@ class UrlLocalizationTest(BaseTestCase):
         """test localized slug and existing article """
         self._log_as_editor()
         article_class = get_article_class()
-        art1 = article_class.objects.create(title=u"Home", content="aa")
-        art2 = article_class.objects.create(title=u"Rome", content="aa", template='test/article.html')
+        art1 = article_class.objects.create(title="Home", content="aa")
+        art2 = article_class.objects.create(title="Rome", content="aa", template='test/article.html')
 
         trans_lang = settings.LANGUAGES[1][0]
         
@@ -415,8 +416,8 @@ class UrlLocalizationTest(BaseTestCase):
 
         self._log_as_editor()
         article_class = get_article_class()
-        art1 = article_class.objects.create(title=u"Home", content="aa")
-        art2 = article_class.objects.create(title=u"Rome", content="aa", template='test/article.html')
+        art1 = article_class.objects.create(title="Home", content="aa")
+        art2 = article_class.objects.create(title="Rome", content="aa", template='test/article.html')
 
         trans_lang = settings.LANGUAGES[1][0]
         
@@ -450,7 +451,7 @@ class UrlLocalizationTest(BaseTestCase):
         article_class = get_article_class()
         
         try:
-            article_class.objects.create(title=u"", content="a!*%:" * 10, publication=BaseArticle.PUBLISHED)
+            article_class.objects.create(title="", content="a!*%:" * 10, publication=BaseArticle.PUBLISHED)
         except InvalidArticleError:
             # OK
             return
@@ -470,7 +471,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         activate(other_lang)
         
-        art1 = article_class.objects.create(title=u"abcd", content="a!*%:" * 10, publication=BaseArticle.PUBLISHED)
+        art1 = article_class.objects.create(title="abcd", content="a!*%:" * 10, publication=BaseArticle.PUBLISHED)
         
         response = self.client.get(art1.get_absolute_url())
         self.assertEqual(200, response.status_code)
@@ -493,7 +494,7 @@ class UrlLocalizationTest(BaseTestCase):
 
         activate(other_lang)
 
-        art1 = article_class.objects.create(title=u"abcd", content="a!*%:" * 10, publication=BaseArticle.PUBLISHED)
+        art1 = article_class.objects.create(title="abcd", content="a!*%:" * 10, publication=BaseArticle.PUBLISHED)
 
         response = self.client.get(art1.get_absolute_url())
         self.assertEqual(200, response.status_code)
@@ -515,9 +516,9 @@ class UrlLocalizationTest(BaseTestCase):
         third_lang = settings.LANGUAGES[2][0]
 
         activate(third_lang)
-        content = u"a!*%:"*10
+        content = "a!*%:"*10
 
-        art1 = article_class.objects.create(title=u"abcd", content=content, publication=BaseArticle.PUBLISHED)
+        art1 = article_class.objects.create(title="abcd", content=content, publication=BaseArticle.PUBLISHED)
         self.assertEqual(art1.slug, 'abcd')
         third_lang_url = art1.get_absolute_url()
         response = self.client.get(third_lang_url)
@@ -544,7 +545,7 @@ class UrlLocalizationTest(BaseTestCase):
 
         other_lang = settings.LANGUAGES[1][0]
 
-        art1 = article_class.objects.create(title=u"abcd", publication=BaseArticle.PUBLISHED)
+        art1 = article_class.objects.create(title="abcd", publication=BaseArticle.PUBLISHED)
 
         response = redirect_to_language(art1.get_absolute_url(), other_lang)
 
@@ -557,7 +558,7 @@ class UrlLocalizationTest(BaseTestCase):
 
         article_class = get_article_class()
 
-        art1 = article_class.objects.create(title=u"abcd", publication=BaseArticle.PUBLISHED)
+        art1 = article_class.objects.create(title="abcd", publication=BaseArticle.PUBLISHED)
 
         self.assertRaises(ImproperlyConfigured, redirect_to_language, art1.get_absolute_url(), "zz")
 
@@ -598,8 +599,8 @@ class SwitchLanguageTest(BaseTestCase):
     def test_change_lang(self):
         """change language"""
 
-        original_text = u'*!-+' * 10
-        translated_text = u':%@/' * 9
+        original_text = '*!-+' * 10
+        translated_text = ':%@/' * 9
 
         art1 = get_article_class().objects.create(title="Home", content=original_text)
 
@@ -608,7 +609,7 @@ class SwitchLanguageTest(BaseTestCase):
 
         activate(origin_lang)
 
-        setattr(art1, 'title_' + trans_lang, u'Accueil')
+        setattr(art1, 'title_' + trans_lang, 'Accueil')
         setattr(art1, 'content_' + trans_lang, translated_text)
 
         art1.save()

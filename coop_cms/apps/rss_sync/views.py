@@ -3,6 +3,8 @@
 views
 """
 
+from __future__ import unicode_literals
+
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -18,7 +20,7 @@ def collect_rss_items_view(request, source_id):
 
     collect_rss_items(request.user, rss_source)
 
-    url = reverse('admin:rss_sync_rssitem_changelist')+u'?source__id__exact={0}'.format(rss_source.id)
+    url = reverse('admin:rss_sync_rssitem_changelist') + '?source__id__exact={0}'.format(rss_source.id)
     return HttpResponseRedirect(url)
 
 
@@ -28,14 +30,14 @@ def collect_rss_items_action(modeladmin, request, queryset):
         collect_rss_items(request.user, source)
     url = reverse('admin:rss_sync_rssitem_changelist')
     return HttpResponseRedirect(url)
-collect_rss_items_action.short_description = _(u'Collect RSS items')
+collect_rss_items_action.short_description = _('Collect RSS items')
 
 
 def create_cms_article_view(request, item_id):
     """The view called when clicking on the button in admin object form"""
     item = get_object_or_404(RssItem, id=item_id)
     art = create_cms_article(request.user, item)
-    return HttpResponseRedirect(art.get_edit_url()) #redirect to cms article edit page
+    return HttpResponseRedirect(art.get_edit_url())  # redirect to cms article edit page
 
 
 def create_cms_article_action(modeladmin, request, queryset):
@@ -43,8 +45,8 @@ def create_cms_article_action(modeladmin, request, queryset):
     for item in queryset:
         art = create_cms_article(request.user, item)
 
-    #if only 1 item processed (checked)
+    # if only 1 item processed (checked)
     if queryset.count() == 1:
-        return HttpResponseRedirect(art.get_edit_url()) #redirect to cms article edit page
+        return HttpResponseRedirect(art.get_edit_url())  # redirect to cms article edit page
 
-create_cms_article_action.short_description = _(u'Create CMS Article')
+create_cms_article_action.short_description = _('Create CMS Article')

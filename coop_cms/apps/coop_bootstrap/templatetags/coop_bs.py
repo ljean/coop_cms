@@ -3,6 +3,8 @@
 Some tools for templates
 """
 
+from __future__ import unicode_literals
+
 from django import template
 
 from coop_cms.templatetags.coop_utils import is_checkbox as _is_checkbox

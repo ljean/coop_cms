@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """media library"""
 
+from __future__ import unicode_literals
+
 import itertools
 import json
 import mimetypes
@@ -224,7 +226,7 @@ def download_doc(request, doc_id):
         wrapper = FileWrapper(the_file)
         mime_type = mimetypes.guess_type(the_file.name)[0]
         if not mime_type:
-            mime_type = u'application/octet-stream'
+            mime_type = 'application/octet-stream'
         response = HttpResponse(wrapper, content_type=mime_type)
         response['Content-Length'] = the_file.size
         filename = unicodedata.normalize('NFKD', os.path.split(the_file.name)[1]).encode("utf8", 'ignore')

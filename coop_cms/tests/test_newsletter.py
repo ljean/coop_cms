@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from datetime import timedelta
 from unittest import skipIf
 
@@ -618,7 +620,7 @@ class NewsletterTest(UserBaseTestCase):
         site.domain = 'toto.fr'
         site.save()
         
-        rel_content = u'''
+        rel_content = '''
             <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
             <div><a href="http://www.google.fr">Google</a></div>
         '''
@@ -979,13 +981,13 @@ class AbsUrlTest(UserBaseTestCase):
         self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))
         
     def test_style_in_between(self):
-        test_html = u'<img style="margin: 0; width: 700px;" src="%s/media/img/newsletter_header.png" alt="Logo">'
+        test_html = '<img style="margin: 0; width: 700px;" src="%s/media/img/newsletter_header.png" alt="Logo">'
         rel_html = test_html % ""
         abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
         self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))
         
     def test_missing_attr(self):
-        test_html = u'<img alt="Logo" /><a name="aa">link</a>'
+        test_html = '<img alt="Logo" /><a name="aa">link</a>'
         abs_html = self._to_text(BeautifulSoup(test_html))
         self.assertEqual(abs_html, strip_a_tags(make_links_absolute(test_html, self.newsletter)))
 
@@ -1008,16 +1010,16 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         template = self.template_content.format('a="color: red;"')
         tpl = Template(template)
         html = tpl.render(Context({'by_email': True}))
-        self.assertEqual(0, html.count(u'<style>'))
-        self.assertEqual(3, html.count(u'<a style="color: red;">'))
+        self.assertEqual(0, html.count('<style>'))
+        self.assertEqual(3, html.count('<a style="color: red;">'))
         
     def test_edit_mode_is_in_style(self):
         template = self.template_content.format('a="color: red;"')
         tpl = Template(template)
         html = tpl.render(Context({'by_email': False}))
-        self.assertEqual(1, html.count(u'<style>'))
-        self.assertEqual(1, html.count(u'a { color: red; }'))
-        self.assertEqual(0, html.count(u'<a style="color: red;">'))
+        self.assertEqual(1, html.count('<style>'))
+        self.assertEqual(1, html.count('a { color: red; }'))
+        self.assertEqual(0, html.count('<a style="color: red;">'))
         
     def test_several_args_email_mode_is_inline(self):
         template = self.template_content.format(
@@ -1025,10 +1027,10 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         )
         tpl = Template(template)
         html = tpl.render(Context({'by_email': True}))
-        self.assertEqual(0, html.count(u'<style>'))
-        self.assertEqual(3, html.count(u'<a style="color: red; background: blue;">'))
-        self.assertEqual(1, html.count(u'<img style="width: 100px;"/>'))
-        self.assertEqual(4, html.count(u'<td style="border: none;">'))
+        self.assertEqual(0, html.count('<style>'))
+        self.assertEqual(3, html.count('<a style="color: red; background: blue;">'))
+        self.assertEqual(1, html.count('<img style="width: 100px;"/>'))
+        self.assertEqual(4, html.count('<td style="border: none;">'))
         
     def test_several_args_edit_mode_is_in_style(self):
         template = self.template_content.format(
@@ -1036,22 +1038,22 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         )
         tpl = Template(template)
         html = tpl.render(Context({'by_email': False}))
-        self.assertEqual(1, html.count(u'<style>'))
-        self.assertEqual(1, html.count(u'a { color: red; background: blue; }'))
-        self.assertEqual(1, html.count(u'img { width: 100px; }'))
-        self.assertEqual(1, html.count(u'td { border: none; }'))
-        self.assertEqual(0, html.count(u'<a style="color: red; background: blue;">'))
-        self.assertEqual(0, html.count(u'<img style="width: 100px;">'))
-        self.assertEqual(0, html.count(u'<td style="border: none;">'))
+        self.assertEqual(1, html.count('<style>'))
+        self.assertEqual(1, html.count('a { color: red; background: blue; }'))
+        self.assertEqual(1, html.count('img { width: 100px; }'))
+        self.assertEqual(1, html.count('td { border: none; }'))
+        self.assertEqual(0, html.count('<a style="color: red; background: blue;">'))
+        self.assertEqual(0, html.count('<img style="width: 100px;">'))
+        self.assertEqual(0, html.count('<td style="border: none;">'))
         
     def test_class_selector_email_mode_is_inline(self):
         template = self.template_content.format('"table.this-one td"="border: none;"')
         tpl = Template(template)
         html = tpl.render(Context({'by_email': True}))
-        self.assertEqual(0, html.count(u'<style>'))
-        self.assertEqual(0, html.count(u'<a style="color: red; background: blue;">'))
-        self.assertEqual(0, html.count(u'<img style="width: 100px;"/>'))
-        self.assertEqual(2, html.count(u'<td style="border: none;">'))
+        self.assertEqual(0, html.count('<style>'))
+        self.assertEqual(0, html.count('<a style="color: red; background: blue;">'))
+        self.assertEqual(0, html.count('<img style="width: 100px;"/>'))
+        self.assertEqual(2, html.count('<td style="border: none;">'))
 
     def test_dont_overwrite_inline(self):
 
@@ -1066,8 +1068,8 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         template = template_content.format('a="color: red; background: blue;"')
         tpl = Template(template)
         html = tpl.render(Context({'by_email': True}))
-        self.assertEqual(1, html.count(u'<a style="color: red; background: blue;">'))
-        self.assertEqual(1, html.count(u'<a style="color: #fff; background: blue;">'))
+        self.assertEqual(1, html.count('<a style="color: red; background: blue;">'))
+        self.assertEqual(1, html.count('<a style="color: #fff; background: blue;">'))
 
     def test_keep_order_inline(self):
 
@@ -1083,8 +1085,8 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         tpl = Template(template)
         html = tpl.render(Context({'by_email': True}))
 
-        self.assertEqual(1, html.count(u'<a style="background: #000; color: #fff; padding: 0;">'))
-        self.assertEqual(1, html.count(u'<a style="color: red; background: blue; padding: 0;">'))
+        self.assertEqual(1, html.count('<a style="background: #000; color: #fff; padding: 0;">'))
+        self.assertEqual(1, html.count('<a style="color: red; background: blue; padding: 0;">'))
 
     def test_accept_quote(self):
 
@@ -1099,8 +1101,8 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         template = template_content.format('''a="font-family: 'Tahoma';"''')
         tpl = Template(template)
         html = tpl.render(Context({'by_email': True}))
-        self.assertEqual(1, html.count(u'''<a style="font-family: 'Arial';">'''))
-        self.assertEqual(1, html.count(u'''<a style="font-family: 'Tahoma';">'''))
+        self.assertEqual(1, html.count('''<a style="font-family: 'Arial';">'''))
+        self.assertEqual(1, html.count('''<a style="font-family: 'Tahoma';">'''))
 
     def test_css_order(self):
 
@@ -1116,13 +1118,13 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
 
         tpl = Template(template_content.format('a="color: #000" ".blue a"="color: #fff"'))
         html = tpl.render(Context({'by_email': True}))
-        self.assertEqual(2, html.count(u'''<a style="color: #000;">'''))
-        self.assertEqual(0, html.count(u'''<a style="color: #fff';">'''))
+        self.assertEqual(2, html.count('''<a style="color: #000;">'''))
+        self.assertEqual(0, html.count('''<a style="color: #fff';">'''))
 
         tpl = Template(template_content.format('".blue a"="color: #fff" a="color: #000"'))
         html = tpl.render(Context({'by_email': True}))
-        self.assertEqual(1, html.count(u'''<a style="color: #000;">'''))
-        self.assertEqual(1, html.count(u'''<a style="color: #fff;">'''))
+        self.assertEqual(1, html.count('''<a style="color: #000;">'''))
+        self.assertEqual(1, html.count('''<a style="color: #fff;">'''))
 
     def test_no_end_tag(self):
 
@@ -1138,7 +1140,7 @@ class NewsletterFriendlyTemplateTagsTest(BaseTestCase):
         template = template_content.format('hr="color: red;"')
         tpl = Template(template)
         html = tpl.render(Context({'by_email': True}))
-        self.assertEqual(1, html.count(u'<hr style="color: red;"/>'))
+        self.assertEqual(1, html.count('<hr style="color: red;"/>'))
 
 
 class HtmlFixTest(BaseTestCase):
@@ -1146,7 +1148,7 @@ class HtmlFixTest(BaseTestCase):
 
     def test_strip_a_tags(self):
         """Make sure that the a tags have no space inside"""
-        html = u'''
+        html = '''
         <p>
          <h1>Test</h1>
          <a class="link" href="/">
@@ -1170,7 +1172,7 @@ class HtmlFixTest(BaseTestCase):
 
     def test_no_a_tags(self):
         """Make sure that content is returned properly if no a tag in content"""
-        html = u'''
+        html = '''
         <p>
          <h1>Test</h1>
         </p>
@@ -1185,7 +1187,7 @@ class HtmlFixTest(BaseTestCase):
 
     def test_avoid_line_too_long(self):
         """newsletter should not contains more than 998 chars. Force some endline if so"""
-        html = u'''
+        html = '''
         <p>
          <h1>Test</h1>
          <a class="link" href="/">
@@ -1208,12 +1210,12 @@ class HtmlFixTest(BaseTestCase):
         self.assertEqual(fixed_html.count('abcd'), 300)
         self.assertEqual(len(fixed_html.splitlines()), len(html.splitlines()) + 1 + (1500 // 900))
         self.assertTrue(max_length <= 900)
-        self.assertTrue(fixed_html.find(u'<h1>Test</h1>') > 0)
-        self.assertTrue(fixed_html.find(u'<h2>Eté</h2>') > 0)
+        self.assertTrue(fixed_html.find('<h1>Test</h1>') > 0)
+        self.assertTrue(fixed_html.find('<h2>Eté</h2>') > 0)
 
     def test_avoid_line_very_too_long(self):
         """newsletter should not contains more than 998 chars. Force some endline if so"""
-        html = u'''
+        html = '''
         <p>
          <h1>Test</h1>
          <a class="link" href="/">
@@ -1225,7 +1227,7 @@ class HtmlFixTest(BaseTestCase):
          </a>
          </div>
         </p>
-        '''.format(u'abcdé ' * 600)  # 4200 characters
+        '''.format('abcdé ' * 600)  # 4200 characters
 
         fixed_html = avoid_line_too_long(html)
 
@@ -1233,15 +1235,15 @@ class HtmlFixTest(BaseTestCase):
         for line in fixed_html.split('\n'):
             max_length = max(max_length, len(line))
 
-        self.assertEqual(fixed_html.count(u'abcdé'), 600)
+        self.assertEqual(fixed_html.count('abcdé'), 600)
         self.assertEqual(len(fixed_html.splitlines()), len(html.splitlines()) + 1 + (4200 // 900))
         self.assertTrue(max_length <= 900)
-        self.assertTrue(fixed_html.find(u'<h1>Test</h1>') > 0)
-        self.assertTrue(fixed_html.find(u'<h2>Eté</h2>') > 0)
+        self.assertTrue(fixed_html.find('<h1>Test</h1>') > 0)
+        self.assertTrue(fixed_html.find('<h2>Eté</h2>') > 0)
 
     def test_avoid_line_too_long_no_change(self):
         """newsletter should not contains more than 998 chars. Force some endline if so"""
-        html = u'''
+        html = '''
         <p>
          <h1>Test</h1>
          <a class="link" href="/">

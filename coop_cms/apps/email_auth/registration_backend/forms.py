@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from django.utils.translation import ugettext, ugettext_lazy as _
+from __future__ import unicode_literals
+
+from django.utils.translation import ugettext_lazy as _
 
 import floppyforms as forms
 from registration.forms import RegistrationFormUniqueEmail
@@ -12,7 +14,7 @@ class RegistrationFormUniqueEmailAndTermsOfService(BootstrapableMixin, Registrat
     
     terms_of_service = forms.BooleanField(
         widget=forms.CheckboxInput,
-        label=_(u'I have read and agree to the Terms of Service'),
+        label=_('I have read and agree to the Terms of Service'),
         error_messages={'required': _("You must agree to the terms to register")}
     )
 

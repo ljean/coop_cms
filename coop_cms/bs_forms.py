@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Boptstrap-css friendly forms"""
 
+from __future__ import unicode_literals
+
 import floppyforms as forms
 
 from coop_cms.templatetags.coop_utils import is_checkbox

@@ -4,6 +4,8 @@ Coop_cms settings : central place for coop_cms settings
 the settings should be accessed from here and not directly from django.conf.settings
 """
 
+from __future__ import unicode_literals
+
 import os.path
 import sys
 
@@ -51,7 +53,7 @@ def get_navigable_content_types():
     for content_type in navigable_content_types:
         is_navnode = ((content_type.model == 'navnode') and (content_type.app_label == 'coop_cms'))
         if (not is_navnode) and 'get_absolute_url' in dir(content_type.model_class()):
-            ct_choices.append((content_type.id, content_type.app_label + u'.' + content_type.model))
+            ct_choices.append((content_type.id, content_type.app_label + '.' + content_type.model))
     return ct_choices
 
 
@@ -348,7 +350,7 @@ def get_img_folder(instance, filename):
     except AttributeError:
         img_root = 'img'
 
-    return u'{0}/{1}'.format(img_root, filename)
+    return '{0}/{1}'.format(img_root, filename)
 
 
 def get_articles_category_page_size(article_category):

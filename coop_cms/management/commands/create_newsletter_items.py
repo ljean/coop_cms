@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """create newsletter item"""
 
-from __future__ import print_function
+from __future__ import unicode_literals, print_function
 
 from django.core.management.base import BaseCommand
 

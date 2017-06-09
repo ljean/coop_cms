@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
+from __future__ import unicode_literals
+
 from django import forms
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -63,7 +65,7 @@ class ArticleForm(InlineHtmlEditableModelForm):
             if title[-4:].lower() == '<br>':
                 title = title[:-4]
             if not title:
-                raise ValidationError(_(u"Title can not be empty"))
+                raise ValidationError(_("Title can not be empty"))
         return title
 
 
@@ -206,7 +208,7 @@ class NewArticleForm(WithNavigationModelForm):
         """check that the current site is selected"""
         sites = self.cleaned_data['sites']
         if Site.objects.get_current() not in sites:
-            raise ValidationError(_(u"It is recommended to keep the current site."))
+            raise ValidationError(_("It is recommended to keep the current site."))
         return sites
 
 

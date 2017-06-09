@@ -3,6 +3,8 @@
 Admin pages for coop_cms
 """
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 from django.contrib import admin
 from django.http import Http404
@@ -27,7 +29,7 @@ def clear_thumbnails_action(model_admin, request, queryset):
     """This action is used by Image Admin and cause sorl-thumbnails to be reset"""
     for obj in queryset:
         obj.clear_thumbnails()
-clear_thumbnails_action.short_description = _(u"Clear thumbnails")
+clear_thumbnails_action.short_description = _("Clear thumbnails")
 
 
 class NavNodeAdmin(admin.ModelAdmin):
@@ -58,16 +60,16 @@ class NavTreeAdmin(admin.ModelAdmin):
     def nodes_li(self, tree):
         """display the tree nodes for jstree"""
         root_nodes = tree.get_root_nodes()
-        nodes_li = u''.join([node.as_jstree() for node in root_nodes])
+        nodes_li = ''.join([node.as_jstree() for node in root_nodes])
         return nodes_li
 
     def navtypes_list(self, tree):
         """list of navigable types"""
         if tree.types.count() == 0:
-            return _(u'All')
+            return _('All')
         else:
-            return u' - '.join([u'{0}'.format(x) for x in tree.types.all()])
-    navtypes_list.short_description = _(u'navigable types')
+            return ' - '.join(['{0}'.format(x) for x in tree.types.all()])
+    navtypes_list.short_description = _('navigable types')
 
     def change_view(self, request, object_id, extra_context=None, *args, **kwargs):
         """override the change view"""
@@ -103,13 +105,13 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
     ]
     date_hierarchy = 'publication_date'
     fieldsets = (
-        (_(u'General'), {'fields': ('slug', 'title', 'subtitle', 'publication', 'login_required', )}),
-        (_(u'Settings'), {
+        (_('General'), {'fields': ('slug', 'title', 'subtitle', 'publication', 'login_required', )}),
+        (_('Settings'), {
             'fields': ('sites', 'template', 'category', 'headline', 'is_homepage', 'logo', 'in_newsletter', )
         }),
-        (_(u'Advanced'), {'fields': ('publication_date', 'created', 'modified', )}),
-        (_(u'Content'), {'fields': ('content', 'summary', )}),
-        (_(u'Debug'), {'fields': ('temp_logo', )}),
+        (_('Advanced'), {'fields': ('publication_date', 'created', 'modified', )}),
+        (_('Content'), {'fields': ('content', 'summary', )}),
+        (_('Debug'), {'fields': ('temp_logo', )}),
     )
     filter_vertical = ('sites', )
 
@@ -124,7 +126,7 @@ admin.site.register(get_article_class(), ArticleAdmin)
 
 class MediaFilterFilter(admin.SimpleListFilter):
     """filter by media_filter"""
-    title = _(u'Media filter')
+    title = _('Media filter')
 
     # Parameter for the filter that will be used in the URL query.
     parameter_name = 'media_filter'
