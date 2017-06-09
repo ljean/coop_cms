@@ -17,6 +17,6 @@ class ArticleAdmin(CmsArticleAdmin):
         ('Misc', {'fields': ('author',)}),
     )
 
-#Replace the default Article admin
+# Replace the default Article admin
 admin.site.unregister(get_article_class())
 admin.site.register(get_article_class(), ArticleAdmin)

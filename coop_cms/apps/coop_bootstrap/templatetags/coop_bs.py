@@ -12,7 +12,7 @@ from coop_cms.templatetags.coop_navigation import NavigationAsNestedUlNode
 
 register = template.Library()
 
-#Just for compatibility
+# Just for compatibility
 
 @register.filter(name='is_checkbox')
 def is_checkbox(field):

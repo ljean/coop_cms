@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """unit test i18n support"""
 
-from django.conf import settings
 from __future__ import unicode_literals
 
 from unittest import skipIf
 
+from django.conf import settings
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured

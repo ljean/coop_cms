@@ -16,7 +16,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """command"""
-        #look for emailing to be sent
+        # look for emailing to be sent
         verbose = options.get('verbosity', 1)
         
         for klass in get_newsletter_item_classes():

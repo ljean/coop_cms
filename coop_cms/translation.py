@@ -79,7 +79,7 @@ class BaseArticleTranslationOptions(TranslationOptions):
         Add a new translation field to both fields dicts.
         """
         # Patch the slug field in order not to validate slug if easten
-        if field == 'slug':# and translation_field.language in get_eastern_languages():
+        if field == 'slug':  # and translation_field.language in get_eastern_languages():
             if validate_slug in translation_field.validators:
                 translation_field.validators.remove(validate_slug)
             translation_field.validators = [

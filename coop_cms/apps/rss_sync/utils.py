@@ -28,9 +28,9 @@ def collect_rss_items(user, source, check_user_rights=True):
 
     feed = feedparser.parse(source.get_absolute_url())
     for entry in feed.entries:
-        #create RSS entries if not exists
+        # create RSS entries if not exists
         item = RssItem.objects.get_or_create(link=entry.link, source=source)[0]
-        #In any case, update the data
+        # In any case, update the data
         item.title = entry.title
         try:
             item.updated = datetime.fromtimestamp(mktime(entry.updated_parsed))
@@ -42,7 +42,7 @@ def collect_rss_items(user, source, check_user_rights=True):
         item.save()
 
     if isinstance(source, RssSource):
-        #update info for rss sources only
+        # update info for rss sources only
         source.title = getattr(feed.feed, 'title', '')
         source.last_collect = datetime.now()
         source.save()

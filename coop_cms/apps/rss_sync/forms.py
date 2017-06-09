@@ -1,7 +1,6 @@
-#-*- coding: utf-8 -*-
-"""
-Admin forms
-"""
+# -*- coding: utf-8 -*-
+"""Admin forms"""
+
 from __future__ import unicode_literals
 
 from django import forms
@@ -9,7 +8,7 @@ from django.conf import settings
 
 from coop_cms.apps.rss_sync import models, widgets
 
-#These 2 admin forms makes possible to add custom widgets for the id field
+# These 2 admin forms makes possible to add custom widgets for the id field
 
 
 class RssSourceAdminForm(forms.ModelForm):
@@ -22,7 +21,7 @@ class RssSourceAdminForm(forms.ModelForm):
 
     class Media:
         css = {
-            'all': (settings.STATIC_URL+'css/rss_sync/admin-cust.css',),
+            'all': (settings.STATIC_URL + 'css/rss_sync/admin-cust.css',),
         }
 
 

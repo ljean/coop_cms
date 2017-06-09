@@ -18,18 +18,17 @@ class ArticleForm(CmsArticleForm):
 
     class Meta(CmsArticleForm.Meta):
         model = get_article_class()
-        fields = CmsArticleForm.Meta.fields +('author',)
+        fields = CmsArticleForm.Meta.fields + ('author',)
 
 
 class SortableNewsletterForm(NewsletterForm):
     """Example of newsletter form"""
-    #cleaned_data = None
+    # cleaned_data = None
 
     sortable = forms.CharField(required=False, widget=forms.HiddenInput())
 
     class Media(NewsletterForm.Media):
         js = NewsletterForm.Media.js + ('js/jquery.sortElements.js',)
-
 
     def save(self, *args, **kwargs):
         """override save"""

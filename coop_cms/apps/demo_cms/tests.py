@@ -105,5 +105,5 @@ class AuthorPermissionTest(TestCase):
         response = self.client.post(article.get_edit_url(), data=data, follow=False)
         self.assertEqual(302, response.status_code)
 
-        article = klass.objects.get(id=article.id)#refresh
+        article = klass.objects.get(id=article.id)  # refresh
         self.assertEqual(article.author, titi)

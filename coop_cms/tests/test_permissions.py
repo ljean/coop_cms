@@ -38,7 +38,7 @@ class PermissionMiddlewareTest(BaseArticleTest):
         response = self.client.get(url)
         self.assertEqual(302, response.status_code)
         auth_url = get_login_url()
-        self.assertTrue(response["Location"].find(auth_url+'?next='+url) >= 0)
+        self.assertTrue(response["Location"].find(auth_url + '?next=' + url) >= 0)
         
     def test_view_published_anonymous(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
