@@ -24,7 +24,6 @@ from coop_cms.moves import FileWrapper, make_context
 from coop_cms.utils import paginate
 
 
-
 def _get_photologue_media(request):
     """get photologue media"""
     # Only if django-photologue is installed
@@ -217,7 +216,7 @@ def download_doc(request, doc_id):
         raise PermissionDenied
 
     if 'filetransfers' in settings.INSTALLED_APPS:
-        from filetransfers.api import serve_file # pylint: disable=F0401
+        from filetransfers.api import serve_file  # pylint: disable=F0401
         return serve_file(request, doc.file)
     else:
         # legacy version just kept for compatibility if filetransfers is not installed

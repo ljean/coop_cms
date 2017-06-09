@@ -60,7 +60,7 @@ def view_navnode(request, tree):
             make_context(request, context_dict)
         )
 
-        # return data has dictionnary
+        # return data has dictionary
         response['html'] = html
         response['message'] = "Node content loaded."
 
