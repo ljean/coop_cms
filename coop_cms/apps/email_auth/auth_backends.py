@@ -20,17 +20,17 @@ class EmailAuthBackend(ModelBackend):
             return None if login fails
          """
 
-        #clean email
+        # clean email
         email = email.strip() if email else email
 
         if email:
-            #if email is defined, get every active user corresponding to the given email
+            # if email is defined, get every active user corresponding to the given email
             for user in User.objects.filter(email=email, is_active=True):
 
                 if user.check_password(password):
-                    #If password is correct: return user to accept it as logged user
+                    # If password is correct: return user to accept it as logged user
                     return user
 
-        #No valid user found : refuse login
+        # No valid user found : refuse login
         return None
 
