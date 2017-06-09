@@ -613,6 +613,16 @@ class BaseArticle(BaseNavigable):
         except NoReverseMatch:
             return False
 
+    @is_homepage.setter
+    def set_is_homepage(self):
+        site_settings = SiteSettings.objects.get_or_create(site=Site.objects.get_current())[0]
+        if homepage_no_redirection():
+            site_settings.homepage_article = self.slug
+        else:
+            site_settings.homepage_url = self.get_absolute_url()
+        site_settings.save()
+
+
     def is_draft(self):
         """True if draft"""
         return self.publication == BaseArticle.DRAFT
