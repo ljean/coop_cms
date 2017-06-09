@@ -2,7 +2,7 @@
 """web utilities"""
 
 import json
-from urlparse import urlparse
+from six.moves.urllib.parse import urlparse
 
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden

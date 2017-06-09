@@ -6,7 +6,7 @@ import os
 import os.path
 import re
 import shutil
-import urlparse
+from six.moves.urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -871,7 +871,7 @@ class Link(BaseNavigable):
         """url"""
         if is_localized():
             # parsed_url = scheme, netloc, path, params, query, fragment
-            parsed_url = urlparse.urlparse(self.url)
+            parsed_url = urlparse(self.url)
             scheme = parsed_url[0]
             if not scheme:
                 # the urls doesn't starts with http://, so it's a url managed by the site
@@ -882,7 +882,7 @@ class Link(BaseNavigable):
     def get_label(self):
         """label for navigation"""
         # parsed_url = scheme, netloc, path, params, query, fragment
-        parsed_url = urlparse.urlparse(self.url)
+        parsed_url = urlparse(self.url)
         scheme, netloc, path = parsed_url[0], parsed_url[1], parsed_url[2]
         if scheme:
             return u"{0}{1}".format(netloc, path)
