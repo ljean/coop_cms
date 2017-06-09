@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.loader import get_template
-from django.utils.translation import get_language, ugettext as _
+from django.utils.translation import ugettext as _
 
 from coop_bar.utils import make_link
 from coop_html_editor.settings import get_html_editor

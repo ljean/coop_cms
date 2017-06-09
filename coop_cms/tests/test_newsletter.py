@@ -14,7 +14,6 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test.utils import override_settings
 from django.utils import timezone
-from django.utils.translation import ugettext
 
 from model_mommy import mommy
 
