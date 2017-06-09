@@ -18,7 +18,7 @@ class Article(BaseArticle):
     author = models.ForeignKey(User, blank=True, default=None, null=True)
 
     def __str__(self):
-        return u"{0} - {1}".format(self.author, super(Article, self).__unicode__())
+        return "{0} - {1}".format(self.author, super(Article, self).__str__())
 
 
 @python_2_unicode_compatible
@@ -33,7 +33,7 @@ class ModeratedArticle(Article):
         return user.is_superuser
 
     def __str__(self):
-        return super(ModeratedArticle, self).__unicode__()
+        return super(ModeratedArticle, self).__str__()
 
 
 @python_2_unicode_compatible
@@ -56,4 +56,4 @@ class PrivateArticle(Article):
         return self.author == user
 
     def __str__(self):
-        return super(PrivateArticle, self).__unicode__()
+        return super(PrivateArticle, self).__str__()
