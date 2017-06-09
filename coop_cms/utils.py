@@ -28,7 +28,7 @@ from coop_cms.settings import get_newsletter_context_callbacks, get_eastern_lang
 class _DeHTMLParser(HTMLParser):
     """html to text parser"""
     def __init__(self, allow_spaces=False, allow_html_chars=False):
-        super(HTMLParser, self).__init__()
+        HTMLParser.__init__(self)
         self._text = []
         self._allow_spaces = allow_spaces
         self._allow_html_chars = allow_html_chars
