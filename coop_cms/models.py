@@ -22,7 +22,6 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.signals import pre_delete, post_save
-from django.template import RequestContext, Context
 from django.template.loader import get_template
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import escape
@@ -32,13 +31,14 @@ from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
 from sorl.thumbnail.parsers import ThumbnailParseError
 
+from coop_cms.moves import make_context
+from coop_cms.optionals import build_localized_fieldname
 from coop_cms.settings import (
     get_article_class, get_article_logo_size, get_article_logo_crop, get_article_templates, get_default_logo,
     get_headline_image_size, get_headline_image_crop, get_img_folder, get_newsletter_item_classes,
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
     cms_no_homepage, homepage_no_redirection
 )
-from coop_cms.optionals import build_localized_fieldname
 from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path, slugify
 
 ADMIN_THUMBS_SIZE = '60x60'
@@ -324,18 +324,17 @@ class NavNode(models.Model):
         """content when displayed in li html tag"""
         request = RequestManager().get_request()
         if li_template:
-            template_ = li_template if hasattr(li_template, 'render') else get_template(li_template)
+            the_template = li_template if hasattr(li_template, 'render') else get_template(li_template)
             context_dict = {
                 'node': self,
                 'node_pos': node_pos,
                 'total_nodes': total_nodes,
                 'STATIC_URL': settings.STATIC_URL,
+                'request': request,
             }
-            if request:
-                context = RequestContext(request, context_dict)
-            else:
-                context = Context(context_dict)
-            return template_.render(context)
+            context = make_context(request, context_dict)
+            return the_template.render(context)
+
         else:
             url = self.get_absolute_url()
             if url is None:

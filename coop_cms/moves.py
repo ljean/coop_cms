@@ -35,3 +35,18 @@ if VERSION >= (1, 8, 0):
 else:
     # Deprecated in Django 1.9
     from django.utils.unittest import SkipTest
+
+
+def make_context(request, context_dict):
+    """"""
+    if VERSION >= (1, 9, 0):
+        context = dict(context_dict)
+        if request:
+            context['request'] = request
+    else:
+        from django.template import RequestContext, Context
+        if request:
+            context = RequestContext(request, context_dict)
+        else:
+            context = Context(context_dict)
+    return context
