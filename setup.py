@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """package the lib"""
 
+from __future__ import unicode_literals
+
 try:
     from setuptools import setup, find_packages
 except ImportError:
