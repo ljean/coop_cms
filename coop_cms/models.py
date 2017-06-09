@@ -38,6 +38,7 @@ from coop_cms.settings import (
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
     cms_no_homepage, homepage_no_redirection
 )
+from coop_cms.optionals import build_localized_fieldname
 from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path, slugify
 
 ADMIN_THUMBS_SIZE = '60x60'
@@ -805,7 +806,6 @@ class BaseArticle(BaseNavigable):
 
     def _get_slug(self):
         """get slug"""
-        from modeltranslation.utils import build_localized_fieldname
         slug = self.slug
         if not slug:
             for lang_code in [lang[0] for lang in settings.LANGUAGES]:

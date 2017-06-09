@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 
 import os.path
 import sys
+from six import string_types
 
 from django.conf import settings as django_settings
 from django.conf.urls.i18n import i18n_patterns
@@ -146,7 +147,7 @@ def get_article_templates(article, user):
     if hasattr(django_settings, 'COOP_CMS_ARTICLE_TEMPLATES'):
         coop_cms_article_templates = getattr(django_settings, 'COOP_CMS_ARTICLE_TEMPLATES')
 
-        if type(coop_cms_article_templates) in (str, unicode):
+        if type(coop_cms_article_templates) in string_types:
             # COOP_CMS_ARTICLE_TEMPLATES is a string :
             #  - a function name that will return a tuple
             #  - a variable name that contains a tuple
@@ -366,7 +367,7 @@ def get_url_patterns():
         return i18n_patterns
     else:
         def url_list(*args):
-            if args and isinstance(args[0], (str, unicode, )):
+            if args and isinstance(args[0], string_types):
                 # remove prefix if any
                 return list(args[1:])
             else:

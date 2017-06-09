@@ -18,16 +18,12 @@ from django.utils.translation import ugettext as _
 from django.views.generic import View
 
 from colorbox.decorators import popup_redirect
-try:
-    from wkhtmltopdf.utils import convert_to_pdf, make_absolute_paths
-    from wkhtmltopdf.views import PDFResponse
-except ImportError:
-    pass
 
 from coop_cms.forms.newsletters import NewsletterSchedulingForm, NewsletterTemplateForm
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
+from coop_cms.optionals import convert_to_pdf, make_absolute_paths, PDFResponse
 from coop_cms.settings import get_newsletter_form, get_newsletter_settings_form
 from coop_cms.utils import send_newsletter, slugify
 

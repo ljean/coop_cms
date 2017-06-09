@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import sys
+from six import string_types
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -60,18 +60,10 @@ class BaseFragmentForm(floppyforms.ModelForm):
         allowed_classes = instance_fragment_type.allowed_css_classes.split(',') if instance_fragment_type else []
         values = self.cleaned_data['css_class']
 
-        if sys.version_info[0] < 3:
-            # Python 2
-            if type(values) in (unicode, str):
-                values = values.strip("[]").split(",")
-                values = [x.replace("u'", "").replace('u"', '').strip("\"' ") for x in values]
-                values = [x for x in values if x]
-        else:
-            # Python 3 : everything is unicode
-            if type(values) in (str, ):
-                values = values.strip("[]").split(",")
-                values = [x.replace("'", "").replace('"', '').strip("\"' ") for x in values]
-                values = [x for x in values if x]
+        if isinstance(values, string_types):
+            values = values.strip("[]").split(",")
+            values = [x.replace("u'", "").replace('u"', '').strip("\"' ") for x in values]
+            values = [x for x in values if x]
 
         for value in values:
             if not value in allowed_classes:

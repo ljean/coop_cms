@@ -7,11 +7,6 @@ from django.conf import settings
 
 import json
 from datetime import datetime
-
-try:
-    from io import BytesIO as StringIO
-except ImportError:
-    from StringIO import StringIO
 from unittest import skipIf
 
 from PIL import Image as PilImage
@@ -27,6 +22,7 @@ if 'photologue' in settings.INSTALLED_APPS:
     from photologue.models import Photo, Gallery
 
 from coop_cms.models import ArticleCategory, Document, Image, ImageSize, MediaFilter
+from coop_cms.moves import StringIO
 from coop_cms.settings import get_article_class
 from coop_cms.tests import BaseArticleTest, BaseTestCase, BeautifulSoup, MediaBaseTestCase
 

@@ -4,10 +4,6 @@
 from __future__ import unicode_literals
 
 from bs4 import BeautifulSoup
-try:
-    from html.parser import HTMLParser
-except ImportError:
-    from HTMLParser import HTMLParser
 from re import sub
 from sys import stderr
 from threading import current_thread
@@ -15,7 +11,6 @@ from traceback import print_exc
 
 from slugify import slugify as unicode_slugify
 
-from django import VERSION
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import get_connection, EmailMultiAlternatives
@@ -26,20 +21,14 @@ from django.template.loader import get_template
 from django.utils import translation
 from django.utils.text import slugify as ascii_slugify
 
+from coop_cms.moves import MiddlewareMixin, HTMLParser
 from coop_cms.settings import get_newsletter_context_callbacks, get_eastern_languages
-
-
-if VERSION >= (1, 9, 0):
-    from wsgiref.util import FileWrapper
-else:
-    from django.core.servers.basehttp import FileWrapper
-FileWrapper = FileWrapper
 
 
 class _DeHTMLParser(HTMLParser):
     """html to text parser"""
     def __init__(self, allow_spaces=False, allow_html_chars=False):
-        HTMLParser.__init__(self)
+        super(HTMLParser, self).__init__()
         self._text = []
         self._allow_spaces = allow_spaces
         self._allow_html_chars = allow_html_chars
@@ -320,7 +309,7 @@ class RequestManager(object):
         _requests[current_thread()] = request
 
 
-class RequestMiddleware(object):
+class RequestMiddleware(MiddlewareMixin):
     """middleware for request"""
 
     def process_request(self, request):

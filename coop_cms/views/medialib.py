@@ -21,7 +21,9 @@ from django.template.loader import get_template
 from coop_cms.forms.content import AddDocForm, AddImageForm
 from coop_cms.logger import logger
 from coop_cms import models
-from coop_cms.utils import paginate, FileWrapper
+from coop_cms.moves import FileWrapper
+from coop_cms.utils import paginate
+
 
 
 def _get_photologue_media(request):

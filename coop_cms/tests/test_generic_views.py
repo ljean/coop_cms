@@ -2,16 +2,10 @@
 
 from __future__ import unicode_literals, print_function
 
-from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 
-if DJANGO_VERSION >= (1, 8, 0):
-    from unittest import SkipTest
-else:
-    # Deprecated in Django 1.9
-    from django.utils.unittest import SkipTest
-
 from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
+from coop_cms.moves import SkipTest
 
 
 class GenericViewTestCase(BaseGenericViewTestCase):
