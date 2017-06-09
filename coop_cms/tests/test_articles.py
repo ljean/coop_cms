@@ -263,7 +263,7 @@ class ArticleTest(BaseArticleTest):
     def _is_inline_html_editor_found(self, response):
         self.assertEqual(200, response.status_code)
         inline_editor_init_url = reverse('html_editor_init')
-        content = unicode(response.content, 'utf-8')
+        content = u'{0}'.format(response.content, 'utf-8')
         return content.find(inline_editor_init_url) > 0
         
     def test_edit_permission(self):

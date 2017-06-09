@@ -1285,10 +1285,10 @@ class NavigationTreeTest(NavigationTreeBaseTest):
         html = tpl.render(Context({}))
 
         for node in nodes_in:
-            self.assertTrue(html.find(unicode(node)) >= 0)
+            self.assertTrue(html.find(u'{0}'.format(node)) >= 0)
 
         for node in nodes_out:
-            self.assertFalse(html.find(unicode(node)) >= 0)
+            self.assertFalse(html.find(u'{0}'.format(node)) >= 0)
 
     def test_view_alternative_navigation(self):
         tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul tree=tree1 %}')
@@ -1317,10 +1317,10 @@ class NavigationTreeTest(NavigationTreeBaseTest):
         html = tpl.render(Context({}))
 
         for node in nodes_in:
-            self.assertTrue(html.find(unicode(node)) >= 0)
+            self.assertTrue(html.find(u'{0}'.format(node)) >= 0)
 
         for node in nodes_out:
-            self.assertFalse(html.find(unicode(node)) >= 0)
+            self.assertFalse(html.find(u'{0}'.format(node)) >= 0)
 
     def test_view_several_navigation(self):
         tpl = Template(
@@ -1356,7 +1356,7 @@ class NavigationTreeTest(NavigationTreeBaseTest):
         html = tpl.render(Context({}))
 
         for node in nodes_in:
-            self.assertTrue(html.find(unicode(node)) >= 0)
+            self.assertTrue(html.find(u'{0}'.format(node)) >= 0)
 
 
 class NavigationLiNodeTest(NavigationTreeBaseTest):

@@ -173,7 +173,7 @@ class NewsletterFriendlyCssNode(template.Node):
                     html_tag["style"] = self._dict_to_style(style_dict, style_list)
 
             # Do not prettify : it may cause some display problems
-            content = unicode(soup)  # .prettify(formatter="minimal")
+            content = u'{0}'.format(soup)  # .prettify(formatter="minimal")
 
         else:
             style = ""

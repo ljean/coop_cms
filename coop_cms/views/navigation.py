@@ -257,7 +257,7 @@ def get_suggest_list(request, tree):
             ]
         else:
             objects = [
-                obj for obj in content_type.model_class().objects.all() if term.lower() in unicode(obj).lower()
+                obj for obj in content_type.model_class().objects.all() if term.lower() in u'{0}'.format(obj).lower()
             ]
 
         already_in_navigation = [

@@ -22,7 +22,7 @@ class NewsletterItemAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(NewsletterItemAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.item = kwargs.get('instance', None)
-        article_choices = [(a.id, unicode(a)) for a in get_article_class().objects.all()]
+        article_choices = [(a.id, u'{0}'.format(a)) for a in get_article_class().objects.all()]
         self.fields['object_id'] = forms.ChoiceField(
             choices=article_choices, required=True, help_text=_(u"Select an article")
         )

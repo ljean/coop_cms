@@ -65,7 +65,7 @@ class AddImageForm(MediaBaseAddMixin, floppyforms.Form):
             self.fields['size'].choices = [
                 (u'', u'')
             ] + [
-                (img_size.id, unicode(img_size)) for img_size in img_size_queryset
+                (img_size.id, u'{0}'.format(img_size)) for img_size in img_size_queryset
             ]
         else:
             self.fields['size'].widget = floppyforms.HiddenInput()

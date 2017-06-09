@@ -66,7 +66,7 @@ class NavTreeAdmin(admin.ModelAdmin):
         if tree.types.count() == 0:
             return _(u'All')
         else:
-            return u' - '.join([unicode(x) for x in tree.types.all()])
+            return u' - '.join([u'{0}'.format(x) for x in tree.types.all()])
     navtypes_list.short_description = _(u'navigable types')
 
     def change_view(self, request, object_id, extra_context=None, *args, **kwargs):

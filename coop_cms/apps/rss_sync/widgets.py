@@ -31,7 +31,7 @@ class AdminCollectRssWidget(HiddenInput):
     def render(self, name, value, attrs=None):
         """returns html"""
         widget = super(AdminCollectRssWidget, self).render(name, value, attrs) # pylint: disable=E1002
-        html = unicode(widget)
+        html = u'{0}'.format(widget)
         html += value
         src_id = RssSource.objects.get(url=value).id
         url = reverse('rss_sync_collect_rss_items', args=[src_id])
@@ -48,8 +48,8 @@ class AdminCreateArticleWidget(HiddenInput):
     def render(self, name, value, attrs=None):
         """returns html"""
         widget = super(AdminCreateArticleWidget, self).render(name, value, attrs)  # pylint: disable=E1002
-        html = unicode(widget)
-        html += unicode(value)
+        html = u'{0}'.format(widget)
+        html += u'{0}'.format(value)
         url = reverse('rss_sync_create_cms_article', args=[int(value)])
         html += get_button_code(_('Create CMS article'), url)
         return mark_safe(html)
