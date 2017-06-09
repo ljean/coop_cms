@@ -10,12 +10,22 @@ from django import VERSION
 
 if sys.version_info[0] < 3:
     # Python 2
-    from HTMLParser import HTMLParser
+
     from StringIO import StringIO
+
+    from HTMLParser import HTMLParser
+
+
+
 else:
     # Python 3
-    from html.parser import HTMLParser
     from io import BytesIO as StringIO
+
+    from html.parser import HTMLParser  as BaseHTMLParser
+
+    class HTMLParser(BaseHTMLParser):
+        def __init__(self):
+            BaseHTMLParser.__init__(self, convert_charrefs=False)
 
 
 try:
