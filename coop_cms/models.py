@@ -176,8 +176,6 @@ class NavTree(BaseNavTree):
         return self.name
 
 
-
-
 @python_2_unicode_compatible
 class NavNode(models.Model):
     """
