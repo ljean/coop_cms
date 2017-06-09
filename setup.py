@@ -29,7 +29,7 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        'django >= 1.8, <1.10',
+        'django >= 1.8',
         'django-floppyforms',
         'django-extensions',
         'sorl-thumbnail',
@@ -40,7 +40,7 @@ setup(
         'beautifulsoup4',
         'django-filetransfers',
         'model_mommy',
-        'Pillow',
+        #'Pillow',
         'unicode-slugify == 0.1.3',
     ],
     #dependency_links=[
