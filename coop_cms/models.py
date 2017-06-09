@@ -22,8 +22,9 @@ from django.db.models.aggregates import Max
 from django.db.models.signals import pre_delete, post_save
 from django.template import RequestContext, Context
 from django.template.loader import get_template
-from django.utils.translation import get_language, ugettext, ugettext_lazy as _
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import escape
+from django.utils.translation import get_language, ugettext, ugettext_lazy as _
 
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
@@ -43,7 +44,6 @@ ADMIN_THUMBS_SIZE = '60x60'
 class InvalidArticleError(Exception):
     """The exception can be raised when article is not valid"""
     pass
-
 
 
 def validate_slug(value):
@@ -105,6 +105,7 @@ def get_navigable_type_choices():
     return types
 
 
+@python_2_unicode_compatible
 class NavType(models.Model):
     """Define which ContentTypes can be inserted in the tree as content"""
 
@@ -124,21 +125,25 @@ class NavType(models.Model):
         verbose_name=_(u'How to generate the label'), choices=LABEL_RULE_CHOICES, default=LABEL_USE_UNICODE
     )
 
-    def __unicode__(self):
-        return self.content_type.app_label+'.'+self.content_type.model
+    def __str__(self):
+        return self.content_type.app_label + '.' + self.content_type.model
 
     class Meta:
         verbose_name = _(u'navigable type')
         verbose_name_plural = _(u'navigable types')
 
 
+@python_2_unicode_compatible
 class BaseNavTree(models.Model):
-    """Base class for nabigation tree. It is deprecated (not recommended) to use your own"""
+    """Base class for navigation tree. It is deprecated (not recommended) to use your own"""
     last_update = models.DateTimeField(auto_now=True)
     name = models.CharField(_(u'name'), max_length=100, db_index=True, unique=True, default='default')
     types = models.ManyToManyField('coop_cms.NavType', blank=True, related_name="%(app_label)s_%(class)s_set")
 
-    def __unicode__(self):
+    def __str__(self):
+        return self.name
+
+    def as_text(self):
         return self.name
 
     def get_absolute_url(self):
@@ -160,13 +165,17 @@ class BaseNavTree(models.Model):
         abstract = True
 
 
+@python_2_unicode_compatible
 class NavTree(BaseNavTree):
     """Implementation of NavTree: Use this one. Don't create your own"""
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
+
+
+@python_2_unicode_compatible
 class NavNode(models.Model):
     """
     A navigation node
@@ -209,7 +218,10 @@ class NavNode(models.Model):
         """friendly name of the object model"""
         return get_model_label(self.content_type.model_class())
 
-    def __unicode__(self):
+    def __str__(self):
+        return self.as_text()
+
+    def as_text(self):
         if self.parent:
             return u'{0} > {1}'.format(self.parent, self.label)
         return self.label
@@ -424,6 +436,7 @@ class NavNode(models.Model):
                 cur_node = cur_node.parent
 
 
+@python_2_unicode_compatible
 class ArticleCategory(models.Model):
     """Article category"""
     name = models.CharField(_(u'name'), max_length=100)
@@ -440,7 +453,7 @@ class ArticleCategory(models.Model):
         help_text=_(u"The number of articles to display in a category page. If 0, use default")
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
     
     def can_view_category(self, user):
@@ -474,6 +487,7 @@ class ArticleCategory(models.Model):
         return ret
 
 
+@python_2_unicode_compatible
 class BaseNavigable(TimeStampedModel):
     """Base class for anything which can be in Navigation"""
 
@@ -535,6 +549,7 @@ def get_logo_folder(article, filename):
     return u'{0}/{1}/{2}'.format(img_root, article.id, basename)
 
 
+@python_2_unicode_compatible
 class BaseArticle(BaseNavigable):
     """An article : static page, blog item, ..."""
 
@@ -684,7 +699,7 @@ class BaseArticle(BaseNavigable):
         verbose_name_plural = _(u"articles")
         abstract = True
 
-    def __unicode__(self):
+    def __str__(self):
         return u"{0} {1}".format(dehtml(self.title), dehtml(self.subtitle)).strip()
 
     def save(self, *args, **kwargs):
@@ -861,6 +876,7 @@ class BaseArticle(BaseNavigable):
         return True
 
 
+@python_2_unicode_compatible
 class Link(BaseNavigable):
     """Link to a given url"""
     title = models.CharField(_(u'Title'), max_length=200, default=_(u"title"))
@@ -895,7 +911,7 @@ class Link(BaseNavigable):
             return False
         return True
 
-    def __unicode__(self):
+    def __str__(self):
         return dehtml(self.title)
 
     class Meta:
@@ -903,6 +919,7 @@ class Link(BaseNavigable):
         verbose_name_plural = _(u"links")
 
 
+@python_2_unicode_compatible
 class MediaFilter(models.Model):
     """make possible to group images: filter in media library, photo album"""
     name = models.CharField(_('name'), max_length=100)
@@ -911,10 +928,11 @@ class MediaFilter(models.Model):
         verbose_name = _(u'media filter')
         verbose_name_plural = _(u'media filters')
         
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
+@python_2_unicode_compatible
 class ImageSize(models.Model):
     """Image size for auto resizing"""
     name = models.CharField(_(u'name'), max_length=100)
@@ -925,30 +943,32 @@ class ImageSize(models.Model):
         verbose_name = _(u'Image size')
         verbose_name_plural = _(u'Image sizes')
         
-    def __unicode__(self):
+    def __str__(self):
         return u"{0} ({1}{2})".format(self.name, self.size, (" "+self.crop if self.crop else ""))
 
 
+@python_2_unicode_compatible
 class Media(TimeStampedModel):
     """Base class for something you can put in Media library"""
     name = models.CharField(_('name'), max_length=200, blank=True, default='')
     filters = models.ManyToManyField(MediaFilter, blank=True, default=None, verbose_name=_(u"filters"))
     ordering = models.IntegerField(_(u"ordering"), default=100)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     class Meta:
         abstract = True
 
 
+@python_2_unicode_compatible
 class Image(Media):
     """An image in media library"""
     file = models.ImageField(_(u'file'), upload_to=get_img_folder)
     size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_(u"size"))
     copyright = models.CharField(max_length=200, verbose_name=_(u'copyright'), blank=True, default='')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     def clear_thumbnails(self):
@@ -1008,10 +1028,11 @@ def get_doc_folder(document, filename):
     return u'{0}/{1}'.format(doc_root, filename)
 
 
+@python_2_unicode_compatible
 class Document(Media):
     """file in media library"""
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
     file = models.FileField(_('file'), upload_to=get_doc_folder)
@@ -1058,6 +1079,7 @@ class Document(Media):
         verbose_name_plural = _(u'documents')
 
 
+@python_2_unicode_compatible
 class PieceOfHtml(models.Model):
     """This is a block of text thant can be added to a page and edited on it"""
     div_id = models.CharField(verbose_name=_(u"identifier"), max_length=100, db_index=True)
@@ -1066,7 +1088,7 @@ class PieceOfHtml(models.Model):
         verbose_name=_(u"extra identifier"), blank=True, default="", max_length=100, db_index=True
     )
 
-    def __unicode__(self):
+    def __str__(self):
         return u" ".join([self.div_id, self.extra_id])
 
     class Meta:
@@ -1087,6 +1109,7 @@ def remove_from_navigation(sender, instance, **kwargs):
 pre_delete.connect(remove_from_navigation)
 
 
+@python_2_unicode_compatible
 class NewsletterItem(models.Model):
     """Something which is in a newsletter"""
     content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"))
@@ -1100,7 +1123,7 @@ class NewsletterItem(models.Model):
         verbose_name_plural = _(u'newsletter items')
         ordering = ['ordering']
 
-    def __unicode__(self):
+    def __str__(self):
         try:
             return u'{0}: {1}'.format(self.content_type, self.content_object)
         except AttributeError:
@@ -1145,6 +1168,7 @@ def on_create_newsletterable_instance(sender, instance, created, raw, **kwargs):
 post_save.connect(on_create_newsletterable_instance)
 
 
+@python_2_unicode_compatible
 class Newsletter(TimeStampedModel):
     """Newsletter"""
     subject = models.CharField(max_length=200, verbose_name=_(u'subject'), blank=True, default="")
@@ -1198,7 +1222,7 @@ class Newsletter(TimeStampedModel):
             template = 'coop_cms/newsletter.html'
         return template
 
-    def __unicode__(self):
+    def __str__(self):
         return dehtml(self.subject).replace('\n', '')
 
     class Meta:
@@ -1206,6 +1230,7 @@ class Newsletter(TimeStampedModel):
         verbose_name_plural = _(u'newsletters')
 
 
+@python_2_unicode_compatible
 class NewsletterSending(models.Model):
     """Schedule newsletter sending"""
 
@@ -1213,7 +1238,7 @@ class NewsletterSending(models.Model):
     scheduling_dt = models.DateTimeField(_(u"scheduling date"), blank=True, default=None, null=True)
     sending_dt = models.DateTimeField(_(u"sending date"), blank=True, default=None, null=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.newsletter.subject
 
     class Meta:
@@ -1221,6 +1246,7 @@ class NewsletterSending(models.Model):
         verbose_name_plural = _(u'newsletter sendings')
 
 
+@python_2_unicode_compatible
 class Alias(models.Model):
     """Alias : makes possinle to redirect an url ton another one"""
 
@@ -1242,7 +1268,7 @@ class Alias(models.Model):
         """urls"""
         return reverse('coop_cms_view_alias', args=[self.path])
     
-    def __unicode__(self):
+    def __str__(self):
         return self.path
 
     def save(self, **kwargs):
@@ -1251,6 +1277,7 @@ class Alias(models.Model):
         return super(Alias, self).save(**kwargs)
 
 
+@python_2_unicode_compatible
 class FragmentType(models.Model):
     """Type of fragments"""
     name = models.CharField(max_length=100, db_index=True, verbose_name=_(u"name"))
@@ -1263,10 +1290,11 @@ class FragmentType(models.Model):
         verbose_name = _(u'Fragment type')
         verbose_name_plural = _(u'Fragment types')
         
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
+@python_2_unicode_compatible
 class FragmentFilter(models.Model):
     """filter fragments"""
     extra_id = models.CharField(max_length=100, db_index=True, verbose_name=_(u"extra_id"))
@@ -1275,10 +1303,11 @@ class FragmentFilter(models.Model):
         verbose_name = _(u'Fragment filter')
         verbose_name_plural = _(u'Fragment filters')
         
-    def __unicode__(self):
+    def __str__(self):
         return self.extra_id
 
 
+@python_2_unicode_compatible
 class Fragment(models.Model):
     """small piece of html which can be dynamically added to the page"""
     type = models.ForeignKey(FragmentType, verbose_name=_(u'fragment type'))
@@ -1321,10 +1350,11 @@ class Fragment(models.Model):
             self.position = max_position + 1
         return super(Fragment, self).save(*args, **kwargs)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"{0} {1} {2}".format(self.type, self.position, self.name)
 
 
+@python_2_unicode_compatible
 class SiteSettings(models.Model):
     """site settings"""
 
@@ -1347,7 +1377,7 @@ class SiteSettings(models.Model):
         help_text=_(u"if set, the homepage will get the article with the given slug"), db_index=True
     )
     
-    def __unicode__(self):
+    def __str__(self):
         return u"{0}".format(self.site)
     
     class Meta:

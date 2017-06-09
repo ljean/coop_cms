@@ -32,7 +32,7 @@ clear_thumbnails_action.short_description = _(u"Clear thumbnails")
 
 class NavNodeAdmin(admin.ModelAdmin):
     """Navigation node admin"""
-    list_display = ["__unicode__", "label", 'parent', 'ordering', 'in_navigation', 'content_type', 'object_id']
+    list_display = ["as_text", "label", 'parent', 'ordering', 'in_navigation', 'content_type', 'object_id']
     list_filter = ['tree', 'in_navigation', 'parent']
     list_editable = ["label", 'parent', 'ordering', 'in_navigation', ]
     ordering = ["tree", "parent", "ordering"]
@@ -51,7 +51,7 @@ admin.site.register(models.NavType, NavTypeAdmin)
 
 class NavTreeAdmin(admin.ModelAdmin):
     """Navigation tree admin"""
-    list_display = ['__unicode__', 'name', 'navtypes_list', 'get_root_nodes_count']
+    list_display = ['as_text', 'name', 'navtypes_list', 'get_root_nodes_count']
     list_editable = ['name']
     list_filters = ['id']
 

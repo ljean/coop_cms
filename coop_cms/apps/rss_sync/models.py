@@ -5,8 +5,10 @@ models
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import python_2_unicode_compatible
 
 
+@python_2_unicode_compatible
 class RssSource(models.Model):
     """a Rss feed to use as source of items (which are used to create CMS articles)"""
 
@@ -18,7 +20,7 @@ class RssSource(models.Model):
         """absolute url"""
         return self.url
 
-    def __unicode__(self):
+    def __str__(self):
         return self.url
 
     class Meta:
@@ -26,6 +28,7 @@ class RssSource(models.Model):
         verbose_name_plural = _(u'RSS sources')
 
 
+@python_2_unicode_compatible
 class RssItem(models.Model):
     """a Rss item that can be used to create a CMS article"""
 
@@ -37,7 +40,7 @@ class RssItem(models.Model):
     updated = models.DateTimeField(_(u"updated"), blank=True, null=True)
     processed = models.BooleanField(_(u"processed"), default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
     class Meta:

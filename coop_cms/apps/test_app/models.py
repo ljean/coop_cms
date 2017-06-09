@@ -3,6 +3,7 @@
 
 from django.db import models
 from django.core.urlresolvers import reverse
+from django.utils.encoding import python_2_unicode_compatible
 
 
 class TestTag(models.Model):
@@ -10,6 +11,7 @@ class TestTag(models.Model):
     name = models.CharField(max_length=100)
 
 
+@python_2_unicode_compatible
 class TestClass(models.Model):
     """for unit-testing"""
 
@@ -24,7 +26,7 @@ class TestClass(models.Model):
 
     tags = models.ManyToManyField(TestTag, blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return u"Test Object {0}".format(self.id)
 
     def get_list_url(self):
