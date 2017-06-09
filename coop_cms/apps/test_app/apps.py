@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Applicaion for unit testing
-"""
+"""Applicaion for unit testing"""
 
-from django import VERSION
 from __future__ import unicode_literals
 
-if VERSION > (1, 7, 0):
-    from django.apps import AppConfig
+from django.apps import AppConfig
 
-    class CoopCmsTestAppConfig(AppConfig):
-        name = 'coop_cms.apps.test_app'
-        verbose_name = "coop CMS > App for unit test"
+class CoopCmsTestAppConfig(AppConfig):
+    name = 'coop_cms.apps.test_app'
+    verbose_name = "coop CMS > App for unit test"
