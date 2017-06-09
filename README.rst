@@ -36,11 +36,11 @@ urls.py
 
 At *the very end* of your urls.py file, add::
 
-    urlpatterns += patterns('',
-        (r'^html-editor/', include('coop_html_editor.urls')),
-        (r'^', include('coop_cms.urls')),
-        (r'^coop_bar/', include('coop_bar.urls')),
-    )
+    urlpatterns += [
+        url(r'^html-editor/', include('coop_html_editor.urls')),
+        url(r'^', include('coop_cms.urls')),
+        url(r'^coop_bar/', include('coop_bar.urls')),
+    ]
 
 Please note that coop-cms will handle any page slug, except the ones you will have defined before.
 
