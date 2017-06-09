@@ -6,16 +6,13 @@ from __future__ import unicode_literals
 
 from coop_cms import coop_bar_cfg
 
+
 def load_commands(coop_bar):
     """This is where to define menus displayed by the coop_bar"""
 
     coop_bar.register([
         [
-            coop_bar_cfg.edit_newsletter,
-            coop_bar_cfg.cancel_edit_newsletter,
-            coop_bar_cfg.save_newsletter,
             coop_bar_cfg.change_newsletter_settings,
-            coop_bar_cfg.change_newsletter_template,
             coop_bar_cfg.test_newsletter,
         ],
         [
