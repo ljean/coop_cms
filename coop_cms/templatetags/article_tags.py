@@ -16,10 +16,10 @@ def last_articles(parser, token):
     try:
         args = token.split_contents()
         if len(args) == 4:
-            tag_name, number, template, category = token.split_contents()
-            return ArticleListNode(number, template, category)
+            tag_name, number, the_template, category = token.split_contents()
+            return ArticleListNode(number, the_template, category)
         elif len(args) == 3:
-            tag_name, number, template = token.split_contents()
+            tag_name, number, the_template = token.split_contents()
             return ArticleListNode(number, template, None)
     except ValueError:
         raise template.TemplateSyntaxError('%s tag requires at least 2 arguments' % token.split_contents()[0])
@@ -62,5 +62,6 @@ class ArticleListNode(template.Node):
     def render(self, context):
         """convert to html"""
         template_name = resolve(self.the_template, context)
+        # TODO : Compatibility issue???
         the_template = template.loader.get_template(template_name)
         return ''.join([the_template.render(template.Context({'item': item})) for item in self.last_articles(context)])

@@ -6,6 +6,8 @@ used for magic form
 
 from __future__ import unicode_literals
 
+import sys
+
 from django import VERSION as DJANGO_VERSION
 from django import template
 from django.forms.formsets import BaseFormSet
@@ -347,8 +349,15 @@ class SafeWrapper(object):
                 return value()
             except KeyError:
                 pass
-        elif type(value) in (unicode, str):
-            return mark_safe(value)
+        else:
+            if sys.version_info[0] < 3:
+                # Python 2
+                if type(value) in (unicode, str):
+                    return mark_safe(value)
+            else:
+                # Python 3
+                if type(value) in (str, ):
+                    return mark_safe(value)
         return value
 
 

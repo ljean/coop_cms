@@ -7,7 +7,11 @@ from django.conf import settings
 
 import json
 from datetime import datetime
-from StringIO import StringIO
+
+try:
+    from io import BytesIO as StringIO
+except ImportError:
+    from StringIO import StringIO
 from unittest import skipIf
 
 from PIL import Image as PilImage
