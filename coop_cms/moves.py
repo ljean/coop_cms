@@ -3,6 +3,7 @@
 coop_cms manage compatibilty with django and python versions
 """
 
+import json
 import sys
 
 from django import VERSION
@@ -63,3 +64,10 @@ def make_context(request, context_dict, force_dict=True):
         else:
             context = Context(context_dict)
     return context
+
+
+def get_response_json(response):
+    if sys.version_info[0] < 3:
+        return json.loads(response.content)
+    else:
+        return response.json()

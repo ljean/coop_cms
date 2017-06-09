@@ -2,8 +2,6 @@
 
 from __future__ import unicode_literals
 
-import json
-
 from django.conf import settings
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
@@ -14,6 +12,7 @@ from django.template import Template, Context
 from model_mommy import mommy
 
 from coop_cms.models import Link, NavNode, NavType, BaseArticle
+from coop_cms.moves import get_response_json
 from coop_cms.settings import get_article_class, get_navtree_class
 from coop_cms.tests import BaseTestCase, BeautifulSoup
 from coop_cms.utils import get_model_app, get_model_name
@@ -106,7 +105,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertEqual(result['label'], 'http://www.google.fr')
 
@@ -122,7 +121,7 @@ class NavigationTest(BaseTestCase):
         data['parent_id'] = nav_node.id
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertEqual(result['label'], 'http://www.python.org')
         nav_node2 = NavNode.objects.get(object_id=link2.id, content_type=self.url_ct)
@@ -142,7 +141,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertEqual(result['label'], 'http://www.google.fr')
 
@@ -156,7 +155,7 @@ class NavigationTest(BaseTestCase):
         data['object_id'] = link.id
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'error')
 
         nav_node = NavNode.objects.get(object_id=link.id, content_type=self.url_ct)
@@ -185,7 +184,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
 
         node = NavNode.objects.get(id=nodes[-2].id)
@@ -223,7 +222,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
 
         node = NavNode.objects.get(id=nodes[1].id)
@@ -241,7 +240,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
 
         node = NavNode.objects.get(id=nodes[2].id)
@@ -271,7 +270,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
 
         nodes = [NavNode.objects.get(id=n.id) for n in nodes]#refresh
@@ -287,7 +286,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
 
         nodes = [NavNode.objects.get(id=n.id) for n in nodes]#refresh
@@ -313,7 +312,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
 
         nodes_after = NavNode.objects.all().order_by('ordering')
@@ -346,7 +345,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
 
         nodes_after = NavNode.objects.all().order_by('ordering')
@@ -355,7 +354,7 @@ class NavigationTest(BaseTestCase):
         self.assertTrue(nodes[-2] not in nodes_after)
         for i, node in enumerate(nodes_after):
             self.assertTrue(node in nodes)
-            self.assertTrue(i+1, node.ordering)
+            self.assertTrue(i + 1, node.ordering)
 
     def test_rename_node(self):
         urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
@@ -377,7 +376,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
 
         node = NavNode.objects.get(id=nodes[0].id)
@@ -407,7 +406,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertTrue(result['html'].find(nodes[0].get_absolute_url()) >= 0)
         self.assertTrue(result['html'].find(nodes[1].get_absolute_url()) < 0)
@@ -425,7 +424,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertEqual(len(result['suggestions']), 4) #3 + noeud vide
 
@@ -463,7 +462,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertEqual(len(result['suggestions']), 3) #2 + noeud vide
 
@@ -477,7 +476,7 @@ class NavigationTest(BaseTestCase):
 
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertEqual(len(result['suggestions']), 1)
         self.assertEqual(result['suggestions'][0]['value'], 0)
@@ -507,7 +506,7 @@ class NavigationTest(BaseTestCase):
 
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertEqual(len(result['suggestions']), 3) #2 + noeud vide
 
@@ -536,7 +535,7 @@ class NavigationTest(BaseTestCase):
 
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertEqual(len(result['suggestions']), 2) #1 + noeud vide
         self.assertEqual(result['suggestions'][0]['label'], 'python')
@@ -549,7 +548,7 @@ class NavigationTest(BaseTestCase):
         }
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'error')
 
     def test_missing_message(self):
@@ -585,7 +584,7 @@ class NavigationTest(BaseTestCase):
 
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'error')
         self.assertEqual(0, NavNode.objects.count())
 
@@ -599,7 +598,7 @@ class NavigationTest(BaseTestCase):
 
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'error')
 
     def test_rename_unknown_node(self):
@@ -613,7 +612,7 @@ class NavigationTest(BaseTestCase):
 
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'error')
 
     def test_check_auth(self):
@@ -640,13 +639,13 @@ class NavigationTest(BaseTestCase):
             self._log_as_staff()
             response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
             self.assertEqual(response.status_code, 200)
-            result = json.loads(response.content)
+            result = get_response_json(response)
             self.assertEqual(result['status'], 'error')
 
             self._log_as_editor()
             response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
             self.assertEqual(response.status_code, 200)
-            result = json.loads(response.content)
+            result = get_response_json(response)
             self.assertEqual(result['status'], 'success')
 
             NavNode.objects.all().delete()
@@ -666,7 +665,7 @@ class NavigationTest(BaseTestCase):
 
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertNotEqual(result['message'], '')
         self.assertEqual(result['icon'], 'out_nav')
@@ -688,7 +687,7 @@ class NavigationTest(BaseTestCase):
 
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
-        result = json.loads(response.content)
+        result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
         self.assertNotEqual(result['message'], '')
         self.assertEqual(result['icon'], 'in_nav')

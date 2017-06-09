@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 
-import json
 from datetime import datetime
 from unittest import skipIf
 
@@ -22,7 +21,7 @@ if 'photologue' in settings.INSTALLED_APPS:
     from photologue.models import Photo, Gallery
 
 from coop_cms.models import ArticleCategory, Document, Image, ImageSize, MediaFilter
-from coop_cms.moves import StringIO
+from coop_cms.moves import StringIO, get_response_json
 from coop_cms.settings import get_article_class
 from coop_cms.tests import BaseArticleTest, BaseTestCase, BeautifulSoup, MediaBaseTestCase
 
@@ -96,7 +95,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -121,7 +120,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -185,7 +184,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -215,7 +214,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -241,7 +240,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, 'close_popup_and_media_slide')
+        self.assertNotEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(0, images.count())
@@ -260,7 +259,7 @@ class ImageUploadTest(MediaBaseTestCase):
 
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
 
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -286,7 +285,7 @@ class ImageUploadTest(MediaBaseTestCase):
 
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
 
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -447,7 +446,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         url = reverse('coop_cms_media_images')+"?page=2"
         response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code)
-        data = json.loads(response.content)
+        data = get_response_json(response)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
         self.assertEqual(4, len(nodes))
@@ -466,7 +465,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         url = reverse('coop_cms_media_images')+"?page=1&media_filter={0}".format(media_filter.id)
         response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code)
-        data = json.loads(response.content)
+        data = get_response_json(response)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
         self.assertEqual(2, len(nodes))
@@ -489,7 +488,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         url = reverse('coop_cms_media_images')+"?page=1&media_filter={0}".format(0)
         response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code)
-        data = json.loads(response.content)
+        data = get_response_json(response)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
         self.assertEqual(12, len(nodes))
@@ -511,7 +510,7 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         public_docs = Document.objects.filter(is_private=False)
         self.assertEquals(1, public_docs.count())
         self.assertEqual(public_docs[0].name, data['name'])
@@ -532,7 +531,7 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         public_docs = Document.objects.filter(is_private=False)
         self.assertEquals(1, public_docs.count())
         self.assertEqual(public_docs[0].name, data['name'])
@@ -549,7 +548,7 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, 'close_popup_and_media_slide')
+        self.assertNotEqual(response.content, b'close_popup_and_media_slide')
         self.assertEquals(0, Document.objects.all().count())
 
     def test_upload_doc_anonymous_user(self):
@@ -561,10 +560,10 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, 'close_popup_and_media_slide')
+        self.assertNotEqual(response.content, b'close_popup_and_media_slide')
         self.assertEquals(0, Document.objects.all().count())
         redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(redirect_url.find(login_url) >= 0)
         
     def test_upload_not_allowed(self):
@@ -587,7 +586,7 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         private_docs = Document.objects.filter(is_private=True)
         self.assertEquals(1, private_docs.count())
         #TODO : on drone.io filename is unittest1_SomeRandom. Why?
@@ -624,7 +623,7 @@ class DocsInMediaLibTest(MediaBaseTestCase):
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(redirect_url.find(login_url) >= 0)
         
     def test_view_docs_not_allowed(self):
@@ -673,7 +672,7 @@ class PhotologueInMediaLibTest(MediaBaseTestCase):
         response = self.client.get(reverse('coop_cms_media_photologue'), follow=True)
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(redirect_url.find(login_url) >= 0)
 
     def test_view_not_allowed(self):
@@ -813,7 +812,7 @@ class DownloadDocTest(MediaBaseTestCase):
         response = self.client.get(doc.get_download_url(), follow=True)
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(redirect_url.find(login_url) >= 0)
         
 
