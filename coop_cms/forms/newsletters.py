@@ -10,7 +10,7 @@ from django.core.exceptions import ValidationError
 from django.utils.timezone import now as dt_now
 from django.utils.translation import ugettext as _
 
-import floppyforms
+import floppyforms.__future__ as floppyforms
 
 from coop_cms.forms.base import InlineHtmlEditableModelForm
 from coop_cms.models import Newsletter, NewsletterSending, NewsletterItem

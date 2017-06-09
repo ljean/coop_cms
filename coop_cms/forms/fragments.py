@@ -9,7 +9,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 
-import floppyforms
+import floppyforms.__future__ as floppyforms
 
 from coop_cms.models import Fragment, FragmentType
 

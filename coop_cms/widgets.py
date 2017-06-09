@@ -9,19 +9,19 @@ from django.forms import TextInput as DjangoTextInput
 from django.utils.text import mark_safe
 from django.utils.translation import ugettext as _
 
-from floppyforms.widgets import ClearableFileInput, Select, SelectMultiple, Input
+import floppyforms.__future__ as floppyforms
 
 from coop_cms.models import NavType
 from coop_cms.utils import get_text_from_template
 
 
 
-class ReadOnlyInput(Input):
+class ReadOnlyInput(floppyforms.widgets.Input):
     """readonly input"""
     template_name = 'coop_cms/widgets/readonlyinput.html'
 
 
-class ImageEdit(ClearableFileInput):
+class ImageEdit(floppyforms.widgets.ClearableFileInput):
     """image edit"""
     template_name = 'coop_cms/widgets/imageedit.html'
     
@@ -56,7 +56,7 @@ class ChosenWidgetMixin(object):
         return kwargs
 
 
-class ChosenSelectMultiple(ChosenWidgetMixin, SelectMultiple):
+class ChosenSelectMultiple(ChosenWidgetMixin, floppyforms.widgets.SelectMultiple):
     """chosen select multiple"""
 
     def __init__(self, attrs=None, *args, **kwargs):
@@ -84,7 +84,7 @@ class ChosenSelectMultiple(ChosenWidgetMixin, SelectMultiple):
         }
 
 
-class ChosenSelect(ChosenWidgetMixin, Select):
+class ChosenSelect(ChosenWidgetMixin, floppyforms.widgets.Select):
     """chosen select"""
 
     def __init__(self, attrs=None, *args, **kwargs):

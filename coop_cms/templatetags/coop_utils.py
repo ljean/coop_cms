@@ -18,7 +18,7 @@ from django.template.base import TemplateSyntaxError
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 
-from floppyforms import CheckboxInput
+import floppyforms.__future__ as floppyforms
 
 from coop_cms.models import ArticleCategory, Image, Document
 from coop_cms.settings import get_article_class, logger
@@ -216,7 +216,7 @@ def is_checkbox(field):
     """is checkbox"""
     field = getattr(field, 'field', field) # get the field attribute of the field or the field itself
     if hasattr(field, 'widget'):
-        return field.widget.__class__.__name__ == CheckboxInput().__class__.__name__
+        return field.widget.__class__.__name__ == floppyforms.CheckboxInput().__class__.__name__
     return False
 
 

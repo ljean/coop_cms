@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-import floppyforms
+import floppyforms.__future__ as floppyforms
 
 from coop_html_editor.widgets import get_inline_html_widget
 
