@@ -17,6 +17,7 @@ from django.template.loader import select_template
 from django.utils.translation import ugettext as _
 
 from coop_cms import models
+from coop_cms.moves import make_context
 from coop_cms.settings import get_navtree_class
 from coop_cms.logger import logger
 from coop_cms.utils import get_model_app, get_model_label, get_model_name
@@ -48,16 +49,15 @@ def view_navnode(request, tree):
             admin_url = ""
             template = select_template(["coop_cms/navtree_content/default.html"])
 
+        context_dict = {
+            "node": node,
+            "admin_url": admin_url,
+            "model_name": model_name,
+            "object_label": object_label,
+        }
+
         html = template.render(
-            RequestContext(
-                request,
-                {
-                    "node": node,
-                    "admin_url": admin_url,
-                    "model_name": model_name,
-                    "object_label": object_label,
-                }
-            )
+            make_context(request, context_dict)
         )
 
         # return data has dictionnary

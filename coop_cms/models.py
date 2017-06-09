@@ -322,17 +322,21 @@ class NavNode(models.Model):
 
     def _get_li_content(self, li_template, node_pos=0, total_nodes=0):
         """content when displayed in li html tag"""
-        request = RequestManager().get_request()
+        try:
+            request = RequestManager().get_request()
+        except RequestNotFound:
+            request = None
+
         if li_template:
-            the_template = li_template if hasattr(li_template, 'render') else get_template(li_template)
+            is_template_obj = hasattr(li_template, 'render')
+            the_template = li_template if is_template_obj else get_template(li_template)
             context_dict = {
                 'node': self,
                 'node_pos': node_pos,
                 'total_nodes': total_nodes,
                 'STATIC_URL': settings.STATIC_URL,
-                'request': request,
             }
-            context = make_context(request, context_dict)
+            context = make_context(request, context_dict, force_dict=not is_template_obj)
             return the_template.render(context)
 
         else:

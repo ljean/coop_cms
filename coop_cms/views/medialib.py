@@ -14,14 +14,13 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
-from django.template import RequestContext
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
 
 from coop_cms.forms.content import AddDocForm, AddImageForm
 from coop_cms.logger import logger
 from coop_cms import models
-from coop_cms.moves import FileWrapper
+from coop_cms.moves import FileWrapper, make_context
 from coop_cms.utils import paginate
 
 
@@ -116,7 +115,7 @@ def show_media(request, media_type):
             context["media_url"] += '?media_filter={0}'.format(media_filter)
 
         template = get_template('coop_cms/medialib/slide_base.html')
-        html = template.render(RequestContext(request, context))
+        html = template.render(make_context(request, context))
 
         if is_ajax:
             data = {

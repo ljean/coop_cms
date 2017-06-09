@@ -5,8 +5,10 @@ coop_cms manage compatibilty with django and python versions
 
 import sys
 
-
 from django import VERSION
+from django.conf import settings
+from django.template import RequestContext, Context
+
 
 if sys.version_info[0] < 3:
     # Python 2
@@ -41,14 +43,21 @@ else:
     from django.utils.unittest import SkipTest
 
 
-def make_context(request, context_dict):
+def make_context(request, context_dict, force_dict=True):
     """"""
     if VERSION >= (1, 9, 0):
-        context = dict(context_dict)
-        if request:
-            context['request'] = request
+        if force_dict:
+            context = dict(context_dict)
+            if request:
+                context['request'] = request
+                context['MEDIA_URL'] = settings.MEDIA_URL
+                context['user'] = request.user
+        else:
+            if request:
+                context = RequestContext(request, context_dict)
+            else:
+                context = Context(context_dict)
     else:
-        from django.template import RequestContext, Context
         if request:
             context = RequestContext(request, context_dict)
         else:
