@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """dump"""
 
+from __future__ import print_function
 import json
 
 from django.core.management.base import BaseCommand
@@ -16,13 +17,13 @@ class Command(BaseCommand):
         try:
             filename = args[0]
         except IndexError:
-            print u'usage :', __name__.split('.')[-1], 'dumpfile.json'
+            print(u'usage :', __name__.split('.')[-1], 'dumpfile.json')
             return
         
         try:
             dump_file = open(filename, 'r')
         except IOError:
-            print filename, u"doesn't exist"
+            print(filename, u"doesn't exist")
             return
         
         objects = json.loads(dump_file.read())

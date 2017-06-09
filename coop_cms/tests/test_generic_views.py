@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 
@@ -22,5 +24,5 @@ class GenericViewTestCase(BaseGenericViewTestCase):
     def setUp(self):
         super(GenericViewTestCase, self).setUp()
         if not ('coop_cms.apps.test_app' in settings.INSTALLED_APPS):
-            print self.warning
+            print(self.warning)
             raise SkipTest()

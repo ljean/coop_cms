@@ -37,7 +37,6 @@ class NavNodeAdminForm(forms.ModelForm):
     """Navigation Type Form"""
 
     def __init__(self, *args, **kwargs):
-        print "******"
         super(NavNodeAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.fields['content_type'].widget = forms.Select(choices=get_navigable_type_choices())
         self.fields['object_id'].widget = GenericFieldRawIdWidget(kwargs.get('instance', None))

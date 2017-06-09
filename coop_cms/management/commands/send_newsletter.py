@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """send newsletter"""
 
+from __future__ import print_function
+
 from datetime import datetime
 
 from django.core.management.base import BaseCommand
@@ -23,17 +25,17 @@ class Command(BaseCommand):
         if email_addresses:
             email_list = email_addresses.split(";")
         else:
-            print 'usage: python manage.py send_newsletter toto@toto.fr;titi@titi.fr'
+            print('usage: python manage.py send_newsletter toto@toto.fr;titi@titi.fr')
         
         sendings = NewsletterSending.objects.filter(scheduling_dt__lte=datetime.now(), sending_dt=None)
         for sending in sendings:
             if verbose:
-                print 'send_newsletter {1} to {0} addresses'.format(len(email_list), sending.newsletter)
+                print('send_newsletter {1} to {0} addresses'.format(len(email_list), sending.newsletter))
             
             nb_sent = send_newsletter(sending.newsletter, email_list)
             
             if verbose:
-                print nb_sent, "emails sent"
+                print(nb_sent, "emails sent")
             
             sending.sending_dt = datetime.now()
             sending.save()
