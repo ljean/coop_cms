@@ -8,7 +8,6 @@ import time
 import unicodedata
 
 from bs4 import BeautifulSoup
-from HTMLParser import HTMLParseError
 
 from django import template
 from django.conf import settings
@@ -148,7 +147,7 @@ class NewsletterFriendlyCssNode(template.Node):
             # avoid string.format issues with curly brackets
             try:
                 soup = BeautifulSoup(content, "html.parser")
-            except HTMLParseError as msg:
+            except Exception as msg:
                 logger.error("HTMLParseError: %s", msg)
                 logger.error(content)
                 raise

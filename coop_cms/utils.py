@@ -2,7 +2,10 @@
 """utils"""
 
 from bs4 import BeautifulSoup
-from HTMLParser import HTMLParser
+try:
+    from html.parser import HTMLParser
+except ImportError:
+    from HTMLParser import HTMLParser
 from re import sub
 from sys import stderr
 from threading import current_thread
