@@ -21,6 +21,7 @@ from django.utils.safestring import mark_safe
 from coop_html_editor.templatetags.html_editor_utils import InlineHtmlEditNode, InlineHtmlMultipleEditNode
 
 from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
+from coop_cms.moves import make_context
 from coop_cms.settings import get_article_class
 from coop_cms.utils import get_text_from_template, slugify
 
@@ -109,16 +110,21 @@ class FragmentEditNode(InlineHtmlMultipleEditNode):
             template_name = self._resolve_arg(template_name, context)
             template_ = get_template(template_name)
             objects_count = self.get_objects_to_render_count()
-            object_content = template_.render(template.Context({
-                'css_class': obj.css_class,
-                'name': obj.name,
-                'slug': slugify(obj.name),
-                'id': obj.id,
-                'index': idx,
-                'objects_count': objects_count,
-                'fragment': self._render_value(context, self._get_object_lookup(obj), value),
-                'form': DummyEditableForm() if self._edit_mode else None,
-            }))
+            object_content = template_.render(
+                make_context(
+                    None,
+                    {
+                        'css_class': obj.css_class,
+                        'name': obj.name,
+                        'slug': slugify(obj.name),
+                        'id': obj.id,
+                        'index': idx,
+                        'objects_count': objects_count,
+                        'fragment': self._render_value(context, self._get_object_lookup(obj), value),
+                        'form': DummyEditableForm() if self._edit_mode else None,
+                    },
+                )
+            )
         else:
             object_content = self._pre_object_render(obj)
             object_content += self._render_value(context, self._get_object_lookup(obj), value)
