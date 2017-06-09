@@ -230,6 +230,6 @@ def download_doc(request, doc_id):
         response = HttpResponse(wrapper, content_type=mime_type)
         response['Content-Length'] = the_file.size
         filename = unicodedata.normalize('NFKD', os.path.split(the_file.name)[1]).encode("utf8", 'ignore')
-        filename = filename.replace(' ', '-')
-        response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
+        filename = filename.replace(b' ', b'-')
+        response['Content-Disposition'] = b'attachment; filename=' + filename
         return response

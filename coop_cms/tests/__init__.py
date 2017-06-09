@@ -69,7 +69,7 @@ class MediaBaseTestCase(BaseTestCase):
             else:
                 return response.content
         elif hasattr(response, 'streaming_content'):
-            return "".join(response.streaming_content)
+            return b"".join(response.streaming_content)
         return None
 
     def _log_as_mediamgr(self, is_staff=True, perm=None):
