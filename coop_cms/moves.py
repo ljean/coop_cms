@@ -21,7 +21,7 @@ else:
     # Python 3
     from io import BytesIO as StringIO
 
-    from html.parser import HTMLParser  as BaseHTMLParser
+    from html.parser import HTMLParser as BaseHTMLParser
 
     class HTMLParser(BaseHTMLParser):
         def __init__(self):
