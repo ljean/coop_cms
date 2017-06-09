@@ -8,7 +8,6 @@ import os.path
 import sys
 
 from django.conf import settings as django_settings
-from django.conf.urls import patterns
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site

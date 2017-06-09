@@ -2,8 +2,9 @@
 """sitemaps"""
 
 from django.conf import settings
-from django.conf.urls import url, patterns
+from django.conf.urls import url
 from django.contrib.sitemaps import Sitemap
+from django.contrib.sitemaps.views import sitemap as django_sitemap
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.utils.translation import activate
@@ -111,11 +112,11 @@ def get_sitemaps(langs=None):
     return sitemaps
 
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(
         r'^sitemap\.xml$',
-        'django.contrib.sitemaps.views.sitemap',
+        django_sitemap,
         {'sitemaps': get_sitemaps()},
         name="coop_cms_sitemap"
     ),
-)
+]
