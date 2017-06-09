@@ -8,7 +8,6 @@ from __future__ import unicode_literals
 
 from six import string_types
 
-from django import VERSION as DJANGO_VERSION
 from django import template
 from django.forms.formsets import BaseFormSet
 from django.template import Context
@@ -421,7 +420,7 @@ class CmsEditNode(template.Node):
                 safe_context[node.target_var] = context.get(node.target_var)
                 inner_context[node.target_var] = context.get(node.target_var)
 
-            elif DJANGO_VERSION >= (1, 8, 0) and isinstance(node, IncludeNode):
+            elif isinstance(node, IncludeNode):
                 # monkey patching for django 1.8
                 template_name = node.template.resolve(context)
                 node.template = get_template(template_name)
@@ -448,18 +447,14 @@ class CmsEditNode(template.Node):
                     content = node.render(Context(context))
                 else:
                     the_context = Context(safe_context)
-                    if DJANGO_VERSION >= (1, 8, 0):
-                        the_context.template = getattr(node, 'template', None) or template.Template("")
-                        the_context.template.engine = DummyEngine()
-                    content = node.render(the_context)
-            else:
-                if DJANGO_VERSION >= (1, 8, 0):
-                    # monkey patching for django 1.8
-                    the_context = Context(inner_context)
                     the_context.template = getattr(node, 'template', None) or template.Template("")
                     the_context.template.engine = DummyEngine()
-                else:
-                    the_context = Context(inner_context)
+                    content = node.render(the_context)
+            else:
+                # monkey patching for django 1.8+
+                the_context = Context(inner_context)
+                the_context.template = getattr(node, 'template', None) or template.Template("")
+                the_context.template.engine = DummyEngine()
                 content = node.render(the_context)
 
             nodes_content += content
