@@ -696,7 +696,7 @@ class NewsletterTest(UserBaseTestCase):
     def test_schedule_anonymous(self):
         newsletter = mommy.make(Newsletter)
         
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         url = reverse('coop_cms_schedule_newsletter_sending', args=[newsletter.id])
         
         response = self.client.get(url, follow=False)

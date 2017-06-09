@@ -6,7 +6,7 @@
     {% else %}
         <p />
     {% endif %}
-    <form class="registration-form" action="{% url "django.contrib.auth.views.login" %}" method="post">{% csrf_token %}
+    <form class="registration-form" action="{% url "login" %}" method="post">{% csrf_token %}
         {% if form.non_field_errors %}
         {{form.non_field_errors}}
         {% endif %}
@@ -27,7 +27,7 @@
         </tr>
         </table>
         <div class="registration-other-actions">
-            <a href="{% url "django.contrib.auth.views.password_reset" %}">{% trans "Forgotten Password" %}</a>
+            <a href="{% url "password_reset" %}">{% trans "Forgotten Password" %}</a>
         </div>
     </form>
 {% endblock %}

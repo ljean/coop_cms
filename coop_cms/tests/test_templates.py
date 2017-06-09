@@ -62,7 +62,7 @@ class TemplateTest(BaseArticleTest):
         response = self.client.post(url, data={'template': 'test/article.html'}, follow=True)
         self.assertEqual(200, response.status_code)
         redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(redirect_url.find(login_url) >= 0)
         article = article_class.objects.get(id=article.id)  # refresh
         self.assertEqual(article.template, '')

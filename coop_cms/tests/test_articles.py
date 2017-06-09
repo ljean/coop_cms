@@ -600,7 +600,7 @@ class ArticleTest(BaseArticleTest):
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
         self.assertEqual(200, response.status_code) #if can_edit returns 404 error
         next_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(login_url in next_url)
         
         self.assertEqual(article_class.objects.filter(title=data['title']).count(), 0)
