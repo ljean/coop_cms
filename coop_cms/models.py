@@ -487,7 +487,6 @@ class ArticleCategory(models.Model):
         return ret
 
 
-@python_2_unicode_compatible
 class BaseNavigable(TimeStampedModel):
     """Base class for anything which can be in Navigation"""
 
