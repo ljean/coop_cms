@@ -15,7 +15,6 @@ from coop_cms.models import NavType
 from coop_cms.utils import get_text_from_template
 
 
-
 class ReadOnlyInput(floppyforms.widgets.Input):
     """readonly input"""
     template_name = 'coop_cms/widgets/readonlyinput.html'

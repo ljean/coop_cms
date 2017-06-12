@@ -21,11 +21,11 @@ class InlineHtmlEditableModelForm(floppyforms.ModelForm):
 
     class Media:
         css = {
-            'all': ('css/colorbox.css?v=2', ),
+            'all': ('css/colorbox.css', ),
         }
         js = (
             'js/jquery.form.js',
             'js/jquery.pageslide.js',
-            'js/jquery.colorbox-min.js?v=2',
-            'js/colorbox.coop.js?v=3',
+            'js/jquery.colorbox-min.js',
+            'js/colorbox.coop.js',
         )

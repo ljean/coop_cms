@@ -395,11 +395,11 @@ class VersionedStaticFileNode(template.Node):
         else:
             static_file_path = os.path.join(settings.STATIC_ROOT, self.static_path)
             try:
-                #last Modification of the file
+                # last Modification of the file
                 version = os.path.getmtime(static_file_path)
             except OSError:
                 version = 'x'
-        return "{0}{1}?v={2}".format(settings.STATIC_URL, self.static_path, version)
+        return mark_safe("{0}{1}?v={2}".format(settings.STATIC_URL, self.static_path, version))
 
 
 @register.tag
