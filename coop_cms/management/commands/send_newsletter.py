@@ -14,13 +14,19 @@ from coop_cms.models import NewsletterSending
 class Command(BaseCommand):
     """send newsletter"""
     help = "send newsletter"
-    use_argparse = False
 
-    def handle(self, email_addresses, *args, **options):
+    def add_arguments(self, parser):
+        """
+        Entry point for subclassed commands to add custom arguments.
+        """
+        parser.add_argument('email_addresses')
+
+    def handle(self, *args, **options):
         """command"""
-        #look for emailing to be sent
+        # look for emailing to be sent
 
         verbose = options.get('verbosity', 1)
+        email_addresses = options.get('email_addresses', '')
         
         if email_addresses:
             email_list = email_addresses.split(";")
