@@ -68,6 +68,7 @@ class BaseFragmentForm(floppyforms.ModelForm):
         for value in values:
             if not value in allowed_classes:
                 raise ValidationError(_("Invalid class '{0}'").format(value))
+
         return " ".join(values)
 
 
