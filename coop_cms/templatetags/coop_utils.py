@@ -179,7 +179,7 @@ class NewsletterFriendlyCssNode(template.Node):
 
         else:
             style = ""
-            for tag in reversed(self.css.keys()):
+            for tag in reversed(list(self.css.keys())):
                 value = self.css[tag]
                 style += "{0} {{ {1} }}\n".format(tag, value)
             content = "<style>\n{0}</style>\n".format(style) + content
