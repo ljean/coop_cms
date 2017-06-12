@@ -273,13 +273,13 @@ def basename(fullname):
 def get_parts(list_of_objs, number_of_parts):
     """slice"""
     nb_objs = len(list_of_objs)
-    nb_by_part, extra_nb = nb_objs / number_of_parts, nb_objs % number_of_parts
+    nb_by_part, extra_nb = nb_objs // number_of_parts, nb_objs % number_of_parts
     parts = []
     stop_index = 0
     for which_part in range(number_of_parts):
-        start_index = 0 if (stop_index == 0) else (stop_index)
+        start_index = 0 if (stop_index == 0) else stop_index
         stop_index = start_index + nb_by_part + (1 if (which_part < extra_nb) else 0)
-        parts.append(list_of_objs[start_index:stop_index])
+        parts.append(list(list_of_objs[start_index:stop_index]))
     return parts
 
 
