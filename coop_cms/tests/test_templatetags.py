@@ -17,6 +17,7 @@ from django.test.client import RequestFactory
 from model_mommy import mommy
 
 from coop_cms.models import Link, NavNode, BaseArticle, MediaFilter, Image
+from coop_cms.moves import get_response_json
 from coop_cms.settings import is_localized, is_multilang, get_article_class, get_navtree_class
 from coop_cms.templatetags.coop_utils import get_part, get_parts, group_in_sublists, find_css, reduced_page_range
 from coop_cms.tests import BaseTestCase, BeautifulSoup
@@ -283,7 +284,7 @@ class AcceptCookieMessageTest(BaseTestCase):
 
         self.assertEqual(200, response.status_code)
 
-        json_content = json.loads(response.content)
+        json_content = get_response_json(response)
         self.assertEqual(json_content["Ok"], True)
 
         self.assertEqual(self.client.session.get('hide_accept_cookie_message'), True)

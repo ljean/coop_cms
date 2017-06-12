@@ -13,7 +13,6 @@ from bs4 import BeautifulSoup
 
 from django import template
 from django.conf import settings
-from django.template import RequestContext
 from django.template.base import TemplateSyntaxError
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
@@ -21,6 +20,7 @@ from django.utils.safestring import mark_safe
 import floppyforms.__future__ as floppyforms
 
 from coop_cms.models import ArticleCategory, Image, Document
+from coop_cms.moves import make_context
 from coop_cms.settings import get_article_class, logger
 from coop_cms.shortcuts import get_article
 from coop_cms.utils import dehtml as do_dehtml, slugify
@@ -343,7 +343,7 @@ class ShowAcceptCookieMessageNode(template.Node):
         request = context.get('request', None)
         if not request.session.get('hide_accept_cookie_message', False):
             template_ = get_template(self.template_name)
-            return template_.render(RequestContext(request, {}))
+            return template_.render(make_context(request, {}))
         else:
             return ""
 
