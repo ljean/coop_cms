@@ -138,7 +138,7 @@ class EditableObjectView(View):
 
     def get_cache_key(self, obj):
         language = get_language()
-        class_name = obj.__class__
+        class_name = '{0}.{1}'.format(obj.__class__.__module__, obj.__class__.__name__)
         cache_key = '{0}-{1}-{2}-{3}'.format(settings.SITE_ID, language, class_name, obj.id)
         return cache_key
 
