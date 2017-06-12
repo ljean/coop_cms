@@ -27,7 +27,7 @@ class ArticleSlugTestCase(BaseTestCase):
         """test slug with duplicated titles"""
         article_class = get_article_class()
         article1 = article_class.objects.create(title="Titre de l'article")
-        for number in xrange(12):
+        for number in range(12):
             article2 = article_class.objects.create(title=article1.title)
             self.assertNotEqual(article1.slug, article2.slug)
             self.assertEqual(article1.title, article2.title)
