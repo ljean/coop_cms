@@ -428,9 +428,6 @@ class CmsEditNode(template.Node):
 
             elif isinstance(node, IncludeNode):
                 # monkey patching for django 1.8
-                template_name = node.template.resolve(context)
-                node.template = get_template(template_name)
-                node.template.resolve = lambda s, c: s
 
                 if isinstance(node.template, FilterExpression):
                     template_name = node.template.resolve(context)
