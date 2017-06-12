@@ -262,11 +262,14 @@ class ArticleTest(BaseArticleTest):
         self.assertEquals(article.title, initial_data['title'])
         self.assertEquals(article.content, initial_data['content'])
         
-    def _is_inline_html_editor_found(self, response):
+    def check_inline_html_editor(self, response, is_loaded):
         self.assertEqual(200, response.status_code)
         inline_editor_init_url = reverse('html_editor_init')
-        content = '{0}'.format(response.content, 'utf-8')
-        return content.find(inline_editor_init_url) > 0
+
+        if is_loaded:
+            self.assertContains(response, inline_editor_init_url)
+        else:
+            self.assertNotContains(response, inline_editor_init_url)
         
     def test_edit_permission(self):
         initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
@@ -291,11 +294,11 @@ class ArticleTest(BaseArticleTest):
         initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
         article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         response = self.client.get(article.get_absolute_url())
-        self.assertFalse(self._is_inline_html_editor_found(response))
+        self.check_inline_html_editor(response, False)
         
         self._log_as_editor()
         response = self.client.get(article.get_edit_url())
-        self.assertTrue(self._is_inline_html_editor_found(response))
+        self.check_inline_html_editor(response, True)
         
     def test_inline_html_editor_links(self):
         slugs = ("un", "deux", "trois", "quatre")
