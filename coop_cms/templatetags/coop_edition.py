@@ -11,7 +11,7 @@ from six import string_types
 from django import template
 from django.forms.formsets import BaseFormSet
 from django.template import Context
-from django.template.base import TextNode, VariableNode
+from django.template.base import TextNode, VariableNode, FilterExpression
 from django.template.context_processors import csrf
 from django.template.loader import get_template, TemplateDoesNotExist
 from django.template.loader_tags import IncludeNode
@@ -431,14 +431,17 @@ class CmsEditNode(template.Node):
                 template_name = node.template.resolve(context)
                 node.template = get_template(template_name)
                 node.template.resolve = lambda s, c: s
+
+                if isinstance(node.template, FilterExpression):
+                    template_name = node.template.resolve(context)
+                    node.template = get_template(template_name)
                 context_dict = inner_context.copy()
                 if node.extra_context:
                     for filter_expression in node.extra_context:
                         value = node.extra_context[filter_expression].resolve(context)
                         context_dict[filter_expression] = value
-                the_context = Context(context_dict)
-                the_context.template = node.template
-                the_context.template.engine = DummyEngine()
+
+                the_context = make_context(None, context_dict)
                 content = node.template.render(the_context)
 
             elif isinstance(node, template.loader_tags.BlockNode):

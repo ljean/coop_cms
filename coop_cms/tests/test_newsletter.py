@@ -634,7 +634,7 @@ class NewsletterTest(UserBaseTestCase):
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
         response = self.client.post(url, data={})
         self.assertEqual(200, response.status_code)
-        
+
         self.assertEqual(
             [[test_address] for test_address in settings.COOP_CMS_TEST_EMAILS],
             [received_email.to for received_email in mail.outbox]
