@@ -10,7 +10,6 @@ from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpResponseForbidden
 from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 from django.shortcuts import render
-from django.template import RequestContext
 from django.template.loader import get_template
 from django.utils.translation import check_for_language, activate, get_language
 from django.views.decorators.csrf import csrf_exempt
@@ -18,8 +17,9 @@ from django.views.generic import TemplateView
 
 from colorbox.decorators import popup_redirect
 
-from coop_cms.logger import logger
 from coop_cms.forms.webutils import LanguageSelectionForm
+from coop_cms.logger import logger
+from coop_cms.moves import make_context
 from coop_cms.settings import get_article_class, is_localized
 from coop_cms.utils import strip_locale_path, make_locale_path
 
@@ -121,7 +121,7 @@ def csrf_failure(request, reason=""):
         'no_referer': reason == REASON_NO_REFERER,
     }
 
-    html = template.render(RequestContext(request, context))
+    html = template.render(make_context(request, context))
 
     return HttpResponseForbidden(html, content_type='text/html')
 
