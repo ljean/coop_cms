@@ -263,7 +263,7 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
         html_text = the_template.render(context_dict)
     except Exception:
         # import traceback
-        # print traceback.print_exc()
+        # print(traceback.print_exc())
         raise
 
     html_text = make_links_absolute(html_text, newsletter)
