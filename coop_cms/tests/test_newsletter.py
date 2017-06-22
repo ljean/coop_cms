@@ -12,12 +12,11 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test.utils import override_settings
 from django.utils import timezone
-from django.utils.translation import ugettext
 
 from model_mommy import mommy
 
 from coop_cms.models import Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending
-from coop_cms.settings import is_localized, get_article_class
+from coop_cms.settings import has_localized_urls, get_article_class
 from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
 from coop_cms.utils import make_links_absolute, strip_a_tags, avoid_line_too_long, send_email
 
@@ -700,7 +699,7 @@ class NewsletterTest(UserBaseTestCase):
         
         response = self.client.get(url, follow=False)
         redirect_url = response['Location']
-        if is_localized():
+        if has_localized_urls():
             login_url = login_url[:2]
             self.assertTrue(redirect_url.find(login_url) >= 0)
         else:
