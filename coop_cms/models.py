@@ -33,7 +33,7 @@ from coop_cms.settings import (
     get_article_class, get_article_logo_size, get_article_logo_crop, get_article_templates, get_default_logo,
     get_headline_image_size, get_headline_image_crop, get_img_folder, get_newsletter_item_classes,
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
-    cms_no_homepage, homepage_no_redirection
+    cms_no_homepage, homepage_no_redirection, has_localized_urls
 )
 from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path, slugify
 
@@ -869,7 +869,7 @@ class Link(BaseNavigable):
 
     def get_absolute_url(self):
         """url"""
-        if is_localized():
+        if has_localized_urls():
             # parsed_url = scheme, netloc, path, params, query, fragment
             parsed_url = urlparse.urlparse(self.url)
             scheme = parsed_url[0]
