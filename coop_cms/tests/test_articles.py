@@ -14,7 +14,7 @@ from model_mommy import mommy
 
 from coop_cms.models import NavNode, BaseArticle, ArticleCategory
 from coop_cms.settings import (
-    is_localized, get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed,
+    has_localized_urls, get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed,
 )
 from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt
 from coop_cms.utils import get_login_url
@@ -120,7 +120,7 @@ class ArticleTest(BaseArticleTest):
         
     def test_is_navigable(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
-        if is_localized():
+        if has_localized_urls():
             lang = settings.LANGUAGES[0][0]
             self.assertEqual('/{0}/test/'.format(lang), article.get_absolute_url())
         else:

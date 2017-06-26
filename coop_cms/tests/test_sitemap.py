@@ -14,7 +14,7 @@ from django.utils.translation import activate
 from model_mommy import mommy
 
 from coop_cms.models import BaseArticle, SiteSettings
-from coop_cms.settings import get_article_class, is_localized, is_multilang
+from coop_cms.settings import get_article_class, has_localized_urls, is_multilang
 from coop_cms.sitemap import get_sitemaps
 from coop_cms.tests import BaseTestCase
 from coop_cms.utils import get_url_in_language, slugify
@@ -134,7 +134,7 @@ class LocaleSitemapTest(SitemapTest):
     def tearDown(self):
         activate(settings.LANGUAGES[0][0])
 
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_sitemap_lang(self):
         site = Site.objects.get_current()
         site2 = self._site2
@@ -169,7 +169,7 @@ class LocaleSitemapTest(SitemapTest):
             self.assertNotContains(response, get_url_in_language(article3.get_absolute_url(), lang))
             self.assertNotContains(response, get_url_in_language(article4.get_absolute_url(), lang))
 
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_sitemap_lang_slug(self):
         """Test that the url is in the locale language"""
         site = Site.objects.get_current()

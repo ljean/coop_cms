@@ -265,12 +265,18 @@ def get_newsletter_context_callbacks():
 
 
 def is_localized():
-    """return True if site is localized"""
-    coop_cms_is_localized = getattr(django_settings, 'COOP_CMS_IS_LOCALIZED', None)
-    if coop_cms_is_localized is None:
-        if 'modeltranslation' in django_settings.INSTALLED_APPS:
-            return True
-    return coop_cms_is_localized
+    """return True if possible to have different languages in the site"""
+    if 'modeltranslation' in django_settings.INSTALLED_APPS:
+        return True
+    return False
+
+
+def has_localized_urls():
+    """return True if use language URL prefix"""
+    has_locale_urls = getattr(django_settings, 'COOP_CMS_HAS_LOCALIZED_URLS', None)
+    if has_locale_urls is None:
+        has_locale_urls = is_localized()
+    return has_locale_urls
 
 
 def is_multilang():
@@ -363,7 +369,7 @@ def get_articles_category_page_size(article_category):
 
 def get_url_patterns():
     """return urlspatterns to use"""
-    if is_localized():
+    if has_localized_urls():
         return i18n_patterns
     else:
         def url_list(*args):

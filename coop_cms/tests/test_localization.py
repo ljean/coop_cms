@@ -14,7 +14,7 @@ from django.utils.translation import activate, get_language
 from django.test.utils import override_settings
 
 from coop_cms.models import BaseArticle, InvalidArticleError
-from coop_cms.settings import is_localized, is_multilang, multilang_mode, get_article_class
+from coop_cms.settings import has_localized_urls, is_localized, is_multilang, multilang_mode, get_article_class
 from coop_cms.tests import BaseTestCase, BeautifulSoup
 from coop_cms.utils import redirect_to_language, strip_locale_path, get_url_in_language, make_locale_path
 
@@ -24,7 +24,7 @@ def language_fallbacks():
     return tuple([lang_code for (lang_code, lang_name) in settings.LANGUAGES])
 
 
-@skipIf(not is_localized(), "not localized")
+@skipIf(not has_localized_urls(), "Urls are not localized")
 class LocalePathTest(BaseTestCase):
     """test that url is parsed correctly when using locale prefix"""
 
@@ -99,7 +99,7 @@ class UrlLocalizationTest(BaseTestCase):
         user.save()
         return self.client.login(username='toto', password='toto')
     
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_get_locale_article(self):
         """get article with locale slug"""
         original_text = '*!-+' * 10
@@ -122,7 +122,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, translated_text)
 
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_change_lang(self):
         """change language"""
 
@@ -159,7 +159,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, translated_text)
         
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_change_lang_next_url_after(self):
         """change language and redirect to url"""
         
@@ -192,7 +192,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, art2.content)
             
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_change_lang_no_trans(self):
         """change language and no translation"""
 
@@ -231,7 +231,7 @@ class UrlLocalizationTest(BaseTestCase):
         art1 = article_class.objects.get(id=art1.id)
         self.assertEqual(original_slug, art1.slug)
         
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_keep_localized_slug(self):
         """test translation of slug are not modified when changing title"""
         
@@ -253,7 +253,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(original_slug, art1.slug)
         self.assertEqual(original_trans_slug, getattr(art1, 'slug_' + trans_lang))
         
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing(self):
         """test localized slug already exists"""
         
@@ -272,7 +272,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertNotEqual(getattr(art2, 'slug_' + trans_lang), getattr(art1, 'slug_' + trans_lang))
         
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing2(self):
         """test localized slug already exists 2 """
         
@@ -289,7 +289,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertNotEqual(getattr(art2, 'slug_' + trans_lang), getattr(art1, 'slug_' + trans_lang))
         
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing3(self):
         """test localized slug already exists 3 """
         self._log_as_editor()
@@ -321,7 +321,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertNotEqual(getattr(art2_updated, 'slug_' + trans_lang), getattr(art1, 'slug_' + trans_lang))
         
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_localize_existing_article1(self):
         """test localized existing article 1 """
 
@@ -350,7 +350,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(getattr(art1_updated, 'title_' + trans_lang), art1.title)
         self.assertEqual(getattr(art1_updated, 'slug_' + trans_lang), getattr(art1, 'slug_' + origin_lang))
         
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_localize_existing_article2(self):
         """test localized existing article 2 """
         self._log_as_editor()
@@ -379,7 +379,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(getattr(art1_updated, 'slug_' + trans_lang), "home")
         self.assertEqual(getattr(art1_updated, 'slug_' + origin_lang), "accueil")
         
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing4(self):
         """test localized slug and existing article """
         self._log_as_editor()
@@ -410,7 +410,7 @@ class UrlLocalizationTest(BaseTestCase):
         
         self.assertNotEqual(getattr(art2_updated, 'slug_' + trans_lang), art1.slug)
         
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_localized_slug_already_existing5(self):
         """test localized slug existing and existing article """
 
@@ -459,7 +459,7 @@ class UrlLocalizationTest(BaseTestCase):
         # Force to fail
         self.assertFalse(True)
 
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     @override_settings(MODELTRANSLATION_FALLBACK_LANGUAGES=language_fallbacks())
     def test_create_article_in_additional_lang_fallback(self):
         """test create article into an other language than the default"""
@@ -483,7 +483,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(response, art1.content)
 
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_create_article_in_additional_lang_no_fallback(self):
         """test create article into an other language than the default"""
 
@@ -505,7 +505,7 @@ class UrlLocalizationTest(BaseTestCase):
         response = self.client.get(art1.get_absolute_url())
         self.assertEqual(404, response.status_code)
 
-    @skipIf(not is_localized() or multilang_mode() < 3, "not localized")
+    @skipIf(not has_localized_urls() or multilang_mode() < 3, "not localized")
     def test_create_article_in_third_lang(self):
         """test create article into an other language than the default"""
 
@@ -538,7 +538,7 @@ class UrlLocalizationTest(BaseTestCase):
         response = self.client.get(third_lang_url.replace('/' + third_lang + '/', '/' + other_lang + '/', 1))
         self.assertEqual(404, response.status_code)
 
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_redirect_to_language(self):
         """check redirect_to_language utility"""
         article_class = get_article_class()
@@ -552,7 +552,7 @@ class UrlLocalizationTest(BaseTestCase):
         self.assertTrue(response.url.find("/" + other_lang + "/") == 0)
         self.assertEqual(get_language(), other_lang)
 
-    @skipIf(not is_localized() or not is_multilang(), "not localized")
+    @skipIf(not has_localized_urls() or not is_multilang(), "not localized")
     def test_redirect_to_invalid_language(self):
         """check redirect_to_language uitiliy raise error if ImproperlyConfigured"""
 

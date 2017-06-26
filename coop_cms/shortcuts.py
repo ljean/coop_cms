@@ -46,7 +46,13 @@ def get_article(slug, current_lang=None, force_lang=None, all_langs=False, **kwa
             if mt_fallbacks is None:
                 fallback_languages += [mt_settings.DEFAULT_LANGUAGE, ]
             else:
-                fallback_languages += list(mt_fallbacks)
+                if isinstance(mt_fallbacks, dict):
+                    if current_lang in mt_fallbacks:
+                        fallback_languages += list(mt_fallbacks[current_lang])
+                    else:
+                        fallback_languages += list(mt_fallbacks.get('default', []))
+                else:
+                    fallback_languages += list(mt_fallbacks)
 
             for lang in fallback_languages:
                 field_name = build_localized_fieldname('slug', lang)

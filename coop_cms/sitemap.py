@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 from django.utils.translation import activate
 
 from coop_cms.models import BaseArticle, SiteSettings
-from coop_cms.settings import get_article_class, is_localized
+from coop_cms.settings import get_article_class, has_localized_urls
 
 
 class LocaleSitemap(Sitemap):
@@ -38,7 +38,7 @@ class LocaleSitemap(Sitemap):
             return SiteSettings.SITEMAP_ONLY_SITE
 
     def location(self, obj):
-        if is_localized() and self.language:
+        if has_localized_urls() and self.language:
             activate(self.language)
         return obj.get_absolute_url()
 
@@ -104,7 +104,7 @@ class ArticleSitemap(BaseSitemap):
 def get_sitemaps(langs=None):
     """return sitemaps"""
     sitemaps = {}
-    if is_localized():
+    if has_localized_urls():
         lang_codes = langs or [code[0] for code in settings.LANGUAGES]
         for code in lang_codes:
             site_key = "coop_cms_articles_{0}".format(code)
