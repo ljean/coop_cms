@@ -66,7 +66,13 @@ class NavigationAsNestedUlNode(NavigationTemplateNode):
         """to html"""
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
-        root_nodes = NavNode.objects.filter(tree__name=tree_name, parent__isnull=True).order_by("ordering")
+        root_nodes = NavNode.objects.filter(tree__name=tree_name)
+        parent = kwargs.pop('parent', None)
+        if parent:
+            root_nodes = root_nodes.filter(parent=parent)
+        else:
+            root_nodes = root_nodes.filter(parent__isnull=True)
+        root_nodes = root_nodes.order_by("ordering")
         total_nodes = root_nodes.count()    
         return ''.join([
             node.as_navigation(node_pos=i + 1, total_nodes=total_nodes, **kwargs)
@@ -128,6 +134,7 @@ class NavigationChildrenNode(NavigationTemplateNode):
             return nav_nodes[0].children_as_navigation(**kwargs)
         return ''
 
+
 @register.tag
 def navigation_children(parser, token):
     """Navigation"""
@@ -186,9 +193,15 @@ class NavigationRootNode(NavigationTemplateNode):
         kwargs = self.resolve_kwargs(context)
         tree_name = kwargs.pop('tree', 'default')
         template_name = kwargs.pop('template_name', DEFAULT_NAVROOT_TEMPLATE)
-        root_nodes = NavNode.objects.filter(
-            tree__name=tree_name, parent__isnull=True, in_navigation=True
-        ).order_by("ordering")
+        parent = kwargs.pop('parent', None)
+
+        root_nodes = NavNode.objects.filter(tree__name=tree_name, in_navigation=True)
+        if parent:
+            root_nodes = root_nodes.filter(parent=parent)
+        else:
+            root_nodes = root_nodes.filter(parent__isnull=True)
+        root_nodes = root_nodes.order_by("ordering")
+
         return ''.join([render_template_node(node, template_name) for node in root_nodes])
 
 
@@ -198,3 +211,9 @@ def navigation_root_nodes(parser, token):
     args = token.contents.split()
     kwargs = extract_kwargs(args)
     return NavigationRootNode(**kwargs)
+
+
+@register.filter
+def get_navigation_node(nav_node_id):
+    """navigation"""
+    return NavNode.objects.get(id=nav_node_id)
