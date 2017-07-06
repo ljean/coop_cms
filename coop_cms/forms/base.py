@@ -10,7 +10,7 @@ from coop_html_editor.widgets import get_inline_html_widget
 
 class InlineHtmlEditableModelForm(floppyforms.ModelForm):
     """Base class for form with inline-HTML editor fields"""
-    is_inline_editable = True  # The cms_edition templatetag checks this for swithcing to edit mode
+    is_inline_editable = True  # The cms_edition templatetag checks this for switching to edit mode
 
     def __init__(self, *args, **kwargs):
         super(InlineHtmlEditableModelForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
