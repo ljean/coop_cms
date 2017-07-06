@@ -252,6 +252,16 @@ class NavNode(models.Model):
 
         return False
 
+    def is_external(self):
+        """True if the link is on another site et should be target=_blank """
+        if self.content_object:
+            is_external = getattr(self.content_object, 'is_external', False)
+            if callable(is_external):
+                return is_external()
+            else:
+                return is_external
+        return False
+
     def get_children(self, in_navigation=None, allow_all=False):
         """children of the node"""
         nodes = NavNode.objects.filter(parent=self).order_by("ordering")
@@ -344,7 +354,10 @@ class NavNode(models.Model):
             if url is None:
                 return '<a>{0}</a>'.format(self.label)
             else:
-                return '<a href="{0}">{1}</a>'.format(url, self.label)
+                target = ""
+                if self.is_external():
+                    target = ' target="_blank"'
+                return '<a href="{0}"{2}>{1}</a>'.format(url, self.label, target)
 
     def _get_ul_format(self, ul_template):
         """format ul tag"""
@@ -474,6 +487,9 @@ class ArticleCategory(models.Model):
             sites__id=settings.SITE_ID, category=self, publication=BaseArticle.PUBLISHED
         ).distinct().order_by('publication_date')
 
+    def get_headlines(self):
+        return self.get_articles_qs().filter(headline=True).order_by('-publication_date')
+
     class Meta:
         verbose_name = _('article category')
         verbose_name_plural = _('article categories')
@@ -500,6 +516,9 @@ class BaseNavigable(TimeStampedModel):
     def is_accessible(self):
         """returns True if the content can be accessed. It most cases, it should be overridden"""
         return True
+
+    def is_external(self):
+        return False
 
     def _get_navigation_parent(self):
         """getter for parent"""
@@ -621,7 +640,6 @@ class BaseArticle(BaseNavigable):
         else:
             site_settings.homepage_url = self.get_absolute_url()
         site_settings.save()
-
 
     def is_draft(self):
         """True if draft"""
@@ -887,6 +905,20 @@ class BaseArticle(BaseNavigable):
 
         return True
 
+    def get_navigation(self):
+        """look for navigation items"""
+
+    def is_current_page(self):
+        """true if the article is currently displayed"""
+        url = self.get_absolute_url()
+        if url and is_requestprovider_installed():
+            try:
+                http_request = RequestManager().get_request()
+                return http_request and http_request.path == url
+            except RequestNotFound:
+                pass
+        return False
+
 
 @python_2_unicode_compatible
 class Link(BaseNavigable):
@@ -915,6 +947,15 @@ class Link(BaseNavigable):
         if scheme:
             return "{0}{1}".format(netloc, path)
         return self.url
+
+    def is_external(self):
+        """True if the link is on another site et should be target=_blank """
+        # parsed_url = scheme, netloc, path, params, query, fragment
+        parsed_url = urlparse(self.url)
+        scheme, netloc, path = parsed_url[0], parsed_url[1], parsed_url[2]
+        if scheme:
+            return True
+        return False
 
     def is_accessible(self):
         """returns True if the content can be accessed. It most cases, it should be overridden"""
