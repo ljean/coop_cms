@@ -8,7 +8,6 @@
     </div>
     {{ field.errors }}
     {% if field.help_text %}<p class="help-block">{{ field.help_text }}</p>{% endif %}
-</div>
 {% else %}
     {% if field.label %}<label class="control-label" for="{{ field.name }}">{{field.label}}</label>{% endif %}
     {{ field }}
