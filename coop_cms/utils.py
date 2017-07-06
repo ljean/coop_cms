@@ -12,6 +12,7 @@ from traceback import print_exc
 from slugify import slugify as unicode_slugify
 
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.exceptions import ImproperlyConfigured
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -150,7 +151,11 @@ def make_links_absolute(html_content, newsletter=None, site_prefix=""):
         return url
 
     if not site_prefix:
-        site_prefix = newsletter.get_site_prefix() if newsletter else settings.COOP_CMS_SITE_PREFIX
+        if newsletter:
+            site_prefix = newsletter.get_site_prefix()
+        else:
+            site = Site.objects.get_current()
+            site_prefix = "http://{0}".format(site.domain)
 
     soup = BeautifulSoup(html_content, 'html.parser')
     for a_tag in soup.find_all("a"):
