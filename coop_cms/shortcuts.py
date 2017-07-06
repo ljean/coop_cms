@@ -76,10 +76,10 @@ def get_article_or_404(slug, **kwargs):
         raise Http404
 
 
-def get_headlines(article, editable=False):
+def get_headlines(article=None, editable=False):
     """get articles to display on homepage"""
     article_class = get_article_class()
-    if article.is_homepage:
+    if (article and article.is_homepage) or (article is None):
         queryset = article_class.objects.filter(headline=True)
         if editable:
             queryset = queryset.filter(publication__in=(BaseArticle.PUBLISHED, BaseArticle.DRAFT))
