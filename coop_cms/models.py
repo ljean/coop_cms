@@ -648,6 +648,8 @@ class BaseArticle(BaseNavigable):
         try:
             return sorl_thumbnail.backend.get_thumbnail(logo_file, size, crop=crop)
         except IOError:
+            # TODO : In case of error (Pillow 4.2.1 cause "cannot write mode RGBA as JPEG")
+            # TODO : Fix "AttributeError: 'File' object has no attribute 'url'"
             return logo_file
         
     def get_headline_image(self):

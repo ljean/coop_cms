@@ -90,10 +90,11 @@ def get_headlines(article, editable=False):
 def redirect_if_alias(path):
     """redirect if path correspond to an alias"""
     article_class = get_article_class()
+    site = Site.objects.get_current()
 
     # look for an article corresponding to this path. For example if trailing slash is missing in the url
     try:
-        article = article_class.objects.get(slug=path, sites=Site.objects.get_current())
+        article = article_class.objects.get(slug=path, sites=site)
     except article_class.DoesNotExist:
         article = None
 
@@ -104,10 +105,10 @@ def redirect_if_alias(path):
 
         # look for a regular alias
         try:
-            alias = Alias.objects.get(path=path, sites=Site.objects.get_current())
+            alias = Alias.objects.get(path=path, sites=site)
         except Alias.DoesNotExist:
             if path and path[-1] == '/':
-                alias = get_object_or_404(Alias, path=path[:-1])
+                alias = get_object_or_404(Alias, path=path[:-1], sites=site)
             else:
                 alias = None
 
