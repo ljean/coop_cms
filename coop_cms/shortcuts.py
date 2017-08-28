@@ -94,7 +94,7 @@ def redirect_if_alias(path):
 
     # look for an article corresponding to this path. For example if trailing slash is missing in the url
     try:
-        article = article_class.objects.get(slug=path, sites=site)
+        article = article_class.objects.get(slug=path, sites=site, publication=BaseArticle.PUBLISHED)
     except article_class.DoesNotExist:
         article = None
 

@@ -19,6 +19,7 @@ from django.views.generic import View
 
 from colorbox.decorators import popup_redirect
 
+from coop_cms.exceptions import ArticleNotAllowed
 from coop_cms.forms.articles import ArticleLogoForm, ArticleTemplateForm, PublishArticleForm
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
@@ -302,7 +303,7 @@ class ArticleView(EditableObjectView):
         if not self.edit_mode:
             if article.is_homepage and homepage_no_redirection() and not self.as_homepage:
                 # Do not authorize access to homepage with its urls in 'homepage_no_redirection' mode
-                raise Http404
+                raise ArticleNotAllowed
         return article
 
     def dispatch(self, request, *args, **kwargs):
@@ -311,6 +312,8 @@ class ArticleView(EditableObjectView):
         except Http404:
             slug = self.kwargs['slug']
             return redirect_if_alias(slug)
+        except ArticleNotAllowed:
+            raise Http404
 
     def can_access_object(self):
         """perms -> 404 if no perms"""
