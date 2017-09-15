@@ -8,13 +8,15 @@ from unittest import skipUnless
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.core import mail
+from django.core import mail, management
 from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
 
 from model_mommy import mommy
 from registration.models import RegistrationProfile
+
+from .models import InvalidatedUser
 
 TEST_AUTHENTICATION_BACKENDS = (
     'coop_cms.perms_backends.ArticlePermissionBackend',
@@ -483,3 +485,114 @@ class RegistrationTest(BaseTest):
         email = mail.outbox[0]
         self.assertEqual(email.to, ['toto@toto.fr', 'titi@titi.fr'])
         self.assertTrue(email.body.find(data['email']) > 0)
+
+
+@override_settings(AUTHENTICATION_BACKENDS=TEST_AUTHENTICATION_BACKENDS)
+class InvalidationUserBackendTest(BaseTest):
+    """check invalidated user management"""
+
+    def test_login_user_wrong_password(self):
+        """Test what happen when user with invalidated login try to login"""
+        user = self._make(User, is_active=True, password="abd134", email="toto@toto.fr", username="toto")
+        mommy.make(InvalidatedUser, user=user, password_changed=False)
+        login_ok = self.client.login(email=user.email, password="password")
+        self.assertEqual(login_ok, False)
+        self.assertEqual(InvalidatedUser.objects.count(), 1)
+        self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=False).count(), 1)
+
+    def test_login(self):
+        """Test user can login"""
+        user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
+        mommy.make(InvalidatedUser, user=user, password_changed=False)
+        login_ok = self.client.login(email=user.email, password="password")
+        self.assertEqual(login_ok, True)
+        self.assertEqual(InvalidatedUser.objects.count(), 1)
+        self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=False).count(), 0)
+        self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=True).count(), 1)
+
+    def test_post_login_error_invalidated(self):
+        """Test what happen when user with invalidated login try to login"""
+        user = self._make(User, is_active=True, password="abd134", email="toto@toto.fr", username="toto")
+        mommy.make(InvalidatedUser, user=user, password_changed=False)
+
+        url = reverse('login')
+
+        response = self.client.post(url, dict(email=user.email, password="password"))
+        self.assertEqual(response.status_code, 200)
+
+        form = self._get_from_context(response, 'form')
+        self.assertNotEqual(form, None)
+        self.assertEqual(form.invalidated_password, True)
+
+        self.assertEqual(self._get_from_context(response, 'user').is_anonymous(), True)
+
+        self.assertEqual(InvalidatedUser.objects.count(), 1)
+        self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=False).count(), 1)
+
+    def _get_from_context(self, response, var_name):
+        """extract variable from context"""
+        for context in response.context:
+            if var_name in context:
+                return context[var_name]
+
+    def test_post_login_error_not_invalidated(self):
+        """Test what happen when user without invalidated login try to login"""
+        user = self._make(User, is_active=True, password="abd134", email="toto@toto.fr", username="toto")
+
+        url = reverse('login')
+
+        response = self.client.post(url, dict(email=user.email, password="password"))
+        self.assertEqual(response.status_code, 200)
+
+        form = self._get_from_context(response, 'form')
+        self.assertNotEqual(form, None)
+        self.assertEqual(form.invalidated_password, False)
+
+        self.assertEqual(self._get_from_context(response, 'user').is_anonymous(), True)
+
+        self.assertEqual(InvalidatedUser.objects.count(), 0)
+
+    def test_post_login_invalidated(self):
+        """Test what happen when user with invalidated login, login"""
+        user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
+        mommy.make(InvalidatedUser, user=user, password_changed=False)
+
+        url = reverse('login')
+
+        response = self.client.post(url, dict(email=user.email, password="password"), follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(self._get_from_context(response, 'user'), user)
+
+        self.assertEqual(InvalidatedUser.objects.count(), 1)
+        self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=False).count(), 0)
+        self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=True).count(), 1)
+
+    def test_post_login_not_invalidated(self):
+        """Test what happen when user login"""
+        user = self._make(User, is_active=True, password="password", email="toto@toto.fr", username="toto")
+
+        url = reverse('login')
+
+        response = self.client.post(url, dict(email=user.email, password="password"), follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(self._get_from_context(response, 'user'), user)
+
+        self.assertEqual(InvalidatedUser.objects.count(), 0)
+
+    def test_create_article_commands(self):
+        user1 = self._make(User, is_active=True, password="password", email="toto1@toto.fr", username="toto1")
+        user2 = self._make(User, is_active=True, password="password", email="toto2@toto.fr", username="toto2")
+
+        self.assertEqual(InvalidatedUser.objects.count(), 0)
+
+        management.call_command('invalidate_passwords', verbosity=0, interactive=False)
+
+        self.assertEqual(User.objects.count(), 2)
+        self.assertEqual(InvalidatedUser.objects.count(), 2)
+        for user_id in (user1.id, user2.id):
+            user = User.objects.get(id=user_id)
+            self.assertEqual(InvalidatedUser.objects.filter(user=user).count(), 1)
+            self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=False).count(), 1)
+            self.assertEqual(user.check_password("password"), False)
