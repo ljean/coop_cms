@@ -64,6 +64,22 @@ class BaseFragmentForm(floppyforms.ModelForm):
                 raise ValidationError(_(u"Invalid class '{0}'").format(value))
         return u" ".join(values)
 
+    def clean(self):
+        ret = super(BaseFragmentForm, self).clean()
+
+        # Check that if no filter is set : the name and type are unique together
+        queryset = Fragment.objects.filter(
+            name=self.cleaned_data.get('name', ''),
+            type=self.cleaned_data.get('type'),
+        )
+        fragment_filter = self.cleaned_data.get('filter')
+        if fragment_filter is None:
+            queryset = queryset.filter(filter__isnull=True)
+            if queryset.count():
+                raise forms.ValidationError(_(u"A fragment with this name already exists"))
+
+        return ret
+
 
 class AddFragmentForm(BaseFragmentForm):
     """Add fragment"""
