@@ -1,18 +1,18 @@
 {% extends "admin/base_site.html" %}
-{% load i18n admin_modify admin_static %}
+{% load i18n admin_modify admin_static static %}
 
 {% block extrahead %}{{ block.super }}
 {% url 'admin:jsi18n' as jsi18nurl %}
 <script type="text/javascript" src="{{ jsi18nurl|default:"../../../jsi18n/" }}"></script>
 {{ media }}
 {% if navtree %}
-  <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/tree.css" />
-  <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/smoothness/jquery-ui-1.8.14.custom.css" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/tree.css' %}" />
+  <link rel="stylesheet" type="text/css" href="{% static 'css/smoothness/jquery-ui-1.8.14.custom.css' %}" />
 
-  <script src="{{STATIC_URL}}js/jquery-1.7.1.min.js"></script>
-  <script src="{{STATIC_URL}}js/jquery-ui-1.8.14.custom.min.js"></script>
-  <script src="{{STATIC_URL}}js/jquery.jstree.js"></script>
-  <script src="{{STATIC_URL}}js/jquery-ajax-csrf.js"></script>
+  <script src="{% static 'js/jquery-1.7.1.min.js' %}"></script>
+  <script src="{% static 'js/jquery-ui-1.8.14.custom.min.js' %}"></script>
+  <script src="{% static 'js/jquery.jstree.js' %}"></script>
+  <script src="{% static 'js/jquery-ajax-csrf.js' %}"></script>
   <script>
     $.widget("custom.catcomplete", $.ui.autocomplete, {
       _renderMenu: function(ul, items) {
@@ -114,13 +114,13 @@
             "valid_children" : "all",
             "out_nav" : {
                 "icon" : {
-                  "image" : "{{STATIC_URL}}img/out_nav.png"
+                  "image" : "{% static 'img/out_nav.png' %}"
                 }
             },
             "in_nav" : {
               "valid_children" : "all",
               "icon" : {
-                "image" : "{{STATIC_URL}}img/in_nav.png"
+                "image" : "{% static 'img/in_nav.png' %}"
               }
             }
           }
