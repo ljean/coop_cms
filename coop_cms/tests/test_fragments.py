@@ -977,10 +977,53 @@ class FragmentsInArticleTest(BaseFragmentTest):
             'type': fragment.type.id,
             'name': fragment.name,
             'position': 0,
-            'filter': '',
+            #'filter': '',
         }
 
         self._add_fragment(data, errors_count=1)
+
+    def test_add_fragment_duplicated_filters(self):
+        """add fragment"""
+        fragment_type = mommy.make(FragmentType, name="parts")
+        fragment_filter1 = mommy.make(FragmentFilter)
+
+        fragment = mommy.make(Fragment, name=u"abcd", type=fragment_type, filter=fragment_filter1)
+
+        data = {
+            'type': fragment.type.id,
+            'name': fragment.name,
+            'position': 0,
+            'filter': fragment_filter1.id,
+        }
+
+        self._add_fragment(data, errors_count=1)
+
+    def test_add_fragment_duplicated_different_filters(self):
+        """add fragment"""
+        fragment_type = mommy.make(FragmentType, name="parts")
+
+        fragment_filter1 = mommy.make(FragmentFilter)
+        fragment_filter2 = mommy.make(FragmentFilter)
+
+        fragment = mommy.make(Fragment, name=u"abcd", type=fragment_type, filter=fragment_filter1)
+
+        data = {
+            'type': fragment.type.id,
+            'name': fragment.name,
+            'position': 0,
+            'filter': fragment_filter2.id,
+        }
+
+        self._add_fragment(data)
+
+        self.assertEqual(Fragment.objects.count(), 2)
+        self.assertEqual(Fragment.objects.exclude(id=fragment.id).count(), 1)
+        new_fragment = Fragment.objects.exclude(id=fragment.id)[0]
+
+        self.assertEqual(new_fragment.type, fragment_type)
+        self.assertEqual(new_fragment.name, data['name'])
+        self.assertEqual(new_fragment.css_class, '')
+        self.assertEqual(new_fragment.filter, fragment_filter2)
         
     def test_view_edit_fragments_empty(self):
         """view edit fragment form: no fragments yet"""

@@ -51,6 +51,23 @@ class AliasTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, article.title)
 
+    def test_redirect_article_no_trailing_slash(self):
+        article_class = get_article_class()
+        article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")
+
+        url = article.get_absolute_url()
+        self.assertEqual(url[-1], "/")
+
+        url = url[:-1]
+        self.assertNotEqual(url[-1], "/")
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 302)
+
+        response = self.client.get(url, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, article.title)
+
     def test_redirect_no_slash(self):
         article_class = get_article_class()
         article = article_class.objects.create(slug="test", title="TestAlias", content="TestAlias")

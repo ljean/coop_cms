@@ -9,6 +9,8 @@ from __future__ import unicode_literals
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 
+from .models import InvalidatedUser
+
 
 class EmailAuthBackend(ModelBackend):
     """
@@ -31,6 +33,8 @@ class EmailAuthBackend(ModelBackend):
 
                 if user.check_password(password):
                     # If password is correct: return user to accept it as logged user
+                    # authenticate successful : Mark password changed if invalidation
+                    InvalidatedUser.objects.filter(user=user).update(password_changed=True)
                     return user
 
         # No valid user found : refuse login

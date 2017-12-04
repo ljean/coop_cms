@@ -9,7 +9,7 @@ import django_extensions.db.fields
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('coop_cms', '0013_auto_20170607_1508'),
+        ('coop_cms', '0014_auto_20171006_1040'),
     ]
 
     operations = [

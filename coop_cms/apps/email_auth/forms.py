@@ -4,15 +4,20 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth import authenticate, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.utils.translation import ugettext as _, ugettext_lazy as __
 
 from coop_cms.bs_forms import Form, BootstrapableMixin
 
+from .models import InvalidatedUser
+
 
 class EmailAuthForm(Form):
     """Email form"""
+    invalidated_password = False
+
     email = forms.EmailField(required=True, label=__("Email"))
     password = forms.CharField(label=__("Password"), widget=forms.PasswordInput)
 
@@ -46,6 +51,11 @@ class EmailAuthForm(Form):
         if email and password:
             self.user_cache = authenticate(email=email, password=password)
             if self.user_cache is None:
+
+                # If we detect that the password may have been invalidated
+                if InvalidatedUser.objects.filter(user__email=email, password_changed=False).exists():
+                    self.invalidated_password = True
+
                 raise forms.ValidationError(
                     error_messages['invalid_login'],
                     code='invalid_login',

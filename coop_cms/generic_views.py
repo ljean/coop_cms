@@ -19,6 +19,7 @@ from django.views.generic.list import ListView as DjangoListView
 
 from coop_html_editor import utils as html_editor_utils
 
+from coop_cms.exceptions import ArticleNotAllowed
 from coop_cms.logger import logger
 from coop_cms.settings import is_cache_enabled
 
@@ -153,7 +154,7 @@ class EditableObjectView(View):
                 return return_this
             else:
                 raise
-        
+
         if not self.can_access_object():
             raise Http404
         
@@ -186,12 +187,12 @@ class EditableObjectView(View):
     def post(self, request, *args, **kwargs):
         """handle http post -> edit"""
         if not self.edit_mode:
-            raise Http404
+            raise ArticleNotAllowed
         
         self.object = self.get_object()
         
         if not self.can_edit_object():
-            logger.warning("PermissionDenied")
+            # logger.warning("PermissionDenied")
             raise PermissionDenied
 
         self.form = self.get_form(request.POST, request.FILES, instance=self.object)
