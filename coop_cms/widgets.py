@@ -76,10 +76,10 @@ class ChosenSelectMultiple(ChosenWidgetMixin, floppyforms.widgets.SelectMultiple
     class Media:
         """css and js required by widget"""
         js = (
-            "{0}?v=1".format("chosen/chosen.jquery.min.js"),
+            "{0}".format("chosen/chosen.jquery.min.js"),
         )
         css = {
-            "all": ("{0}?v=1".format("chosen/chosen.css"),),
+            "all": ("{0}".format("chosen/chosen.css"),),
         }
 
 
@@ -103,10 +103,10 @@ class ChosenSelect(ChosenWidgetMixin, floppyforms.widgets.Select):
     class Media:
         """css and js required by widget"""
         js = (
-            "{0}?v=1".format("chosen/chosen.jquery.min.js"),
+            "{0}".format("chosen/chosen.jquery.min.js"),
         )
         css = {
-            "all": ("{0}?v=1".format("chosen/chosen.css"),),
+            "all": ("{0}".format("chosen/chosen.css"),),
         }
 
 

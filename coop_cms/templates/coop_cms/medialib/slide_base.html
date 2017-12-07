@@ -1,8 +1,8 @@
-{% if not is_ajax %}<html>{% load i18n %}
+{% if not is_ajax %}<html>{% load i18n static %}
   <head>
-    <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}/css/mediatheque.css?v=1.1">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/mediatheque.css' %}">
     <script>
-    {%  include "coop_cms/_pagination_js.html" %}
+    {% include "coop_cms/_pagination_js.html" %}
     $(function() {
       $(document).on('click', '.pagination a', function(e) {
         try {
