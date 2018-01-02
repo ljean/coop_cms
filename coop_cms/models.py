@@ -223,8 +223,6 @@ class NavNode(models.Model):
         return self.as_text()
 
     def as_text(self):
-        if self.parent:
-            return '{0} > {1}'.format(self.parent, self.label)
         return self.label
 
     class Meta:
