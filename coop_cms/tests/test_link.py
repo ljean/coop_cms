@@ -51,6 +51,7 @@ class AddLinkTest(BaseArticleTest):
         self.assertEqual(1, len(soup.select("input#id_title")))
         self.assertEqual(1, len(soup.select("input#id_url")))
         self.assertEqual(1, len(soup.select("input#id_sites_0")))
+        self.assertEqual('', soup.select("input#id_sites_0")[0]["checked"])
         self.assertEqual(0, len(soup.select("input#id_sites_1")))
 
     def test_view_new_link_two_sites(self):
@@ -65,6 +66,12 @@ class AddLinkTest(BaseArticleTest):
         self.assertEqual(1, len(soup.select("input#id_url")))
         self.assertEqual(1, len(soup.select("input#id_sites_0")))
         self.assertEqual(1, len(soup.select("input#id_sites_1")))
+        elt1 = soup.select("input#id_sites_0")[0]
+        elt2 = soup.select("input#id_sites_1")[0]
+        for elt in (elt1, elt2):
+            # Only the current site is checked
+            self.assertEqual('checked' in elt, elt["value"] == settings.SITE_ID)
+
 
     def test_view_new_link_non_editor(self):
         url = reverse('coop_cms_new_link')

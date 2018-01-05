@@ -104,6 +104,10 @@ class NewLinkForm(WithNavigationModelForm):
             'sites': forms.CheckboxSelectMultiple(),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(NewLinkForm, self).__init__(*args, **kwargs)
+        self.fields['sites'].initial = Site.objects.filter(id=settings.SITE_ID)
+
 
 class AliasAdminForm(forms.ModelForm):
     """New link form"""
