@@ -32,6 +32,7 @@ def new_link(request):
         form = NewLinkForm(request.POST)
         if form.is_valid():
             form.save()
+            form.save_m2m()
             homepage_url = reverse('coop_cms_homepage')
             next_url = request.META.get('HTTP_REFERER', homepage_url)
             success_message(request, _('The link has been created properly'))
