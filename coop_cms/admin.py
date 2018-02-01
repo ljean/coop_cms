@@ -198,11 +198,41 @@ class NewsletterAdmin(BASE_ADMIN_CLASS):
 admin.site.register(models.Newsletter, NewsletterAdmin)
 
 
+class IsDuplicatedFilter(admin.SimpleListFilter):
+    """filter items to know if they have a parent"""
+    title = _(u'Is duplicated')
+    parameter_name = 'duplicated'
+
+    def lookups(self, request, model_admin):
+        return [
+            (1, _(u'Yes')),
+            (2, _(u'No')),
+        ]
+
+    def get_duplicate_ids(self, queryset):
+        duplicated_ids = []
+
+        for alias in queryset:
+            duplicates = models.Alias.objects.filter(path=alias, sites__in=alias.sites.all()).exclude(id=alias.id)
+            if duplicates.count() > 0:
+                duplicated_ids.append(alias.id)
+                duplicated_ids.extend([elt.id for elt in duplicates])
+        return duplicated_ids
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == '1':
+            return queryset.filter(id__in=self.get_duplicate_ids(queryset))
+        elif value == '2':
+            return queryset.exclude(id__in=self.get_duplicate_ids(queryset))
+        return queryset
+
+
 class AliasAdmin(BASE_ADMIN_CLASS):
     """Alias admin"""
     list_display = ['path', 'redirect_url', 'redirect_code']
     list_editable = ['redirect_url', 'redirect_code']
-    list_filter = ['redirect_code', 'sites']
+    list_filter = ['redirect_code', IsDuplicatedFilter, 'sites', ]
     search_fields = ['path', 'redirect_url']
     ordering = ['path', ]
     form = AliasAdminForm
