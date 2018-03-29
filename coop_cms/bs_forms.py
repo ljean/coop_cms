@@ -10,7 +10,7 @@ import floppyforms.__future__ as forms
 from coop_cms.templatetags.coop_utils import is_checkbox
 
 
-def build_attrs(widget, base_attrs, extra_attrs=None):
+def _build_attrs(widget, base_attrs, extra_attrs=None, **kwargs):
     """Patch > Helper function for building an attribute dictionary."""
     attrs = base_attrs.copy()
     if 'class' in attrs:
@@ -20,6 +20,8 @@ def build_attrs(widget, base_attrs, extra_attrs=None):
         attrs['class'] = "form-control"
     if extra_attrs is not None:
         attrs.update(extra_attrs)
+    if kwargs:
+        attrs.update(kwargs)
     return attrs
 
 
@@ -29,10 +31,14 @@ class BootstrapableMixin(object):
         """Patch fields for adding form-control class to widget"""
         for field_name in self.fields:
             field = self.fields[field_name]
-            if not is_checkbox(field):
-                # replace the `build_attrs` method of the widget with a custom version whic adds the
-                # form-control class to attrs
-                field.widget.build_attrs = types.MethodType(build_attrs, field.widget)
+            self._bs_patch_field(field)
+
+    @staticmethod
+    def _bs_patch_field(field):
+        if not is_checkbox(field):
+            # replace the `build_attrs` method of the widget with a custom version whic adds the
+            # form-control class to attrs
+            field.widget.build_attrs = types.MethodType(_build_attrs, field.widget)
 
 
 class Form(forms.Form, BootstrapableMixin):
