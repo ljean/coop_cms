@@ -29,7 +29,6 @@ if settings.DEBUG or ('test' in sys.argv) or getattr(settings, 'SERVE_STATIC', T
             url(r'^static/(?P<path>.*)$', serve_media, {'document_root': settings.STATIC_ROOT}),
         ]
     urlpatterns += [
-        #'',
         url(
             r'^media/(?P<path>.*)$',
             serve_media,
