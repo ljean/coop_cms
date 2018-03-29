@@ -4,20 +4,17 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib.auth.models import User, Permission
-
-from datetime import datetime
-
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
+from django.utils.http import urlencode
 
 from model_mommy import mommy
 
 from colorbox.utils import assert_popup_redirects
 
 from coop_cms.models import Link
-from coop_cms.settings import is_perm_middleware_installed
-from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt
+from coop_cms.tests import BaseArticleTest, BeautifulSoup
 from coop_cms.utils import get_login_url
 
 
@@ -51,7 +48,7 @@ class AddLinkTest(BaseArticleTest):
         self.assertEqual(1, len(soup.select("input#id_title")))
         self.assertEqual(1, len(soup.select("input#id_url")))
         self.assertEqual(1, len(soup.select("input#id_sites_0")))
-        self.assertEqual('', soup.select("input#id_sites_0")[0]["checked"])
+        self.assertNotEqual(None, soup.select("input#id_sites_0")[0].get("checked", None))
         self.assertEqual(0, len(soup.select("input#id_sites_1")))
 
     def test_view_new_link_two_sites(self):
@@ -72,7 +69,6 @@ class AddLinkTest(BaseArticleTest):
             # Only the current site is checked
             self.assertEqual('checked' in elt, elt["value"] == settings.SITE_ID)
 
-
     def test_view_new_link_non_editor(self):
         url = reverse('coop_cms_new_link')
         self._log_as_non_editor()
@@ -81,10 +77,9 @@ class AddLinkTest(BaseArticleTest):
 
     def test_view_new_link_anonymous(self):
         url = reverse('coop_cms_new_link')
-        response = self.client.get(url)
-        self.assertEqual(302, response.status_code)
+        response = self.client.get(url, follow=True)
         auth_url = get_login_url()
-        self.assertRedirects(response, auth_url+'?next='+url)
+        self.assertRedirects(response, auth_url + '?{0}'.format(urlencode({'next': url})))
 
     def test_add_link(self):
         self._log_as_editor()
@@ -92,7 +87,7 @@ class AddLinkTest(BaseArticleTest):
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
-        assert_popup_redirects(response, "/")
+        assert_popup_redirects(response, reverse('coop_cms_homepage'))
 
         self.assertEqual(Link.objects.count(), 1)
         link = Link.objects.all()[0]
@@ -107,7 +102,7 @@ class AddLinkTest(BaseArticleTest):
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
-        assert_popup_redirects(response, "/")
+        assert_popup_redirects(response, reverse('coop_cms_homepage'))
 
         self.assertEqual(Link.objects.count(), 1)
         link = Link.objects.all()[0]
@@ -125,7 +120,7 @@ class AddLinkTest(BaseArticleTest):
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
-        assert_popup_redirects(response, "/")
+        assert_popup_redirects(response, reverse('coop_cms_homepage'))
 
         self.assertEqual(Link.objects.count(), 1)
         link = Link.objects.all()[0]
@@ -142,7 +137,7 @@ class AddLinkTest(BaseArticleTest):
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
-        assert_popup_redirects(response, "/")
+        assert_popup_redirects(response, reverse('coop_cms_homepage'))
 
         self.assertEqual(Link.objects.count(), 1)
         link = Link.objects.all()[0]
@@ -159,7 +154,7 @@ class AddLinkTest(BaseArticleTest):
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
-        assert_popup_redirects(response, "/")
+        assert_popup_redirects(response, reverse('coop_cms_homepage'))
 
         self.assertEqual(Link.objects.count(), 1)
         link = Link.objects.all()[0]
@@ -182,11 +177,10 @@ class AddLinkTest(BaseArticleTest):
         data = {'title': "test", 'url': "http://www.google.fr", 'sites': [settings.SITE_ID]}
 
         url = reverse('coop_cms_new_link')
-        response = self.client.post(url, data=data)
+        response = self.client.post(url, data=data, follow=True)
 
-        self.assertEqual(302, response.status_code)
         auth_url = get_login_url()
-        self.assertRedirects(response, auth_url + '?next=' + url)
+        self.assertRedirects(response, auth_url + '?{0}'.format(urlencode({'next': url})))
 
         self.assertEqual(Link.objects.count(), 0)
 
