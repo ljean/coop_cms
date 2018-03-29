@@ -289,6 +289,19 @@ class RegistrationTest(BaseTest):
         self.assertEqual(User.objects.count(), user_count)
         self.assertEqual(len(mail.outbox), 0)
 
+        soup = BeautifulSoup(response.content)
+        self.assertEqual(len(soup.select("input#id_email")), 1)
+        self.assertEqual(len(soup.select("input#id_password1")), 1)
+        self.assertEqual(len(soup.select("input#id_password2")), 1)
+        self.assertEqual(len(soup.select("input#id_username")), 1)
+        self.assertEqual(len(soup.select("input#id_terms_of_service")), 1)
+
+        self.assertEqual(soup.select("input#id_email")[0]['type'], 'email')
+        self.assertEqual(soup.select("input#id_password1")[0]['type'], 'password')
+        self.assertEqual(soup.select("input#id_password2")[0]['type'], 'password')
+        self.assertEqual(soup.select("input#id_username")[0]['type'], 'hidden')
+        self.assertEqual(soup.select("input#id_terms_of_service")[0]['type'], 'checkbox')
+
     def test_register(self):
         """It should create disabled user"""
         url = reverse('registration_register')
