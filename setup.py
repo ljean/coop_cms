@@ -45,9 +45,6 @@ setup(
         #'Pillow',
         'unicode-slugify',
     ],
-    #dependency_links=[
-    #    'git+https://github.com/ljean/coop_html_editor.git@73e067b3505a193c6244015fe606c30d98bb18de#egg=coop_html_editor',
-    #],
     long_description=open('README.rst').read(),
     url='https://github.com/ljean/coop_cms/',
     download_url='https://github.com/ljean/coop_cms/tarball/master',
