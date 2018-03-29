@@ -432,7 +432,7 @@ class ImageListTemplateTagsTest(BaseTestCase):
         """display an album"""
 
         media_filer = mommy.make(MediaFilter, name='Album Homepage')
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         image.filters.add(media_filer)
         image.save()
 
@@ -455,13 +455,13 @@ class ImageListTemplateTagsTest(BaseTestCase):
         """display an album"""
 
         media_filer = mommy.make(MediaFilter, name='Album Homepage')
-        image1 = mommy.make(Image)
+        image1 = mommy.make(Image, _create_files=True)
         image1.filters.add(media_filer)
         image1.save()
-        image2 = mommy.make(Image)
+        image2 = mommy.make(Image, _create_files=True)
         image2.filters.add(media_filer)
         image2.save()
-        image3 = mommy.make(Image)
+        image3 = mommy.make(Image, _create_files=True)
 
         template_content = '''
         {% load coop_utils %}
@@ -483,7 +483,7 @@ class ImageListTemplateTagsTest(BaseTestCase):
         """display an album"""
 
         media_filer = mommy.make(MediaFilter, name='Album Homepage')
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         image.filters.add(media_filer)
         image.save()
 

@@ -304,7 +304,7 @@ class ImageSizeTest(MediaBaseTestCase):
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="600")
     def test_image_max_width_no_size(self):
         """get image with no size upscale"""
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -315,8 +315,8 @@ class ImageSizeTest(MediaBaseTestCase):
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="600")
     def test_image_max_width_size(self):
         """get image with size"""
-        size = mommy.make(ImageSize, size="60")
-        image = mommy.make(Image, size=size)
+        size = mommy.make(ImageSize, size="60", _create_files=True)
+        image = mommy.make(Image, size=size, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -327,7 +327,7 @@ class ImageSizeTest(MediaBaseTestCase):
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="60")
     def test_image_max_width_size_no_scale(self):
         """get image with size downscale"""
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -338,7 +338,7 @@ class ImageSizeTest(MediaBaseTestCase):
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="coop_cms.tests.dummy_image_width")
     def test_image_max_width_size_lambda(self):
         """get image from function"""
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -349,7 +349,7 @@ class ImageSizeTest(MediaBaseTestCase):
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="")
     def test_image_max_width_size_none(self):
         """get image with size setting is empty"""
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -359,28 +359,28 @@ class ImageSizeTest(MediaBaseTestCase):
 
     def test_image_no_size(self):
         """get image: no size"""
-        image = mommy.make(Image, size=None)
+        image = mommy.make(Image, size=None, _create_files=True)
         url = image.get_absolute_url()
         self.assertEqual(url, image.file.url)
 
     def test_image_size(self):
         """get image: with size"""
         image_size = mommy.make(ImageSize, size="128x128")
-        image = mommy.make(Image, size=image_size)
+        image = mommy.make(Image, size=image_size, _create_files=True)
         url = image.get_absolute_url()
         self.assertNotEqual(url, image.file.url)
 
     def test_image_wrong_size(self):
         """get image: wrong size"""
         image_size = mommy.make(ImageSize, size="blabla")
-        image = mommy.make(Image, size=image_size)
+        image = mommy.make(Image, size=image_size, _create_files=True)
         url = image.get_absolute_url()
         self.assertEqual(url, image.file.url)
 
     def test_image_size_crop(self):
         """get image: cropped"""
         image_size = mommy.make(ImageSize, size="128x128", crop="center")
-        image = mommy.make(Image, size=image_size)
+        image = mommy.make(Image, size=image_size, _create_files=True)
         url = image.get_absolute_url()
         self.assertNotEqual(url, image.file.url)
 
@@ -420,7 +420,7 @@ class MediaLibraryTest(MediaBaseTestCase):
     def test_show_images(self):
         """show images"""
         self._log_as_mediamgr()
-        mommy.make(Image, _quantity=2)
+        mommy.make(Image, _quantity=2, _create_files=True)
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
@@ -431,7 +431,7 @@ class MediaLibraryTest(MediaBaseTestCase):
     def test_show_images_pagination(self):
         """show images with pagination"""
         self._log_as_mediamgr()
-        mommy.make(Image, _quantity=16)
+        mommy.make(Image, _quantity=16, _create_files=True)
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
@@ -442,7 +442,7 @@ class MediaLibraryTest(MediaBaseTestCase):
     def test_show_images_page_2(self):
         """show images page 2"""
         self._log_as_mediamgr()
-        mommy.make(Image, _quantity=16)
+        mommy.make(Image, _quantity=16, _create_files=True)
         url = reverse('coop_cms_media_images')+"?page=2"
         response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code)
@@ -457,7 +457,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         media_filter = mommy.make(MediaFilter)
         images = []
         for i in range(16):
-            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i)))
+            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i), _create_files=True))
         images.reverse()
         
         images[5].filters.add(media_filter)
@@ -480,7 +480,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         
         images = []
         for i in range(16):
-            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i)))
+            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i), _create_files=True))
         images.reverse()
         
         images[5].filters.add(media_filter)
@@ -835,7 +835,7 @@ class ImageListTemplateTagTest(BaseTestCase):
     def test_filter_with_images(self):
         """test filter with image"""
         filter_ = mommy.make(MediaFilter, name="abcd")
-        mommy.make(Image, filters=[filter_])
+        mommy.make(Image, filters=[filter_], _create_files=True)
         tpl = Template('{% load coop_utils %}{% coop_image_list "abcd" as image_list %}{{image_list|length}}')
         html = tpl.render(Context({}))
         self.assertEqual(html, "1")
@@ -843,7 +843,7 @@ class ImageListTemplateTagTest(BaseTestCase):
     def test_filter_with_images_var_name(self):
         """test filter: name from variable"""
         filter_ = mommy.make(MediaFilter, name="abcd")
-        mommy.make(Image, filters=[filter_])
+        mommy.make(Image, filters=[filter_], _create_files=True)
         tpl = Template('{% load coop_utils %}{% coop_image_list filter_name as image_list %}{{image_list|length}}')
         html = tpl.render(Context({"filter_name": filter_.name}))
         self.assertEqual(html, "1")
@@ -851,7 +851,7 @@ class ImageListTemplateTagTest(BaseTestCase):
     def test_filter_as_missing(self):
         """test filter: as is missing"""
         filter_ = mommy.make(MediaFilter, name="abcd")
-        mommy.make(Image, filters=[filter_])
+        mommy.make(Image, filters=[filter_], _create_files=True)
         try:
             Template('{% load coop_utils %}{% coop_image_list "abcd" image_list %}{{image_list|length}}')
         except TemplateSyntaxError as msg:
