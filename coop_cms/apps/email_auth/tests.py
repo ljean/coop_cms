@@ -5,7 +5,6 @@ Email authentication Unit tests
 
 from __future__ import unicode_literals
 
-from bs4 import BeautifulSoup
 from unittest import skipUnless
 
 from django.conf import settings
@@ -17,6 +16,8 @@ from django.test.utils import override_settings
 
 from model_mommy import mommy
 from registration.models import RegistrationProfile
+
+from coop_cms.tests import BeautifulSoup
 
 from .models import InvalidatedUser
 
