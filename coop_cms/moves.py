@@ -14,10 +14,12 @@ from django.template import RequestContext, Context
 if sys.version_info[0] < 3:
     # Python 2
     from StringIO import StringIO
+    from StringIO import StringIO as BytesIO
     from HTMLParser import HTMLParser
 else:
     # Python 3
-    from io import BytesIO as StringIO
+    from io import StringIO as StringIO
+    from io import BytesIO as BytesIO
     from html.parser import HTMLParser as BaseHTMLParser
 
     class HTMLParser(BaseHTMLParser):

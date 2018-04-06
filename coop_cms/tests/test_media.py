@@ -21,7 +21,7 @@ if 'photologue' in settings.INSTALLED_APPS:
     from photologue.models import Photo, Gallery
 
 from coop_cms.models import ArticleCategory, Document, Image, ImageSize, MediaFilter
-from coop_cms.moves import StringIO, get_response_json
+from coop_cms.moves import BytesIO, get_response_json
 from coop_cms.settings import get_article_class
 from coop_cms.tests import BaseArticleTest, BaseTestCase, BeautifulSoup, MediaBaseTestCase
 
@@ -308,7 +308,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 130)
         
@@ -320,7 +320,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 60)
         
@@ -331,7 +331,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 60)
         
@@ -342,7 +342,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 20)
         
@@ -353,7 +353,7 @@ class ImageSizeTest(MediaBaseTestCase):
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 130)
 
