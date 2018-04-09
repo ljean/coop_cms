@@ -35,7 +35,7 @@ setup(
         'sorl-thumbnail',
         'apidev-coop_colorbox >= 1.2.7',
         'apidev-coop_bar >= 1.3.2',
-        'coop_html_editor >= 1.0.6',
+        'coop_html_editor == 1.0.8',
         'feedparser',
         'beautifulsoup4',
         'django-filetransfers',
