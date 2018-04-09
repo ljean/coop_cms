@@ -13,6 +13,8 @@ from coop_cms.templatetags.coop_utils import is_checkbox
 def _build_attrs(widget, base_attrs, extra_attrs=None, **kwargs):
     """Patch > Helper function for building an attribute dictionary."""
     attrs = base_attrs.copy()
+    if widget.attrs:
+        attrs.update(widget.attrs)
     if 'class' in attrs:
         val = attrs['class']
         attrs['class'] = val + " form-control"
