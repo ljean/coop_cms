@@ -14,13 +14,13 @@ class PermissionMiddlewareTest(BaseArticleTest):
     
     def setUp(self):
         super(PermissionMiddlewareTest, self).setUp()
-        self._MIDDLEWARE_CLASSES = settings.MIDDLEWARE_CLASSES
-        if not 'coop_cms.middleware.PermissionsMiddleware' in settings.MIDDLEWARE_CLASSES:
-            settings.MIDDLEWARE_CLASSES += ('coop_cms.middleware.PermissionsMiddleware',)
+        self._MIDDLEWARE = settings.MIDDLEWARE
+        if not 'coop_cms.middleware.PermissionsMiddleware' in settings.MIDDLEWARE:
+            settings.MIDDLEWARE += ('coop_cms.middleware.PermissionsMiddleware',)
         
     def tearDown(self):
         super(PermissionMiddlewareTest, self).tearDown()
-        self.MIDDLEWARE_CLASSES = self._MIDDLEWARE_CLASSES
+        self.MIDDLEWARE = self._MIDDLEWARE
         
     def test_view_draft_anonymous(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
