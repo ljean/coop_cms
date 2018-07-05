@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """permission backend"""
 
+from __future__ import unicode_literals
+
 
 class ArticlePermissionBackend(object):
     """Permission backend : check if a user is allowed to view/edit an editable object"""
@@ -16,14 +18,14 @@ class ArticlePermissionBackend(object):
         """has_perm : check if user is allowed to access obj for perm"""
 
         if obj:
-            #get the 'perm' attribute of the object
+            # get the 'perm' attribute of the object
             field = getattr(obj, perm, None)
             if field:
                 if not callable(field):
-                    #if an attribute : use the value
+                    # if an attribute : use the value
                     is_authorized = field
                 else:
-                    #if a method call it with user
+                    # if a method call it with user
                     is_authorized = field(user_obj)
                 return is_authorized
         return False

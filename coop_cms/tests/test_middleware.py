@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from coop_cms.utils import RequestManager, RequestMiddleware, RequestNotFound
 from coop_cms.tests import BaseTestCase
 

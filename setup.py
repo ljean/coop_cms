@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """package the lib"""
 
+from __future__ import unicode_literals
+
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -29,23 +31,19 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        'django >= 1.8, <1.10',
+        'django >= 1.11, <2.0',
         'django-floppyforms',
         'django-extensions',
         'sorl-thumbnail',
         'apidev-coop_colorbox >= 1.2.7',
         'apidev-coop_bar >= 1.3.2',
-        'coop_html_editor == 1.0.8',
+        'coop_html_editor >= 1.2.0',
         'feedparser',
         'beautifulsoup4',
         'django-filetransfers',
         'model_mommy',
-        'Pillow',
-        'unicode-slugify == 0.1.3',
+        'unicode-slugify',
     ],
-    #dependency_links=[
-    #    'git+https://github.com/ljean/coop_html_editor.git@73e067b3505a193c6244015fe606c30d98bb18de#egg=coop_html_editor',
-    #],
     long_description=open('README.rst').read(),
     url='https://github.com/ljean/coop_cms/',
     download_url='https://github.com/ljean/coop_cms/tarball/master',

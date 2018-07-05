@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 
 import logging
@@ -30,8 +32,8 @@ def dummy_image_width(img):
 
 class BeautifulSoup(BaseBeautifulSoup):
 
-    def __init__(self, content):
-        super(BeautifulSoup, self).__init__(content, "html.parser")
+    def __init__(self, content, parser='html.parser'):
+        super(BeautifulSoup, self).__init__(content, parser)
 
 
 @override_settings(MEDIA_ROOT=get_unit_test_media_root())
@@ -67,7 +69,7 @@ class MediaBaseTestCase(BaseTestCase):
             else:
                 return response.content
         elif hasattr(response, 'streaming_content'):
-            return "".join(response.streaming_content)
+            return b"".join(response.streaming_content)
         return None
 
     def _log_as_mediamgr(self, is_staff=True, perm=None):

@@ -10,7 +10,7 @@
     <div class="carousel-inner">
     {% for headline in headlines %}
       <div class="item {% if forloop.counter0 == 0 %}active{% endif %}">
-        <img src="{{headline.get_headline_image}}" alt="{{headline.title}}">
+        <img src="{{headline.get_headline_image}}" alt="{{headline.title}}" />
         <div class="carousel-caption">
           <h3 class="carousel-caption-title"><a href="{{ headline.get_absolute_url }}">{{ headline.title }}</a></h3>
           <div class="carousel-caption-summary">

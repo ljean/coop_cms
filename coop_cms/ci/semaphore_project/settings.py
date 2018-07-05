@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """project settings"""
 
+from __future__ import unicode_literals
+
 import os.path
 import sys
 
+from django import VERSION as DJANGO_VERSION
 
 DEBUG = False
-TEMPLATE_DEBUG = DEBUG
 
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -45,10 +47,10 @@ LANGUAGE_CODE = 'en'
 
 gettext = lambda s: s
 LANGUAGES = (
-    ('en', gettext(u'English')),
-    ('fr', gettext(u'Français')),
-    ('en-us', gettext(u'American')),
-    ('ru', gettext(u'Russian')),
+    ('en', gettext('English')),
+    ('fr', gettext('Français')),
+    ('en-us', gettext('American')),
+    ('ru', gettext('Russian')),
 )
 
 SITE_ID = 1
@@ -101,12 +103,50 @@ STATICFILES_FINDERS = (
 SECRET_KEY = 'drone-ci'
 
 # List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-)
 
-MIDDLEWARE_CLASSES = (
+if DJANGO_VERSION > (1, 9):
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [
+                os.path.join(PROJECT_PATH, 'templates'),
+            ],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                ],
+            },
+        },
+    ]
+else:
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
+
+    TEMPLATE_DIRS = (
+        # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+        # Always use forward slashes, even on Windows.
+        # Don't forget to use absolute paths, not relative paths.
+        os.path.abspath(PROJECT_PATH + '/templates'),
+    )
+
+    TEMPLATE_CONTEXT_PROCESSORS = (
+        "django.contrib.auth.context_processors.auth",
+        "django.template.context_processors.debug",
+        "django.template.context_processors.i18n",
+        "django.template.context_processors.request",
+        "django.template.context_processors.media",
+        "django.template.context_processors.static",
+        "django.contrib.messages.context_processors.messages",
+    )
+
+
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
@@ -123,22 +163,6 @@ ROOT_URLCONF = 'urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.abspath(PROJECT_PATH+'/templates'),
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.template.context_processors.debug",
-    "django.template.context_processors.i18n",
-    "django.template.context_processors.request",
-    "django.template.context_processors.media",
-    "django.template.context_processors.static",
-    "django.contrib.messages.context_processors.messages",
-)
 
 AUTHENTICATION_BACKENDS = (
     'coop_cms.perms_backends.ArticlePermissionBackend',
@@ -159,9 +183,9 @@ COOP_CMS_NEWSLETTER_TEMPLATES = (
     ('basic_newsletter.html', 'Basic'),
 )
 COOP_CMS_ARTICLE_TEMPLATES = (
-    ('standard.html', u'Standard'),
+    ('standard.html', 'Standard'),
 )
-COOP_CMS_FROM_EMAIL = u'""'
+COOP_CMS_FROM_EMAIL = ''
 COOP_CMS_TEST_EMAILS = ('"Luc JEAN - Apidev" <ljean@apidev.fr>', )
 COOP_CMS_SITE_PREFIX = ''
 COOP_CMS_REPLY_TO = 'ljean@apidev.fr'
@@ -205,8 +229,8 @@ if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigratio
 if len(sys.argv) > 1 and 'test' == sys.argv[1]:
     INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app', )
 
-import warnings
-warnings.filterwarnings('ignore', r"django.contrib.localflavor is deprecated")
+#import warnings
+#warnings.filterwarnings('ignore', r"django.contrib.localflavor is deprecated")
 
 
 LOGGING = {

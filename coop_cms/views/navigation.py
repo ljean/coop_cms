@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """navigation: the navigation tree page"""
 
+from __future__ import unicode_literals
+
 import json
 
 from django.db.models.aggregates import Max
@@ -15,6 +17,7 @@ from django.template.loader import select_template
 from django.utils.translation import ugettext as _
 
 from coop_cms import models
+from coop_cms.moves import make_context
 from coop_cms.settings import get_navtree_class
 from coop_cms.logger import logger
 from coop_cms.utils import get_model_app, get_model_label, get_model_name
@@ -36,31 +39,30 @@ def view_navnode(request, tree):
 
             # load and render template for the object
             # try to load the corresponding template and if not found use the default one
-            model_name = u"{0}".format(node.content_type)
-            object_label = u"{0}".format(node.content_object)
+            model_name = "{0}".format(node.content_type)
+            object_label = "{0}".format(node.content_object)
             template = select_template([
                 "coop_cms/navtree_content/{0}.html".format(node.content_type.name),
                 "coop_cms/navtree_content/default.html"
             ])
         else:
-            admin_url = u""
+            admin_url = ""
             template = select_template(["coop_cms/navtree_content/default.html"])
 
+        context_dict = {
+            "node": node,
+            "admin_url": admin_url,
+            "model_name": model_name,
+            "object_label": object_label,
+        }
+
         html = template.render(
-            RequestContext(
-                request,
-                {
-                    "node": node,
-                    "admin_url": admin_url,
-                    "model_name": model_name,
-                    "object_label": object_label,
-                }
-            )
+            make_context(request, context_dict)
         )
 
-        # return data has dictionnary
+        # return data has dictionary
         response['html'] = html
-        response['message'] = u"Node content loaded."
+        response['message'] = "Node content loaded."
 
         return response
     except Exception:
@@ -77,7 +79,7 @@ def rename_navnode(request, tree):
     node.label = request.POST['name']  # change the name
     node.save()
     if old_name != node.label:
-        response['message'] = _(u"The node '{0}' has been renamed into '{1}'.").format(old_name, node.label)
+        response['message'] = _("The node '{0}' has been renamed into '{1}'.").format(old_name, node.label)
     else:
         response['message'] = ''
     return response
@@ -91,9 +93,9 @@ def remove_navnode(request, tree):
     for node_id in node_ids:
         models.NavNode.objects.get(tree=tree, id=node_id).delete()
     if len(node_ids) == 1:
-        response['message'] = _(u"The node has been removed.")
+        response['message'] = _("The node has been removed.")
     else:
-        response['message'] = _(u"{0} nodes has been removed.").format(len(node_ids))
+        response['message'] = _("{0} nodes has been removed.").format(len(node_ids))
     return response
 
 
@@ -187,7 +189,7 @@ def move_navnode(request, tree):
             node.ordering = max_ordering + 1
 
     node.save()
-    response['message'] = _(u"The node '{0}' has been moved.").format(node.label)
+    response['message'] = _("The node '{0}' has been moved.").format(node.label)
 
     return response
 
@@ -205,15 +207,15 @@ def add_navnode(request, tree):
         object_id = request.POST['object_id']
         model_name = get_model_label(model_class)
         if not object_id:
-            raise ValidationError(_(u"Please choose an existing {0}").format(model_name.lower()))
+            raise ValidationError(_("Please choose an existing {0}").format(model_name.lower()))
         try:
             obj = model_class.objects.get(id=object_id)
         except model_class.DoesNotExist:
-            raise ValidationError(_(u"{0} {1} not found").format(get_model_label(model_class), object_id))
+            raise ValidationError(_("{0} {1} not found").format(get_model_label(model_class), object_id))
 
         # objects can not be added twice in the navigation tree
         if models.NavNode.objects.filter(tree=tree, content_type=content_type, object_id=obj.id).count() > 0:
-            raise ValidationError(_(u"The {0} is already in navigation").format(get_model_label(model_class)))
+            raise ValidationError(_("The {0} is already in navigation").format(get_model_label(model_class)))
 
     else:
         content_type = None
@@ -229,7 +231,7 @@ def add_navnode(request, tree):
 
     response['label'] = node.label
     response['id'] = 'node_{0}'.format(node.id)
-    response['message'] = _(u"'{0}' has added to the navigation tree.").format(node.label)
+    response['message'] = _("'{0}' has added to the navigation tree.").format(node.label)
 
     return response
 
@@ -257,7 +259,7 @@ def get_suggest_list(request, tree):
             ]
         else:
             objects = [
-                obj for obj in content_type.model_class().objects.all() if term.lower() in unicode(obj).lower()
+                obj for obj in content_type.model_class().objects.all() if term.lower() in '{0}'.format(obj).lower()
             ]
 
         already_in_navigation = [
@@ -272,14 +274,14 @@ def get_suggest_list(request, tree):
                     'label': models.get_object_label(content_type, obj),
                     'value': obj.id,
                     'category': get_model_label(content_type.model_class()).capitalize(),
-                    'type': content_type.app_label + u'.' + content_type.model,
+                    'type': content_type.app_label + '.' + content_type.model,
                 })
 
     # Add suggestion for an empty node
     suggestions.append({
-        'label': _(u"Node"),
+        'label': _("Node"),
         'value': 0,
-        'category': _(u"Empty node"),
+        'category': _("Empty node"),
         'type': "",
     })
     response['suggestions'] = suggestions
@@ -294,12 +296,12 @@ def navnode_in_navigation(request, tree):
     node.in_navigation = not node.in_navigation
     node.save()
     if node.in_navigation:
-        response['message'] = _(u"The node is now visible.")
-        response['label'] = _(u"Hide node in navigation")
+        response['message'] = _("The node is now visible.")
+        response['label'] = _("Hide node in navigation")
         response['icon'] = "in_nav"
     else:
-        response['message'] = _(u"The node is now hidden.")
-        response['label'] = _(u"Show node in navigation")
+        response['message'] = _("The node is now hidden.")
+        response['label'] = _("Show node in navigation")
         response['icon'] = "out_nav"
     return response
 
@@ -336,16 +338,15 @@ def process_nav_edition(request, tree_id):
             response.setdefault('message', 'Ok')  # if no message defined in response, add something
 
         except KeyError as msg:
-            response = {'status': 'error', 'message': u"Unsupported message : {0}".format(msg)}
+            response = {'status': 'error', 'message': "Unsupported message : {0}".format(msg)}
         except PermissionDenied:
-            response = {'status': 'error', 'message': u"You are not allowed to add a node"}
+            response = {'status': 'error', 'message': "You are not allowed to add a node"}
         except ValidationError as ex:
-            response = {'status': 'error', 'message': u' - '.join(ex.messages)}
+            response = {'status': 'error', 'message': ' - '.join(ex.messages)}
         except Exception as msg:
             logger.exception("process_nav_edition")
-            response = {'status': 'error', 'message': u"An error occured : {0}".format(msg)}
+            response = {'status': 'error', 'message': "An error occured : {0}".format(msg)}
 
         # return the result as json object
         return HttpResponse(json.dumps(response), content_type='application/json')
     raise Http404
-

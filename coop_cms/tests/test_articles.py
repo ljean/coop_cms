@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 
 from datetime import datetime
@@ -125,7 +127,7 @@ class ArticleTest(BaseArticleTest):
             self.assertEqual('/test/', article.get_absolute_url())
 
     def test_create_slug(self):
-        article = get_article_class().objects.create(title=u"voici l'été", publication=BaseArticle.PUBLISHED)
+        article = get_article_class().objects.create(title="voici l'été", publication=BaseArticle.PUBLISHED)
         self.assertEqual(article.slug, 'voici-lete')
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
@@ -260,11 +262,14 @@ class ArticleTest(BaseArticleTest):
         self.assertEquals(article.title, initial_data['title'])
         self.assertEquals(article.content, initial_data['content'])
         
-    def _is_inline_html_editor_found(self, response):
+    def check_inline_html_editor(self, response, is_loaded):
         self.assertEqual(200, response.status_code)
         inline_editor_init_url = reverse('html_editor_init')
-        content = unicode(response.content, 'utf-8')
-        return content.find(inline_editor_init_url) > 0
+
+        if is_loaded:
+            self.assertContains(response, inline_editor_init_url)
+        else:
+            self.assertNotContains(response, inline_editor_init_url)
         
     def test_edit_permission(self):
         initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
@@ -286,14 +291,14 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(200, response.status_code)
         
     def test_inline_html_editor_loaded(self):
-        initial_data = {'title': u"ceci est un test", 'content': u"this is my article content"}
+        initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
         article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
         response = self.client.get(article.get_absolute_url())
-        self.assertFalse(self._is_inline_html_editor_found(response))
+        self.check_inline_html_editor(response, False)
         
         self._log_as_editor()
         response = self.client.get(article.get_edit_url())
-        self.assertTrue(self._is_inline_html_editor_found(response))
+        self.check_inline_html_editor(response, True)
         
     def test_inline_html_editor_links(self):
         slugs = ("un", "deux", "trois", "quatre")
@@ -596,9 +601,9 @@ class ArticleTest(BaseArticleTest):
         }
         
         response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
-        self.assertEqual(200, response.status_code) #if can_edit returns 404 error
+        self.assertEqual(200, response.status_code)  # if can_edit returns 404 error
         next_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(login_url in next_url)
         
         self.assertEqual(article_class.objects.filter(title=data['title']).count(), 0)

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
+from __future__ import unicode_literals
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
@@ -24,7 +26,7 @@ class NavTypeForm(forms.ModelForm):
             content_type = self.cleaned_data['content_type']
             if not 'get_label' in dir(content_type.model_class()):
                 raise ValidationError(
-                    _(u"Invalid rule for this content type: The object class doesn't have a get_label method")
+                    _("Invalid rule for this content type: The object class doesn't have a get_label method")
                 )
         return rule
 
@@ -37,7 +39,6 @@ class NavNodeAdminForm(forms.ModelForm):
     """Navigation Type Form"""
 
     def __init__(self, *args, **kwargs):
-        print "******"
         super(NavNodeAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.fields['content_type'].widget = forms.Select(choices=get_navigable_type_choices())
         self.fields['object_id'].widget = GenericFieldRawIdWidget(kwargs.get('instance', None))
@@ -50,7 +51,7 @@ class NavNodeAdminForm(forms.ModelForm):
 def get_node_choices():
     """used for node selection in article settings form"""
     prefix = "--"
-    choices = [(None, _(u'<not in navigation>'))]
+    choices = [(None, _('<not in navigation>'))]
     for tree in get_navtree_class().objects.all():
         choices.append((-tree.id, tree.name))
         for root_node in NavNode.objects.filter(tree=tree, parent__isnull=True).order_by('ordering'):

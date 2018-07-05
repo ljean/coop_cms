@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """media library unit testing"""
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 
-import json
 from datetime import datetime
-from StringIO import StringIO
 from unittest import skipIf
 
 from PIL import Image as PilImage
@@ -21,6 +21,7 @@ if 'photologue' in settings.INSTALLED_APPS:
     from photologue.models import Photo, Gallery
 
 from coop_cms.models import ArticleCategory, Document, Image, ImageSize, MediaFilter
+from coop_cms.moves import BytesIO, get_response_json
 from coop_cms.settings import get_article_class
 from coop_cms.tests import BaseArticleTest, BaseTestCase, BeautifulSoup, MediaBaseTestCase
 
@@ -94,7 +95,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -119,7 +120,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -183,7 +184,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -213,7 +214,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -239,7 +240,7 @@ class ImageUploadTest(MediaBaseTestCase):
         
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, 'close_popup_and_media_slide')
+        self.assertNotEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
         self.assertEquals(0, images.count())
@@ -258,7 +259,7 @@ class ImageUploadTest(MediaBaseTestCase):
 
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
 
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -284,7 +285,7 @@ class ImageUploadTest(MediaBaseTestCase):
 
         response = self.client.post(url, data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
 
         images = Image.objects.all()
         self.assertEquals(1, images.count())
@@ -303,83 +304,83 @@ class ImageSizeTest(MediaBaseTestCase):
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="600")
     def test_image_max_width_no_size(self):
         """get image with no size upscale"""
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 130)
         
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="600")
     def test_image_max_width_size(self):
         """get image with size"""
-        size = mommy.make(ImageSize, size="60")
-        image = mommy.make(Image, size=size)
+        size = mommy.make(ImageSize, size="60", _create_files=True)
+        image = mommy.make(Image, size=size, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 60)
         
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="60")
     def test_image_max_width_size_no_scale(self):
         """get image with size downscale"""
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 60)
         
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="coop_cms.tests.dummy_image_width")
     def test_image_max_width_size_lambda(self):
         """get image from function"""
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 20)
         
     @override_settings(COOP_CMS_MAX_IMAGE_WIDTH="")
     def test_image_max_width_size_none(self):
         """get image with size setting is empty"""
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         url = image.get_absolute_url()
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-        data = StringIO(self.get_safe_content(response))
+        data = BytesIO(self.get_safe_content(response))
         img = PilImage.open(data)
         self.assertEqual(img.size[0], 130)
 
     def test_image_no_size(self):
         """get image: no size"""
-        image = mommy.make(Image, size=None)
+        image = mommy.make(Image, size=None, _create_files=True)
         url = image.get_absolute_url()
         self.assertEqual(url, image.file.url)
 
     def test_image_size(self):
         """get image: with size"""
         image_size = mommy.make(ImageSize, size="128x128")
-        image = mommy.make(Image, size=image_size)
+        image = mommy.make(Image, size=image_size, _create_files=True)
         url = image.get_absolute_url()
         self.assertNotEqual(url, image.file.url)
 
     def test_image_wrong_size(self):
         """get image: wrong size"""
         image_size = mommy.make(ImageSize, size="blabla")
-        image = mommy.make(Image, size=image_size)
+        image = mommy.make(Image, size=image_size, _create_files=True)
         url = image.get_absolute_url()
         self.assertEqual(url, image.file.url)
 
     def test_image_size_crop(self):
         """get image: cropped"""
         image_size = mommy.make(ImageSize, size="128x128", crop="center")
-        image = mommy.make(Image, size=image_size)
+        image = mommy.make(Image, size=image_size, _create_files=True)
         url = image.get_absolute_url()
         self.assertNotEqual(url, image.file.url)
 
@@ -419,7 +420,7 @@ class MediaLibraryTest(MediaBaseTestCase):
     def test_show_images(self):
         """show images"""
         self._log_as_mediamgr()
-        mommy.make(Image, _quantity=2)
+        mommy.make(Image, _quantity=2, _create_files=True)
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
@@ -430,7 +431,7 @@ class MediaLibraryTest(MediaBaseTestCase):
     def test_show_images_pagination(self):
         """show images with pagination"""
         self._log_as_mediamgr()
-        mommy.make(Image, _quantity=16)
+        mommy.make(Image, _quantity=16, _create_files=True)
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
         self.assertEqual(200, response.status_code)
@@ -441,11 +442,11 @@ class MediaLibraryTest(MediaBaseTestCase):
     def test_show_images_page_2(self):
         """show images page 2"""
         self._log_as_mediamgr()
-        mommy.make(Image, _quantity=16)
+        mommy.make(Image, _quantity=16, _create_files=True)
         url = reverse('coop_cms_media_images')+"?page=2"
         response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code)
-        data = json.loads(response.content)
+        data = get_response_json(response)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
         self.assertEqual(4, len(nodes))
@@ -456,7 +457,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         media_filter = mommy.make(MediaFilter)
         images = []
         for i in range(16):
-            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i)))
+            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i), _create_files=True))
         images.reverse()
         
         images[5].filters.add(media_filter)
@@ -464,7 +465,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         url = reverse('coop_cms_media_images')+"?page=1&media_filter={0}".format(media_filter.id)
         response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code)
-        data = json.loads(response.content)
+        data = get_response_json(response)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
         self.assertEqual(2, len(nodes))
@@ -479,7 +480,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         
         images = []
         for i in range(16):
-            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i)))
+            images.append(mommy.make(Image, created=datetime(2014, 1, 1, 12, i), _create_files=True))
         images.reverse()
         
         images[5].filters.add(media_filter)
@@ -487,7 +488,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         url = reverse('coop_cms_media_images')+"?page=1&media_filter={0}".format(0)
         response = self.client.get(url, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(200, response.status_code)
-        data = json.loads(response.content)
+        data = get_response_json(response)
         soup = BeautifulSoup(data['html'])
         nodes = soup.select(".library-thumbnail")
         self.assertEqual(12, len(nodes))
@@ -509,7 +510,7 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         public_docs = Document.objects.filter(is_private=False)
         self.assertEquals(1, public_docs.count())
         self.assertEqual(public_docs[0].name, data['name'])
@@ -530,7 +531,7 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         public_docs = Document.objects.filter(is_private=False)
         self.assertEquals(1, public_docs.count())
         self.assertEqual(public_docs[0].name, data['name'])
@@ -547,7 +548,7 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, 'close_popup_and_media_slide')
+        self.assertNotEqual(response.content, b'close_popup_and_media_slide')
         self.assertEquals(0, Document.objects.all().count())
 
     def test_upload_doc_anonymous_user(self):
@@ -559,10 +560,10 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, 'close_popup_and_media_slide')
+        self.assertNotEqual(response.content, b'close_popup_and_media_slide')
         self.assertEquals(0, Document.objects.all().count())
         redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(redirect_url.find(login_url) >= 0)
         
     def test_upload_not_allowed(self):
@@ -585,7 +586,7 @@ class UploadDocTest(MediaBaseTestCase):
         }
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content, 'close_popup_and_media_slide')
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
         private_docs = Document.objects.filter(is_private=True)
         self.assertEquals(1, private_docs.count())
         #TODO : on drone.io filename is unittest1_SomeRandom. Why?
@@ -622,7 +623,7 @@ class DocsInMediaLibTest(MediaBaseTestCase):
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(redirect_url.find(login_url) >= 0)
         
     def test_view_docs_not_allowed(self):
@@ -671,7 +672,7 @@ class PhotologueInMediaLibTest(MediaBaseTestCase):
         response = self.client.get(reverse('coop_cms_media_photologue'), follow=True)
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(redirect_url.find(login_url) >= 0)
 
     def test_view_not_allowed(self):
@@ -811,7 +812,7 @@ class DownloadDocTest(MediaBaseTestCase):
         response = self.client.get(doc.get_download_url(), follow=True)
         self.assertEqual(response.status_code, 200)
         redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('django.contrib.auth.views.login')
+        login_url = reverse('login')
         self.assertTrue(redirect_url.find(login_url) >= 0)
         
 
@@ -834,7 +835,7 @@ class ImageListTemplateTagTest(BaseTestCase):
     def test_filter_with_images(self):
         """test filter with image"""
         filter_ = mommy.make(MediaFilter, name="abcd")
-        mommy.make(Image, filters=[filter_])
+        mommy.make(Image, filters=[filter_], _create_files=True)
         tpl = Template('{% load coop_utils %}{% coop_image_list "abcd" as image_list %}{{image_list|length}}')
         html = tpl.render(Context({}))
         self.assertEqual(html, "1")
@@ -842,7 +843,7 @@ class ImageListTemplateTagTest(BaseTestCase):
     def test_filter_with_images_var_name(self):
         """test filter: name from variable"""
         filter_ = mommy.make(MediaFilter, name="abcd")
-        mommy.make(Image, filters=[filter_])
+        mommy.make(Image, filters=[filter_], _create_files=True)
         tpl = Template('{% load coop_utils %}{% coop_image_list filter_name as image_list %}{{image_list|length}}')
         html = tpl.render(Context({"filter_name": filter_.name}))
         self.assertEqual(html, "1")
@@ -850,11 +851,14 @@ class ImageListTemplateTagTest(BaseTestCase):
     def test_filter_as_missing(self):
         """test filter: as is missing"""
         filter_ = mommy.make(MediaFilter, name="abcd")
-        mommy.make(Image, filters=[filter_])
+        mommy.make(Image, filters=[filter_], _create_files=True)
         try:
             Template('{% load coop_utils %}{% coop_image_list "abcd" image_list %}{{image_list|length}}')
         except TemplateSyntaxError as msg:
-            self.assertEqual("coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}", unicode(msg))
+            self.assertEqual(
+                "coop_image_list: usage --> {% coop_image_list 'filter_name' as var_name %}",
+                '{0}'.format(msg)
+            )
         else:
             self.assertEqual("", "No exception")
 
@@ -891,8 +895,8 @@ class ArticleLogoTest(BaseArticleTest):
         article_class = get_article_class()
         article = mommy.make(
             article_class,
-            title=u"This is my article",
-            content=u"<p>This is my <b>content</b></p>",
+            title="This is my article",
+            content="<p>This is my <b>content</b></p>",
             template=settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0]
         )
         if image:
@@ -923,8 +927,8 @@ class ArticleLogoTest(BaseArticleTest):
         if image:
             article = mommy.make(
                 article_class,
-                title=u"This is my article",
-                content=u"<p>This is my <b>content</b></p>",
+                title="This is my article",
+                content="<p>This is my <b>content</b></p>",
                 slug="",
                 template=settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0],
                 logo=File(self._get_image())
@@ -932,8 +936,8 @@ class ArticleLogoTest(BaseArticleTest):
         else:
             article = mommy.make(
                 article_class,
-                title=u"This is my article",
-                content=u"<p>This is my <b>content</b></p>",
+                title="This is my article",
+                content="<p>This is my <b>content</b></p>",
                 slug="",
                 template=settings.COOP_CMS_ARTICLE_TEMPLATES[template_index][0]
             )

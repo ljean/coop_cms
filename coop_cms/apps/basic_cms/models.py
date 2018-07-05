@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """models"""
 
+from __future__ import unicode_literals
+
 from coop_cms.models import BaseArticle, BaseNavTree
 
 

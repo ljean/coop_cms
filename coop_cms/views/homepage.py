@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """homepage management"""
 
+from __future__ import unicode_literals
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
@@ -61,7 +63,7 @@ def set_homepage(request, article_id):
 
     context_dict = {
         'article': article,
-        'title': _(u"Do you want to use this article as homepage?"),
+        'title': _("Do you want to use this article as homepage?"),
     }
 
     return render(

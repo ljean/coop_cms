@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """Rss feed"""
 
+from __future__ import unicode_literals
+
 from django.contrib.syndication.views import Feed
 
 from coop_cms.settings import get_article_class

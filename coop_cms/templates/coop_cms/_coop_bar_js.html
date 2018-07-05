@@ -25,9 +25,10 @@ $(document).ready(function(){
 	$(".coop-bar a.slide").pageSlide({width:'350px', direction:'right'});
 	
 	$("form#cms_form input[type='submit']").hide();
-    $('#coopbar_save').click(function(event) {
-        $("form#cms_form").submit();    
+    $('#coopbar_save').on('click', function(event) {
+        $("form#cms_form").submit();
         event.preventDefault();
+        event.stopPropagation();
     });
 	
 	var toggle_save = function() {

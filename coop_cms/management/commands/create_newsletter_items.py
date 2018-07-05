@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """create newsletter item"""
 
+from __future__ import unicode_literals, print_function
+
 from django.core.management.base import BaseCommand
 
 from coop_cms.models import create_newsletter_item
@@ -14,16 +16,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """command"""
-        #look for emailing to be sent
+        # look for emailing to be sent
         verbose = options.get('verbosity', 1)
         
         for klass in get_newsletter_item_classes():
             for instance in klass.objects.all():
                 item, status = create_newsletter_item(instance)
                 if item and status and verbose:
-                    print 'create item for', klass.__name__, '-', instance.id, ':', instance
+                    print('create item for', klass.__name__, '-', instance.id, ':', instance)
                 else:
                     if status and verbose:
-                        print 'delete item for', klass.__name__, '-', instance.id, ':', instance
+                        print('delete item for', klass.__name__, '-', instance.id, ':', instance)
         if verbose:
-            print "done"        
+            print("done")

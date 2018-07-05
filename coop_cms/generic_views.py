@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """generic views"""
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message, error as error_message
@@ -96,7 +98,7 @@ class EditableObjectView(View):
             'form': self.form if self.edit_mode else None,
             'editable': self.can_edit_object(),
             'edit_mode': self.edit_mode,
-            'title': getattr(self.object, 'title', u'{0}'.format(self.object)),
+            'title': getattr(self.object, 'title', '{0}'.format(self.object)),
             'coop_cms_edit_url': self.get_edit_url(),
             'coop_cms_cancel_url': self.get_cancel_url(),
             'coop_cms_can_view_callback': self.can_view_object,
@@ -137,8 +139,8 @@ class EditableObjectView(View):
 
     def get_cache_key(self, obj):
         language = get_language()
-        class_name = obj.__class__
-        cache_key = u'{0}-{1}-{2}-{3}'.format(settings.SITE_ID, language, class_name, obj.id)
+        class_name = '{0}.{1}'.format(obj.__class__.__module__, obj.__class__.__name__)
+        cache_key = '{0}-{1}-{2}-{3}'.format(settings.SITE_ID, language, class_name, obj.id)
         return cache_key
 
     def get(self, request, *args, **kwargs):
@@ -210,16 +212,16 @@ class EditableObjectView(View):
             if inline_html_forms:
                 [_the_form.save() for _the_form in inline_html_forms]
 
-            success_message(request, _(u'The object has been saved properly'))
+            success_message(request, _('The object has been saved properly'))
 
             return HttpResponseRedirect(self.object.get_absolute_url())
         else:
 
-            error_text = u'<br />'.join(
-                [u'{0}'.format(_form.errors) for _form in [self.form] + inline_html_forms if _form.errors]
+            error_text = '<br />'.join(
+                ['{0}'.format(_form.errors) for _form in [self.form] + inline_html_forms if _form.errors]
             )
-            error_message(request, _(u'An error occurred: {0}').format(error_text))
-            logger.debug(u"error: {0}".format(error_text))
+            error_message(request, _('An error occurred: {0}').format(error_text))
+            logger.debug("error: {0}".format(error_text))
     
         return render(
             request,
@@ -351,14 +353,14 @@ class EditableFormsetView(TemplateView):
             if inline_html_forms:
                 [_html_form.save() for _html_form in inline_html_forms]
             
-            success_message(request, _(u'The objects have been saved properly'))
+            success_message(request, _('The objects have been saved properly'))
 
             url = self.get_success_url()
             return HttpResponseRedirect(url)
         else:
             if formset_index_error:
-                logger.warning(_(u'Index error in formset: some objects may be missing'))
-                error_message(request, _(u'An error occured: At least one object is missing. Please try again.'))
+                logger.warning(_('Index error in formset: some objects may be missing'))
+                error_message(request, _('An error occured: At least one object is missing. Please try again.'))
                 return HttpResponseRedirect(self.get_cancel_url())
             else:
                 for _form in self.formset:

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """test fragments feature"""
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 
 from django.contrib.auth.models import User, Permission
@@ -9,6 +11,7 @@ from django.core.urlresolvers import reverse
 from django.template import Template, Context
 
 from model_mommy import mommy
+from colorbox.utils import assert_popup_refresh
 
 from coop_cms.forms import ArticleForm
 from coop_cms.models import BaseArticle, Fragment, FragmentType, FragmentFilter
@@ -160,7 +163,7 @@ class FragmentsTest(BaseFragmentTest):
     def test_view_fragments(self):
         """test view fragments"""
 
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         
         fragment1 = mommy.make(Fragment, type=fragment_type1, content="Azerty")
@@ -179,7 +182,7 @@ class FragmentsTest(BaseFragmentTest):
         
     def test_view_fragments_extra_id_in_edit_mode(self):
         """in edit mode: coop-fragment-type"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         fragment_filter1 = mommy.make(FragmentFilter, extra_id="1")
         fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
@@ -213,7 +216,7 @@ class FragmentsTest(BaseFragmentTest):
 
     def test_view_fragments_extra_id_in_view_mode(self):
         """in view mode: no coop-fragment-type"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         fragment_filter1 = mommy.make(FragmentFilter, extra_id="1")
         fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
@@ -243,7 +246,7 @@ class FragmentsTest(BaseFragmentTest):
     def test_fragments_with_extra_id(self):
         """test fragments with extra id"""
 
-        ft_name = u"contacts"
+        ft_name = "contacts"
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name x %}')
         tpl.render(Context({"ft_name": ft_name, 'x': 2}))
@@ -301,7 +304,7 @@ class FragmentsTest(BaseFragmentTest):
     def test_view_fragments_order(self):
         """test fragments displayed in position order"""
 
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         
         fragment1 = mommy.make(Fragment, type=fragment_type1, content="Azerty", position=3)
@@ -321,7 +324,7 @@ class FragmentsTest(BaseFragmentTest):
     def test_view_only_specified_fragments(self):
         """test display only right fragements"""
 
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         fragment_type2 = mommy.make(FragmentType, name="AAAA")
         
@@ -344,7 +347,7 @@ class FragmentsTest(BaseFragmentTest):
             
     def test_view_only_specified_extra_id(self):
         """text extra_id is taken into account"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         fragment_type2 = mommy.make(FragmentType, name="AAAA")
         
@@ -372,7 +375,7 @@ class FragmentsTest(BaseFragmentTest):
 
     def test_view_extra_id_named_args(self):
         """text extra_id is taken into account extra_id is given as named arg"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         fragment_type2 = mommy.make(FragmentType, name="AAAA")
 
@@ -400,7 +403,7 @@ class FragmentsTest(BaseFragmentTest):
 
     def test_view_extra_id_named_args_end(self):
         """text extra_id is taken into account extra_id is given as named arg in last position"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         fragment_type2 = mommy.make(FragmentType, name="AAAA")
 
@@ -431,7 +434,7 @@ class FragmentsTest(BaseFragmentTest):
     def test_view_fragments_edit_mode(self):
         """test view in edit mode"""
 
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         fragment_type2 = mommy.make(FragmentType, name="AAAA")
         
@@ -461,7 +464,7 @@ class FragmentsTest(BaseFragmentTest):
             
     def test_view_fragments_extra_id_edit_mode(self):
         """test view with extra id in edit mode"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type1 = mommy.make(FragmentType, name=ft_name)
         fragment_type2 = mommy.make(FragmentType, name="AAAA")
         
@@ -498,7 +501,7 @@ class FragmentsTest(BaseFragmentTest):
             
     def test_fragments_with_template(self):
         """test template_name argument of the template tag"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         
         tpl = Template('{% load coop_edition %}{% coop_fragments ft_name template_name="test/_fragment.html" %}')
         html = tpl.render(Context({"ft_name": ft_name}))
@@ -511,7 +514,7 @@ class FragmentsTest(BaseFragmentTest):
         
     def test_view_fragments_with_template(self):
         """test view with template_name arguement"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type = mommy.make(FragmentType, name=ft_name)
         
         mommy.make(Fragment, type=fragment_type)
@@ -527,7 +530,7 @@ class FragmentsTest(BaseFragmentTest):
         
     def test_view_fragments_template_edit_mode(self):
         """test with template_name in edit_mode"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type = mommy.make(FragmentType, name=ft_name)
         
         mommy.make(Fragment, type=fragment_type)
@@ -547,7 +550,7 @@ class FragmentsTest(BaseFragmentTest):
     
     def test_view_fragments_with_template2(self):
         """test with another template"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type = mommy.make(FragmentType, name=ft_name)
         
         mommy.make(Fragment, type=fragment_type)
@@ -563,7 +566,7 @@ class FragmentsTest(BaseFragmentTest):
         
     def test_view_fragments_with_template3(self):
         """test with another other template"""
-        ft_name = u"contacts"
+        ft_name = "contacts"
         fragment_type = mommy.make(FragmentType, name=ft_name)
         
         mommy.make(Fragment, type=fragment_type)
@@ -673,7 +676,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
         fragment_type = mommy.make(FragmentType, name="parts")
         fragment1 = mommy.make(Fragment, type=fragment_type, content="Azertyuiop")
         
-        new_fragment1_content = u"Qsdfghjklm"
+        new_fragment1_content = "Qsdfghjklm"
         data = {
             "title": 'salut',
             'content': 'bonjour!',
@@ -697,7 +700,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
         fragment_filter = mommy.make(FragmentFilter, extra_id=str(article.id))
         fragment1 = mommy.make(Fragment, type=fragment_type, content="Azertyuiop", filter=fragment_filter)
         
-        new_fragment1_content = u"Qsdfghjklm"
+        new_fragment1_content = "Qsdfghjklm"
         data = {
             "title": 'salut',
             'content': 'bonjour!',
@@ -805,8 +808,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
             self.assertEqual(errors_count, len(errs))
         else:
             self.assertEqual([], errs)
-            expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-            self.assertEqual(response.content, expected)
+            assert_popup_refresh(response)
         
         return response        
         
@@ -969,7 +971,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
         """add fragment"""
         fragment_type = mommy.make(FragmentType, name="parts")
 
-        fragment = mommy.make(Fragment, name=u"abcd", type=fragment_type)
+        fragment = mommy.make(Fragment, name="abcd", type=fragment_type)
 
         data = {
             'type': fragment.type.id,
@@ -1082,15 +1084,15 @@ class FragmentsInArticleTest(BaseFragmentTest):
         data = {
             'form-0-id': fragment1.id,
             'form-0-type': fragment1.type.id,
-            'form-0-name': fragment1.name+"!",
-            'form-0-css_class': [],
+            'form-0-name': fragment1.name + "!",
+            'form-0-css_class': "",
             'form-0-position': 5,
             'form-0-delete_me': False,
             
             'form-1-id': fragment2.id,
             'form-1-type': fragment2.type.id,
-            'form-1-name': fragment2.name+"+",
-            'form-1-css_class': [],
+            'form-1-name': fragment2.name + "+",
+            'form-1-css_class': "",
             'form-1-position': 2,
             'form-1-delete_me': False,
             
@@ -1108,10 +1110,9 @@ class FragmentsInArticleTest(BaseFragmentTest):
         soup = BeautifulSoup(response.content)
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
-        
-        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-        self.assertEqual(response.content, expected)
-        
+
+        assert_popup_refresh(response)
+
         self.assertEqual(2, Fragment.objects.count())
         fragment1 = Fragment.objects.get(id=fragment1.id)
         fragment2 = Fragment.objects.get(id=fragment2.id)
@@ -1167,8 +1168,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
 
-        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-        self.assertEqual(response.content, expected)
+        assert_popup_refresh(response)
 
         self.assertEqual(2, Fragment.objects.count())
         fragment1 = Fragment.objects.get(id=fragment1.id)
@@ -1382,10 +1382,9 @@ class FragmentsInArticleTest(BaseFragmentTest):
         soup = BeautifulSoup(response.content)
         errs = soup.select("ul.errorlist li")
         self.assertEqual([], errs)
-        
-        expected = u'<script>$.colorbox.close(); window.location=window.location;</script>'.format()
-        self.assertEqual(response.content, expected)
-        
+
+        assert_popup_refresh(response)
+
         self.assertEqual(1, Fragment.objects.count())
         fragment1 = Fragment.objects.get(id=fragment1.id)
         self.assertEqual(Fragment.objects.filter(id=fragment2.id).count(), 0)

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """modeltranslation settings"""
 
+from __future__ import unicode_literals
+
 from modeltranslation.translator import translator, TranslationOptions  # pylint: disable=F0401
 
 from coop_cms.models import (
     Alias, ArticleCategory, Fragment, NavNode, Newsletter, PieceOfHtml, SiteSettings, validate_slug, Link
 )
-from coop_cms.utils import get_eastern_languages
+from coop_cms.settings import get_eastern_languages
 
 
 class PieceOfHtmlTranslationOptions(TranslationOptions):
@@ -77,7 +79,7 @@ class BaseArticleTranslationOptions(TranslationOptions):
         Add a new translation field to both fields dicts.
         """
         # Patch the slug field in order not to validate slug if easten
-        if field == 'slug':# and translation_field.language in get_eastern_languages():
+        if field == 'slug':  # and translation_field.language in get_eastern_languages():
             if validate_slug in translation_field.validators:
                 translation_field.validators.remove(validate_slug)
             translation_field.validators = [

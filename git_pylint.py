@@ -3,6 +3,7 @@
 This script detects the modified files thanks to 'git status' command
 
 """
+from __future__ import unicode_literals
 from __future__ import print_function
 
 import imp
@@ -19,7 +20,7 @@ class CommandWrapper(object):
         """run a command"""
         try:
             return subprocess.check_output(command_line.split(' ')), 0
-        except subprocess.CalledProcessError, ex:
+        except subprocess.CalledProcessError as ex:
             return ex.output, ex.returncode
 
 

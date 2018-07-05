@@ -4,11 +4,13 @@ Coop_cms settings : central place for coop_cms settings
 the settings should be accessed from here and not directly from django.conf.settings
 """
 
+from __future__ import unicode_literals
+
 import os.path
 import sys
+from six import string_types
 
 from django.conf import settings as django_settings
-from django.conf.urls import patterns
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
@@ -52,7 +54,7 @@ def get_navigable_content_types():
     for content_type in navigable_content_types:
         is_navnode = ((content_type.model == 'navnode') and (content_type.app_label == 'coop_cms'))
         if (not is_navnode) and 'get_absolute_url' in dir(content_type.model_class()):
-            ct_choices.append((content_type.id, content_type.app_label + u'.' + content_type.model))
+            ct_choices.append((content_type.id, content_type.app_label + '.' + content_type.model))
     return ct_choices
 
 
@@ -145,7 +147,7 @@ def get_article_templates(article, user):
     if hasattr(django_settings, 'COOP_CMS_ARTICLE_TEMPLATES'):
         coop_cms_article_templates = getattr(django_settings, 'COOP_CMS_ARTICLE_TEMPLATES')
 
-        if type(coop_cms_article_templates) in (str, unicode):
+        if type(coop_cms_article_templates) in string_types:
             # COOP_CMS_ARTICLE_TEMPLATES is a string :
             #  - a function name that will return a tuple
             #  - a variable name that contains a tuple
@@ -306,9 +308,9 @@ def hide_media_library_menu():
 
 def is_requestprovider_installed():
     """returns True if possible to get request from anywhere in the code"""
-    is_installed = ('coop_cms.utils.RequestMiddleware' in django_settings.MIDDLEWARE_CLASSES)
+    is_installed = ('coop_cms.utils.RequestMiddleware' in django_settings.MIDDLEWARE)
     if not is_installed:
-        logger.warn("You should add coop_cms.utils.RequestMiddleware to the MIDDLEWARE_CLASSES settings")
+        logger.warn("You should add coop_cms.utils.RequestMiddleware to the MIDDLEWARE settings")
     return is_installed
 
 
@@ -332,7 +334,7 @@ def get_article_views():
 
 def is_perm_middleware_installed():
     """returns True if permission middleware is installed"""
-    return 'coop_cms.middleware.PermissionsMiddleware' in django_settings.MIDDLEWARE_CLASSES
+    return 'coop_cms.middleware.PermissionsMiddleware' in django_settings.MIDDLEWARE
 
 
 # Check that languages are correctly set
@@ -355,7 +357,7 @@ def get_img_folder(instance, filename):
     except AttributeError:
         img_root = 'img'
 
-    return u'{0}/{1}'.format(img_root, filename)
+    return '{0}/{1}'.format(img_root, filename)
 
 
 def get_articles_category_page_size(article_category):
@@ -371,7 +373,7 @@ def get_url_patterns():
         return i18n_patterns
     else:
         def url_list(*args):
-            if args and isinstance(args[0], (str, unicode, )):
+            if args and isinstance(args[0], string_types):
                 # remove prefix if any
                 return list(args[1:])
             else:

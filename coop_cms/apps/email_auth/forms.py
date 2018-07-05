@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """login form with Email rather than Username"""
 
+from __future__ import unicode_literals
+
 from django import forms
 from django.conf import settings
 from django.contrib.auth import authenticate, REDIRECT_FIELD_NAME
@@ -16,7 +18,7 @@ class EmailAuthForm(Form):
     """Email form"""
     invalidated_password = False
 
-    email = forms.EmailField(required=True, label=__(u"Email"))
+    email = forms.EmailField(required=True, label=__("Email"))
     password = forms.CharField(label=__("Password"), widget=forms.PasswordInput)
 
     def __init__(self, request=None, *args, **kwargs):
@@ -57,7 +59,7 @@ class EmailAuthForm(Form):
                 raise forms.ValidationError(
                     error_messages['invalid_login'],
                     code='invalid_login',
-                    params={'email': _(u"email")},
+                    params={'email': _("email")},
                 )
 
     def get_user(self):

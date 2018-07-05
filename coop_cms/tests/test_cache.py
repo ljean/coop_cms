@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from django.conf import settings
 from django.test.utils import override_settings
 
@@ -34,47 +36,47 @@ class ArticleTest(BaseArticleTest):
         settings.HTML_EDITOR_LINK_MODELS = self._HTML_EDITOR_LINK_MODELS
 
     def test_view_article(self):
-        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED, content=u"Hello")
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED, content="Hello")
         self.assertEqual(article.slug, 'test')
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, u"Hello")
+        self.assertContains(response, "Hello")
 
-        article.content = u"Bye"
+        article.content = "Bye"
         article.save()
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, u"Hello")
+        self.assertContains(response, "Hello")
 
     def test_logged_as_non_staff(self):
         """show page if permission required and authenticated"""
         self._log_as_non_editor()
-        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED, content=u"Hello")
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED, content="Hello")
         self.assertEqual(article.slug, 'test')
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, u"Hello")
+        self.assertContains(response, "Hello")
 
-        article.content = u"Bye"
+        article.content = "Bye"
         article.save()
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, u"Hello")
+        self.assertContains(response, "Hello")
 
     def test_logged_as_staff(self):
         """show page if permission required and authenticated"""
         self._log_as_editor()
-        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED, content=u"Hello")
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED, content="Hello")
         self.assertEqual(article.slug, 'test')
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, u"Hello")
+        self.assertContains(response, "Hello")
 
-        article.content = u"Bye"
+        article.content = "Bye"
         article.save()
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, u"Bye")
+        self.assertContains(response, "Bye")
 
     def _check_article(self, response, data):
         for (key, value) in data.items():
@@ -83,19 +85,19 @@ class ArticleTest(BaseArticleTest):
     def test_edit_article(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
         
-        data = {"title": u'salut', 'content': u'bonjour!'}
+        data = {"title": 'salut', 'content': 'bonjour!'}
         
         self._log_as_editor()
         response = self.client.post(article.get_edit_url(), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
 
     def test_edit_article_invalidate(self):
-        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED, content=u"Hello")
+        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED, content="Hello")
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
-        self.assertContains(response, u"Hello")
+        self.assertContains(response, "Hello")
 
-        data = {"title": u'salut', 'content': u'bonjour!'}
+        data = {"title": 'salut', 'content': 'bonjour!'}
         self._log_as_editor()
         response = self.client.post(article.get_edit_url(), data=data, follow=True)
         self.assertEqual(response.status_code, 200)

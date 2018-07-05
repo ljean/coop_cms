@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """fragments are block of html which can be dynamically added"""
 
+from __future__ import unicode_literals
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
@@ -67,7 +69,7 @@ def edit_fragments(request):
 
     context_dict = {
         'form': formset,
-        'title': _(u"Edit fragments of this template?"),
+        'title': _("Edit fragments of this template?"),
     }
 
     return render(

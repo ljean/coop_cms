@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """urls"""
 
+from __future__ import unicode_literals
+
 from django.conf.urls import include, url
 from django.contrib.auth.views import login, password_change, password_reset, password_reset_confirm
 

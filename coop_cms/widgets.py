@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 """widgets"""
 
+from __future__ import unicode_literals
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.forms import TextInput as DjangoTextInput
 from django.utils.text import mark_safe
 from django.utils.translation import ugettext as _
 
-from floppyforms.widgets import ClearableFileInput, Select, SelectMultiple, Input
+import floppyforms.__future__ as floppyforms
 
 from coop_cms.models import NavType
 from coop_cms.utils import get_text_from_template
 
 
-
-class ReadOnlyInput(Input):
+class ReadOnlyInput(floppyforms.widgets.Input):
     """readonly input"""
     template_name = 'coop_cms/widgets/readonlyinput.html'
 
 
-class ImageEdit(ClearableFileInput):
+class ImageEdit(floppyforms.widgets.ClearableFileInput):
     """image edit"""
     template_name = 'coop_cms/widgets/imageedit.html'
     
@@ -54,7 +55,7 @@ class ChosenWidgetMixin(object):
         return kwargs
 
 
-class ChosenSelectMultiple(ChosenWidgetMixin, SelectMultiple):
+class ChosenSelectMultiple(ChosenWidgetMixin, floppyforms.widgets.SelectMultiple):
     """chosen select multiple"""
 
     def __init__(self, attrs=None, *args, **kwargs):
@@ -75,14 +76,14 @@ class ChosenSelectMultiple(ChosenWidgetMixin, SelectMultiple):
     class Media:
         """css and js required by widget"""
         js = (
-            "{0}?v=1".format("chosen/chosen.jquery.min.js"),
+            "{0}".format("chosen/chosen.jquery.min.js"),
         )
         css = {
-            "all": ("{0}?v=1".format("chosen/chosen.css"),),
+            "all": ("{0}".format("chosen/chosen.css"),),
         }
 
 
-class ChosenSelect(ChosenWidgetMixin, Select):
+class ChosenSelect(ChosenWidgetMixin, floppyforms.widgets.Select):
     """chosen select"""
 
     def __init__(self, attrs=None, *args, **kwargs):
@@ -102,10 +103,10 @@ class ChosenSelect(ChosenWidgetMixin, Select):
     class Media:
         """css and js required by widget"""
         js = (
-            "{0}?v=1".format("chosen/chosen.jquery.min.js"),
+            "{0}".format("chosen/chosen.jquery.min.js"),
         )
         css = {
-            "all": ("{0}?v=1".format("chosen/chosen.css"),),
+            "all": ("{0}".format("chosen/chosen.css"),),
         }
 
 
@@ -134,10 +135,10 @@ class GenericFieldRawIdWidget(DjangoTextInput):
 
     def get_nav_types_url_html(self):
         """returns html for JS"""
-        html = u'<ul class="nav_type_urls">{0}</ul>'.format(
-            u''.join(
+        html = '<ul class="nav_type_urls">{0}</ul>'.format(
+            ''.join(
                 [
-                    u'<li rel="{0}">{1}</li>'.format(nav_type_id, nav_type_url)
+                    '<li rel="{0}">{1}</li>'.format(nav_type_id, nav_type_url)
                     for nav_type_id, nav_type_url in self.base_nav_urls
                 ]
             )
@@ -150,10 +151,10 @@ class GenericFieldRawIdWidget(DjangoTextInput):
         extra = []
 
         if "class" not in attrs:
-            attrs['class'] = u'vGenericRawIdAdminField'  # The JavaScript code looks for this hook.
+            attrs['class'] = 'vGenericRawIdAdminField'  # The JavaScript code looks for this hook.
             # the correct API to determine the ID dynamically.
-            extra.append(u'<a href="" class="related-lookup" id="lookup_id_{0}" title="{1}"></a>'.format(
-                name, _(u'Lookup'))
+            extra.append('<a href="" class="related-lookup" id="lookup_id_{0}" title="{1}"></a>'.format(
+                name, _('Lookup'))
             )
         output = [super(GenericFieldRawIdWidget, self).render(name, value, attrs)] + extra
         output.append(self.get_nav_types_url_html())
@@ -166,14 +167,14 @@ class GenericFieldRawIdWidget(DjangoTextInput):
             model_class = instance.content_type.model_class()
             label = model_class.objects.get(id=instance.object_id)
         except AttributeError:
-            label = u''
+            label = ''
         except ObjectDoesNotExist:
-            label = u"<Not Found>"
+            label = "<Not Found>"
 
         if label:
-            return u"{0}:{1} ({2})".format(
+            return "{0}:{1} ({2})".format(
                 instance.content_type,
                 instance.object_id,
                 label
             )
-        return u''
+        return ''

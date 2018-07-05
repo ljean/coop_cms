@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
-import floppyforms
+from __future__ import unicode_literals
+
+import floppyforms.__future__ as floppyforms
 
 
 class HidableMultipleChoiceField(floppyforms.MultipleChoiceField):

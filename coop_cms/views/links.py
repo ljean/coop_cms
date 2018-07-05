@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """links: object who redirects to another url"""
 
+from __future__ import unicode_literals
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message
@@ -30,9 +32,10 @@ def new_link(request):
         form = NewLinkForm(request.POST)
         if form.is_valid():
             form.save()
+            form.save_m2m()
             homepage_url = reverse('coop_cms_homepage')
             next_url = request.META.get('HTTP_REFERER', homepage_url)
-            success_message(request, _(u'The link has been created properly'))
+            success_message(request, _('The link has been created properly'))
             return HttpResponseRedirect(next_url)
     else:
         form = NewLinkForm()

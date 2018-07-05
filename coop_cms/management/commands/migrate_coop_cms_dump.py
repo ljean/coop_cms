@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """dump"""
 
+from __future__ import unicode_literals, print_function
+
 import json
 
 from django.core.management.base import BaseCommand
@@ -8,7 +10,7 @@ from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     """Rename coop_page.page into coop_tree.article and url into link in a json dump"""
-    help = u"Rename coop_page.page into coop_tree.article and url into link in a json dump"
+    help = "Rename coop_page.page into coop_tree.article and url into link in a json dump"
     use_argparse = False
 
     def handle(self, *args, **options):
@@ -16,13 +18,13 @@ class Command(BaseCommand):
         try:
             filename = args[0]
         except IndexError:
-            print u'usage :', __name__.split('.')[-1], 'dumpfile.json'
+            print('usage :', __name__.split('.')[-1], 'dumpfile.json')
             return
         
         try:
             dump_file = open(filename, 'r')
         except IOError:
-            print filename, u"doesn't exist"
+            print(filename, "doesn't exist")
             return
         
         objects = json.loads(dump_file.read())

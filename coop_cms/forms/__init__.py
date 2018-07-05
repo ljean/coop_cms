@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # This can be imported directly from coop_cms.forms
+from __future__ import unicode_literals
+
 from coop_cms.forms.articles import (
     ArticleForm, ArticleAdminForm, ArticleSettingsForm, NewArticleForm, BaseArticleAdminForm
 )

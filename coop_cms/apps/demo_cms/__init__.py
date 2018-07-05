@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Example of CMS app"""
 
+from __future__ import unicode_literals
+
+
 def get_article_templates(article, user):
     """
     example of functions to get custom templates

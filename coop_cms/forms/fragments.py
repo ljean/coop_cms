@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
+from __future__ import unicode_literals
+
+from six import string_types
+
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _
 
-import floppyforms
+import floppyforms.__future__ as floppyforms
 
 from coop_cms.models import Fragment, FragmentType
 
@@ -42,7 +46,7 @@ class BaseFragmentForm(floppyforms.ModelForm):
                 choices = [('', '')] + [(x, x) for x in css_classes]
                 self.fields['css_class'].widget = floppyforms.SelectMultiple(
                     choices=choices,
-                    attrs={"class": "chosen-select", "data-placeholder": _(u"Select CSS classes to apply")}
+                    attrs={"class": "chosen-select", "data-placeholder": _("Select CSS classes to apply")}
                 )
             else:
                 self.fields['css_class'].widget = floppyforms.HiddenInput()
@@ -55,14 +59,17 @@ class BaseFragmentForm(floppyforms.ModelForm):
 
         allowed_classes = instance_fragment_type.allowed_css_classes.split(',') if instance_fragment_type else []
         values = self.cleaned_data['css_class']
-        if type(values) in (unicode, str):
+
+        if isinstance(values, string_types):
             values = values.strip("[]").split(",")
             values = [x.replace("u'", "").replace('u"', '').strip("\"' ") for x in values]
             values = [x for x in values if x]
+
         for value in values:
             if not value in allowed_classes:
-                raise ValidationError(_(u"Invalid class '{0}'").format(value))
-        return u" ".join(values)
+                raise ValidationError(_("Invalid class '{0}'").format(value))
+
+        return " ".join(values)
 
     def clean(self):
         ret = super(BaseFragmentForm, self).clean()
@@ -97,7 +104,7 @@ class AddFragmentForm(BaseFragmentForm):
 
 class EditFragmentForm(BaseFragmentForm):
     """Edit fragment"""
-    delete_me = floppyforms.BooleanField(label=_(u"delete"), required=False)
+    delete_me = floppyforms.BooleanField(label=_("delete"), required=False)
 
     class Meta:
         model = Fragment

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """media library"""
 
+from __future__ import unicode_literals
+
 import itertools
 import json
 import mimetypes
@@ -12,14 +14,14 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
-from django.template import RequestContext
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
 
 from coop_cms.forms.content import AddDocForm, AddImageForm
 from coop_cms.logger import logger
 from coop_cms import models
-from coop_cms.utils import paginate, FileWrapper
+from coop_cms.moves import FileWrapper, make_context
+from coop_cms.utils import paginate
 
 
 def _get_photologue_media(request):
@@ -112,7 +114,7 @@ def show_media(request, media_type):
             context["media_url"] += '?media_filter={0}'.format(media_filter)
 
         template = get_template('coop_cms/medialib/slide_base.html')
-        html = template.render(RequestContext(request, context))
+        html = template.render(make_context(request, context))
 
         if is_ajax:
             data = {
@@ -214,7 +216,7 @@ def download_doc(request, doc_id):
         raise PermissionDenied
 
     if 'filetransfers' in settings.INSTALLED_APPS:
-        from filetransfers.api import serve_file # pylint: disable=F0401
+        from filetransfers.api import serve_file  # pylint: disable=F0401
         return serve_file(request, doc.file)
     else:
         # legacy version just kept for compatibility if filetransfers is not installed
@@ -224,10 +226,10 @@ def download_doc(request, doc_id):
         wrapper = FileWrapper(the_file)
         mime_type = mimetypes.guess_type(the_file.name)[0]
         if not mime_type:
-            mime_type = u'application/octet-stream'
+            mime_type = 'application/octet-stream'
         response = HttpResponse(wrapper, content_type=mime_type)
         response['Content-Length'] = the_file.size
         filename = unicodedata.normalize('NFKD', os.path.split(the_file.name)[1]).encode("utf8", 'ignore')
-        filename = filename.replace(' ', '-')
-        response['Content-Disposition'] = 'attachment; filename={0}'.format(filename)
+        filename = filename.replace(b' ', b'-')
+        response['Content-Disposition'] = b'attachment; filename=' + filename
         return response

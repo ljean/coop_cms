@@ -1,38 +1,28 @@
 # -*- coding: utf-8 -*-
-"""send newsletter"""
+"""force sync_translation after migrate for unit tests"""
 
 import sys
 
-from django import VERSION as DJANGO_VERSION
 from django.conf import settings
 from django.core.management import call_command
+from django.core.management.commands import migrate
+from django.utils.six import StringIO
 
 
-def get_and_configure_base_class():
-    if DJANGO_VERSION >= (1, 7, 0):
-        from django.core.management.commands import migrate
-        return migrate.Command
-    else:
-        if 'south' in settings.INSTALLED_APPS:
-            from south.management.commands.migrate import Command as SouthMigrateCommand
-            south_migration_modules = getattr(settings, 'SOUTH_MIGRATION_MODULES', None)
-            if not south_migration_modules:
-                south_migration_modules = {}
-            south_migration_modules['coop_cms'] = 'coop_cms.south_migrations'
-            settings.SOUTH_MIGRATION_MODULES = south_migration_modules
-            return SouthMigrateCommand
-        else:
-            raise ImportError("south is not set in INSTALLED_APPS")
-
-
-class Command(get_and_configure_base_class()):
-    """send newsletter"""
-    help = u"migrate"
-    #use_argparse = False
+class Command(migrate.Command):
+    """migrate"""
+    help = u"patched migrate: call sync_translation_fields after migrations when unit testing"
 
     def handle(self, *args, **options):
         """command"""
 
         super(Command, self).handle(*args, **options)
-        if DJANGO_VERSION >= (1, 7, 0) and 'test' in sys.argv and 'modeltranslation' in settings.INSTALLED_APPS:
-            call_command('sync_translation_fields', interactive=False)
+
+        # Unit testing force sync_translation_fields
+        if 'test' in sys.argv and 'modeltranslation' in settings.INSTALLED_APPS:
+            print("Call sync_translation_fields")
+            sys_stdout = sys.stdout  # keep for restoring
+            silent_stdout = StringIO()
+            sys.stdout = silent_stdout  # make the command silent
+            call_command('sync_translation_fields', interactive=False, stdout=silent_stdout)
+            sys.stdout = sys_stdout  # restore stdout

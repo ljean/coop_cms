@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from unittest import skipIf
 
 from django.conf import settings
@@ -25,7 +27,7 @@ class ArticleSlugTestCase(BaseTestCase):
         """test slug with duplicated titles"""
         article_class = get_article_class()
         article1 = article_class.objects.create(title="Titre de l'article")
-        for number in xrange(12):
+        for number in range(12):
             article2 = article_class.objects.create(title=article1.title)
             self.assertNotEqual(article1.slug, article2.slug)
             self.assertEqual(article1.title, article2.title)
@@ -106,10 +108,10 @@ class ArticleSlugTestCase(BaseTestCase):
         expected_title = self._get_localized_slug("/titre-de-larticle/")
         self.assertEqual(article1.get_absolute_url(), expected_title)
 
-    @override_settings(LANGUAGE_CODE='ru', LANGUAGES=(('ru', u'Russian'), ))
+    @override_settings(LANGUAGE_CODE='ru', LANGUAGES=(('ru', 'Russian'), ))
     def create_article_non_ascii_char(self):
         """create an article with russian characters"""
-        title = u"Миниальбом"
+        title = "Миниальбом"
         article_class = get_article_class()
         article1 = article_class.objects.create(title=title)
         response = self.client.get(article1.get_absolute_url())

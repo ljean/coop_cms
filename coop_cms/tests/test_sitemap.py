@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+
 from unittest import skipIf
 
 from django.conf import settings
@@ -179,8 +181,8 @@ class LocaleSitemapTest(SitemapTest):
         for lang_code, lang_name in settings.LANGUAGES:
             loc_title_var = build_localized_fieldname('title', lang_code)
             loc_slug_var = build_localized_fieldname('slug', lang_code)
-            kwargs1[loc_title_var] = u'article-{0}-1'.format(lang_name)
-            kwargs2[loc_title_var] = u'other-article-{0}-2'.format(lang_name)
+            kwargs1[loc_title_var] = 'article-{0}-1'.format(lang_name)
+            kwargs2[loc_title_var] = 'other-article-{0}-2'.format(lang_name)
             kwargs1[loc_slug_var] = slugify(kwargs1[loc_title_var])
             kwargs2[loc_slug_var] = slugify(kwargs2[loc_title_var])
 

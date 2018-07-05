@@ -4,6 +4,8 @@ This backend can be set in django project settings in order to enable email auth
 In this case, the user will logged with his email rather than with a username
 """
 
+from __future__ import unicode_literals
+
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 
@@ -15,12 +17,15 @@ class EmailAuthBackend(ModelBackend):
     Email Authentication Backend: make possible to use email rather than username for user authentication
     """
 
-    def authenticate(self, email=None, password=None, **kwargs):
+    def authenticate(self, **kwargs):
         """
             check if user can log in:
             return the user if login is successfull
             return None if login fails
          """
+
+        email = kwargs.get('email')
+        password = kwargs.get('password')
 
         # clean email
         email = email.strip() if email else email

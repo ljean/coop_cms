@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """urls"""
 
+from __future__ import unicode_literals
+
 import sys
 
 from django.conf import settings
-from django.conf.urls import include, patterns, url
+from django.conf.urls import include, url
 from django.contrib import admin
 from django.contrib.staticfiles.views import serve as serve_static
 from django.views.static import serve as serve_media
@@ -27,7 +29,6 @@ if settings.DEBUG or ('test' in sys.argv) or getattr(settings, 'SERVE_STATIC', T
             url(r'^static/(?P<path>.*)$', serve_media, {'document_root': settings.STATIC_ROOT}),
         ]
     urlpatterns += [
-        #'',
         url(
             r'^media/(?P<path>.*)$',
             serve_media,

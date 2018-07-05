@@ -4,11 +4,14 @@ coop_edition template tags
 used for magic form
 """
 
-from django import VERSION as DJANGO_VERSION
+from __future__ import unicode_literals
+
+from six import string_types
+
 from django import template
 from django.forms.formsets import BaseFormSet
 from django.template import Context
-from django.template.base import TextNode, VariableNode
+from django.template.base import TextNode, VariableNode, FilterExpression
 from django.template.context_processors import csrf
 from django.template.loader import get_template, TemplateDoesNotExist
 from django.template.loader_tags import IncludeNode
@@ -18,6 +21,7 @@ from django.utils.safestring import mark_safe
 from coop_html_editor.templatetags.html_editor_utils import InlineHtmlEditNode, InlineHtmlMultipleEditNode
 
 from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
+from coop_cms.moves import make_context
 from coop_cms.settings import get_article_class
 from coop_cms.utils import get_text_from_template, slugify
 
@@ -92,11 +96,11 @@ class FragmentEditNode(InlineHtmlMultipleEditNode):
 
     def _pre_object_render(self, obj):
         """call before rendering an object"""
-        return u'<div class="coop-fragment {0}" rel="{1}">'.format(obj.css_class, obj.id)
+        return '<div class="coop-fragment {0}" rel="{1}">'.format(obj.css_class, obj.id)
     
     def _post_object_render(self, obj):
         """call after rendering an object"""
-        return u'</div>'
+        return '</div>'
     
     def _object_render(self, idx, obj, context):
         """convert object to html"""
@@ -106,16 +110,21 @@ class FragmentEditNode(InlineHtmlMultipleEditNode):
             template_name = self._resolve_arg(template_name, context)
             template_ = get_template(template_name)
             objects_count = self.get_objects_to_render_count()
-            object_content = template_.render(template.Context({
-                'css_class': obj.css_class,
-                'name': obj.name,
-                'slug': slugify(obj.name),
-                'id': obj.id,
-                'index': idx,
-                'objects_count': objects_count,
-                'fragment': self._render_value(context, self._get_object_lookup(obj), value),
-                'form': DummyEditableForm() if self._edit_mode else None,
-            }))
+            object_content = template_.render(
+                make_context(
+                    None,
+                    {
+                        'css_class': obj.css_class,
+                        'name': obj.name,
+                        'slug': slugify(obj.name),
+                        'id': obj.id,
+                        'index': idx,
+                        'objects_count': objects_count,
+                        'fragment': self._render_value(context, self._get_object_lookup(obj), value),
+                        'form': DummyEditableForm() if self._edit_mode else None,
+                    },
+                )
+            )
         else:
             object_content = self._pre_object_render(obj)
             object_content += self._render_value(context, self._get_object_lookup(obj), value)
@@ -132,13 +141,13 @@ class FragmentEditNode(InlineHtmlMultipleEditNode):
         html = super(FragmentEditNode, self).render(context)
         filter_id = self.fragment_filter.id if self.fragment_filter else ""
         if self._edit_mode:
-            html_layout = u'<div style="display: none; visibility: hidden;" class="coop-fragment-type" '
-            html_layout += u'rel="{0}" data-filter="{2}">{1}</div>'
+            html_layout = '<div style="display: none; visibility: hidden;" class="coop-fragment-type" '
+            html_layout += 'rel="{0}" data-filter="{2}">{1}</div>'
             pre_html = html_layout.format(
                 self.fragment_type.id, self.fragment_type.name, filter_id
             )
         else:
-            pre_html = u''
+            pre_html = ''
         return pre_html + html
 
 
@@ -193,11 +202,11 @@ class ArticleTitleNode(template.Node):
         """to html"""
         is_edition_mode = context.get('form', None) is not None
         article = context.get('article')
-        return u"{0}{1}{2}{3}".format(
+        return "{0}{1}{2}{3}".format(
             article.title,
-            _(u" [EDITION]") if is_edition_mode else u"",
-            _(u" [DRAFT]") if article.publication == BaseArticle.PUBLISHED else u"",
-            _(u" [ARCHIVED]") if article.publication == BaseArticle.ARCHIVED else u"",
+            _(" [EDITION]") if is_edition_mode else "",
+            _(" [DRAFT]") if article.publication == BaseArticle.PUBLISHED else "",
+            _(" [ARCHIVED]") if article.publication == BaseArticle.ARCHIVED else "",
         )
 
 
@@ -328,7 +337,8 @@ class SafeWrapper(object):
                 try:
                     template_ = get_template("coop_cms/widgets/_img_logo.html")
                     value = template_.render(
-                        template.Context(
+                        make_context(
+                            None,
                             {
                                 'url': src.url,
                                 'extra_classes': get_text_from_template("coop_cms/widgets/_imageedit_cssclass.html")
@@ -336,17 +346,18 @@ class SafeWrapper(object):
                         )
                     )
                 except TemplateDoesNotExist:
-                    value = u'<img class="logo" src="{0}" />'.format(src.url)
+                    value = '<img class="logo" src="{0}" />'.format(src.url)
             else:
-                value = u''
+                value = ''
             return mark_safe(value)
         elif callable(value):
             try:
                 return value()
             except KeyError:
                 pass
-        elif type(value) in (unicode, str):
-            return mark_safe(value)
+        else:
+            if isinstance(value, string_types):
+                return mark_safe(value)
         return value
 
 
@@ -416,26 +427,26 @@ class CmsEditNode(template.Node):
                 safe_context[node.target_var] = context.get(node.target_var)
                 inner_context[node.target_var] = context.get(node.target_var)
 
-            elif DJANGO_VERSION >= (1, 8, 0) and isinstance(node, IncludeNode):
+            elif isinstance(node, IncludeNode):
                 # monkey patching for django 1.8
-                template_name = node.template.resolve(context)
-                node.template = get_template(template_name)
-                node.template.resolve = lambda s, c: s
+
+                if isinstance(node.template, FilterExpression):
+                    template_name = node.template.resolve(context)
+                    node.template = get_template(template_name)
                 context_dict = inner_context.copy()
                 if node.extra_context:
                     for filter_expression in node.extra_context:
                         value = node.extra_context[filter_expression].resolve(context)
                         context_dict[filter_expression] = value
-                the_context = Context(context_dict)
-                the_context.template = node.template
-                the_context.template.engine = DummyEngine()
+
+                the_context = make_context(None, context_dict)
                 content = node.template.render(the_context)
 
             elif isinstance(node, template.loader_tags.BlockNode):
                 safe_context_var = Context(safe_context)
                 safe_context_var.render_context['block_context'] = context.render_context.get('block_context', None)
                 safe_context_var.template = getattr(node, 'template', None) or template.Template("")
-                safe_context_var.template.engine = DummyEngine()
+                #safe_context_var.template.engine = DummyEngine()
                 content = node.render(safe_context_var)
 
             elif isinstance(node, VariableNode):
@@ -443,18 +454,14 @@ class CmsEditNode(template.Node):
                     content = node.render(Context(context))
                 else:
                     the_context = Context(safe_context)
-                    if DJANGO_VERSION >= (1, 8, 0):
-                        the_context.template = getattr(node, 'template', None) or template.Template("")
-                        the_context.template.engine = DummyEngine()
+                    the_context.template = getattr(node, 'template', None) or template.Template("")
+                    #the_context.template.engine = DummyEngine()
                     content = node.render(the_context)
             else:
-                if DJANGO_VERSION >= (1, 8, 0):
-                    # monkey patching for django 1.8
-                    the_context = Context(inner_context)
-                    the_context.template = getattr(node, 'template', None) or template.Template("")
-                    the_context.template.engine = DummyEngine()
-                else:
-                    the_context = Context(inner_context)
+                # monkey patching for django 1.8+
+                the_context = Context(inner_context)
+                the_context.template = getattr(node, 'template', None) or template.Template("")
+                #the_context.template.engine = DummyEngine()
                 content = node.render(the_context)
 
             nodes_content += content

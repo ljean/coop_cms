@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """unitesting of templatetags"""
 
+from __future__ import unicode_literals
+
 import json
 from unittest import skipIf
 
@@ -15,6 +17,7 @@ from django.test.client import RequestFactory
 from model_mommy import mommy
 
 from coop_cms.models import Link, NavNode, BaseArticle, MediaFilter, Image
+from coop_cms.moves import get_response_json
 from coop_cms.settings import is_localized, is_multilang, get_article_class, get_navtree_class
 from coop_cms.templatetags.coop_utils import get_part, get_parts, group_in_sublists, find_css, reduced_page_range
 from coop_cms.tests import BaseTestCase, BeautifulSoup
@@ -281,7 +284,7 @@ class AcceptCookieMessageTest(BaseTestCase):
 
         self.assertEqual(200, response.status_code)
 
-        json_content = json.loads(response.content)
+        json_content = get_response_json(response)
         self.assertEqual(json_content["Ok"], True)
 
         self.assertEqual(self.client.session.get('hide_accept_cookie_message'), True)
@@ -429,7 +432,7 @@ class ImageListTemplateTagsTest(BaseTestCase):
         """display an album"""
 
         media_filer = mommy.make(MediaFilter, name='Album Homepage')
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         image.filters.add(media_filer)
         image.save()
 
@@ -452,13 +455,13 @@ class ImageListTemplateTagsTest(BaseTestCase):
         """display an album"""
 
         media_filer = mommy.make(MediaFilter, name='Album Homepage')
-        image1 = mommy.make(Image)
+        image1 = mommy.make(Image, _create_files=True)
         image1.filters.add(media_filer)
         image1.save()
-        image2 = mommy.make(Image)
+        image2 = mommy.make(Image, _create_files=True)
         image2.filters.add(media_filer)
         image2.save()
-        image3 = mommy.make(Image)
+        image3 = mommy.make(Image, _create_files=True)
 
         template_content = '''
         {% load coop_utils %}
@@ -480,7 +483,7 @@ class ImageListTemplateTagsTest(BaseTestCase):
         """display an album"""
 
         media_filer = mommy.make(MediaFilter, name='Album Homepage')
-        image = mommy.make(Image)
+        image = mommy.make(Image, _create_files=True)
         image.filters.add(media_filer)
         image.save()
 
