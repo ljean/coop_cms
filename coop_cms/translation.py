@@ -8,7 +8,7 @@ from modeltranslation.translator import translator, TranslationOptions  # pylint
 from coop_cms.models import (
     Alias, ArticleCategory, Fragment, NavNode, Newsletter, PieceOfHtml, SiteSettings, validate_slug, Link
 )
-from coop_cms.utils import get_eastern_languages
+from coop_cms.settings import get_eastern_languages
 
 
 class PieceOfHtmlTranslationOptions(TranslationOptions):
