@@ -32,12 +32,11 @@ setup(
     zip_safe=False,
     install_requires=[
         'django >= 1.11, <2.0',
-        'django-floppyforms',
         'django-extensions',
         'sorl-thumbnail',
         'apidev-coop_colorbox >= 1.2.7',
         'apidev-coop_bar >= 1.3.2',
-        'coop_html_editor >= 1.2.0',
+        'coop_html_editor >= 1.2.1',
         'feedparser',
         'beautifulsoup4',
         'django-filetransfers',
