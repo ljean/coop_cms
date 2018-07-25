@@ -1,3 +1,3 @@
-psycopg2
+psycopg2-binary
 django-modeltranslation
 django-registration==2.0.4
