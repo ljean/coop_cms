@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=100, verbose_name='name')),
-                ('slug', django_extensions.db.fields.AutoSlugField(editable=False, populate_from=b'name', max_length=100, blank=True, unique=True)),
+                ('slug', django_extensions.db.fields.AutoSlugField(editable=False, populate_from='name', max_length=100, blank=True, unique=True)),
                 ('ordering', models.IntegerField(default=0, verbose_name='ordering')),
                 ('in_rss', models.BooleanField(default=False, help_text='The articles of this category will be listed in the main rss feed', verbose_name='in rss')),
                 ('sites', models.ManyToManyField(default=[1], to='sites.Site', verbose_name='site')),
