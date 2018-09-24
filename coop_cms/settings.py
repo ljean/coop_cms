@@ -14,6 +14,7 @@ from django.conf import settings as django_settings
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
+from django.utils.translation import ugettext as _
 from importlib import import_module
 
 from coop_cms.logger import logger
@@ -428,24 +429,19 @@ def is_cache_enabled():
 def change_site_id():
     """Change SITE ID"""
     current_site = Site.objects.get_current()
-    print("Current site: ", current_site.domain)
     
-    if current_site.domain != "127.0.0.1":
-        print("The current site is NOT localhost (127.0.0.1).\nDo you want to turn it into localhost?")
-        
-        while True:
-            choice = input("0: No\n1: Yes\n")
+    if django_settings.DEBUG == True and sys.argv[1] == "runserver":
+        if current_site.domain != "127.0.0.1:8000":
+            print(_("The current site is NOT localhost (127.0.0.1:8000).\nDo you want to turn it into localhost?"))
+            
+            choice = input(_("0: No\n1: Yes\n"))
             
             if choice == "0":
-                break
+                print(_("Nothing has changed"))
             
             elif choice == "1":
-                current_site.domain = "127.0.0.1"
+                current_site.domain = "127.0.0.1:8000"
                 current_site.name = "localhost"
                 current_site.save()
-                break
             
-            else:
-                print("Please enter only 0 or 1.")
-            
-        print("Your domain site is now: ", current_site.domain)
+        print(_("Your domain site is now: "), current_site.domain)
