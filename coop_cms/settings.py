@@ -428,9 +428,8 @@ def is_cache_enabled():
 
 def change_site_id():
     """Change SITE ID"""
-    current_site = Site.objects.get_current()
-    
-    if django_settings.DEBUG == True and sys.argv[1] == "runserver":
+    if django_settings.DEBUG and len(sys.argv) and sys.argv[1] == "runserver":
+        current_site = Site.objects.get_current()
         if current_site.domain != "127.0.0.1:8000":
             print(_("The current site is NOT localhost (127.0.0.1:8000).\nDo you want to turn it into localhost?"))
             
@@ -443,5 +442,4 @@ def change_site_id():
                 current_site.domain = "127.0.0.1:8000"
                 current_site.name = "localhost"
                 current_site.save()
-            
-        print(_("Your domain site is now: "), current_site.domain)
+                print(_("Your domain site is now: "), current_site.domain)
