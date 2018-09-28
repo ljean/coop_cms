@@ -9,7 +9,7 @@ from django.conf.urls import include, url
 
 from coop_cms import sitemap
 from coop_cms.settings import (
-    get_article_views, install_csrf_failure_view
+    get_article_views, install_csrf_failure_view, change_site_id
 )
 from coop_cms.views.newsletters import NewsletterView, NewsletterPdfView
 from coop_cms.views import articles, fragments, homepage, links, navigation, newsletters, medialib, webutils
@@ -20,6 +20,8 @@ article_view = article_views['article_view']
 edit_article_view = article_views['edit_article_view']
 
 install_csrf_failure_view()
+change_site_id()
+
 
 urlpatterns = [
     url(r'^htm-editor/', include('coop_html_editor.urls')),
