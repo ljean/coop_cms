@@ -73,7 +73,6 @@ class BaseFragmentForm(floppyforms.ModelForm):
 
     def clean(self):
         ret = super(BaseFragmentForm, self).clean()
-
         # Check that if no filter is set : the name and type are unique together
         queryset = Fragment.objects.filter(
             name=self.cleaned_data.get('name', ''),
@@ -82,9 +81,10 @@ class BaseFragmentForm(floppyforms.ModelForm):
         fragment_filter = self.cleaned_data.get('filter')
         if fragment_filter is None:
             queryset = queryset.filter(filter__isnull=True)
+            if self.instance:
+                queryset = queryset.exclude(id=self.instance.id)
             if queryset.count():
                 raise forms.ValidationError(_(u"A fragment with this name already exists"))
-
         return ret
 
 

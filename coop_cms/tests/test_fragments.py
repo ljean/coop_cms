@@ -1356,14 +1356,14 @@ class FragmentsInArticleTest(BaseFragmentTest):
         data = {
             'form-0-id': fragment1.id,
             'form-0-type': fragment1.type.id,
-            'form-0-name': fragment1.name+"!",
+            'form-0-name': fragment1.name,
             'form-0-css_class': "",
             'form-0-position': 5,
             'form-0-delete_me': False,
             
             'form-1-id': fragment2.id,
             'form-1-type': fragment2.type.id,
-            'form-1-name': fragment2.name+"+",
+            'form-1-name': fragment2.name,
             'form-1-css_class': "",
             'form-1-position': 2,
             'form-1-delete_me': True,
@@ -1390,7 +1390,7 @@ class FragmentsInArticleTest(BaseFragmentTest):
         self.assertEqual(Fragment.objects.filter(id=fragment2.id).count(), 0)
 
         self.assertEqual(fragment1.type, fragment_type1)
-        self.assertEqual(fragment1.name, "azerty!")
+        self.assertEqual(fragment1.name, "azerty")
         self.assertEqual(fragment1.css_class, "")
         self.assertEqual(fragment1.position, 5)
         

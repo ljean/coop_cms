@@ -50,18 +50,19 @@
     <select id="fragment-types">
         
     </select>
-    {% for f in form %}
+    {% for sub_form in form %}
         {% if forloop.counter0 == 0 %}
         <tr>
-            {% for field in f %}
-                <th>{% if not field.is_hidden %}{{field.label}}{% endif %}</th>
+            {% for field in sub_form %}
+                <th>{% if not field.is_hidden %}{{ field.label }}{% endif %}</th>
             {% endfor %}
         </tr>
         {% endif %}
         <tr class="field-row">
-        {% for field in f %}
+        {%  if sub_form.non_field_errors %}{{ sub_form.non_field_errors }}{% endif %}
+        {% for field in sub_form %}
             <td class="{% if forloop.counter0 == 0 %}ft-id{% endif %}{% if forloop.counter0 == 1 %}ff-id{% endif %}">
-                {{field}}{{ field.errors }}
+                {{ field }}{{ field.errors }}
             </td>
         {% endfor %}
         </tr>
