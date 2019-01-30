@@ -1043,23 +1043,26 @@ class Image(Media):
 
     def get_absolute_url(self):
         """url"""
-        if not self.size:
-            max_width = get_max_image_width(self)
-            max_width = int(max_width) if max_width else 0
-            if max_width and (max_width < self.file.width):
-                try:
-                    url = sorl_thumbnail.backend.get_thumbnail(self.file.file, str(max_width), upscale=False).url
-                    return url
-                except (IOError, ThumbnailParseError):
-                    return self.file.url
-            else:
-                return self.file.url
         try:
-            crop = self.size.crop or None
-            url = sorl_thumbnail.backend.get_thumbnail(self.file.file, self.size.size, crop=crop).url
-            return url
-        except (IOError, ThumbnailParseError):
-            return self.file.url
+            if not self.size:
+                max_width = get_max_image_width(self)
+                max_width = int(max_width) if max_width else 0
+                if max_width and (max_width < self.file.width):
+                    try:
+                        url = sorl_thumbnail.backend.get_thumbnail(self.file.file, str(max_width), upscale=False).url
+                        return url
+                    except (IOError, ThumbnailParseError):
+                        return self.file.url
+                else:
+                    return self.file.url
+            try:
+                crop = self.size.crop or None
+                url = sorl_thumbnail.backend.get_thumbnail(self.file.file, self.size.size, crop=crop).url
+                return url
+            except (IOError, ThumbnailParseError):
+                return self.file.url
+        except IOError:
+            pass
 
     class Meta:
         verbose_name = _('image')
