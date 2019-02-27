@@ -5,9 +5,7 @@ from __future__ import unicode_literals
 
 import itertools
 import json
-import mimetypes
 import os.path
-import unicodedata
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -20,8 +18,9 @@ from django.template.loader import get_template
 from coop_cms.forms.content import AddDocForm, AddImageForm
 from coop_cms.logger import logger
 from coop_cms import models
-from coop_cms.moves import FileWrapper, make_context
+from coop_cms.moves import make_context
 from coop_cms.utils import paginate
+from coop_cms.utils.xsendfile import serve_file
 
 
 def _get_photologue_media(request):
@@ -214,22 +213,4 @@ def download_doc(request, doc_id):
     doc = get_object_or_404(models.Document, id=doc_id)
     if not request.user.has_perm('can_download_file', doc):
         raise PermissionDenied
-
-    if 'filetransfers' in settings.INSTALLED_APPS:
-        from filetransfers.api import serve_file  # pylint: disable=F0401
-        return serve_file(request, doc.file)
-    else:
-        # legacy version just kept for compatibility if filetransfers is not installed
-        logger.warning("install django-filetransfers for better download support")
-        the_file = doc.file
-        the_file.open('rb')
-        wrapper = FileWrapper(the_file)
-        mime_type = mimetypes.guess_type(the_file.name)[0]
-        if not mime_type:
-            mime_type = 'application/octet-stream'
-        response = HttpResponse(wrapper, content_type=mime_type)
-        response['Content-Length'] = the_file.size
-        filename = unicodedata.normalize('NFKD', os.path.split(the_file.name)[1]).encode("utf8", 'ignore')
-        filename = filename.replace(b' ', b'-')
-        response['Content-Disposition'] = b'attachment; filename=' + filename
-        return response
+    return serve_file(request, doc.file, save_as=True)

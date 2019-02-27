@@ -39,7 +39,6 @@ setup(
         'coop_html_editor >= 1.2.1',
         'feedparser',
         'beautifulsoup4',
-        'django-filetransfers',
         'model_mommy',
         'unicode-slugify',
     ],
