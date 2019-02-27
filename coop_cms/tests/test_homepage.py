@@ -33,7 +33,7 @@ class NoHomepageTest(UserBaseTestCase):
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content)
         url = reverse('coop_cms_set_homepage', args=[art.id])
-        links = soup.select(".coop-bar a[href={0}]".format(url))
+        links = soup.select('.coop-bar a[href="{0}"]'.format(url))
         self.assertEqual(0, len(links))
         
     def test_view_article_set_homepage(self):
@@ -45,7 +45,7 @@ class NoHomepageTest(UserBaseTestCase):
         self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content)
         url = reverse('coop_cms_set_homepage', args=[art.id])
-        links = soup.select(".coop-bar a[href={0}]".format(url))
+        links = soup.select('.coop-bar a[href="{0}"]'.format(url))
         self.assertEqual(1, len(links))
 
 
