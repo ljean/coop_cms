@@ -26,7 +26,7 @@ def chunk_serve_file(request, file, save_as, content_type, **kwargs):
     """
     response = HttpResponse(ChunkedFile(file), content_type=content_type)
     if save_as:
-        response['Content-Disposition'] = smart_str(u'attachment; filename=%s' % save_as)
+        response['Content-Disposition'] = smart_str(u'attachment; filename={0}'.format(save_as))
     if file.size is not None:
         response['Content-Length'] = file.size
     return response
@@ -35,7 +35,7 @@ def chunk_serve_file(request, file, save_as, content_type, **kwargs):
 def xsendfile_serve_file(request, file, save_as, content_type, **kwargs):
     """Lets the web server serve the file using the X-Sendfile extension"""
     response = HttpResponse(content_type=content_type)
-    file_path = getattr(file, 'path', file.url)  # image doesn't have path but url
+    file_path = file.name
     response['X-Sendfile'] = smart_str(file_path)
     if save_as:
         response['Content-Disposition'] = smart_str(u'attachment; filename={0}'.format(save_as))
