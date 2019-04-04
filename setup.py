@@ -34,7 +34,7 @@ setup(
         'django >= 1.11, <2.0',
         'django-extensions',
         'sorl-thumbnail',
-        'apidev-coop_colorbox >= 1.2.7',
+        'apidev-coop_colorbox >= 1.4.1',
         'apidev-coop_bar >= 1.3.2',
         'coop_html_editor >= 1.2.1',
         'feedparser',
