@@ -461,7 +461,7 @@ class ArticleCategory(models.Model):
         _('in rss'), default=False,
         help_text=_("The articles of this category will be listed in the main rss feed")
     )
-    sites = models.ManyToManyField(Site, verbose_name=_('site'), default=[settings.SITE_ID])
+    sites = models.ManyToManyField(Site, verbose_name=_('site'), default=[])
     pagination_size = models.IntegerField(
         default=0,
         verbose_name=_('pagination size'),
@@ -1231,10 +1231,18 @@ class Newsletter(TimeStampedModel):
     content = models.TextField(_("content"), default="<br>", blank=True)
     items = models.ManyToManyField(NewsletterItem, blank=True)
     template = models.CharField(_('template'), max_length=200, default='', blank=True)
-    site = models.ForeignKey(Site, verbose_name=_('site'), default=settings.SITE_ID)
+    site = models.ForeignKey(Site, verbose_name=_('site'))
     source_url = models.URLField(verbose_name=_('source url'), default="", blank=True)
     is_public = models.BooleanField(default=False, verbose_name=_('is_public'))
     newsletter_date = models.DateField(blank=True, null=True, default=None, verbose_name=_('newsletter date'))
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            try:
+                self.site
+            except Site.DoesNotExist:
+                self.site = Site.objects.get_current()
+        return super().save(*args, **kwargs)
 
     def get_items(self):
         """associated items"""

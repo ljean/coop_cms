@@ -628,8 +628,8 @@ class NewsletterTest(UserBaseTestCase):
             'subject': 'test email',
             'content': rel_content.format("")
         }
-        newsletter = mommy.make(Newsletter, **original_data)
-        
+        newsletter = mommy.make(Newsletter, site=site, **original_data)
+
         self._log_as_editor()
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
         response = self.client.post(url, data={})
@@ -647,7 +647,7 @@ class NewsletterTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
-            site_prefix = "http://"+site.domain
+            site_prefix = "http://" + site.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
             if extra_checker:
                 extra_checker(received_email)
