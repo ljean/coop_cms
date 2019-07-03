@@ -300,8 +300,8 @@ class EditableFormsetView(TemplateView):
     
     def get_formset(self, *args, **kwargs):
         """formset"""
-        Formset = self.get_formset_class()
-        return Formset(queryset=self.get_queryset(), *args, **kwargs)
+        formset_class = self.get_formset_class()
+        return formset_class(queryset=self.get_queryset(), *args, **kwargs)
     
     def get(self, request, *args, **kwargs):
         """handle http get --> view"""
@@ -330,7 +330,7 @@ class EditableFormsetView(TemplateView):
     
         if not self.can_edit_objects():
             raise PermissionDenied
-        
+
         self.formset = self.get_formset(request.POST, request.FILES)
         
         forms_args = html_editor_utils.extract_forms_args(request.POST)
