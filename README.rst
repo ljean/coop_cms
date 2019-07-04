@@ -1,5 +1,6 @@
 coop_cms is a Content Management System (CMS) for Django
-===============================================
+========================================================
+
 * `Yet another CMS ?`_
 * `Quick start`_
 
