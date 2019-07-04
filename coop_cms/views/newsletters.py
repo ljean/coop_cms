@@ -164,6 +164,7 @@ class NewsletterView(EditableObjectView):
             'by_email': self.request.GET.get('by_email', False),
             'editable': self.editable,
             'current_site': Site.objects.get_current(),
+            'COOP_CMS_SITE_PREFIX': settings.COOP_CMS_SITE_PREFIX,
         })
         return context_data
 
