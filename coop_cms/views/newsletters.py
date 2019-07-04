@@ -10,6 +10,7 @@ from tempfile import NamedTemporaryFile
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -162,6 +163,7 @@ class NewsletterView(EditableObjectView):
             'title': self.object.subject,
             'by_email': self.request.GET.get('by_email', False),
             'editable': self.editable,
+            'current_site': Site.objects.get_current(),
         })
         return context_data
 
