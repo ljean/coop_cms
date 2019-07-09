@@ -5,9 +5,11 @@
 
 {% block form_fields %}
 <div>
-    {{ dests|join:"<br />"|safe }}
+	{{ form.choices }}
+    {{ form.email.label }}
+	{{ form.email }}
+	<input id="add" name="add" type="submit" value="+"/>
 </div>
-{{block.super}}
 {% endblock %}
 
 {% block form_url %}{% url "coop_cms_test_newsletter" newsletter.id %}{% endblock %}

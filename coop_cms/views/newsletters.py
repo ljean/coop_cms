@@ -20,7 +20,7 @@ from django.views.generic import View
 
 from colorbox.decorators import popup_redirect
 
-from coop_cms.forms.newsletters import NewsletterSchedulingForm, NewsletterTemplateForm
+from coop_cms.forms.newsletters import NewsletterSchedulingForm, NewsletterTemplateForm, NewsletterHandleRecipients
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
@@ -91,33 +91,48 @@ def test_newsletter(request, newsletter_id):
         raise PermissionDenied
 
     dests = settings.COOP_CMS_TEST_EMAILS
+    
+    form = NewsletterHandleRecipients(data=request.POST)
 
     if request.method == "POST":
-        try:
-            nb_sent = send_newsletter(newsletter, dests)
+        if form.is_valid():
+            choices = form.cleaned_data["choices"]
+            if choices:
+                print(">>>OK", choices)
+                dests = choices
+            
+            if "add" in request.POST:
+                email = form.cleaned_data["email"]
+                print(">>>>>>>", email)
+                dests.append(email)
+                
+            try:
+                nb_sent = send_newsletter(newsletter, dests)
+                print("NB: ", nb_sent)
+                print("DEST: ", dests)
+    
+                messages.add_message(
+                    request, messages.SUCCESS,
+                    _("The test email has been sent to {0} addresses: {1}").format(nb_sent, dests)
+                )
+                return HttpResponseRedirect(newsletter.get_absolute_url())
 
-            messages.add_message(
-                request, messages.SUCCESS,
-                _("The test email has been sent to {0} addresses: {1}").format(nb_sent, ', '.join(dests))
-            )
-            return HttpResponseRedirect(newsletter.get_absolute_url())
-
-        except Exception:
-            messages.add_message(request, messages.ERROR, _("An error occured! Please contact your support."))
-            logger.error(
-                'Internal Server Error: {0}'.format(request.path),
-                exc_info=sys.exc_info,
-                extra={
-                    'status_code': 500,
-                    'request': request
-                }
-            )
-            return HttpResponseRedirect(newsletter.get_absolute_url())
-
+            except Exception:
+                messages.add_message(request, messages.ERROR, _("An error occured! Please contact your support."))
+                logger.error(
+                    'Internal Server Error: {0}'.format(request.path),
+                    exc_info=sys.exc_info,
+                    extra={
+                        'status_code': 500,
+                        'request': request
+                    }
+                )
+                return HttpResponseRedirect(newsletter.get_absolute_url())
+    
     return render(
         request,
         'coop_cms/popup_test_newsletter.html',
-        {'newsletter': newsletter, 'dests': dests}
+        {'newsletter': newsletter, 'dests': dests, 'form': form}
     )
 
 
