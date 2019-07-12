@@ -5,10 +5,7 @@
 
 {% block form_fields %}
 <div>
-	{{ form.choices }}
-    {{ form.email.label }}
-	{{ form.email }}
-	<input id="add" name="add" type="submit" value="+"/>
+	{{ block.super }}
 </div>
 {% endblock %}
 

@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.sites.models import Site
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils.encoding import smart_text
@@ -85,32 +85,57 @@ def change_newsletter_template(request, newsletter_id):
 @popup_redirect
 def test_newsletter(request, newsletter_id):
     """test newsletter"""
+    context = {}
     newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
+    context["newsletter"] = newsletter
 
     if not request.user.has_perm('can_edit_newsletter', newsletter):
         raise PermissionDenied
 
     dests = settings.COOP_CMS_TEST_EMAILS
-    
+    print("DESTDESTDEST: ", dests)
     form = NewsletterHandleRecipients(data=request.POST)
-
+    context["form"] = form
     if request.method == "POST":
+        print(">"*15)
         if form.is_valid():
-            choices = form.cleaned_data["choices"]
-            if choices:
-                print(">>>OK", choices)
-                dests = choices
+            print(">>>>>")
+            choix = form.cleaned_data["choix"]
+            email = form.cleaned_data["email"]
+            email2 = form.cleaned_data["email2"]
+            print(">>>>>", choix)
+            print(">>>>>bis", email)
+            print(">>>>>bis2", email2)
             
-            if "add" in request.POST:
-                email = form.cleaned_data["email"]
-                print(">>>>>>>", email)
-                dests.append(email)
+            if choix:
+                print(">>>>>1", choix)
+                dests = choix
                 
+                if email:
+                    dests.append(email)
+
+                if email2:
+                    if email != email2:
+                        dests.append(email2)
+            else:
+                dests = []
+                if email:
+                    dests.append(email)
+                
+                if email2 and email != email2:
+                    dests.append(email2)
+                
+                if not email and not email2:
+                    print("NOTHING")
+                    messages.add_message(
+                        request, messages.ERROR,
+                        _("Cochez au moins une case ou remplissez un champ email.")
+                    )
+                    return HttpResponseRedirect(newsletter.get_absolute_url())
+            
             try:
                 nb_sent = send_newsletter(newsletter, dests)
-                print("NB: ", nb_sent)
-                print("DEST: ", dests)
-    
+                print(">>>>>3")
                 messages.add_message(
                     request, messages.SUCCESS,
                     _("The test email has been sent to {0} addresses: {1}").format(nb_sent, dests)
@@ -128,13 +153,11 @@ def test_newsletter(request, newsletter_id):
                     }
                 )
                 return HttpResponseRedirect(newsletter.get_absolute_url())
-    
-    return render(
-        request,
-        'coop_cms/popup_test_newsletter.html',
-        {'newsletter': newsletter, 'dests': dests, 'form': form}
-    )
-
+        
+        if not form.is_valid():
+            print("ERRORS: ", form.errors.as_data())
+            
+    return render(request, 'coop_cms/popup_test_newsletter.html', context)
 
 @login_required
 @popup_redirect

@@ -120,8 +120,11 @@ def _send_email(subject, html_text, dests, list_unsubscribe):
 
     for address in dests:
         text = dehtml(html_text)
+        print(">6", text)
         email = EmailMultiAlternatives(subject, text, from_email, [address], headers=headers)
+        print(">7", email.subject)
         email.attach_alternative(html_text, "text/html")
+        print("EMAIL: ", email.subject)
         emails.append(email)
     return connection.send_messages(emails)
 
@@ -172,6 +175,10 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
         'MEDIA_URL': settings.MEDIA_URL,
         'STATIC_URL': settings.STATIC_URL,
     }
+    print(">1", context_dict['title'])
+    print(">2", context_dict['newsletter'])
+    print(">3", context_dict['by_email'])
+    # print(">4", the_template.render(context_dict))
 
     for callback in get_newsletter_context_callbacks():
         data = callback(newsletter)
@@ -186,5 +193,7 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
         raise
 
     html_text = make_links_absolute(html_text, newsletter)
+
+    print(">5", newsletter.subject)
 
     return _send_email(newsletter.subject, html_text, dests, list_unsubscribe)
