@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
@@ -164,3 +165,24 @@ class NewsletterAdminForm(forms.ModelForm):
         js = (
             'chosen/chosen.jquery.js',
         )
+        
+        
+class NewsletterHandleRecipients(forms.Form):
+    email = forms.EmailField(required=False)
+    email2 = forms.EmailField(required=False)
+    choix = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(), required=False)
+    
+    def __init__(self, *args, **kwargs):
+        super(NewsletterHandleRecipients, self).__init__(*args, **kwargs)
+        DESTS = settings.COOP_CMS_TEST_EMAILS
+        self.fields["choix"].choices = DESTS
+
+    def clean_choices(self):
+        choix = self.cleaned_data['choix']
+        return choix
+    
+    # def clean(self):
+    #     if not self.cleaned_data["email"] and not self.cleaned_data["email2"]:
+    #         if not self.cleaned_data["choix"]:
+    #             raise forms.ValidationError(_("Cochez au moins une case ou remplissez un champ email."))
+ 

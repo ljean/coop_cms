@@ -612,7 +612,13 @@ class NewsletterTest(UserBaseTestCase):
         newsletter = Newsletter.objects.get(id=newsletter.id)
         self.assertEqual(newsletter.template, original_data['template'])
 
-    @override_settings(COOP_CMS_TEST_EMAILS=['toto@toto.fr', 'titi@toto.fr'], COOP_CMS_FROM_EMAIL='contact@toto.fr')
+    @override_settings(
+        COOP_CMS_TEST_EMAILS=[
+            ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
+            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+        ],
+        COOP_CMS_FROM_EMAIL='contact@toto.fr'
+    )
     def test_send_test_newsletter(self, template='test/newsletter_blue.html', extra_checker=None):
         settings.SITE_ID = 1
         site = Site.objects.get(id=settings.SITE_ID)
@@ -631,13 +637,244 @@ class NewsletterTest(UserBaseTestCase):
         newsletter = mommy.make(Newsletter, site=site, **original_data)
 
         self._log_as_editor()
+        print(">>>OKOK", [email[0] for email in settings.COOP_CMS_TEST_EMAILS])
+        data = {
+            "choix": [email[0] for email in settings.COOP_CMS_TEST_EMAILS],
+            "email": "",
+            "email2": ""
+        }
+        
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
-        response = self.client.post(url, data={})
+        response = self.client.post(url, data)
         self.assertEqual(200, response.status_code)
-
+        print(">>PASS")
+        print("EMAIL DEST: ", [m.to for m in mail.outbox])
         self.assertEqual(
-            [[test_address] for test_address in settings.COOP_CMS_TEST_EMAILS],
-            [received_email.to for received_email in mail.outbox]
+            [test_address[0] for test_address in settings.COOP_CMS_TEST_EMAILS],
+            [received_email.to[0] for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, newsletter.subject)
+            self.assertTrue(received_email.body.find('Title') >= 0)
+            self.assertTrue(received_email.body.find('Google') >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
+            self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
+            site_prefix = "http://" + site.domain
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
+            if extra_checker:
+                extra_checker(received_email)
+
+    @override_settings(
+        COOP_CMS_TEST_EMAILS=[
+            ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
+            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+        ],
+        COOP_CMS_FROM_EMAIL='contact@toto.fr'
+    )
+    def test_send_test_newsletter_add_email(self, template='test/newsletter_blue.html', extra_checker=None):
+        settings.SITE_ID = 1
+        site = Site.objects.get(id=settings.SITE_ID)
+        site.domain = 'toto.fr'
+        site.save()
+    
+        rel_content = '''
+                <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
+                <div><a href="http://www.google.fr">Google</a></div>
+            '''
+        original_data = {
+            'template': template,
+            'subject': 'test email',
+            'content': rel_content.format("")
+        }
+        newsletter = mommy.make(Newsletter, site=site, **original_data)
+    
+        self._log_as_editor()
+        print(">>>OKOK", settings.COOP_CMS_TEST_EMAILS)
+        data = {
+            "choix": [email[0] for email in settings.COOP_CMS_TEST_EMAILS],
+            "email": 'test@test.test',
+        }
+    
+        url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
+        response = self.client.post(url, data)
+        self.assertEqual(200, response.status_code)
+        print(">>PASS")
+        print("EMAIL DEST: ", [m.to for m in mail.outbox])
+        test_address = [test_address[0] for test_address in settings.COOP_CMS_TEST_EMAILS]
+        test_address.append("test@test.test")
+        self.assertEqual(
+            test_address,
+            [received_email.to[0] for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, newsletter.subject)
+            self.assertTrue(received_email.body.find('Title') >= 0)
+            self.assertTrue(received_email.body.find('Google') >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
+            self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
+            site_prefix = "http://" + site.domain
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
+            if extra_checker:
+                extra_checker(received_email)
+
+    @override_settings(
+        COOP_CMS_TEST_EMAILS=[
+            ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
+            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+        ],
+        COOP_CMS_FROM_EMAIL='contact@toto.fr'
+    )
+    def test_send_test_newsletter_add_two_emails(self, template='test/newsletter_blue.html', extra_checker=None):
+        settings.SITE_ID = 1
+        site = Site.objects.get(id=settings.SITE_ID)
+        site.domain = 'toto.fr'
+        site.save()
+    
+        rel_content = '''
+                    <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
+                    <div><a href="http://www.google.fr">Google</a></div>
+                '''
+        original_data = {
+            'template': template,
+            'subject': 'test email',
+            'content': rel_content.format("")
+        }
+        newsletter = mommy.make(Newsletter, site=site, **original_data)
+    
+        self._log_as_editor()
+        print(">>>OKOK", settings.COOP_CMS_TEST_EMAILS)
+        data = {
+            "choix": [email[0] for email in settings.COOP_CMS_TEST_EMAILS],
+            "email": 'test@test.test',
+            "email2": 'test2@test2.test2'
+        }
+    
+        url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
+        response = self.client.post(url, data)
+        self.assertEqual(200, response.status_code)
+        print(">>PASS")
+        print("EMAIL DEST: ", [m.to for m in mail.outbox])
+        test_address = [test_address[0] for test_address in settings.COOP_CMS_TEST_EMAILS]
+        test_address.append("test@test.test")
+        test_address.append("test2@test2.test2")
+        self.assertEqual(
+            test_address,
+            [received_email.to[0] for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, newsletter.subject)
+            self.assertTrue(received_email.body.find('Title') >= 0)
+            self.assertTrue(received_email.body.find('Google') >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
+            self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
+            site_prefix = "http://" + site.domain
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
+            if extra_checker:
+                extra_checker(received_email)
+
+    @override_settings(
+        COOP_CMS_TEST_EMAILS=[
+            ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
+            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+        ],
+        COOP_CMS_FROM_EMAIL='contact@toto.fr'
+    )
+    def test_send_test_newsletter_add_same_emails(self, template='test/newsletter_blue.html', extra_checker=None):
+        settings.SITE_ID = 1
+        site = Site.objects.get(id=settings.SITE_ID)
+        site.domain = 'toto.fr'
+        site.save()
+    
+        rel_content = '''
+                        <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
+                        <div><a href="http://www.google.fr">Google</a></div>
+                    '''
+        original_data = {
+            'template': template,
+            'subject': 'test email',
+            'content': rel_content.format("")
+        }
+        newsletter = mommy.make(Newsletter, site=site, **original_data)
+    
+        self._log_as_editor()
+        print(">>>OKOK", settings.COOP_CMS_TEST_EMAILS)
+        data = {
+            "choix": [email[0] for email in settings.COOP_CMS_TEST_EMAILS],
+            "email": 'test@test.test',
+            "email2": 'test@test.test'
+        }
+    
+        url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
+        response = self.client.post(url, data)
+        self.assertEqual(200, response.status_code)
+        print(">>PASS")
+        print("EMAIL DEST: ", [m.to for m in mail.outbox])
+        test_address = [test_address[0] for test_address in settings.COOP_CMS_TEST_EMAILS]
+        test_address.append("test@test.test")
+        self.assertEqual(
+            test_address,
+            [received_email.to[0] for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, newsletter.subject)
+            self.assertTrue(received_email.body.find('Title') >= 0)
+            self.assertTrue(received_email.body.find('Google') >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
+            self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
+            site_prefix = "http://" + site.domain
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
+            if extra_checker:
+                extra_checker(received_email)
+
+    @override_settings(
+        COOP_CMS_TEST_EMAILS=[
+            ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
+            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+        ],
+        COOP_CMS_FROM_EMAIL='contact@toto.fr'
+    )
+    def test_send_test_newsletter_add_email_and_no_choice(self, template='test/newsletter_blue.html', extra_checker=None):
+        settings.SITE_ID = 1
+        site = Site.objects.get(id=settings.SITE_ID)
+        site.domain = 'toto.fr'
+        site.save()
+    
+        rel_content = '''
+                            <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
+                            <div><a href="http://www.google.fr">Google</a></div>
+                        '''
+        original_data = {
+            'template': template,
+            'subject': 'test email',
+            'content': rel_content.format("")
+        }
+        newsletter = mommy.make(Newsletter, site=site, **original_data)
+    
+        self._log_as_editor()
+        print(">>>OKOK", settings.COOP_CMS_TEST_EMAILS)
+        data = {
+            "email": 'test@test.test',
+            "email2": ''
+        }
+    
+        url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
+        response = self.client.post(url, data)
+        self.assertEqual(200, response.status_code)
+        print(">>PASS")
+        print("EMAIL DEST: ", [m.to for m in mail.outbox])
+        test_address = []
+        test_address.append("test@test.test")
+        self.assertEqual(
+            test_address,
+            [received_email.to[0] for received_email in mail.outbox]
         )
         for received_email in mail.outbox:
             self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
