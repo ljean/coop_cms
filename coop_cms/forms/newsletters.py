@@ -168,21 +168,19 @@ class NewsletterAdminForm(forms.ModelForm):
         
         
 class NewsletterHandleRecipients(forms.Form):
+    choix = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(), required=False)
     email = forms.EmailField(required=False)
     email2 = forms.EmailField(required=False)
-    choix = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(), required=False)
     
     def __init__(self, *args, **kwargs):
         super(NewsletterHandleRecipients, self).__init__(*args, **kwargs)
         DESTS = settings.COOP_CMS_TEST_EMAILS
         self.fields["choix"].choices = DESTS
+        self.fields["choix"].help_text = "Cochez les emails que vous souhaitez utiliser pour le test d'envoi."
+        self.fields["email"].help_text = "Ajoutez un email supplémentaire."
+        self.fields["email2"].help_text = "Ajoutez un email supplémentaire."
+        self.fields["email2"].label = "Email"
 
     def clean_choices(self):
         choix = self.cleaned_data['choix']
         return choix
-    
-    # def clean(self):
-    #     if not self.cleaned_data["email"] and not self.cleaned_data["email2"]:
-    #         if not self.cleaned_data["choix"]:
-    #             raise forms.ValidationError(_("Cochez au moins une case ou remplissez un champ email."))
- 
