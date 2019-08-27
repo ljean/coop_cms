@@ -92,23 +92,15 @@ def test_newsletter(request, newsletter_id):
     if not request.user.has_perm('can_edit_newsletter', newsletter):
         raise PermissionDenied
 
-    dests = settings.COOP_CMS_TEST_EMAILS
-    print("DESTDESTDEST: ", dests)
     form = NewsletterHandleRecipients(data=request.POST)
     context["form"] = form
     if request.method == "POST":
-        print(">"*15)
         if form.is_valid():
-            print(">>>>>")
             choix = form.cleaned_data["choix"]
             email = form.cleaned_data["email"]
             email2 = form.cleaned_data["email2"]
-            print(">>>>>", choix)
-            print(">>>>>bis", email)
-            print(">>>>>bis2", email2)
             
             if choix:
-                print(">>>>>1", choix)
                 dests = choix
                 
                 if email:
@@ -126,7 +118,6 @@ def test_newsletter(request, newsletter_id):
                     dests.append(email2)
                 
                 if not email and not email2:
-                    print("NOTHING")
                     messages.add_message(
                         request, messages.ERROR,
                         _("Cochez au moins une case ou remplissez un champ email.")
@@ -135,7 +126,6 @@ def test_newsletter(request, newsletter_id):
             
             try:
                 nb_sent = send_newsletter(newsletter, dests)
-                print(">>>>>3")
                 messages.add_message(
                     request, messages.SUCCESS,
                     _("The test email has been sent to {0} addresses: {1}").format(nb_sent, dests)
@@ -154,9 +144,6 @@ def test_newsletter(request, newsletter_id):
                 )
                 return HttpResponseRedirect(newsletter.get_absolute_url())
         
-        if not form.is_valid():
-            print("ERRORS: ", form.errors.as_data())
-            
     return render(request, 'coop_cms/popup_test_newsletter.html', context)
 
 @login_required
