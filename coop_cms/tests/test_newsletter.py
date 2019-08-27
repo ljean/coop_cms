@@ -637,7 +637,6 @@ class NewsletterTest(UserBaseTestCase):
         newsletter = mommy.make(Newsletter, site=site, **original_data)
 
         self._log_as_editor()
-        print(">>>OKOK", [email[0] for email in settings.COOP_CMS_TEST_EMAILS])
         data = {
             "choix": [email[0] for email in settings.COOP_CMS_TEST_EMAILS],
             "email": "",
@@ -647,8 +646,6 @@ class NewsletterTest(UserBaseTestCase):
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
         response = self.client.post(url, data)
         self.assertEqual(200, response.status_code)
-        print(">>PASS")
-        print("EMAIL DEST: ", [m.to for m in mail.outbox])
         self.assertEqual(
             [test_address[0] for test_address in settings.COOP_CMS_TEST_EMAILS],
             [received_email.to[0] for received_email in mail.outbox]
@@ -691,7 +688,6 @@ class NewsletterTest(UserBaseTestCase):
         newsletter = mommy.make(Newsletter, site=site, **original_data)
     
         self._log_as_editor()
-        print(">>>OKOK", settings.COOP_CMS_TEST_EMAILS)
         data = {
             "choix": [email[0] for email in settings.COOP_CMS_TEST_EMAILS],
             "email": 'test@test.test',
@@ -700,8 +696,6 @@ class NewsletterTest(UserBaseTestCase):
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
         response = self.client.post(url, data)
         self.assertEqual(200, response.status_code)
-        print(">>PASS")
-        print("EMAIL DEST: ", [m.to for m in mail.outbox])
         test_address = [test_address[0] for test_address in settings.COOP_CMS_TEST_EMAILS]
         test_address.append("test@test.test")
         self.assertEqual(
@@ -746,7 +740,6 @@ class NewsletterTest(UserBaseTestCase):
         newsletter = mommy.make(Newsletter, site=site, **original_data)
     
         self._log_as_editor()
-        print(">>>OKOK", settings.COOP_CMS_TEST_EMAILS)
         data = {
             "choix": [email[0] for email in settings.COOP_CMS_TEST_EMAILS],
             "email": 'test@test.test',
@@ -756,8 +749,6 @@ class NewsletterTest(UserBaseTestCase):
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
         response = self.client.post(url, data)
         self.assertEqual(200, response.status_code)
-        print(">>PASS")
-        print("EMAIL DEST: ", [m.to for m in mail.outbox])
         test_address = [test_address[0] for test_address in settings.COOP_CMS_TEST_EMAILS]
         test_address.append("test@test.test")
         test_address.append("test2@test2.test2")
@@ -803,7 +794,6 @@ class NewsletterTest(UserBaseTestCase):
         newsletter = mommy.make(Newsletter, site=site, **original_data)
     
         self._log_as_editor()
-        print(">>>OKOK", settings.COOP_CMS_TEST_EMAILS)
         data = {
             "choix": [email[0] for email in settings.COOP_CMS_TEST_EMAILS],
             "email": 'test@test.test',
@@ -813,8 +803,6 @@ class NewsletterTest(UserBaseTestCase):
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
         response = self.client.post(url, data)
         self.assertEqual(200, response.status_code)
-        print(">>PASS")
-        print("EMAIL DEST: ", [m.to for m in mail.outbox])
         test_address = [test_address[0] for test_address in settings.COOP_CMS_TEST_EMAILS]
         test_address.append("test@test.test")
         self.assertEqual(
@@ -859,7 +847,6 @@ class NewsletterTest(UserBaseTestCase):
         newsletter = mommy.make(Newsletter, site=site, **original_data)
     
         self._log_as_editor()
-        print(">>>OKOK", settings.COOP_CMS_TEST_EMAILS)
         data = {
             "email": 'test@test.test',
             "email2": ''
@@ -868,8 +855,6 @@ class NewsletterTest(UserBaseTestCase):
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
         response = self.client.post(url, data)
         self.assertEqual(200, response.status_code)
-        print(">>PASS")
-        print("EMAIL DEST: ", [m.to for m in mail.outbox])
         test_address = []
         test_address.append("test@test.test")
         self.assertEqual(
