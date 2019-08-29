@@ -4,7 +4,10 @@
 from __future__ import unicode_literals
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.forms import TextInput as DjangoTextInput
 from django.utils.text import mark_safe
 from django.utils.translation import ugettext as _

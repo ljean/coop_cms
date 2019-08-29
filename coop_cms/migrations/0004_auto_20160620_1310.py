@@ -2,7 +2,10 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 
 
 def set_homepage(apps, schema_editor):

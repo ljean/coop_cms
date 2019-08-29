@@ -8,7 +8,10 @@ from django.conf.urls import url
 from django.contrib.sitemaps import Sitemap
 from django.contrib.sitemaps.views import sitemap as django_sitemap
 from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.utils.translation import activate
 
 from coop_cms.models import BaseArticle, SiteSettings

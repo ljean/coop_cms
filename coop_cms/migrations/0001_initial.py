@@ -53,7 +53,7 @@ class Migration(migrations.Migration):
                 ('ordering', models.IntegerField(default=100, verbose_name='ordering')),
                 ('file', models.FileField(upload_to=coop_cms.models.get_doc_folder, verbose_name='file')),
                 ('is_private', models.BooleanField(default=False, help_text='Check this if you do not want to publish this document to all users', verbose_name='is private')),
-                ('category', models.ForeignKey(default=None, blank=True, to='coop_cms.ArticleCategory', null=True, verbose_name='category')),
+                ('category', models.ForeignKey(default=None, blank=True, to='coop_cms.ArticleCategory', null=True, verbose_name='category', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'document',
@@ -159,8 +159,8 @@ class Migration(migrations.Migration):
                 ('ordering', models.PositiveIntegerField(default=0, verbose_name='ordering')),
                 ('object_id', models.PositiveIntegerField(null=True, verbose_name='object id', blank=True)),
                 ('in_navigation', models.BooleanField(default=True, verbose_name='in navigation')),
-                ('content_type', models.ForeignKey(verbose_name='content_type', blank=True, to='contenttypes.ContentType', null=True)),
-                ('parent', models.ForeignKey(default=0, blank=True, to='coop_cms.NavNode', null=True, verbose_name='parent')),
+                ('content_type', models.ForeignKey(verbose_name='content_type', blank=True, to='contenttypes.ContentType', null=True, on_delete=models.CASCADE)),
+                ('parent', models.ForeignKey(default=0, blank=True, to='coop_cms.NavNode', null=True, verbose_name='parent', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'navigation node',
@@ -186,7 +186,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('search_field', models.CharField(default=b'', max_length=200, verbose_name='search field', blank=True)),
                 ('label_rule', models.IntegerField(default=0, verbose_name='How to generate the label', choices=[(0, 'Use object unicode'), (1, 'Use search field'), (2, 'Use get_label')])),
-                ('content_type', models.OneToOneField(verbose_name='django model', to='contenttypes.ContentType')),
+                ('content_type', models.OneToOneField(verbose_name='django model', to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'navigable type',
@@ -214,7 +214,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('object_id', models.PositiveIntegerField(verbose_name='object id')),
                 ('ordering', models.IntegerField(default=0, verbose_name='ordering')),
-                ('content_type', models.ForeignKey(verbose_name='content_type', to='contenttypes.ContentType')),
+                ('content_type', models.ForeignKey(verbose_name='content_type', to='contenttypes.ContentType', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ['ordering'],
@@ -228,7 +228,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('scheduling_dt', models.DateTimeField(default=None, null=True, verbose_name='scheduling date', blank=True)),
                 ('sending_dt', models.DateTimeField(default=None, null=True, verbose_name='sending date', blank=True)),
-                ('newsletter', models.ForeignKey(to='coop_cms.Newsletter')),
+                ('newsletter', models.ForeignKey(to='coop_cms.Newsletter', on_delete=models.CASCADE)),
             ],
             options={
                 'verbose_name': 'newsletter sending',
@@ -254,7 +254,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('homepage_url', models.CharField(default=b'', help_text='if set, the homepage will be redirected to the given URL', max_length=256, verbose_name='homepage URL', blank=True)),
                 ('sitemap_mode', models.IntegerField(default=1, choices=[(1, 'Only site articles'), (2, 'All articles')])),
-                ('site', models.OneToOneField(verbose_name='site settings', to='sites.Site')),
+                ('site', models.OneToOneField(verbose_name='site settings', to='sites.Site', on_delete=models.CASCADE)),
             ],
             options={
                 'ordering': ('site__id',),
@@ -270,7 +270,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='newsletter',
             name='site',
-            field=models.ForeignKey(default=1, verbose_name='site', to='sites.Site'),
+            field=models.ForeignKey(default=1, verbose_name='site', to='sites.Site', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='navtree',
@@ -280,7 +280,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='navnode',
             name='tree',
-            field=models.ForeignKey(verbose_name='tree', to='coop_cms.NavTree'),
+            field=models.ForeignKey(verbose_name='tree', to='coop_cms.NavTree', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='image',
@@ -290,17 +290,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='image',
             name='size',
-            field=models.ForeignKey(default=None, blank=True, to='coop_cms.ImageSize', null=True, verbose_name='size'),
+            field=models.ForeignKey(default=None, blank=True, to='coop_cms.ImageSize', null=True, verbose_name='size', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='fragment',
             name='filter',
-            field=models.ForeignKey(default=None, blank=True, to='coop_cms.FragmentFilter', null=True, verbose_name='fragment filter'),
+            field=models.ForeignKey(default=None, blank=True, to='coop_cms.FragmentFilter', null=True, verbose_name='fragment filter', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='fragment',
             name='type',
-            field=models.ForeignKey(verbose_name='fragment type', to='coop_cms.FragmentType'),
+            field=models.ForeignKey(verbose_name='fragment type', to='coop_cms.FragmentType', on_delete=models.CASCADE),
         ),
         migrations.AddField(
             model_name='document',

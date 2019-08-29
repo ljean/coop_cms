@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 
@@ -335,7 +335,7 @@ def cms_extra_js(request, context):
 
 def log_out(request, context):
     """show menu"""
-    if request and request.user.is_authenticated() and request.user.is_staff:
+    if request and request.user.is_authenticated and request.user.is_staff:  # TODO
         return make_link(
             reverse("logout"), _('Log out'), 'power-off', classes=['alert_on_click', 'icon']
         )

@@ -10,7 +10,10 @@ import os.path
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template

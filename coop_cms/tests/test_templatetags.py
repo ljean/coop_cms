@@ -10,7 +10,10 @@ from django.conf import settings
 from django.contrib.auth.models import User, Permission, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except:
+    from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test.client import RequestFactory
 

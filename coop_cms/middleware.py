@@ -4,7 +4,10 @@
 from __future__ import unicode_literals
 
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import NoReverseMatch
+try:
+    from django.urls import NoReverseMatch
+except:
+    from django.core.urlresolvers import NoReverseMatch
 from django.contrib.auth.views import redirect_to_login
 
 from coop_cms.moves import MiddlewareMixin
@@ -17,7 +20,7 @@ class PermissionsMiddleware(MiddlewareMixin):
     def process_exception(self, request, exception):
         """manage exception"""
 
-        if isinstance(exception, PermissionDenied) and (not request.user.is_authenticated()):
+        if isinstance(exception, PermissionDenied) and (not request.user.is_authenticated):  # TODO
             try:
                 login_url = get_login_url()
             except NoReverseMatch:
