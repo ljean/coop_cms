@@ -17,7 +17,10 @@ from django.contrib.sites.models import Site
 from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
 from django.core.files import File
-from django.core.urlresolvers import reverse, NoReverseMatch
+try:
+    from django.urls import reverse, NoReverseMatch
+except ImportError:
+    from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models import Q
 from django.db.models.aggregates import Max
@@ -122,7 +125,7 @@ class NavType(models.Model):
         (LABEL_USE_GET_LABEL, _('Use get_label')),
     )
 
-    content_type = models.OneToOneField(ContentType, verbose_name=_('django model'))
+    content_type = models.OneToOneField(ContentType, verbose_name=_('django model'), on_delete=models.CASCADE)
     search_field = models.CharField(max_length=200, blank=True, default="", verbose_name=_('search field'))
     label_rule = models.IntegerField(
         verbose_name=_('How to generate the label'), choices=LABEL_RULE_CHOICES, default=LABEL_USE_UNICODE
@@ -184,13 +187,24 @@ class NavNode(models.Model):
     Point on a content_object
     """
 
-    tree = models.ForeignKey(COOP_CMS_NAVTREE_CLASS, verbose_name=_("tree"))
+    tree = models.ForeignKey(COOP_CMS_NAVTREE_CLASS, verbose_name=_("tree"), on_delete=models.CASCADE)
     label = models.CharField(max_length=200, verbose_name=_("label"))
-    parent = models.ForeignKey("NavNode", blank=True, null=True, default=0, verbose_name=_("parent"))
+    parent = models.ForeignKey(
+        "NavNode", blank=True,
+        null=True, default=0,
+        verbose_name=_("parent"),
+        on_delete=models.CASCADE
+    )
     ordering = models.PositiveIntegerField(_("ordering"), default=0)
 
     # generic relation
-    content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"), blank=True, null=True)
+    content_type = models.ForeignKey(
+        ContentType,
+        verbose_name=_("content_type"),
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE
+    )
     object_id = models.PositiveIntegerField(verbose_name=_("object id"), blank=True, null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
     in_navigation = models.BooleanField(_("in navigation"), default=True)
@@ -596,7 +610,7 @@ class BaseArticle(BaseNavigable):
     summary = models.TextField(_('Summary'), blank=True, default='')
     category = models.ForeignKey(
         ArticleCategory, verbose_name=_('Category'), blank=True, null=True, default=None,
-        related_name="%(app_label)s_%(class)s_rel"
+        related_name="%(app_label)s_%(class)s_rel", on_delete=models.CASCADE
     )
     in_newsletter = models.BooleanField(
         _('In newsletter'), default=True,
@@ -604,7 +618,7 @@ class BaseArticle(BaseNavigable):
     )
     homepage_for_site = models.ForeignKey(
         Site, verbose_name=_('Homepage for site'), blank=True, null=True, default=None,
-        related_name="homepage_article"
+        related_name="homepage_article",  on_delete=models.CASCADE
     )
     headline = models.BooleanField(
         _("Headline"), default=False,
@@ -1018,7 +1032,14 @@ class Media(TimeStampedModel):
 class Image(Media):
     """An image in media library"""
     file = models.ImageField(_('file'), upload_to=get_img_folder)
-    size = models.ForeignKey(ImageSize, default=None, blank=True, null=True, verbose_name=_("size"))
+    size = models.ForeignKey(
+        ImageSize,
+        default=None,
+        blank=True,
+        null=True,
+        verbose_name=_("size"),
+        on_delete=models.CASCADE
+    )
     copyright = models.CharField(max_length=200, verbose_name=_('copyright'), blank=True, default='')
 
     def __str__(self):
@@ -1096,11 +1117,13 @@ class Document(Media):
         _('is private'), default=False,
         help_text=_("Check this if you do not want to publish this document to all users")
     )
-    category = models.ForeignKey(ArticleCategory, blank=True, null=True, default=None, verbose_name=_('category'))
+    category = models.ForeignKey(ArticleCategory, blank=True, null=True, default=None, verbose_name=_('category'),
+        on_delete=models.CASCADE
+     )
 
     def can_download_file(self, user):
         """is user allowed to download"""
-        return user.is_authenticated()
+        return user.is_authenticated  # TODO
 
     def get_download_url(self):
         """download url"""
@@ -1168,7 +1191,7 @@ pre_delete.connect(remove_from_navigation)
 @python_2_unicode_compatible
 class NewsletterItem(models.Model):
     """Something which is in a newsletter"""
-    content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"))
+    content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"), on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField(verbose_name=_("object id"))
     content_object = GenericForeignKey('content_type', 'object_id')
     ordering = models.IntegerField(verbose_name=_("ordering"), default=0)
@@ -1231,7 +1254,7 @@ class Newsletter(TimeStampedModel):
     content = models.TextField(_("content"), default="<br>", blank=True)
     items = models.ManyToManyField(NewsletterItem, blank=True)
     template = models.CharField(_('template'), max_length=200, default='', blank=True)
-    site = models.ForeignKey(Site, verbose_name=_('site'))
+    site = models.ForeignKey(Site, verbose_name=_('site'), on_delete=models.CASCADE)
     source_url = models.URLField(verbose_name=_('source url'), default="", blank=True)
     is_public = models.BooleanField(default=False, verbose_name=_('is_public'))
     newsletter_date = models.DateField(blank=True, null=True, default=None, verbose_name=_('newsletter date'))
@@ -1298,7 +1321,7 @@ class Newsletter(TimeStampedModel):
 class NewsletterSending(models.Model):
     """Schedule newsletter sending"""
 
-    newsletter = models.ForeignKey(Newsletter)
+    newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE)
     scheduling_dt = models.DateTimeField(_("scheduling date"), blank=True, default=None, null=True)
     sending_dt = models.DateTimeField(_("sending date"), blank=True, default=None, null=True)
 
@@ -1374,12 +1397,19 @@ class FragmentFilter(models.Model):
 @python_2_unicode_compatible
 class Fragment(models.Model):
     """small piece of html which can be dynamically added to the page"""
-    type = models.ForeignKey(FragmentType, verbose_name=_('fragment type'))
+    type = models.ForeignKey(FragmentType, verbose_name=_('fragment type'), on_delete=models.CASCADE)
     name = models.CharField(max_length=100, db_index=True, verbose_name=_('name'))
     css_class = models.CharField(max_length=100, default="", blank=True, verbose_name=_('CSS class'))
     position = models.IntegerField(verbose_name=_("position"), default=0)
     content = models.TextField(default="", blank=True, verbose_name=_('content'))
-    filter = models.ForeignKey(FragmentFilter, verbose_name=_('fragment filter'), blank=True, null=True, default=None)
+    filter = models.ForeignKey(
+        FragmentFilter,
+        verbose_name=_('fragment filter'),
+        blank=True,
+        null=True,
+        default=None,
+        on_delete=models.CASCADE
+    )
     
     class Meta:
         verbose_name = _('Fragment')
@@ -1430,7 +1460,7 @@ class SiteSettings(models.Model):
         (SITEMAP_ALL, _("All articles")),
     )
 
-    site = models.OneToOneField(Site, verbose_name=_('site settings'))
+    site = models.OneToOneField(Site, verbose_name=_('site settings'), on_delete=models.CASCADE)
     homepage_url = models.CharField(
         max_length=256, blank=True, default="", verbose_name=_('homepage URL'),
         help_text=_("if set, the homepage will be redirected to the given URL"), db_index=True

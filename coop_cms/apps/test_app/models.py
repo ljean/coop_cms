@@ -4,7 +4,10 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except:
+    from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
 
 
@@ -45,7 +48,7 @@ class TestClass(models.Model):
 
     def can_view_object(self, user):
         """for unit-testing"""
-        return user.is_authenticated()
+        return user.is_authenticated # TODO
 
     def can_edit_object(self, user):
         """for unit-testing"""

@@ -31,7 +31,7 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        'django >= 1.11, <2.0',
+        'django >= 1.11, <2.1',
         'django-extensions',
         'sorl-thumbnail',
         'apidev-coop_colorbox >= 1.4.1',

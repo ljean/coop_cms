@@ -8,7 +8,10 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message, error as error_message
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -73,7 +76,7 @@ class EditableObjectView(View):
         """check edit perms"""
         can_edit_perm = 'can_edit_{0}'.format(self.varname)
         user = self.request.user
-        return user.is_authenticated() and user.is_active and user.has_perm(can_edit_perm, self.object)
+        return user.is_authenticated and user.is_active and user.has_perm(can_edit_perm, self.object) # TODO
         
     def can_access_object(self):
         """check access perms: 404 if not"""
@@ -246,7 +249,7 @@ class EditableFormsetView(TemplateView):
         ct = ContentType.objects.get_for_model(self.model)
         can_edit_perm = '{0}.change_{1}'.format(ct.app_label, ct.model)
         user = self.request.user
-        return user.is_authenticated() and user.is_active and user.has_perm(can_edit_perm, None)
+        return user.is_authenticated and user.is_active and user.has_perm(can_edit_perm, None)  # TODO
         
     def can_view_objects(self):
         """check view perms"""

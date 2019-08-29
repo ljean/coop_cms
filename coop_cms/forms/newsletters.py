@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 from django import forms
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
@@ -164,3 +165,22 @@ class NewsletterAdminForm(forms.ModelForm):
         js = (
             'chosen/chosen.jquery.js',
         )
+        
+        
+class NewsletterHandleRecipients(forms.Form):
+    choix = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(), required=False)
+    email = forms.EmailField(required=False)
+    email2 = forms.EmailField(required=False)
+    
+    def __init__(self, *args, **kwargs):
+        super(NewsletterHandleRecipients, self).__init__(*args, **kwargs)
+        DESTS = settings.COOP_CMS_TEST_EMAILS
+        self.fields["choix"].choices = DESTS
+        self.fields["choix"].help_text = "Cochez les emails que vous souhaitez utiliser pour le test d'envoi."
+        self.fields["email"].help_text = "Ajoutez un email supplémentaire."
+        self.fields["email2"].help_text = "Ajoutez un email supplémentaire."
+        self.fields["email2"].label = "Email"
+
+    def clean_choices(self):
+        choix = self.cleaned_data['choix']
+        return choix

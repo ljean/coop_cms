@@ -6,7 +6,10 @@ from datetime import timedelta
 
 from django.contrib.sites.models import Site
 from django.conf import settings
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except:
+    from django.core.urlresolvers import reverse
 
 from model_mommy import mommy
 

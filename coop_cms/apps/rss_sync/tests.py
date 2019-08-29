@@ -4,7 +4,10 @@ from __future__ import unicode_literals
 
 from django.test import TestCase
 from django.contrib.auth.models import User, Permission
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except:
+    from django.core.urlresolvers import reverse
 from coop_cms.settings import get_article_class
 from coop_cms.apps.rss_sync.models import RssItem, RssSource
 from coop_cms.models import BaseArticle
