@@ -386,7 +386,7 @@ class NewsletterTest(UserBaseTestCase):
         self.assertEqual(2, NewsletterItem.objects.count())
         NewsletterItem.objects.all().delete()
         self.assertEqual(0, NewsletterItem.objects.count())
-        management.call_command('create_newsletter_items', verbosity=0, interactive=False)
+        management.call_command('create_newsletter_items', verbosity=0)  # , interactive=False)
         self.assertEqual(2, NewsletterItem.objects.count())
         item1 = NewsletterItem.objects.get(content_type=content_type, object_id=art1.id)
         item2 = NewsletterItem.objects.get(content_type=content_type, object_id=art2.id)
@@ -949,7 +949,7 @@ class NewsletterTest(UserBaseTestCase):
         sch_dt = timezone.now() - timedelta(1)
         sending = mommy.make(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
 
-        management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
+        management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0)  # , interactive=False)
 
         sending = NewsletterSending.objects.get(id=sending.id)
         self.assertNotEqual(sending.sending_dt, None)
@@ -967,7 +967,7 @@ class NewsletterTest(UserBaseTestCase):
         
         # check whet happens if command is called again
         mail.outbox = []
-        management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
+        management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0)  # , interactive=False)
         self.assertEqual(len(mail.outbox), 0)
 
     def test_send_newsletter_several(self):
@@ -984,7 +984,7 @@ class NewsletterTest(UserBaseTestCase):
         sending = mommy.make(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
         addresses = ';'.join(['toto@toto.fr']*5)
-        management.call_command('send_newsletter', addresses, verbosity=0, interactive=False)
+        management.call_command('send_newsletter', addresses, verbosity=0)  # , interactive=False)
         
         sending = NewsletterSending.objects.get(id=sending.id)
         self.assertNotEqual(sending.sending_dt, None)
@@ -999,7 +999,7 @@ class NewsletterTest(UserBaseTestCase):
         
         # check whet happens if command is called again
         mail.outbox = []
-        management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
+        management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0)  #  , interactive=False)
         self.assertEqual(len(mail.outbox), 0)
 
     def test_send_newsletter_not_yet(self):
@@ -1014,7 +1014,7 @@ class NewsletterTest(UserBaseTestCase):
         sch_dt = timezone.now() + timedelta(1)
         sending = mommy.make(NewsletterSending, newsletter=newsletter, scheduling_dt= sch_dt, sending_dt= None)
         
-        management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0, interactive=False)
+        management.call_command('send_newsletter', 'toto@toto.fr', verbosity=0)  # , interactive=False)
         
         sending = NewsletterSending.objects.get(id=sending.id)
         self.assertEqual(sending.sending_dt, None)

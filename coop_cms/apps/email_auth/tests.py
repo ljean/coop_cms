@@ -607,7 +607,7 @@ class InvalidationUserBackendTest(BaseTest):
 
         self.assertEqual(InvalidatedUser.objects.count(), 0)
 
-        management.call_command('invalidate_passwords', verbosity=0, interactive=False)
+        management.call_command('invalidate_passwords', verbosity=0)
 
         self.assertEqual(User.objects.count(), 2)
         self.assertEqual(InvalidatedUser.objects.count(), 2)
