@@ -34,8 +34,8 @@ class Migration(migrations.Migration):
                 ('in_newsletter', models.BooleanField(default=True, help_text='Make this article available for newsletters.', verbose_name='In newsletter')),
                 ('headline', models.BooleanField(default=False, help_text='Make this article appear on the home page', verbose_name='Headline')),
                 ('publication_date', models.DateTimeField(default=datetime.datetime.now, verbose_name='Publication date')),
-                ('category', models.ForeignKey(related_name='basic_cms_article_rel', default=None, blank=True, to='coop_cms.ArticleCategory', null=True, verbose_name='Category')),
-                ('homepage_for_site', models.ForeignKey(related_name='homepage_article', default=None, blank=True, to='sites.Site', null=True, verbose_name='Homepage for site')),
+                ('category', models.ForeignKey(related_name='basic_cms_article_rel', default=None, blank=True, to='coop_cms.ArticleCategory', null=True, verbose_name='Category', on_delete=models.CASCADE)),
+                ('homepage_for_site', models.ForeignKey(related_name='homepage_article', default=None, blank=True, to='sites.Site', null=True, verbose_name='Homepage for site', on_delete=models.CASCADE)),
                 ('sites', models.ManyToManyField(default=[1], to='sites.Site', verbose_name='site')),
             ],
             options={
