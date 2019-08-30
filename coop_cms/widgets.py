@@ -4,10 +4,6 @@
 from __future__ import unicode_literals
 
 from django.core.exceptions import ObjectDoesNotExist
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
 from django.forms import TextInput as DjangoTextInput
 from django.utils.text import mark_safe
 from django.utils.translation import ugettext as _
@@ -15,6 +11,7 @@ from django.utils.translation import ugettext as _
 import floppyforms.__future__ as floppyforms
 
 from coop_cms.models import NavType
+from coop_cms.moves import reverse
 from coop_cms.utils import get_text_from_template
 
 

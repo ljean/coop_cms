@@ -13,6 +13,7 @@ from coop_bar.utils import make_link
 from coop_html_editor.settings import get_html_editor
 
 from coop_cms.models import Link, Fragment
+from coop_cms.moves import is_authenticated
 from coop_cms.settings import (
     get_article_class, get_navtree_class, cms_no_homepage, hide_media_library_menu, is_localized
 )
@@ -335,7 +336,7 @@ def cms_extra_js(request, context):
 
 def log_out(request, context):
     """show menu"""
-    if request and request.user.is_authenticated and request.user.is_staff:  # TODO
+    if request and is_authenticated(request.user) and request.user.is_staff:
         return make_link(
             reverse("logout"), _('Log out'), 'power-off', classes=['alert_on_click', 'icon']
         )

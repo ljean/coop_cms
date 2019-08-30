@@ -33,6 +33,12 @@ except ImportError:
     MiddlewareMixin = object
 
 
+try:
+    from django.urls import reverse, NoReverseMatch
+except ImportError:
+    from django.core.urlresolvers import reverse, NoReverseMatch
+
+
 if VERSION >= (1, 9, 0):
     from wsgiref.util import FileWrapper
 else:
@@ -73,3 +79,13 @@ def get_response_json(response):
         return json.loads(response.content)
     else:
         return response.json()
+
+
+def is_authenticated(user):
+    if callable(user.is_authenticated):
+        return user.is_authenticated()
+    return user.is_authenticated
+
+
+def is_anonymous(user):
+    return not is_authenticated(user)

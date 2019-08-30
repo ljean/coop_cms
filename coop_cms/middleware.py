@@ -10,7 +10,7 @@ except:
     from django.core.urlresolvers import NoReverseMatch
 from django.contrib.auth.views import redirect_to_login
 
-from coop_cms.moves import MiddlewareMixin
+from coop_cms.moves import MiddlewareMixin, is_authenticated
 from coop_cms.utils import get_login_url
 
 
@@ -20,7 +20,7 @@ class PermissionsMiddleware(MiddlewareMixin):
     def process_exception(self, request, exception):
         """manage exception"""
 
-        if isinstance(exception, PermissionDenied) and (not request.user.is_authenticated):  # TODO
+        if isinstance(exception, PermissionDenied) and (not is_authenticated(request.user)):
             try:
                 login_url = get_login_url()
             except NoReverseMatch:

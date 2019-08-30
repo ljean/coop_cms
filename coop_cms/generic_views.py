@@ -8,10 +8,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message, error as error_message
 from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
 from django.forms.models import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
@@ -24,6 +20,7 @@ from coop_html_editor import utils as html_editor_utils
 
 from coop_cms.exceptions import ArticleNotAllowed
 from coop_cms.logger import logger
+from coop_cms.moves import reverse, is_authenticated
 from coop_cms.settings import is_cache_enabled
 
 
@@ -76,7 +73,7 @@ class EditableObjectView(View):
         """check edit perms"""
         can_edit_perm = 'can_edit_{0}'.format(self.varname)
         user = self.request.user
-        return user.is_authenticated and user.is_active and user.has_perm(can_edit_perm, self.object) # TODO
+        return is_authenticated(user) and user.is_active and user.has_perm(can_edit_perm, self.object)
         
     def can_access_object(self):
         """check access perms: 404 if not"""
@@ -249,7 +246,7 @@ class EditableFormsetView(TemplateView):
         ct = ContentType.objects.get_for_model(self.model)
         can_edit_perm = '{0}.change_{1}'.format(ct.app_label, ct.model)
         user = self.request.user
-        return user.is_authenticated and user.is_active and user.has_perm(can_edit_perm, None)  # TODO
+        return is_authenticated(user) and user.is_active and user.has_perm(can_edit_perm, None)
         
     def can_view_objects(self):
         """check view perms"""

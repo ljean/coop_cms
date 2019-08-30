@@ -9,10 +9,6 @@ from django.db.models.aggregates import Max
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError, PermissionDenied
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template import RequestContext
@@ -20,7 +16,7 @@ from django.template.loader import select_template
 from django.utils.translation import ugettext as _
 
 from coop_cms import models
-from coop_cms.moves import make_context
+from coop_cms.moves import make_context, reverse
 from coop_cms.settings import get_navtree_class
 from coop_cms.logger import logger
 from coop_cms.utils import get_model_app, get_model_label, get_model_name

@@ -4,11 +4,9 @@
 from __future__ import unicode_literals
 
 from django.db import models
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
 from django.utils.encoding import python_2_unicode_compatible
+
+from coop_cms.moves import reverse, is_authenticated
 
 
 class TestTag(models.Model):
@@ -48,7 +46,7 @@ class TestClass(models.Model):
 
     def can_view_object(self, user):
         """for unit-testing"""
-        return user.is_authenticated # TODO
+        return is_authenticated(user)
 
     def can_edit_object(self, user):
         """for unit-testing"""

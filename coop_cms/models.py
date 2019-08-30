@@ -17,10 +17,6 @@ from django.contrib.sites.models import Site
 from django.contrib.staticfiles import finders
 from django.core.exceptions import ValidationError
 from django.core.files import File
-try:
-    from django.urls import reverse, NoReverseMatch
-except ImportError:
-    from django.core.urlresolvers import reverse, NoReverseMatch
 from django.db import models
 from django.db.models import Q
 from django.db.models.aggregates import Max
@@ -34,7 +30,7 @@ from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
 from sorl.thumbnail.parsers import ThumbnailParseError
 
-from coop_cms.moves import make_context
+from coop_cms.moves import make_context, reverse, NoReverseMatch, is_authenticated
 from coop_cms.optionals import build_localized_fieldname
 from coop_cms.settings import (
     get_article_class, get_article_logo_size, get_article_logo_crop, get_article_templates, get_default_logo,
@@ -1123,7 +1119,7 @@ class Document(Media):
 
     def can_download_file(self, user):
         """is user allowed to download"""
-        return user.is_authenticated  # TODO
+        return is_authenticated(user)
 
     def get_download_url(self):
         """download url"""

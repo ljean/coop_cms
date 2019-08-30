@@ -10,10 +10,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message
 from django.core.exceptions import PermissionDenied
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.template import TemplateDoesNotExist
@@ -29,6 +25,7 @@ from coop_cms.forms.articles import ArticleLogoForm, ArticleTemplateForm, Publis
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
+from coop_cms.moves import reverse, is_authenticated
 from coop_cms.settings import (
     get_article_class, get_article_form, get_article_settings_form, get_new_article_form,
     get_articles_category_page_size, homepage_no_redirection
@@ -323,7 +320,7 @@ class ArticleView(EditableObjectView):
     def can_access_object(self):
         """perms -> 404 if no perms"""
 
-        if self.object.login_required and not self.request.user.is_authenticated:  # TODO
+        if self.object.login_required and not is_authenticated(self.request.user):
             raise PermissionDenied
 
         if self.object.is_archived():

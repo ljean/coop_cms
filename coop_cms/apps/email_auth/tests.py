@@ -20,6 +20,7 @@ from django.test.utils import override_settings
 from model_mommy import mommy
 from registration.models import RegistrationProfile
 
+from coop_cms.moves import is_anonymous
 from coop_cms.tests import BeautifulSoup
 
 from .models import InvalidatedUser
@@ -544,7 +545,7 @@ class InvalidationUserBackendTest(BaseTest):
         self.assertNotEqual(form, None)
         self.assertEqual(form.invalidated_password, True)
 
-        self.assertEqual(self._get_from_context(response, 'user').is_anonymous(), True)
+        self.assertEqual(is_anonymous(self._get_from_context(response, 'user')), True)
 
         self.assertEqual(InvalidatedUser.objects.count(), 1)
         self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=False).count(), 1)
@@ -568,7 +569,7 @@ class InvalidationUserBackendTest(BaseTest):
         self.assertNotEqual(form, None)
         self.assertEqual(form.invalidated_password, False)
 
-        self.assertEqual(self._get_from_context(response, 'user').is_anonymous(), True)
+        self.assertEqual(is_anonymous(self._get_from_context(response, 'user')), True)
 
         self.assertEqual(InvalidatedUser.objects.count(), 0)
 

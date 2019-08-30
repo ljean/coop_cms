@@ -10,10 +10,6 @@ import os.path
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
@@ -21,7 +17,7 @@ from django.template.loader import get_template
 from coop_cms.forms.content import AddDocForm, AddImageForm
 from coop_cms.logger import logger
 from coop_cms import models
-from coop_cms.moves import make_context
+from coop_cms.moves import make_context, reverse
 from coop_cms.utils import paginate
 from coop_cms.utils.xsendfile import serve_file
 
