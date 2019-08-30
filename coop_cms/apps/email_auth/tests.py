@@ -18,7 +18,6 @@ from django.test import TestCase
 from django.test.utils import override_settings
 
 from model_mommy import mommy
-from registration.models import RegistrationProfile
 
 from coop_cms.moves import is_anonymous
 from coop_cms.tests import BeautifulSoup
@@ -441,6 +440,8 @@ class RegistrationTest(BaseTest):
 
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
+        activation_key = response.context["activation_key"]
+
         self.assertEqual(User.objects.filter(email=data['email']).count(), 1)
         user = User.objects.filter(email=data['email'])[0]
         self.assertEqual(user.is_active, False)
@@ -452,11 +453,7 @@ class RegistrationTest(BaseTest):
         self.assertEqual(email.to, [data['email']])
         mail.outbox = []
 
-        self.assertEqual(RegistrationProfile.objects.count(), 1)
-        registration_profile = RegistrationProfile.objects.all()[0]
-        self.assertEqual(registration_profile.user, user)
-
-        activation_url = reverse('registration_activate', args=[registration_profile.activation_key])
+        activation_url = reverse('registration_activate', args=[activation_key])
         response = self.client.get(activation_url, follow=True)
         self.assertEqual(response.status_code, 200)
         user = User.objects.get(id=user.id)
@@ -479,6 +476,8 @@ class RegistrationTest(BaseTest):
 
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 302)
+        activation_key = response.context["activation_key"]
+
         self.assertEqual(User.objects.filter(email=data['email']).count(), 1)
         user = User.objects.filter(email=data['email'])[0]
         self.assertEqual(user.is_active, False)
@@ -490,11 +489,7 @@ class RegistrationTest(BaseTest):
         self.assertEqual(email.to, [data['email']])
         mail.outbox = []
 
-        self.assertEqual(RegistrationProfile.objects.count(), 1)
-        registration_profile = RegistrationProfile.objects.all()[0]
-        self.assertEqual(registration_profile.user, user)
-
-        activation_url = reverse('registration_activate', args=[registration_profile.activation_key])
+        activation_url = reverse('registration_activate', args=[activation_key])
         response = self.client.get(activation_url, follow=True)
         self.assertEqual(response.status_code, 200)
         user = User.objects.get(id=user.id)
