@@ -122,9 +122,9 @@ class GenericViewTestCase(BaseTestCase):
     def test_view_object_m2m_relationships(self):
         self._log_as_viewer()
         obj = mommy.make(TestClass)
-        tag1 = mommy.make(TestTag)
-        tag2 = mommy.make(TestTag)
-        tag3 = mommy.make(TestTag)
+        tag1 = mommy.make(TestTag, name='The-Tag-1#')
+        tag2 = mommy.make(TestTag, name='The-Tag-2#')
+        tag3 = mommy.make(TestTag, name='The-Tag-3#')
         obj.tags.add(tag1)
         obj.tags.add(tag2)
         obj.save()
