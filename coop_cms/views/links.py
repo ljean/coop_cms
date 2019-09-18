@@ -7,7 +7,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.translation import ugettext as _
@@ -16,6 +15,7 @@ from colorbox.decorators import popup_redirect
 
 from coop_cms.forms.content import NewLinkForm
 from coop_cms import models
+from coop_cms.moves import reverse
 
 
 @login_required

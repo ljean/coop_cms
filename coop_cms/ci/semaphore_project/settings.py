@@ -209,7 +209,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'floppyforms',
     'sorl.thumbnail',
-    'registration',
+    'django_registration',
 
     # externals
     'coop_html_editor',

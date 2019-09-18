@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 
@@ -13,6 +13,7 @@ from coop_bar.utils import make_link
 from coop_html_editor.settings import get_html_editor
 
 from coop_cms.models import Link, Fragment
+from coop_cms.moves import is_authenticated
 from coop_cms.settings import (
     get_article_class, get_navtree_class, cms_no_homepage, hide_media_library_menu, is_localized
 )
@@ -80,7 +81,7 @@ def django_admin(request, context):
     """show admin"""
     if request and request.user.is_staff:
         return make_link(
-            reverse("admin:index"), _(u'Administration'), 'fugue/tables.png',
+            reverse("admin:index"), _(u'Administration'), 'table',
             classes=['icon', 'alert_on_click']
         )
 
@@ -93,7 +94,7 @@ def django_admin_edit_article(request, context):
 
         view_name = 'admin:{0}_{1}_change'.format(get_model_app(article_class), get_model_name(article_class))
         return make_link(
-            reverse(view_name, args=[article.id]), _('Article admin'), 'fugue/table.png',
+            reverse(view_name, args=[article.id]), _('Article admin'), 'table',
             classes=['icon', 'alert_on_click']
         )
 
@@ -107,7 +108,7 @@ def django_admin_edit_object(request, context):
         try:
             return make_link(
                 reverse(view_name, args=[obj.id]),
-                _('Admin {0}').format(get_model_label(object_class)), 'fugue/table.png',
+                _('Admin {0}').format(get_model_label(object_class)), 'table',
                 classes=['icon', 'alert_on_click']
             )
         except NoReverseMatch:
@@ -125,7 +126,7 @@ def django_admin_add_object(request, context):
         try:
             return make_link(
                 reverse(view_name),
-                _('Add {0}').format(get_model_label(object_class)), 'fugue/table.png',
+                _('Add {0}').format(get_model_label(object_class)), 'table',
                 classes=['icon', 'alert_on_click']
             )
         except NoReverseMatch:
@@ -142,7 +143,7 @@ def django_admin_list_objects(request, context):
             view_name = 'admin:{0}_{1}_changelist'.format(get_model_app(object_class), get_model_name(object_class))
             return make_link(
                 reverse(view_name),
-                _('List {0}').format(get_model_label(object_class)), 'fugue/table.png',
+                _('List {0}').format(get_model_label(object_class)), 'table',
                 classes=['icon', 'alert_on_click']
             )
         except NoReverseMatch:
@@ -164,7 +165,7 @@ def django_admin_navtree(request, context):
                 url = reverse('admin:{0}_changelist'.format(admin_tree_name))
                 label = _('Navigation trees')
             return make_link(
-                url, label, 'fugue/leaf-plant.png',
+                url, label, 'leaf',
                 classes=['icon', 'alert_on_click']
             )
 
@@ -173,7 +174,7 @@ def view_all_articles(request, context):
     """show menu"""
     if request and request.user.is_staff:
         return make_link(
-            reverse('coop_cms_view_all_articles'), _('Articles'), 'fugue/documents-stack.png',
+            reverse('coop_cms_view_all_articles'), _('Articles'), 'copy',
             classes=['icon', 'alert_on_click']
         )
 
@@ -186,7 +187,7 @@ def cms_media_library(request, context):
     
     if context.get('edit_mode'):
         return make_link(
-            reverse('coop_cms_media_images'), _('Media library'), 'fugue/images-stack.png',
+            reverse('coop_cms_media_images'), _('Media library'), 'images',
             'coopbar_medialibrary', ['icon', 'slide']
         )
 
@@ -199,7 +200,7 @@ def cms_upload_image(request, context):
     
     if context.get('edit_mode'):
         return make_link(
-            reverse('coop_cms_upload_image'), _('Add image'), 'fugue/image--plus.png',
+            reverse('coop_cms_upload_image'), _('Add image'), 'file-image',
             classes=['coopbar_addfile', 'colorbox-form', 'icon']
         )
 
@@ -210,7 +211,7 @@ def cms_update_logo(request, context):
     article = context.get('article', None)
     if article and context.get('edit_mode'):
         return make_link(
-            reverse('coop_cms_update_logo', args=[article.id]), _('Update logo'), 'fugue/image.png',
+            reverse('coop_cms_update_logo', args=[article.id]), _('Update logo'), 'image',
             classes=['update-logo', 'icon']
         )
 
@@ -223,7 +224,7 @@ def cms_upload_doc(request, context):
     
     if context.get('edit_mode'):
         return make_link(
-            reverse('coop_cms_upload_doc'), _('Add document'), 'fugue/document-import.png',
+            reverse('coop_cms_upload_doc'), _('Add document'), 'file-import',
             classes=['coopbar_addfile', 'colorbox-form', 'icon']
         )
 
@@ -234,7 +235,7 @@ def cms_new_article(request, context):
     if not context.get('edit_mode'):
         url = reverse('coop_cms_new_article')
         return make_link(
-            url, _('Add article'), 'fugue/document--plus.png',
+            url, _('Add article'), 'file-medical',
             classes=['alert_on_click', 'colorbox-form', 'icon']
         )
 
@@ -245,7 +246,7 @@ def cms_new_link(request, context):
     if not context.get('edit_mode'):
         url = reverse('coop_cms_new_link')
         return make_link(
-            url, _('Add link'), 'fugue/document--plus.png',
+            url, _('Add link'), 'file-medical',
             classes=['alert_on_click', 'colorbox-form', 'icon']
         )
 
@@ -260,18 +261,18 @@ def cms_set_homepage(request, context):
     if context.get('edit_mode') and article and (not getattr(article, 'is_homepage', False)):
         url = reverse('coop_cms_set_homepage', args=[article.id])
         return make_link(
-            url, _('Set homepage'), 'fugue/home--pencil.png',
+            url, _('Set homepage'), 'home',
             classes=['alert_on_click', 'colorbox-form', 'icon']
         )
 
 
-@can_edit_article    
+@can_edit_article
 def cms_article_settings(request, context):
     """show menu"""
     article = context['article']
     url = reverse('coop_cms_article_settings', args=[article.id])
     return make_link(
-        url, _('Article settings'), 'fugue/gear.png',
+        url, _('Article settings'), 'cog',
         classes=['alert_on_click', 'colorbox-form', 'icon']
     )
 
@@ -282,7 +283,7 @@ def cms_save(request, context):
     if context.get('edit_mode'):
         #No link, will be managed by catching the js click event
         return make_link(
-            '', _('Save'), 'fugue/disk-black.png', id="coopbar_save",
+            '', _('Save'), 'save', id="coopbar_save",
             classes=['icon']
         )
 
@@ -294,7 +295,7 @@ def cms_cancel(request, context):
         url = context.get('coop_cms_cancel_url', None)
         if url:
             return make_link(
-                url, _('Cancel'), 'fugue/cross.png', classes=['alert_on_click', 'icon']
+                url, _('Cancel'), 'times', classes=['alert_on_click', 'icon']
             )
 
 
@@ -305,7 +306,7 @@ def cms_edit(request, context):
         url = context.get('coop_cms_edit_url', None)
         if url:
             return make_link(
-                url, _('Edit'), 'fugue/document--pencil.png', classes=['icon']
+                url, _('Edit'), 'edit', classes=['icon']
             )
 
 
@@ -316,12 +317,12 @@ def cms_publish(request, context):
     if article and ('draft' in context):
         if context['draft']:
             return make_link(
-                article.get_publish_url(), _('Draft'), 'fugue/lock.png',
+                article.get_publish_url(), _('Draft'), 'lock',
                 classes=['colorbox-form', 'icon']
             )
         else:
             return make_link(
-                article.get_publish_url(), _('Published'), 'fugue/globe.png',
+                article.get_publish_url(), _('Published'), 'globe-americas',
                 classes=['colorbox-form', 'icon']
             )
 
@@ -335,9 +336,9 @@ def cms_extra_js(request, context):
 
 def log_out(request, context):
     """show menu"""
-    if request and request.user.is_authenticated() and request.user.is_staff:
+    if request and is_authenticated(request.user) and request.user.is_staff:
         return make_link(
-            reverse("logout"), _('Log out'), 'fugue/control-power.png', classes=['alert_on_click', 'icon']
+            reverse("logout"), _('Log out'), 'power-off', classes=['alert_on_click', 'icon']
         )
 
 
@@ -348,7 +349,7 @@ def cms_new_newsletter(request, context):
         if getattr(settings, 'COOP_CMS_NEWSLETTER_TEMPLATES', None):
             url = reverse('coop_cms_new_newsletter')
             return make_link(
-                url, _('Create newsletter'), 'fugue/document--plus.png',
+                url, _('Create newsletter'), 'file-medical',
                 classes=['alert_on_click', 'colorbox-form', 'icon']
             )
 
@@ -362,7 +363,7 @@ def newsletter_admin(request, context):
     try:
         return make_link(
             reverse(view_name, args=[newsletter.id]),
-            _('Admin {0}').format(get_model_label(object_class)), 'fugue/table.png',
+            _('Admin {0}').format(get_model_label(object_class)), 'table',
             classes=['icon', 'alert_on_click']
         )
     except NoReverseMatch:
@@ -376,7 +377,7 @@ def newsletter_articles(request, context):
     try:
         return make_link(
             reverse(view_name),
-            _('Articles ordering'), 'fugue/table.png',
+            _('Articles ordering'), 'table',
             classes=['icon', 'alert_on_click']
         )
     except NoReverseMatch:
@@ -390,7 +391,7 @@ def change_newsletter_settings(request, context):
         newsletter = context.get('newsletter')
         url = reverse('coop_cms_newsletter_settings', kwargs={'newsletter_id': newsletter.id})
         return make_link(
-            url, _('Newsletter settings'), 'fugue/gear.png',
+            url, _('Newsletter settings'), 'cog',
             classes=['icon', 'colorbox-form', 'alert_on_click']
         )
 
@@ -402,7 +403,7 @@ def convert_newsletter_to_pdf(request, context):
         newsletter = context.get('newsletter')
         url = reverse('coop_cms_newsletter_pdf', args=[newsletter.id, ])
         return make_link(
-            url, _('Convert to Pdf'), 'fugue/document-pdf.png',
+            url, _('Convert to Pdf'), 'file-pdf',
             classes=['icon']
         )
 
@@ -414,7 +415,7 @@ def test_newsletter(request, context):
     if newsletter:
         url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
         return make_link(
-            url, _('Send test'), 'fugue/mail-at-sign.png',
+            url, _('Send test'), 'at',
             classes=['alert_on_click', 'colorbox-form', 'icon']
         )
 
@@ -428,7 +429,7 @@ def cms_add_fragment(request, context):
         if request.user.has_perm(perm):
             url = reverse("coop_cms_add_fragment")
             return make_link(
-                url, _('Add fragment'), 'fugue/block--plus.png',
+                url, _('Add fragment'), 'cubes',
                 classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments']
             )
 
@@ -442,7 +443,7 @@ def cms_edit_fragments(request, context):
         if request.user.has_perm(perm):
             url = reverse("coop_cms_edit_fragments")
             return make_link(
-                url, _('Edit fragments'), 'fugue/block--pencil.png',
+                url, _('Edit fragments'), 'shapes',
                 classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments']
             )
 
@@ -460,7 +461,7 @@ def publication_css_classes(request, context):
 def switch_language(request, context):
     if request and request.user.is_staff and is_localized():
         url = reverse('coop_cms_switch_language_popup')
-        return make_link(url, _('Switch language'), 'fugue/globe-green.png', classes=['colorbox-form', 'icon'])
+        return make_link(url, _('Switch language'), 'globe-americas', classes=['colorbox-form', 'icon'])
 
 
 def load_commands(coop_bar):

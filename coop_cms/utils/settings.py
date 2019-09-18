@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 
-from django.core.urlresolvers import reverse, NoReverseMatch
+from coop_cms.moves import reverse, NoReverseMatch
 
 
 def get_login_url():

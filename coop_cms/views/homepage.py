@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 from django.contrib.auth.decorators import login_required
 from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
-from django.core.urlresolvers import reverse
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils.translation import ugettext as _
@@ -14,6 +13,7 @@ from django.utils.translation import ugettext as _
 from colorbox.decorators import popup_redirect
 
 from coop_cms import models
+from coop_cms.moves import reverse
 from coop_cms.settings import cms_no_homepage, get_article_class, homepage_no_redirection, get_article_views
 from coop_cms.models import get_homepage_url, get_homepage_article
 

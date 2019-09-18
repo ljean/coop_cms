@@ -9,7 +9,10 @@ import logging
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except:
+    from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -119,9 +122,9 @@ class GenericViewTestCase(BaseTestCase):
     def test_view_object_m2m_relationships(self):
         self._log_as_viewer()
         obj = mommy.make(TestClass)
-        tag1 = mommy.make(TestTag)
-        tag2 = mommy.make(TestTag)
-        tag3 = mommy.make(TestTag)
+        tag1 = mommy.make(TestTag, name='The-Tag-1#')
+        tag2 = mommy.make(TestTag, name='The-Tag-2#')
+        tag3 = mommy.make(TestTag, name='The-Tag-3#')
         obj.tags.add(tag1)
         obj.tags.add(tag2)
         obj.save()

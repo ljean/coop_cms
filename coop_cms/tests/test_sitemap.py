@@ -7,7 +7,10 @@ from unittest import skipIf
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.contrib.sitemaps.views import sitemap as sitemap_view
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except:
+    from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.utils.translation import activate
 

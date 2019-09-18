@@ -27,19 +27,6 @@
 				}
 				return false;
 			})
-			
-			$("a.gplus-share").click(function() {
-				try{
-					window.open(
-						'https://plus.google.com/share?url=' + loc + '&text=' + title + '&', 'twitterwindow',
-						'height=600, width=600, toolbar=0, location=0, menubar=0, directories=0, scrollbars=0'
-					);
-				} catch (err) {
-					alert(err);
-				}
-				return false;
-			})
-			
 		})
 	</script>
 	<div class="social-share">
@@ -50,10 +37,6 @@
 		
 		<a href="" class="fb-share-me">
 			<img src="{% static 'img/facebook.png' %}" alt="{% trans "Share on Facebook" %}">
-		</a>
-		
-		<a href="" class="gplus-share">
-			<img src="{% static 'img/gplus.png' %}" alt="{% trans "Share on Google+" %}"/>
 		</a>
 		{% endspaceless %}
 	</div>

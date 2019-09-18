@@ -8,7 +8,10 @@ from datetime import datetime
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except:
+    from django.core.urlresolvers import reverse
 
 from model_mommy import mommy
 

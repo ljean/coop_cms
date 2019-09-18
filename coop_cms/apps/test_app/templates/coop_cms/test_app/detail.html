@@ -19,7 +19,7 @@
     <div id="int_field">{{ object.int_field }}</div>
     <div id="float_field">{{ object.float_field }}</div>
     <div id="properties">{{ object.properties.abc }}</div>
-    {% for tag in object.tags.all %}
+    {% for tag in raw_object.tags.all %}
         {{ tag.name }}
     {% endfor %}
 </div>

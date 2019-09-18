@@ -7,12 +7,12 @@ from django import forms
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 
 from coop_cms.forms.base import InlineHtmlEditableModelForm
 from coop_cms.forms.navigation import WithNavigationModelForm
 from coop_cms.models import BaseArticle
+from coop_cms.moves import reverse
 from coop_cms.settings import (
     get_article_class, get_article_templates, is_localized, can_rewrite_url, is_multi_site
 )

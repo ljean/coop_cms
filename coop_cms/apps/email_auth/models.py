@@ -7,7 +7,7 @@ from django.db import models
 
 class InvalidatedUser(models.Model):
     """Show a message for these users"""
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     password_changed = models.BooleanField(default=False)
     invalidation_datetime = models.DateTimeField()
 

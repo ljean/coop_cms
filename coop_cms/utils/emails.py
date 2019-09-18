@@ -187,4 +187,5 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
 
     html_text = make_links_absolute(html_text, newsletter)
 
+
     return _send_email(newsletter.subject, html_text, dests, list_unsubscribe)

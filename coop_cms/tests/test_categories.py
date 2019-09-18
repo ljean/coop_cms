@@ -4,7 +4,10 @@ from __future__ import unicode_literals
 
 from datetime import datetime, timedelta
 
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except:
+    from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test.utils import override_settings
 

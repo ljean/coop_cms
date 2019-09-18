@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.sites.models import Site
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.utils.encoding import smart_text
@@ -20,7 +20,7 @@ from django.views.generic import View
 
 from colorbox.decorators import popup_redirect
 
-from coop_cms.forms.newsletters import NewsletterSchedulingForm, NewsletterTemplateForm
+from coop_cms.forms.newsletters import NewsletterSchedulingForm, NewsletterTemplateForm, NewsletterHandleRecipients
 from coop_cms import models
 from coop_cms.generic_views import EditableObjectView
 from coop_cms.logger import logger
@@ -85,41 +85,66 @@ def change_newsletter_template(request, newsletter_id):
 @popup_redirect
 def test_newsletter(request, newsletter_id):
     """test newsletter"""
+    context = {}
     newsletter = get_object_or_404(models.Newsletter, id=newsletter_id)
+    context["newsletter"] = newsletter
 
     if not request.user.has_perm('can_edit_newsletter', newsletter):
         raise PermissionDenied
 
-    dests = settings.COOP_CMS_TEST_EMAILS
-
+    form = NewsletterHandleRecipients(data=request.POST)
+    context["form"] = form
     if request.method == "POST":
-        try:
-            nb_sent = send_newsletter(newsletter, dests)
+        if form.is_valid():
+            choix = form.cleaned_data["choix"]
+            email = form.cleaned_data["email"]
+            email2 = form.cleaned_data["email2"]
+            
+            if choix:
+                dests = choix
+                
+                if email:
+                    dests.append(email)
 
-            messages.add_message(
-                request, messages.SUCCESS,
-                _("The test email has been sent to {0} addresses: {1}").format(nb_sent, ', '.join(dests))
-            )
-            return HttpResponseRedirect(newsletter.get_absolute_url())
+                if email2:
+                    if email != email2:
+                        dests.append(email2)
+            else:
+                dests = []
+                if email:
+                    dests.append(email)
+                
+                if email2 and email != email2:
+                    dests.append(email2)
+                
+                if not email and not email2:
+                    messages.add_message(
+                        request, messages.ERROR,
+                        _("Cochez au moins une case ou remplissez un champ email.")
+                    )
+                    return HttpResponseRedirect(newsletter.get_absolute_url())
+            
+            try:
+                nb_sent = send_newsletter(newsletter, dests)
+                messages.add_message(
+                    request, messages.SUCCESS,
+                    _("The test email has been sent to {0} addresses: {1}").format(nb_sent, dests)
+                )
+                return HttpResponseRedirect(newsletter.get_absolute_url())
 
-        except Exception:
-            messages.add_message(request, messages.ERROR, _("An error occured! Please contact your support."))
-            logger.error(
-                'Internal Server Error: {0}'.format(request.path),
-                exc_info=sys.exc_info,
-                extra={
-                    'status_code': 500,
-                    'request': request
-                }
-            )
-            return HttpResponseRedirect(newsletter.get_absolute_url())
-
-    return render(
-        request,
-        'coop_cms/popup_test_newsletter.html',
-        {'newsletter': newsletter, 'dests': dests}
-    )
-
+            except Exception:
+                messages.add_message(request, messages.ERROR, _("An error occured! Please contact your support."))
+                logger.error(
+                    'Internal Server Error: {0}'.format(request.path),
+                    exc_info=sys.exc_info,
+                    extra={
+                        'status_code': 500,
+                        'request': request
+                    }
+                )
+                return HttpResponseRedirect(newsletter.get_absolute_url())
+        
+    return render(request, 'coop_cms/popup_test_newsletter.html', context)
 
 @login_required
 @popup_redirect

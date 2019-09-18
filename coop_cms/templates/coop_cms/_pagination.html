@@ -27,27 +27,27 @@
   {% endif %}
 <ul class="pagination">
     {% if page_obj.has_previous %}
-        <li><a href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>
     {% else %}
-        <li class="disabled"><a href="#">&laquo;</a></li>
+        <li class="disabled page-item"><a class="page-link" href="#">&laquo;</a></li>
     {% endif %}
 
     {% for page_number in page_obj|reduced_page_range %}
       {% if page_number == 0 %}
-        <li class="disabled"><a href="#">...</a></li>
+        <li class="disabled page-item"><a  class="page-link"href="#">...</a></li>
       {% else %}
         {% if page_number == page_obj.number %}
-              <li class="active"><a href="#">{{ page_number }} <span class="sr-only">(current)</span></a></li>
+              <li class="active page-item"><a class="page-link" href="#">{{ page_number }} <span class="sr-only">(current)</span></a></li>
           {% else %}
-              <li><a href="?page={{ page_number }}">{{ page_number }}</a></li>
+              <li class="page-item"><a class="page-link" href="?page={{ page_number }}">{{ page_number }}</a></li>
           {% endif %}
       {% endif %}
     {% endfor %}
 
     {% if page_obj.has_next %}
-        <li><a href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>
     {% else %}
-        <li class="disabled"><a href="#">&raquo;</a></li>
+        <li class="disabled page-item"><a class="page-link" href="#">&raquo;</a></li>
     {% endif %}
 
     {% if page_obj.paginator.num_pages > 10 %}

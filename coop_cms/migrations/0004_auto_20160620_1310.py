@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-from django.core.urlresolvers import reverse
+
+from coop_cms.moves import reverse
 
 
 def set_homepage(apps, schema_editor):

@@ -3,7 +3,10 @@
 
 from __future__ import unicode_literals
 
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except:
+    from django.core.urlresolvers import reverse
 from django.forms import HiddenInput
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy as _

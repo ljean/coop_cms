@@ -5,9 +5,8 @@
 
 {% block form_fields %}
 <div>
-    {{ dests|join:"<br />"|safe }}
+	{{ block.super }}
 </div>
-{{block.super}}
 {% endblock %}
 
 {% block form_url %}{% url "coop_cms_test_newsletter" newsletter.id %}{% endblock %}
