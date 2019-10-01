@@ -444,3 +444,7 @@ def change_site_id():
                 current_site.name = "localhost"
                 current_site.save()
                 print(_("Your domain site is now: "), current_site.domain)
+
+
+def is_xsendfile_disabled():
+    return getattr(django_settings, 'COOP_CMS_DISABLE_XSENDFILE', False)
