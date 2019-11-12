@@ -1,0 +1,45 @@
+{% load i18n %}
+{% if contact and emailing %}
+<div class="{{ position }} email-only" {% include 'newsletters/_linkbar_style.html' %}>
+    <div class="item">
+        {% trans "If you can't view this email, " %}
+        <a {% include 'newsletters/_linkbar_link_style.html' %}
+          href="{% url 'newsletters:view_online' emailing.id contact.uuid %}">
+            {% trans "read the online version" %}
+        </a>
+    </div>
+    <div class="item">
+        {% blocktrans %}
+        You receive this email because you subscribed to the {{ subscription_type_name }} mailing list.
+        You can unsubscribe by clicking
+        {% endblocktrans %}
+        <a {% include 'newsletters/_linkbar_link_style.html' %}
+          href="{% url 'newsletters:unregister' emailing.id contact.uuid %}">
+            {% trans "this link" %}
+        </a>
+    </div>
+{% else %}
+<!-- missing -->
+{% endif %}{{ contact }} - {{ emailing }}
+{% if contact and emailing %}
+<div class="{{ position }} email-only" {% include 'newsletters/_linkbar_style.html' %}>
+    <div class="item">
+        {% trans "If you can't view this email, " %}
+        <a {% include 'newsletters/_linkbar_link_style.html' %}
+          href="{% url 'newsletters:view_online' emailing.id contact.uuid %}">
+            {% trans "read the online version" %}
+        </a>
+    </div>
+    <div class="item">
+        {% blocktrans %}
+        You receive this email because you subscribed to the {{ subscription_type_names }} mailing list.
+        You can unsubscribe by clicking
+        {% endblocktrans %}
+        <a {% include 'newsletters/_linkbar_link_style.html' %}
+          href="{% url 'newsletters:unregister' emailing.id contact.uuid %}">
+            {% trans "this link" %}
+        </a>
+    </div>
+{% else %}
+<!-- missing -->
+{% endif %}

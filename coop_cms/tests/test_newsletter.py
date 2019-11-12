@@ -618,7 +618,7 @@ class NewsletterTest(UserBaseTestCase):
     @override_settings(
         COOP_CMS_TEST_EMAILS=[
             ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
-            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+            ('Test Two <test2@test2.fr>', 'Test Two <test2@test2>'),
         ],
         COOP_CMS_FROM_EMAIL='contact@toto.fr'
     )
@@ -669,7 +669,7 @@ class NewsletterTest(UserBaseTestCase):
     @override_settings(
         COOP_CMS_TEST_EMAILS=[
             ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
-            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+            ('Test Two <test2@example.com>', 'Test Two <test2@example.com>'),
         ],
         COOP_CMS_FROM_EMAIL='contact@toto.fr'
     )
@@ -721,7 +721,7 @@ class NewsletterTest(UserBaseTestCase):
     @override_settings(
         COOP_CMS_TEST_EMAILS=[
             ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
-            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+            ('Test Two <test2@example.com>', 'Test Two <test2@example.com>'),
         ],
         COOP_CMS_FROM_EMAIL='contact@toto.fr'
     )
@@ -775,7 +775,7 @@ class NewsletterTest(UserBaseTestCase):
     @override_settings(
         COOP_CMS_TEST_EMAILS=[
             ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
-            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+            ('Test Two <test2@example.com>', 'Test Two <test2@example.com>'),
         ],
         COOP_CMS_FROM_EMAIL='contact@toto.fr'
     )
@@ -828,7 +828,7 @@ class NewsletterTest(UserBaseTestCase):
     @override_settings(
         COOP_CMS_TEST_EMAILS=[
             ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
-            ('Benjamin Cherpas <benjamin.cherpas@apidev.fr>', 'Benjamin Cherpas <benjamin.cherpas@apidev.fr>'),
+            ('Test Two <test2@example.com>', 'Test Two <test2@example.com>'),
         ],
         COOP_CMS_FROM_EMAIL='contact@toto.fr'
     )

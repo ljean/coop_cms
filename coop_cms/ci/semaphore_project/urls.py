@@ -41,5 +41,6 @@ urlpatterns += localized_patterns(
     # path('accounts/', include('coop_cms.apps.email_auth.registration_backend.urls')),
     # path('accounts/', include('registration.backends.model_activation.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path('newsletters/', include('coop_cms.apps.newsletters.urls', namespace='newsletters')),
     path('', include('coop_cms.urls')),
 )

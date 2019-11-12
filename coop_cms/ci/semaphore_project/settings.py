@@ -218,6 +218,7 @@ INSTALLED_APPS = (
     'coop_bar',
     'coop_cms.apps.basic_cms',
     'coop_cms.apps.email_auth',
+    'coop_cms.apps.newsletters',
 
     'django.contrib.admin',
     'django.contrib.admindocs',
@@ -229,8 +230,8 @@ if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigratio
 if len(sys.argv) > 1 and 'test' == sys.argv[1]:
     INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app', )
 
-#import warnings
-#warnings.filterwarnings('ignore', r"django.contrib.localflavor is deprecated")
+# import warnings
+# warnings.filterwarnings('ignore', r"django.contrib.localflavor is deprecated")
 
 
 LOGGING = {

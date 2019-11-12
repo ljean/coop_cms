@@ -1,0 +1,14 @@
+{% extends "coop_cms/newsletter_base.html" %}
+{% load i18n newsletters_utils %}
+
+{% block email_only_header %}
+    {% include 'newsletters/_link_bar.html' with position="top-header" %}
+{% endblock %}
+
+{% block email_only_footer %}
+    {% include 'newsletters/_link_bar.html' with position="bottom-footer" %}
+{% endblock %}
+
+{% block email_only_tracking %}
+    {% email_tracking %}
+{% endblock %}
