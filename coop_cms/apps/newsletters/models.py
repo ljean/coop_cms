@@ -8,6 +8,7 @@ from django.conf import settings
 
 from django.contrib.sites.models import Site
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from coop_cms.models import Newsletter
@@ -140,6 +141,11 @@ class Emailing(models.Model):
     @property
     def lang(self):
         return self.subscription_type.lang
+
+    def get_absolute_url(self):
+        if self.newsletter:
+            return reverse('coop_cms_view_newsletter', args=[self.newsletter.id])
+
 
 
 class MagicLink(models.Model):
