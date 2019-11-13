@@ -14,18 +14,14 @@ from . import settings
 @admin.register(models.Emailing)
 class EmailingAdmin(admin.ModelAdmin):
     """Emailing"""
-    list_display = ['newsletter']
+    list_display = ['newsletter', 'creation_dt', 'subscription_type', 'status']
+    list_editable = ['status']
     raw_id_fields = [
         'send_to', 'sent_to', 'opened_emails', 'unsub',
     ]
-
-    def get_form(self, *args, **kwargs):
-        form_class = super(EmailingAdmin, self).get_form(*args, **kwargs)
-        class custom_form_class(form_class):
-            def __init__(self, *args, **kwargs):
-                super(custom_form_class, self).__init__(*args, **kwargs)
-                self.fields['lang'].widget = forms.Select(choices=settings.get_language_choices())
-        return custom_form_class
+    search_fields = ['newsletter__subject', 'newsletter__content']
+    list_filter = ['status', 'subscription_type']
+    date_hierarchy = 'creation_dt'
 
 
 @admin.register(models.MagicLink)
@@ -39,6 +35,16 @@ class MagicLinkAdmin(admin.ModelAdmin):
 @admin.register(models.SubscriptionType)
 class SubscriptionTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'site', 'order_index', )
+
+    def get_form(self, *args, **kwargs):
+        form_class = super().get_form(*args, **kwargs)
+
+        class custom_form_class(form_class):
+            def __init__(self, *args, **kwargs):
+                super().__init__(*args, **kwargs)
+                self.fields['lang'].widget = forms.Select(choices=settings.get_language_choices())
+
+        return custom_form_class
 
 
 @admin.register(models.Subscription)
