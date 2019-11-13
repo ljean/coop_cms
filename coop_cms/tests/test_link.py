@@ -80,9 +80,9 @@ class AddLinkTest(BaseArticleTest):
 
     def test_view_new_link_anonymous(self):
         url = reverse('coop_cms_new_link')
-        response = self.client.get(url, follow=True)
+        response = self.client.get(url)
         auth_url = get_login_url()
-        self.assertRedirects(response, auth_url + '?{0}'.format(urlencode({'next': url})))
+        self.assertNotAllowed(response)
 
     def test_add_link(self):
         self._log_as_editor()
@@ -178,13 +178,9 @@ class AddLinkTest(BaseArticleTest):
 
     def test_add_link_anonymous(self):
         data = {'title': "test", 'url': "http://www.google.fr", 'sites': [settings.SITE_ID]}
-
         url = reverse('coop_cms_new_link')
-        response = self.client.post(url, data=data, follow=True)
-
-        auth_url = get_login_url()
-        self.assertRedirects(response, auth_url + '?{0}'.format(urlencode({'next': url})))
-
+        response = self.client.post(url, data=data)
+        self.assertNotAllowed(response)
         self.assertEqual(Link.objects.count(), 0)
 
     def test_add_link_no_url(self):

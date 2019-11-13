@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
 from django.template import Template, Context
+from django.test import override_settings
+from django.urls import reverse
 
 from model_mommy import mommy
 
@@ -29,6 +25,7 @@ def _create_link(url, title=""):
     return link
 
 
+@override_settings(COOP_CMS_ARTICLE_TEMPLATES=(('test/standard.html', 'Standard'),))
 class NavigationTest(BaseTestCase):
 
     def setUp(self):
@@ -1231,6 +1228,7 @@ class TemplateTagsTest(BaseTestCase):
         self.assertTrue(html.find(self.nodes[5].get_absolute_url()) < 0)
 
 
+@override_settings(COOP_CMS_ARTICLE_TEMPLATES=(('test/standard.html', 'Standard'),))
 class NavigationTreeBaseTest(BaseTestCase):
     """Base class for navigation tree"""
 
@@ -1259,6 +1257,7 @@ class NavigationTreeBaseTest(BaseTestCase):
         self.tree2.save()
 
 
+@override_settings(COOP_CMS_ARTICLE_TEMPLATES=(('test/standard.html', 'Standard'),))
 class NavigationTreeTest(NavigationTreeBaseTest):
     """Test Navigation tree"""
 
@@ -1363,6 +1362,7 @@ class NavigationTreeTest(NavigationTreeBaseTest):
             self.assertTrue(html.find('{0}'.format(node)) >= 0)
 
 
+@override_settings(COOP_CMS_ARTICLE_TEMPLATES=(('test/standard.html', 'Standard'),))
 class NavigationLiNodeTest(NavigationTreeBaseTest):
     """test li_node argument of navigation_as_nested_ul templatetag"""
 
@@ -1420,19 +1420,27 @@ class NavigationLiNodeTest(NavigationTreeBaseTest):
         """check that request context is use for rendering li_node arg template"""
         tree = get_navtree_class().objects.get(name="default")
 
-        article1 = mommy.make(get_article_class(), title="test1", publication=BaseArticle.PUBLISHED)
+        article1 = mommy.make(
+            get_article_class(), title="test1", publication=BaseArticle.PUBLISHED, template='test/standard.html'
+        )
         article1.sites.add(Site.objects.get_current())
         article1.save()
 
-        article2 = mommy.make(get_article_class(), title="test2", publication=BaseArticle.ARCHIVED)
+        article2 = mommy.make(
+            get_article_class(), title="test2", publication=BaseArticle.ARCHIVED, template='test/standard.html'
+        )
         article2.sites.add(Site.objects.get_current())
         article2.save()
 
-        article3 = mommy.make(get_article_class(), title="test3", publication=BaseArticle.DRAFT)
+        article3 = mommy.make(
+            get_article_class(), title="test3", publication=BaseArticle.DRAFT, template='test/standard.html'
+        )
         article3.sites.add(Site.objects.get_current())
         article3.save()
 
-        article4 = mommy.make(get_article_class(), title="test4", publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(
+            get_article_class(), title="test4", publication=BaseArticle.PUBLISHED, template='test/standard.html'
+        )
         article4.sites.clear()
         article4.save()
 
@@ -1469,19 +1477,27 @@ class NavigationLiNodeTest(NavigationTreeBaseTest):
             tree=tree, label='Node 2', content_object=None, parent=None
         )
 
-        article1 = mommy.make(get_article_class(), title="test1", publication=BaseArticle.PUBLISHED)
+        article1 = mommy.make(
+            get_article_class(), title="test1", publication=BaseArticle.PUBLISHED, template='test/standard.html'
+        )
         article1.sites.add(Site.objects.get_current())
         article1.save()
 
-        article2 = mommy.make(get_article_class(), title="test2", publication=BaseArticle.ARCHIVED)
+        article2 = mommy.make(
+            get_article_class(), title="test2", publication=BaseArticle.ARCHIVED, template='test/standard.html'
+        )
         article2.sites.add(Site.objects.get_current())
         article2.save()
 
-        article3 = mommy.make(get_article_class(), title="test3", publication=BaseArticle.DRAFT)
+        article3 = mommy.make(
+            get_article_class(), title="test3", publication=BaseArticle.DRAFT, template='test/standard.html'
+        )
         article3.sites.add(Site.objects.get_current())
         article3.save()
 
-        article4 = mommy.make(get_article_class(), title="test4", publication=BaseArticle.PUBLISHED)
+        article4 = mommy.make(
+            get_article_class(), title="test4", publication=BaseArticle.PUBLISHED, template='test/standard.html'
+        )
         article4.sites.clear()
         article4.save()
 

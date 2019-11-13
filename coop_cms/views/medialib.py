@@ -13,6 +13,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
+from django.urls import reverse_lazy
 
 from coop_cms.forms.content import AddDocForm, AddImageForm
 from coop_cms.logger import logger
@@ -45,7 +46,7 @@ def _get_photologue_media(request):
         raise Http404
 
 
-@login_required
+@login_required(login_url=reverse_lazy('login'))
 def show_media(request, media_type):
     """show media library"""
     try:

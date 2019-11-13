@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from datetime import timedelta
 from unittest import skipIf
 
@@ -10,13 +8,11 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core import mail
 from django.core import management
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import get_language
 
 from model_mommy import mommy
 
@@ -426,11 +422,9 @@ class NewsletterTest(UserBaseTestCase):
             content="a little intro for this newsletter",
             template="test/newsletter_blue.html",
         )
-
         url = reverse('coop_cms_view_newsletter', args=[newsletter.id])
         response = self.client.get(url)
-
-        self.assertEqual(403, response.status_code)
+        self.assertNotAllowed(response)
         
     def test_edit_newsletter_is_public(self):
         newsletter = mommy.make(
@@ -483,10 +477,10 @@ class NewsletterTest(UserBaseTestCase):
         
         url = reverse('coop_cms_edit_newsletter', args=[newsletter.id])
         response = self.client.get(url)
-        self.assertEqual(403, response.status_code)
+        self.assertNotAllowed(response)
         
         response = self.client.post(url, data={'content': ':OP'})
-        self.assertEqual(403, response.status_code)
+        self.assertNotAllowed(response)
         
         newsletter = Newsletter.objects.get(id=newsletter.id)
         self.assertEqual(newsletter.content, original_data['content'])
@@ -1076,7 +1070,7 @@ class SendEmailTest(UserBaseTestCase):
         )
         for received_email in mail.outbox:
 
-            translated = 'All'  # ugettext('All')
+            translated = "Translate this string for test"  # ugettext("Translate this string for test")
 
             self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
             self.assertEqual(received_email.subject, subject)
@@ -1109,7 +1103,7 @@ class SendEmailTest(UserBaseTestCase):
             [received_email.to for received_email in mail.outbox]
         )
         for received_email in mail.outbox:
-            translated = 'Tous'  # ugettext('All')
+            translated = "Traduit cette chaine pour test"  # ugettext("Translate this string for test")
 
             self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
             self.assertEqual(received_email.subject, subject)
@@ -1142,7 +1136,11 @@ class SendEmailTest(UserBaseTestCase):
             [received_email.to for received_email in mail.outbox]
         )
         for received_email in mail.outbox:
-            translated = 'All'  # ugettext('All')
+            lang = get_language()
+            if lang == 'fr':
+                translated = "Traduit cette chaine pour test"  # ugettext("Translate this string for test")
+            else:
+                translated = "Translate this string for test"  # ugettext("Translate this string for test")
 
             self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
             self.assertEqual(received_email.subject, subject)

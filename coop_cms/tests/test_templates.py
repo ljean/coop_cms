@@ -62,12 +62,7 @@ class TemplateTest(BaseArticleTest):
         article_class = get_article_class()
         article = mommy.make(article_class, slug="test")
         url = reverse('coop_cms_change_template', args=[article.id])
-        response = self.client.post(url, data={'template': 'test/article.html'}, follow=True)
-        self.assertEqual(200, response.status_code)
-        redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('login')
-        self.assertTrue(redirect_url.find(login_url) >= 0)
+        response = self.client.post(url, data={'template': 'test/article.html'})
+        self.assertNotAllowed(response)
         article = article_class.objects.get(id=article.id)  # refresh
         self.assertEqual(article.template, '')
-
-

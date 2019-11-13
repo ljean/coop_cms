@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: rss_sync\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-08 14:58+0000\n"
+"POT-Creation-Date: 2019-11-13 11:30+0100\n"
 "PO-Revision-Date: 2011-12-24 16:16+0100\n"
 "Last-Translator: Dominique Guardiola <dguardiola@quinode.fr>\n"
 "Language-Team: Quinode <contact@quinode.fr>\n"
@@ -19,90 +19,90 @@ msgstr ""
 "X-Poedit-Language: French\n"
 "X-Poedit-Country: FRANCE\n"
 
-#: apps/rss_sync/admin.py:19
+#: apps/rss_sync/admin.py:21
 msgid "Feed"
 msgstr "Flux"
 
-#: apps/rss_sync/admin.py:20
+#: apps/rss_sync/admin.py:22
 msgid "Information"
 msgstr "Information"
 
-#: apps/rss_sync/admin.py:43
+#: apps/rss_sync/admin.py:45
 msgid "Actions"
 msgstr "Actions"
 
-#: apps/rss_sync/admin.py:44
+#: apps/rss_sync/admin.py:46
 msgid "Source"
 msgstr "Source"
 
-#: apps/rss_sync/admin.py:45
+#: apps/rss_sync/admin.py:47
 msgid "Content"
 msgstr "Contenu"
 
-#: apps/rss_sync/admin.py:46
+#: apps/rss_sync/admin.py:48
 msgid "CMS"
 msgstr ""
 
-#: apps/rss_sync/models.py:13
+#: apps/rss_sync/models.py:17
 msgid "url"
 msgstr "url"
 
-#: apps/rss_sync/models.py:14 apps/rss_sync/models.py:34
+#: apps/rss_sync/models.py:18 apps/rss_sync/models.py:39
 msgid "title"
 msgstr "titre"
 
-#: apps/rss_sync/models.py:15
+#: apps/rss_sync/models.py:19
 msgid "last collect"
 msgstr "dernière collecte"
 
-#: apps/rss_sync/models.py:25
+#: apps/rss_sync/models.py:29
 msgid "RSS source"
 msgstr "source RSS"
 
-#: apps/rss_sync/models.py:26
+#: apps/rss_sync/models.py:30
 msgid "RSS sources"
 msgstr "sources RSS"
 
-#: apps/rss_sync/models.py:33
+#: apps/rss_sync/models.py:38
 msgid "link"
 msgstr "lien"
 
-#: apps/rss_sync/models.py:35
+#: apps/rss_sync/models.py:40
 msgid "summary"
 msgstr "résumé"
 
-#: apps/rss_sync/models.py:36
+#: apps/rss_sync/models.py:41
 msgid "author"
 msgstr "auteur"
 
-#: apps/rss_sync/models.py:37
+#: apps/rss_sync/models.py:42
 msgid "updated"
 msgstr "mise à jour"
 
-#: apps/rss_sync/models.py:38
+#: apps/rss_sync/models.py:43
 msgid "processed"
 msgstr "traité"
 
-#: apps/rss_sync/models.py:44
+#: apps/rss_sync/models.py:49
 msgid "RSS item"
 msgstr "article externe (RSS)"
 
-#: apps/rss_sync/models.py:45
+#: apps/rss_sync/models.py:50
 msgid "RSS items"
 msgstr "articles externe (RSS)"
 
-#: apps/rss_sync/views.py:31
+#: apps/rss_sync/views.py:36
 msgid "Collect RSS items"
 msgstr "Collecter les articles via RSS"
 
-#: apps/rss_sync/views.py:50
+#: apps/rss_sync/views.py:55
 msgid "Create CMS Article"
 msgstr "Créer un article sur le site"
 
-#: apps/rss_sync/widgets.py:38
+#: apps/rss_sync/widgets.py:43
 msgid "Collect"
 msgstr "Collecter"
 
-#: apps/rss_sync/widgets.py:54
+#: apps/rss_sync/widgets.py:59
 msgid "Create CMS article"
 msgstr "Créer un article sur le site"

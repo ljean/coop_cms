@@ -27,9 +27,7 @@ class PermissionMiddlewareTest(BaseArticleTest):
         self.assertEqual(article.is_draft(), True)
         url = article.get_absolute_url()
         response = self.client.get(url)
-        self.assertEqual(302, response.status_code)
-        auth_url = get_login_url()
-        self.assertRedirects(response, auth_url+'?next='+url)
+        self.assertNotAllowed(response)
         
     def test_edit_anonymous(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)

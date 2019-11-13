@@ -7,6 +7,7 @@ import os.path
 import sys
 
 from django import VERSION as DJANGO_VERSION
+from django.urls import reverse_lazy
 
 DEBUG = False
 
@@ -171,9 +172,8 @@ AUTHENTICATION_BACKENDS = (
 )
 
 LOCALE_PATHS = (
-    PROJECT_PATH+'/locale/',
+    PROJECT_PATH + '/locale/',
 )
-SOUTH_TESTS_MIGRATE = False
 
 TEST_RUNNER = 'coop_cms.test_runners.SafeMediaDiscoverRunner'
 
@@ -192,6 +192,7 @@ COOP_CMS_REPLY_TO = 'ljean@apidev.fr'
 COOP_CMS_TITLE_OPTIONAL = True
 
 LOGIN_REDIRECT_URL = "/"
+LOGIN_URL = reverse_lazy('login')
 
 ACCOUNT_ACTIVATION_DAYS = 7
 

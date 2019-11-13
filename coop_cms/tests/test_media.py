@@ -409,9 +409,7 @@ class MediaLibraryTest(MediaBaseTestCase):
         """show images empty anonymous"""
         url = reverse('coop_cms_media_images')
         response = self.client.get(url)
-        self.assertEqual(302, response.status_code)
-        next_url = "/accounts/login/?next={0}".format(url)
-        self.assertTrue(response['Location'].find(next_url) >= 0)
+        self.assertNotAllowed(response)
         
     def test_show_media_not_staff(self):
         """show images empty user is not a staff member"""
@@ -561,14 +559,9 @@ class UploadDocTest(MediaBaseTestCase):
             'file': self._get_file(),
             'is_private': False,
         }
-        response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotEqual(response.content, b'close_popup_and_media_slide')
-        self.assertEquals(0, Document.objects.all().count())
-        redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('login')
-        self.assertTrue(redirect_url.find(login_url) >= 0)
-        
+        response = self.client.post(reverse('coop_cms_upload_doc'), data=data)
+        self.assertNotAllowed(response)
+
     def test_upload_not_allowed(self):
         """upload: not allowed"""
 
@@ -807,16 +800,13 @@ class DownloadDocTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEquals(response['Content-Disposition'], "attachment; filename=unittest1.txt")
         self.assertEquals(response['Content-Type'], "text/plain")
-        #TODO: This change I/O Exception in UnitTest
-        #self.assertEqual(response.content, self._get_file().read()) 
+        # TODO: This change I/O Exception in UnitTest
+        # self.assertEqual(response.content, self._get_file().read())
         
-        #logout and download
+        # logout and download
         self.client.logout()
-        response = self.client.get(doc.get_download_url(), follow=True)
-        self.assertEqual(response.status_code, 200)
-        redirect_url = response.redirect_chain[-1][0]
-        login_url = reverse('login')
-        self.assertTrue(redirect_url.find(login_url) >= 0)
+        response = self.client.get(doc.get_download_url())
+        self.assertNotAllowed(response)
         
 
 class ImageListTemplateTagTest(BaseTestCase):

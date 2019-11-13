@@ -80,9 +80,7 @@ class BaseFragmentTest(BaseTestCase):
 class FragmentsTest(BaseFragmentTest):
     """Test fragments"""
 
-    editable_field_tpl = '<div class="inline-editable" id="html_editor_html_editor__coop_cms__Fragment__id__{0}__content">' + \
-        '{1}</div>\n<input type="hidden" id="html_editor_html_editor__coop_cms__Fragment__id__{0}__content_hidden" ' + \
-        'name="html_editor__coop_cms__Fragment__id__{0}__content" value="{1}" />'
+    editable_field_id = 'html_editor_html_editor__coop_cms__Fragment__id__{0}__content'
 
     def test_fragment_position(self):
         """test position is taken into account"""
@@ -454,14 +452,14 @@ class FragmentsTest(BaseFragmentTest):
         html = tpl.render(Context({"ft_name": ft_name, "form": ArticleForm(instance=article)}))
 
         positions = [
-            html.find(self.editable_field_tpl.format(f.id, f.content))
+            html.find(self.editable_field_id.format(f.id, f.content))
             for f in [fragments[0], fragments[1], fragments[2]]
         ]
         for pos in positions:
             self.assertTrue(pos >= 0)
         self.assertEqual(positions, sorted(positions))
         
-        positions = [html.find(self.editable_field_tpl.format(f.id, f.content)) for f in [fragments[3]]]
+        positions = [html.find(self.editable_field_id.format(f.id, f.content)) for f in [fragments[3]]]
         for pos in positions:
             self.assertTrue(pos == -1)
             
@@ -474,7 +472,7 @@ class FragmentsTest(BaseFragmentTest):
         fragment_filter1 = mommy.make(FragmentFilter, extra_id="hello")
         fragment_filter2 = mommy.make(FragmentFilter, extra_id="2")
 
-        article = mommy.make(get_article_class(), title='test')
+        article = mommy.make(get_article_class(), title='test', template='test/standard.html')
         
         fragments = [
             mommy.make(Fragment, type=fragment_type1, content="Azerty", filter=fragment_filter1),
@@ -488,7 +486,7 @@ class FragmentsTest(BaseFragmentTest):
         html = tpl.render(Context({"ft_name": ft_name, "form": ArticleForm(instance=article)}))
 
         positions = [
-            html.find(self.editable_field_tpl.format(fragment.id, fragment.content))
+            html.find(self.editable_field_id.format(fragment.id, fragment.content))
             for fragment in [fragments[0], fragments[1]]
         ]
         for pos in positions:
@@ -496,7 +494,7 @@ class FragmentsTest(BaseFragmentTest):
         self.assertEqual(positions, sorted(positions))
         
         positions = [
-            html.find(self.editable_field_tpl.format(fragment.id, fragment.content))
+            html.find(self.editable_field_id.format(fragment.id, fragment.content))
             for fragment in [fragments[4], fragments[2], fragments[3]]
         ]
         for pos in positions:

@@ -4,8 +4,12 @@ from __future__ import unicode_literals, print_function
 
 from django.conf import settings
 
-from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
 from coop_cms.moves import SkipTest
+
+if 'coop_cms.apps.test_app' in settings.INSTALLED_APPS:
+    from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
+else:
+    from coop_cms.tests import BaseTestCase as BaseGenericViewTestCase
 
 
 class GenericViewTestCase(BaseGenericViewTestCase):
@@ -18,5 +22,4 @@ class GenericViewTestCase(BaseGenericViewTestCase):
     def setUp(self):
         super(GenericViewTestCase, self).setUp()
         if not ('coop_cms.apps.test_app' in settings.INSTALLED_APPS):
-            print(self.warning)
-            raise SkipTest()
+            raise SkipTest('coop_cms.apps.test_app not installed')

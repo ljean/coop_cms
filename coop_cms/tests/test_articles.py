@@ -1,26 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
-from django.conf import settings
-
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
+from django.test import override_settings
+from django.urls import reverse
 
 from model_mommy import mommy
 
 from coop_cms.models import NavNode, BaseArticle, ArticleCategory
-from coop_cms.settings import (
-    has_localized_urls, get_article_class, get_article_templates, get_navtree_class, is_perm_middleware_installed,
-)
+from coop_cms.settings import has_localized_urls, get_article_class, get_article_templates, get_navtree_class
 from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt
-from coop_cms.utils import get_login_url
 
 
 class ArticleTest(BaseArticleTest):
@@ -85,12 +77,7 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(article.is_draft(), True)
         url = article.get_absolute_url()
         response = self.client.get(url)
-        if is_perm_middleware_installed():
-            self.assertEqual(302, response.status_code)
-            auth_url = get_login_url()
-            self.assertRedirects(response, auth_url+'?next='+url)
-        else:
-            self.assertEqual(403, response.status_code)
+        self.assertNotAllowed(response)
 
     def test_login_required_authenticated(self):
         """show page if permission required and authenticated"""
@@ -110,12 +97,7 @@ class ArticleTest(BaseArticleTest):
         )
         url = article.get_absolute_url()
         response = self.client.get(url)
-        if is_perm_middleware_installed():
-            self.assertEqual(302, response.status_code)
-            auth_url = get_login_url()
-            self.assertRedirects(response, auth_url+'?next='+url)
-        else:
-            self.assertEqual(403, response.status_code)
+        self.assertNotAllowed(response)
         
     def test_404_ok(self):
         response = self.client.get("/jhjhjkahekhj", follow=True)
@@ -161,9 +143,12 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(response.status_code, 200)
         self._check_article(response, data)
 
+    @override_settings(COOP_HTML_EDITOR='aloha')
     def test_edit_article_html_with_br(self):
         """It should save article correctly"""
-        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        article = get_article_class().objects.create(
+            title="test", publication=BaseArticle.PUBLISHED, template="test/standard.html"
+        )
 
         data = {"title": 'salut', 'content': '<h2>Hello</h2><p>Hello<br>Cool<br /></p>'}
 
@@ -175,9 +160,12 @@ class ArticleTest(BaseArticleTest):
         data['content'] = expected_content
         self._check_article(response, data)
 
+    @override_settings(COOP_HTML_EDITOR='aloha')
     def test_edit_article_html_with_img_wrapper(self):
         """It should save article correctly"""
-        article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
+        article = get_article_class().objects.create(
+            title="test", publication=BaseArticle.PUBLISHED, template="test/standard.html"
+        )
 
         content = """
             <p><div
@@ -205,7 +193,9 @@ class ArticleTest(BaseArticleTest):
         self._check_article(response, data)
 
     def test_edit_article_draft(self):
-        article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
+        article = get_article_class().objects.create(
+            title="test", publication=BaseArticle.DRAFT, template="test/standard.html"
+        )
         
         data = {"title": 'salut', 'content': 'bonjour!'}
         
@@ -254,12 +244,7 @@ class ArticleTest(BaseArticleTest):
         url = article.get_edit_url()
         data = {"title": 'salut', "content": 'oups'}
         response = self.client.post(url, data=data)
-        if is_perm_middleware_installed():
-            self.assertEqual(302, response.status_code)
-            auth_url = get_login_url()
-            self.assertRedirects(response, auth_url+'?next='+url)
-        else:
-            self.assertEqual(403, response.status_code)
+        self.assertNotAllowed(response)
         
         article = get_article_class().objects.get(id=article.id)
         self.assertEquals(article.title, initial_data['title'])
@@ -282,12 +267,7 @@ class ArticleTest(BaseArticleTest):
         
         url = article.get_edit_url()
         response = self.client.get(url, follow=False)
-        if is_perm_middleware_installed():
-            self.assertEqual(302, response.status_code)
-            auth_url = get_login_url()
-            self.assertRedirects(response, auth_url+'?next='+url)
-        else:
-            self.assertEqual(403, response.status_code)
+        self.assertNotAllowed(response)
     
         self._log_as_editor()
         response = self.client.get(article.get_edit_url(), follow=False)
@@ -322,12 +302,7 @@ class ArticleTest(BaseArticleTest):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.DRAFT)
         url = article.get_absolute_url()
         response = self.client.get(url)
-        if is_perm_middleware_installed():
-            self.assertEqual(302, response.status_code)
-            auth_url = get_login_url()
-            self.assertRedirects(response, auth_url+'?next='+url)
-        else:
-            self.assertEqual(403, response.status_code)
+        self.assertNotAllowed(response)
         
         self._log_as_editor()
         response = self.client.get(article.get_absolute_url())
@@ -603,11 +578,8 @@ class ArticleTest(BaseArticleTest):
             'sites': [settings.SITE_ID]
         }
         
-        response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
-        self.assertEqual(200, response.status_code)  # if can_edit returns 404 error
-        next_url = response.redirect_chain[-1][0]
-        login_url = reverse('login')
-        self.assertTrue(login_url in next_url)
+        response = self.client.post(reverse('coop_cms_new_article'), data=data)
+        self.assertNotAllowed(response)
         
         self.assertEqual(article_class.objects.filter(title=data['title']).count(), 0)
         
@@ -623,8 +595,8 @@ class ArticleTest(BaseArticleTest):
             'sites': [settings.SITE_ID]
         }
         
-        response = self.client.post(reverse('coop_cms_new_article'), data=data, follow=True)
-        self.assertEqual(403, response.status_code)
+        response = self.client.post(reverse('coop_cms_new_article'), data=data)
+        self.assertNotAllowed(response)
         self.assertEqual(article_class.objects.filter(title=data['title']).count(), 0)
         
     def test_new_article_navigation(self):

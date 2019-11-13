@@ -8,6 +8,7 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext as _
 
 from colorbox.decorators import popup_redirect
@@ -39,7 +40,7 @@ def homepage(request):
     return HttpResponseRedirect(reverse('coop_cms_view_all_articles'))
 
 
-@login_required
+@login_required(login_url=reverse_lazy('login'))
 @popup_redirect
 def set_homepage(request, article_id):
     """use the article as homepage"""

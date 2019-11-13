@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """links: object who redirects to another url"""
 
-from __future__ import unicode_literals
-
 from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.utils.translation import ugettext as _
 
 from colorbox.decorators import popup_redirect
@@ -18,7 +17,7 @@ from coop_cms import models
 from coop_cms.moves import reverse
 
 
-@login_required
+@login_required(login_url=reverse_lazy('login'))
 @popup_redirect
 def new_link(request):
     """new link"""

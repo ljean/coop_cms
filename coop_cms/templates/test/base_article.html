@@ -1,0 +1,18 @@
+{% extends "test/base.html" %}
+{% load i18n coop_edition %}
+
+{% block meta_title %}
+    {% article_title %}
+{% endblock %}
+
+{% block document %}
+
+    {% block article %}
+        {% include "coop_cms/_article_form.html" %}
+        
+        {% if_cms_edition %}
+        {% include "coop_cms/_article_publication.html" %}
+        {% endif %}
+    
+    {% endblock %}
+{% endblock %}

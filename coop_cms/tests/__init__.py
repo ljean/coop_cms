@@ -13,6 +13,7 @@ from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils import timezone
 
 from coop_cms.settings import get_article_class, get_unit_test_media_root, DEFAULT_MEDIA_ROOT
@@ -55,6 +56,11 @@ class BaseTestCase(TestCase):
         logging.disable(logging.NOTSET)
         self._clean_files()
 
+    def assertNotAllowed(self, response):
+        self.assertTrue(response.status_code in [302, 403])
+        if response.status_code == 302:
+            self.assertTrue(response['Location'].find(reverse('login')) >= 0)
+
     
 class MediaBaseTestCase(BaseTestCase):
 
@@ -94,13 +100,16 @@ class UserBaseTestCase(BaseTestCase):
         self.editor = None
         self.viewer = None
 
+    def can_edit_newsletter_permission(self):
+        return Permission.objects.get(content_type__app_label='coop_cms', codename='change_newsletter')
+
     def _log_as_editor(self, can_add=False):
         if not self.editor:
             self.editor = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
             self.editor.is_staff = True
             self.editor.is_active = True
-            can_edit_newsletter = Permission.objects.get(content_type__app_label='coop_cms', codename='change_newsletter')
-            self.editor.user_permissions.add(can_edit_newsletter)
+
+            self.editor.user_permissions.add(self.can_edit_newsletter_permission())
 
             ct = ContentType.objects.get_for_model(get_article_class())
             codename = 'change_{0}'.format(ct.model)
@@ -121,7 +130,7 @@ class UserBaseTestCase(BaseTestCase):
             self.viewer = User.objects.create_user('titi', 'titi@toto.fr', 'titi')
             self.viewer.is_staff = True
             self.viewer.is_active = True
-            self.viewer.user_permissions.add(can_edit_newsletter)
+            self.viewer.user_permissions.add(self.can_edit_newsletter_permission())
             self.viewer.save()
 
         return self.client.login(username='titi', password='titi')
