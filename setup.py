@@ -31,11 +31,11 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        'django >= 2.0, <2.1',
+        'django >= 2.0, <3.0',
         'django-extensions',
         'sorl-thumbnail',
         'apidev-coop_colorbox >= 1.5.1',
-        'apidev-coop_bar >= 1.5.1',
+        'apidev-coop_bar >= 1.5.2',
         'coop_html_editor >= 1.3.1',
         'feedparser',
         'beautifulsoup4',

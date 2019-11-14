@@ -369,7 +369,7 @@ class ArticleTest(BaseArticleTest):
             'title': "Un titre",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID]
         }
         
@@ -435,7 +435,7 @@ class ArticleTest(BaseArticleTest):
             'title': "Un titre",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': sorted([settings.SITE_ID, other_site.id])
         }
 
@@ -460,7 +460,7 @@ class ArticleTest(BaseArticleTest):
             'title': "Un titre",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': []
         }
 
@@ -480,7 +480,7 @@ class ArticleTest(BaseArticleTest):
             'title': "Un titre",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID, 999]
         }
 
@@ -510,7 +510,7 @@ class ArticleTest(BaseArticleTest):
             'category': category2.id,
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID]
         }
 
@@ -530,7 +530,7 @@ class ArticleTest(BaseArticleTest):
             'title': "",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID]
         }
         
@@ -549,7 +549,7 @@ class ArticleTest(BaseArticleTest):
             'title': "Un titre",
             'publication': BaseArticle.PUBLISHED,
             'template': get_article_templates(None, self.user)[0][0],
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID]
         }
         
@@ -574,7 +574,7 @@ class ArticleTest(BaseArticleTest):
             'title': "Ceci est un titre",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID]
         }
         
@@ -591,7 +591,7 @@ class ArticleTest(BaseArticleTest):
             'title': "Ceci est un titre",
             'publication': BaseArticle.DRAFT,
             'template': get_article_templates(None, self.user)[0][0],
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID]
         }
         
@@ -772,7 +772,7 @@ class ArticleTest(BaseArticleTest):
             'headline': True,
             'in_newsletter': True,
             'summary': 'short summary',
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID, other_site.id]
         }
 
@@ -802,7 +802,7 @@ class ArticleTest(BaseArticleTest):
             'headline': True,
             'in_newsletter': True,
             'summary': 'short summary',
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID, 999]
         }
 
@@ -835,7 +835,7 @@ class ArticleTest(BaseArticleTest):
             'headline': True,
             'in_newsletter': True,
             'summary': 'short summary',
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': []
         }
 

@@ -89,3 +89,4 @@ def is_authenticated(user):
 
 def is_anonymous(user):
     return not is_authenticated(user)
+
