@@ -39,8 +39,9 @@ def xsendfile_serve_file(request, file, save_as, content_type, **kwargs):
     response['X-Sendfile'] = smart_str(file_path)
     if save_as:
         response['Content-Disposition'] = smart_str(u'attachment; filename={0}'.format(save_as))
-    if file.size is not None:
-        response['Content-Length'] = file.size
+    # Do not define a Content-Length : It may cause files not to be access correctly with XSendFile
+    # if file.size is not None:
+    #     response['Content-Length'] = file.size
     return response
 
 

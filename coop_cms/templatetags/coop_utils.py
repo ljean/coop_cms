@@ -341,7 +341,7 @@ class ShowAcceptCookieMessageNode(template.Node):
     def render(self, context):
         """to html"""
         request = context.get('request', None)
-        if not request.session.get('hide_accept_cookie_message', False):
+        if request and not request.session.get('hide_accept_cookie_message', False):
             template_ = get_template(self.template_name)
             return template_.render(make_context(request, {}))
         else:
