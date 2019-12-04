@@ -55,7 +55,7 @@ def serve_file(request, file, backend=None, save_as=False, content_type=None):
     if not content_type:
         content_type = mimetypes.guess_type(filename)[0]
 
-    if settings.DEBUG or is_xsendfile_disabled():
+    if is_xsendfile_disabled():
         return chunk_serve_file(request, file, save_as=save_as, content_type=content_type)
     else:
-        return xsendfile_serve_file(request, file, save_as=save_as, content_type=content_type, no_file_size=True)
+        return xsendfile_serve_file(request, file, save_as=save_as, content_type=content_type)
