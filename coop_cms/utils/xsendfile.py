@@ -34,7 +34,7 @@ def chunk_serve_file(request, file, save_as, content_type, **kwargs):
     return response
 
 
-def xsendfile_serve_file(request, file, save_as, content_type, **kwargs):
+def xsendfile_serve_file(request, file, save_as, content_type, no_file_size=False, **kwargs):
     """Lets the web server serve the file using the X-Sendfile extension"""
     response = HttpResponse(content_type=content_type)
     file_path = file.name
@@ -42,8 +42,8 @@ def xsendfile_serve_file(request, file, save_as, content_type, **kwargs):
     if save_as:
         response['Content-Disposition'] = smart_str(u'attachment; filename={0}'.format(save_as))
     # Do not define a Content-Length : It may cause files not to be access correctly with XSendFile
-    # if file.size is not None:
-    #     response['Content-Length'] = file.size
+    if not no_file_size and file.size is not None:
+        response['Content-Length'] = file.size
     return response
 
 
@@ -58,4 +58,4 @@ def serve_file(request, file, backend=None, save_as=False, content_type=None):
     if settings.DEBUG or is_xsendfile_disabled():
         return chunk_serve_file(request, file, save_as=save_as, content_type=content_type)
     else:
-        return xsendfile_serve_file(request, file, save_as=save_as, content_type=content_type)
+        return xsendfile_serve_file(request, file, save_as=save_as, content_type=content_type, no_file_size=True)
