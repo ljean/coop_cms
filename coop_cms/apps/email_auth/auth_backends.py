@@ -17,10 +17,10 @@ class EmailAuthBackend(ModelBackend):
     Email Authentication Backend: make possible to use email rather than username for user authentication
     """
 
-    def authenticate(self, **kwargs):
+    def authenticate(self, request, **kwargs):
         """
             check if user can log in:
-            return the user if login is successfull
+            return the user if login is successful
             return None if login fails
          """
 

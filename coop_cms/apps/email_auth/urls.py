@@ -29,5 +29,4 @@ urlpatterns = [
         PasswordResetConfirmView.as_view(form_class=BsSetPasswordForm),
         name='password_reset_confirm'
     ),
-    url(r'^', include('django.contrib.auth.urls')),
 ]

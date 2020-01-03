@@ -8,7 +8,7 @@ from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.utils.translation import ugettext as _
 
-from registration.backends.model_activation.views import RegistrationView, ActivationView
+from django_registration.backends.activation.views import RegistrationView, ActivationView
 
 from coop_cms.apps.email_auth.registration_backend.forms import RegistrationFormUniqueEmailAndTermsOfService
 

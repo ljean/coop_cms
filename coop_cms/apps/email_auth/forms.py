@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 from django import forms
-from django.conf import settings
 from django.contrib.auth import authenticate, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.utils.translation import ugettext as _, ugettext_lazy as __

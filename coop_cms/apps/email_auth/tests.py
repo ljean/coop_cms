@@ -10,12 +10,9 @@ from unittest import skipUnless
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core import mail, management
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 
 from model_mommy import mommy
 
@@ -278,7 +275,7 @@ class UserLoginTest(BaseTest):
         self.assertEqual(user_id, 0)
 
 
-@skipUnless('registration' in settings.INSTALLED_APPS, "registration not installed installed")
+@skipUnless('django_registration' in settings.INSTALLED_APPS, "django_registration not installed installed")
 @override_settings(AUTHENTICATION_BACKENDS=TEST_AUTHENTICATION_BACKENDS)
 class RegistrationTest(BaseTest):
     """Test that events are sent on registration events"""
@@ -540,7 +537,7 @@ class InvalidationUserBackendTest(BaseTest):
         self.assertNotEqual(form, None)
         self.assertEqual(form.invalidated_password, True)
 
-        self.assertEqual(is_anonymous(self._get_from_context(response, 'user')), True)
+        self.assertEqual(is_anonymous(self._get_user_from_context(response)), True)
 
         self.assertEqual(InvalidatedUser.objects.count(), 1)
         self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=False).count(), 1)
@@ -550,6 +547,13 @@ class InvalidationUserBackendTest(BaseTest):
         for context in response.context:
             if var_name in context:
                 return context[var_name]
+
+    def _get_user_from_context(self, response):
+        """extract variable from context"""
+        user = self._get_from_context(response, 'user')
+        if user and user.is_authenticated:
+            return User.objects.get(id=user.id)
+        return user
 
     def test_post_login_error_not_invalidated(self):
         """Test what happen when user without invalidated login try to login"""
@@ -564,7 +568,7 @@ class InvalidationUserBackendTest(BaseTest):
         self.assertNotEqual(form, None)
         self.assertEqual(form.invalidated_password, False)
 
-        self.assertEqual(is_anonymous(self._get_from_context(response, 'user')), True)
+        self.assertEqual(is_anonymous(self._get_user_from_context(response)), True)
 
         self.assertEqual(InvalidatedUser.objects.count(), 0)
 
@@ -578,7 +582,7 @@ class InvalidationUserBackendTest(BaseTest):
         response = self.client.post(url, dict(email=user.email, password="password"), follow=True)
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(self._get_from_context(response, 'user'), user)
+        self.assertEqual(self._get_user_from_context(response), user)
 
         self.assertEqual(InvalidatedUser.objects.count(), 1)
         self.assertEqual(InvalidatedUser.objects.filter(user=user, password_changed=False).count(), 0)
@@ -593,7 +597,7 @@ class InvalidationUserBackendTest(BaseTest):
         response = self.client.post(url, dict(email=user.email, password="password"), follow=True)
         self.assertEqual(response.status_code, 200)
 
-        self.assertEqual(self._get_from_context(response, 'user'), user)
+        self.assertEqual(self._get_user_from_context(response), user)
 
         self.assertEqual(InvalidatedUser.objects.count(), 0)
 
