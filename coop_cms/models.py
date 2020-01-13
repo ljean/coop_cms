@@ -8,7 +8,7 @@ import os
 import os.path
 import re
 import shutil
-from six.moves.urllib.parse import urlparse
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -25,6 +25,7 @@ from django.template.loader import get_template
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import escape
 from django.utils.translation import get_language, ugettext, ugettext_lazy as _
+from django.utils.safestring import mark_safe
 
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
@@ -729,11 +730,10 @@ class BaseArticle(BaseNavigable):
         """logo in article admin"""
         if self.logo:
             thumb = sorl_thumbnail.backend.get_thumbnail(self.logo.file, ADMIN_THUMBS_SIZE)
-            return '<img width="%s" src="%s" />' % (thumb.width, thumb.url)
+            return mark_safe('<img width="%s" src="%s" />' % (thumb.width, thumb.url))
         else:
             return _("No Image")
     logo_list_display.short_description = _("logo")
-    logo_list_display.allow_tags = True
 
     class Meta:
         verbose_name = _("article")
@@ -1054,8 +1054,7 @@ class Image(Media):
         
     def admin_image(self):
         """admin"""
-        return '<img src="{0}"/>'.format(self.as_thumbnail().url)
-    admin_image.allow_tags = True
+        return mark_safe('<img src="{0}"/>'.format(self.as_thumbnail().url))
     admin_image.short_description = _("Image")
 
     def get_absolute_url(self):
