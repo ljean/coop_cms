@@ -151,21 +151,20 @@ def django_admin_list_objects(request, context):
 def django_admin_navtree(request, context):
     """show menu"""
     if request and request.user.is_staff:
-        coop_cms_navtrees = context.get('coop_cms_navtrees', None)
-        if coop_cms_navtrees:
-            tree_class = get_navtree_class()
-            admin_tree_name = "{0}_{1}".format(get_model_app(tree_class), get_model_name(tree_class))
-            if len(coop_cms_navtrees) == 1:
-                tree = coop_cms_navtrees[0]
-                url = reverse('admin:{0}_change'.format(admin_tree_name), args=[tree.id])
-                label = _('Navigation tree')
-            else:
-                url = reverse('admin:{0}_changelist'.format(admin_tree_name))
-                label = _('Navigation trees')
-            return make_link(
-                url, label, 'leaf',
-                classes=['icon', 'alert_on_click']
-            )
+        coop_cms_navtrees = context.get('coop_cms_navtrees', None) or []
+        tree_class = get_navtree_class()
+        admin_tree_name = "{0}_{1}".format(get_model_app(tree_class), get_model_name(tree_class))
+        if len(coop_cms_navtrees) == 1:
+            tree = coop_cms_navtrees[0]
+            url = reverse('admin:{0}_change'.format(admin_tree_name), args=[tree.id])
+            label = _('Navigation tree')
+        else:
+            url = reverse('admin:{0}_changelist'.format(admin_tree_name))
+            label = _('Navigation trees')
+        return make_link(
+            url, label, 'leaf',
+            classes=['icon', 'alert_on_click']
+        )
 
 
 def view_all_articles(request, context):
