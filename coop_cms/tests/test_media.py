@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """media library unit testing"""
 
-from __future__ import unicode_literals
-
 from django.conf import settings
 
 from datetime import datetime

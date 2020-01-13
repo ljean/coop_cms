@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """navigation: the navigation tree page"""
 
-from __future__ import unicode_literals
-
 import json
 
 from django.db.models.aggregates import Max
@@ -11,7 +9,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
-from django.template import RequestContext
 from django.template.loader import select_template
 from django.utils.translation import ugettext as _
 

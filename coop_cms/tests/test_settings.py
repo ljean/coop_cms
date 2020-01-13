@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from django.test.utils import override_settings
 
 from coop_cms.forms.articles import ArticleSettingsForm, NewArticleForm

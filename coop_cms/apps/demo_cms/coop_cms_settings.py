@@ -2,7 +2,6 @@
 """
 How to configure the demo CMS
 """
-from __future__ import unicode_literals
 
 COOP_CMS_ARTICLE_CLASS = 'coop_cms.apps.demo_cms.models.Article'
 COOP_CMS_ARTICLE_FORM = 'coop_cms.apps.demo_cms.forms.ArticleForm'

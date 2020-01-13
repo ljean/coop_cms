@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """generic views"""
 
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.messages.api import success as success_message, error as error_message

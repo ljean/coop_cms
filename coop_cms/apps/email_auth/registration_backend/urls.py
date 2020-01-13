@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
-from django.conf.urls import include, url
+from django.conf.urls import url
 from django.views.generic.base import TemplateView
 from coop_cms.apps.email_auth.registration_backend.views import EmailRegistrationView, EmailActivationView
 

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from __future__ import unicode_literals, print_function
-
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection

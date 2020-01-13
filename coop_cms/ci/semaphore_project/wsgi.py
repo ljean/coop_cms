@@ -14,8 +14,6 @@ framework.
 
 """
 
-from __future__ import unicode_literals
-
 import os
 
 # We defer to a DJANGO_SETTINGS_MODULE already in the environment. This breaks

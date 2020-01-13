@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """navigation tags"""
 
-from __future__ import unicode_literals
-
 from django import template
 from django.contrib.contenttypes.models import ContentType
 from django.template import VariableDoesNotExist

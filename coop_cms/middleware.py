@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 """"""
 
-from __future__ import unicode_literals
-
 from django.core.exceptions import PermissionDenied
-try:
-    from django.urls import NoReverseMatch
-except:
-    from django.core.urlresolvers import NoReverseMatch
 from django.contrib.auth.views import redirect_to_login
+from django.urls import NoReverseMatch
 
 from coop_cms.moves import MiddlewareMixin, is_authenticated
 from coop_cms.utils import get_login_url

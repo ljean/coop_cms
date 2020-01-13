@@ -3,7 +3,6 @@
 urls
 """
 
-from __future__ import unicode_literals
 from django.conf.urls import url
 
 from coop_cms.apps.rss_sync import views

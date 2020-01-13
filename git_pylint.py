@@ -3,8 +3,6 @@
 This script detects the modified files thanks to 'git status' command
 
 """
-from __future__ import unicode_literals
-from __future__ import print_function
 
 import imp
 import os.path

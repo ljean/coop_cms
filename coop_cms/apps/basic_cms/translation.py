@@ -4,8 +4,6 @@
 modeltranslation config file : which field to be translatable
 """
 
-from __future__ import unicode_literals
-
 from modeltranslation.translator import translator, TranslationOptions  # pylint: disable=F0401
 
 from coop_cms.apps.basic_cms.models import Article

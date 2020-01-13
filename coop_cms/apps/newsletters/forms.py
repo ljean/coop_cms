@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
-from __future__ import unicode_literals
-
 from django.utils.translation import ugettext_lazy as _
 
 from coop_cms.bs_forms import Form as BsForm

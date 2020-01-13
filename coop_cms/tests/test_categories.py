@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from datetime import datetime, timedelta
 
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
 from django.template import Template, Context
+from django.urls import reverse
 from django.test.utils import override_settings
 
 from model_mommy import mommy

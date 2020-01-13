@@ -3,8 +3,6 @@
 Unit tests
 """
 
-from __future__ import unicode_literals
-
 from unittest import skipUnless
 
 from django.contrib.auth.models import User

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """configuration file for coop_bar"""
 
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse, NoReverseMatch

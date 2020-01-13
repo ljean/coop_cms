@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """custom backend for sorl-thumbnail: keep image file name"""
 
-from __future__ import unicode_literals
-
 import os.path
 
 from sorl.thumbnail.base import ThumbnailBackend, EXTENSIONS

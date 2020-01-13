@@ -3,8 +3,6 @@
 Default CMS application : It define a simple Article
 """
 
-from __future__ import unicode_literals
-
 from coop_cms.bs_forms import Form, ModelForm
 
 # Just for compatibility

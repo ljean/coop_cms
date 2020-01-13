@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """media library"""
 
-from __future__ import unicode_literals
-
 import itertools
 import json
 import os.path

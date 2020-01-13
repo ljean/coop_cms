@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
-from __future__ import unicode_literals
-
 from six import string_types
 
 from django import forms

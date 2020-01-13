@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """dump"""
 
-from __future__ import unicode_literals, print_function
-
 import json
 
 from django.core.management.base import BaseCommand

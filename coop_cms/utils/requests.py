@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """utils"""
 
-from __future__ import unicode_literals
-
 from threading import current_thread
 
 from coop_cms.moves import MiddlewareMixin

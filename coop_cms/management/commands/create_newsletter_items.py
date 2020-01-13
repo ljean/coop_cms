@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """create newsletter item"""
 
-from __future__ import unicode_literals, print_function
-
 from django.core.management.base import BaseCommand
 
 from coop_cms.models import create_newsletter_item

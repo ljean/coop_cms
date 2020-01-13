@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """for unit-testing"""
 
-from __future__ import unicode_literals
-
 from coop_cms.apps.test_app.models import TestClass
 from coop_cms.apps.test_app.forms import TestClassForm
 

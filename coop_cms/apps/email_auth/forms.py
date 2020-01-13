@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """login form with Email rather than Username"""
 
-from __future__ import unicode_literals
-
 from django import forms
 from django.contrib.auth import authenticate, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm

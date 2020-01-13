@@ -4,8 +4,6 @@ This backend can be set in django project settings in order to enable email auth
 In this case, the user will logged with his email rather than with a username
 """
 
-from __future__ import unicode_literals
-
 from django.contrib.auth.models import User
 from django.contrib.auth.backends import ModelBackend
 

@@ -4,8 +4,6 @@ coop_edition template tags
 used for magic form
 """
 
-from __future__ import unicode_literals
-
 from six import string_types
 
 from django import template

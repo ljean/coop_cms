@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """customize execution of tests"""
 
-from __future__ import unicode_literals
-
 from django.test.runner import DiscoverRunner
 
 from coop_cms.settings import get_unit_test_media_root

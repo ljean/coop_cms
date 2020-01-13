@@ -2,7 +2,6 @@
 """
 Example of a custom coop_bar configuration
 """
-from __future__ import unicode_literals
 
 from coop_cms import coop_bar_cfg
 

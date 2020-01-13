@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """"test special pages"""
 
-from __future__ import unicode_literals
-
 from unittest import skipIf
 
 from django.conf import settings

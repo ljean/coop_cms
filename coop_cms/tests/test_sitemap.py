@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from unittest import skipIf
 
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.contrib.sitemaps.views import sitemap as sitemap_view
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
+from django.urls import reverse
 from django.utils.translation import activate
 
 from model_mommy import mommy

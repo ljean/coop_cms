@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 """test fragments feature"""
 
-from __future__ import unicode_literals
-
 from django.conf import settings
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
 from django.template import Template, Context
+from django.urls import reverse
 
 from model_mommy import mommy
 from colorbox.utils import assert_popup_refresh

@@ -1,16 +1,11 @@
 # -*- coding: utf-8 -*-
 """utilities for developpers"""
 
-from __future__ import unicode_literals
-
 from django.conf import settings
-try:
-    from django.urls import reverse
-except ImportError:
-    from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
 from django.http import Http404, HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 
 from coop_cms.models import BaseArticle, Alias
 from coop_cms.settings import get_article_class, is_localized

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """newsleters"""
 
-from __future__ import unicode_literals
-
 from datetime import datetime
 import sys
 from tempfile import NamedTemporaryFile

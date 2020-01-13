@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """utils"""
 
-from __future__ import unicode_literals
-
 from re import sub
 from sys import stderr
 from traceback import print_exc

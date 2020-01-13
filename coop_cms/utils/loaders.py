@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """utils"""
 
-from __future__ import unicode_literals
-
 from django.template.loader import get_template
 
 

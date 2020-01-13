@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
-from __future__ import unicode_literals
-
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext as _

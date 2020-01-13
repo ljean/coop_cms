@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """Boptstrap-css friendly forms"""
 
-from __future__ import unicode_literals
-
 import types
 
 import floppyforms.__future__ as forms

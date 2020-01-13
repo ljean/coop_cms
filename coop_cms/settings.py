@@ -4,8 +4,6 @@ Coop_cms settings : central place for coop_cms settings
 the settings should be accessed from here and not directly from django.conf.settings
 """
 
-from __future__ import unicode_literals
-
 import os.path
 import sys
 from six import string_types

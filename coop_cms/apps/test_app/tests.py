@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from django.conf import settings
 
 from datetime import datetime
@@ -9,11 +7,8 @@ import logging
 
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
 from django.test import TestCase
+from django.urls import reverse
 from django.test.utils import override_settings
 
 from model_mommy import mommy

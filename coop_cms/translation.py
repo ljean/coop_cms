@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """modeltranslation settings"""
 
-from __future__ import unicode_literals
-
 from modeltranslation.translator import translator, TranslationOptions  # pylint: disable=F0401
 
 from coop_cms.models import (

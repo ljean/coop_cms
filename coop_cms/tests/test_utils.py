@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from coop_cms.tests import BaseArticleTest
 from coop_cms.utils import dehtml
 

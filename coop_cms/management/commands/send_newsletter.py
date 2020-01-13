@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """send newsletter"""
 
-from __future__ import unicode_literals, print_function
-
 from datetime import datetime
 
 from django.core.management.base import BaseCommand

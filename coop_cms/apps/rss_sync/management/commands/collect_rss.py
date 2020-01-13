@@ -3,8 +3,6 @@
 This command runs a rss import
 """
 
-from __future__ import unicode_literals
-
 from django.core.management.base import BaseCommand
 from coop_cms.apps.rss_sync.utils import collect_all_rss_items
 

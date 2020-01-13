@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """web utilities"""
 
-from __future__ import unicode_literals
-
 import json
 from six.moves.urllib.parse import urlparse
 

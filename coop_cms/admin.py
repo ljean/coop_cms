@@ -3,8 +3,6 @@
 Admin pages for coop_cms
 """
 
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.contrib import admin
 from django.http import Http404

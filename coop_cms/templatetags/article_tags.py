@@ -1,8 +1,6 @@
 # -*- coding:utf-8 -*-
 """article tags"""
 
-from __future__ import unicode_literals
-
 from django import template
 
 register = template.Library()

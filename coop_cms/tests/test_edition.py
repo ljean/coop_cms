@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals
-
 from django.template import Template, Context
 from django.test.utils import override_settings
 

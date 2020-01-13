@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 """This can be added to default context"""
 
-from __future__ import unicode_literals
-
 from django.conf import settings
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from coop_cms.models import get_homepage_url
 from coop_cms.settings import homepage_no_redirection
