@@ -426,22 +426,29 @@ def is_cache_enabled():
 
 def change_site_id():
     """Change SITE ID"""
-    if django_settings.DEBUG and not getattr(django_settings, 'DISABLE_CHANGE_SITE', False)\
-            and len(sys.argv) and sys.argv[1] == "runserver":
+    if (
+        django_settings.DEBUG and not getattr(django_settings, 'DISABLE_CHANGE_SITE', False) and
+        len(sys.argv) and sys.argv[1] == "runserver"
+    ):
+        local_dev_address = "127.0.0.1:8000"
         current_site = Site.objects.get_current()
-        if current_site.domain != "127.0.0.1:8000":
-            print(_("The current site is NOT localhost (127.0.0.1:8000).\nDo you want to turn it into localhost?"))
-            
-            choice = input(_("0: No\n1: Yes\n"))
-            
-            if choice == "0":
-                print(_("Nothing has changed"))
-            
-            elif choice == "1":
-                current_site.domain = "127.0.0.1:8000"
-                current_site.name = "localhost"
-                current_site.save()
-                print(_("Your domain site is now: "), current_site.domain)
+        if current_site.domain != local_dev_address:
+            print(_("The current site is NOT localhost (127.0.0.1:8000)"))
+            if Site.objects.filter(domain=local_dev_address).exclude(id=current_site.id).exists():
+                print(_("Another site is already set as localhost"))
+            else:
+                print(_("Do you want to turn it into localhost?"))
+
+                choice = input(_("0: No\n1: Yes\n"))
+
+                if choice == "0":
+                    print(_("You can disable this by adding in your settings DISABLE_CHANGE_SITE=True"))
+
+                elif choice == "1":
+                    current_site.domain = "127.0.0.1:8000"
+                    current_site.name = "localhost"
+                    current_site.save()
+                    print(_("Your domain site is now: "), current_site.domain)
 
 
 def is_xsendfile_disabled():
