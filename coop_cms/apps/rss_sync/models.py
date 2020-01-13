@@ -5,10 +5,8 @@ models
 
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
 
 
-@python_2_unicode_compatible
 class RssSource(models.Model):
     """a Rss feed to use as source of items (which are used to create CMS articles)"""
 
@@ -28,7 +26,6 @@ class RssSource(models.Model):
         verbose_name_plural = _('RSS sources')
 
 
-@python_2_unicode_compatible
 class RssItem(models.Model):
     """a Rss item that can be used to create a CMS article"""
 

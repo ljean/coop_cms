@@ -2,7 +2,6 @@
 """models"""
 
 from django.db import models
-from django.utils.encoding import python_2_unicode_compatible
 
 from coop_cms.moves import reverse, is_authenticated
 
@@ -12,7 +11,6 @@ class TestTag(models.Model):
     name = models.CharField(max_length=100)
 
 
-@python_2_unicode_compatible
 class TestClass(models.Model):
     """for unit-testing"""
 

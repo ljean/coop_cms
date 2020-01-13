@@ -20,7 +20,6 @@ from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.signals import pre_delete, post_save
 from django.template.loader import get_template
-from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import escape
 from django.utils.translation import get_language, ugettext, ugettext_lazy as _
 from django.utils.safestring import mark_safe
@@ -106,7 +105,6 @@ def get_navigable_type_choices():
     return types
 
 
-@python_2_unicode_compatible
 class NavType(models.Model):
     """Define which ContentTypes can be inserted in the tree as content"""
 
@@ -134,7 +132,6 @@ class NavType(models.Model):
         verbose_name_plural = _('navigable types')
 
 
-@python_2_unicode_compatible
 class BaseNavTree(models.Model):
     """Base class for navigation tree. It is deprecated (not recommended) to use your own"""
     last_update = models.DateTimeField(auto_now=True)
@@ -166,7 +163,6 @@ class BaseNavTree(models.Model):
         abstract = True
 
 
-@python_2_unicode_compatible
 class NavTree(BaseNavTree):
     """Implementation of NavTree: Use this one. Don't create your own"""
 
@@ -174,7 +170,6 @@ class NavTree(BaseNavTree):
         return self.name
 
 
-@python_2_unicode_compatible
 class NavNode(models.Model):
     """
     A navigation node
@@ -460,7 +455,6 @@ class NavNode(models.Model):
                 cur_node = cur_node.parent
 
 
-@python_2_unicode_compatible
 class ArticleCategory(models.Model):
     """Article category"""
     name = models.CharField(_('name'), max_length=100)
@@ -578,7 +572,6 @@ def get_logo_folder(article, filename):
     return '{0}/{1}/{2}'.format(img_root, article.id, basename)
 
 
-@python_2_unicode_compatible
 class BaseArticle(BaseNavigable):
     """An article : static page, blog item, ..."""
 
@@ -928,7 +921,6 @@ class BaseArticle(BaseNavigable):
         return False
 
 
-@python_2_unicode_compatible
 class Link(BaseNavigable):
     """Link to a given url"""
     title = models.CharField(_('Title'), max_length=200, default=_("title"))
@@ -980,7 +972,6 @@ class Link(BaseNavigable):
         verbose_name_plural = _("links")
 
 
-@python_2_unicode_compatible
 class MediaFilter(models.Model):
     """make possible to group images: filter in media library, photo album"""
     name = models.CharField(_('name'), max_length=100)
@@ -993,7 +984,6 @@ class MediaFilter(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
 class ImageSize(models.Model):
     """Image size for auto resizing"""
     name = models.CharField(_('name'), max_length=100)
@@ -1008,7 +998,6 @@ class ImageSize(models.Model):
         return "{0} ({1}{2})".format(self.name, self.size, (" "+self.crop if self.crop else ""))
 
 
-@python_2_unicode_compatible
 class Media(TimeStampedModel):
     """Base class for something you can put in Media library"""
     name = models.CharField(_('name'), max_length=200, blank=True, default='')
@@ -1022,7 +1011,6 @@ class Media(TimeStampedModel):
         abstract = True
 
 
-@python_2_unicode_compatible
 class Image(Media):
     """An image in media library"""
     file = models.ImageField(_('file'), upload_to=get_img_folder)
@@ -1098,7 +1086,6 @@ def get_doc_folder(document, filename):
     return '{0}/{1}'.format(doc_root, filename)
 
 
-@python_2_unicode_compatible
 class Document(Media):
     """file in media library"""
 
@@ -1151,7 +1138,6 @@ class Document(Media):
         verbose_name_plural = _('documents')
 
 
-@python_2_unicode_compatible
 class PieceOfHtml(models.Model):
     """This is a block of text thant can be added to a page and edited on it"""
     div_id = models.CharField(verbose_name=_("identifier"), max_length=100, db_index=True)
@@ -1181,7 +1167,6 @@ def remove_from_navigation(sender, instance, **kwargs):
 pre_delete.connect(remove_from_navigation)
 
 
-@python_2_unicode_compatible
 class NewsletterItem(models.Model):
     """Something which is in a newsletter"""
     content_type = models.ForeignKey(ContentType, verbose_name=_("content_type"), on_delete=models.CASCADE)
@@ -1240,7 +1225,6 @@ def on_create_newsletterable_instance(sender, instance, created, raw, **kwargs):
 post_save.connect(on_create_newsletterable_instance)
 
 
-@python_2_unicode_compatible
 class Newsletter(TimeStampedModel):
     """Newsletter"""
     subject = models.CharField(max_length=200, verbose_name=_('subject'), blank=True, default="")
@@ -1310,7 +1294,6 @@ class Newsletter(TimeStampedModel):
         verbose_name_plural = _('newsletters')
 
 
-@python_2_unicode_compatible
 class NewsletterSending(models.Model):
     """Schedule newsletter sending"""
 
@@ -1326,7 +1309,6 @@ class NewsletterSending(models.Model):
         verbose_name_plural = _('newsletter sendings')
 
 
-@python_2_unicode_compatible
 class Alias(models.Model):
     """Alias : makes possinle to redirect an url ton another one"""
 
@@ -1357,7 +1339,6 @@ class Alias(models.Model):
         return super(Alias, self).save(**kwargs)
 
 
-@python_2_unicode_compatible
 class FragmentType(models.Model):
     """Type of fragments"""
     name = models.CharField(max_length=100, db_index=True, verbose_name=_("name"))
@@ -1374,7 +1355,6 @@ class FragmentType(models.Model):
         return self.name
 
 
-@python_2_unicode_compatible
 class FragmentFilter(models.Model):
     """filter fragments"""
     extra_id = models.CharField(max_length=100, db_index=True, verbose_name=_("extra_id"))
@@ -1387,7 +1367,6 @@ class FragmentFilter(models.Model):
         return self.extra_id
 
 
-@python_2_unicode_compatible
 class Fragment(models.Model):
     """small piece of html which can be dynamically added to the page"""
     type = models.ForeignKey(FragmentType, verbose_name=_('fragment type'), on_delete=models.CASCADE)
@@ -1441,7 +1420,6 @@ class Fragment(models.Model):
         return "{0} {1} {2}".format(self.type, self.position, self.name)
 
 
-@python_2_unicode_compatible
 class SiteSettings(models.Model):
     """site settings"""
 
