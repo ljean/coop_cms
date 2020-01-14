@@ -224,7 +224,7 @@ msgid ""
 "If you did not request this account creation, please ignore this email.\n"
 msgstr ""
 "\n"
-"Si vous n'avez pas demandé la création d'un compre, merci d'ignorer cet "
+"Si vous n'avez pas demandé la création d'un compte, merci d'ignorer cet "
 "email.\n"
 
 #: ci/drone_project/templates/registration/activation_email_subject.txt:2
