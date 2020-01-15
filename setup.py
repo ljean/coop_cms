@@ -34,6 +34,7 @@ setup(
         'django >= 1.11, <2.0',
         'django-extensions',
         'sorl-thumbnail',
+        'apidev-django-floppyforms==1.7.2',
         'apidev-coop_colorbox >= 1.4.1',
         'apidev-coop_bar >= 1.3.2',
         'coop_html_editor >= 1.2.1',
