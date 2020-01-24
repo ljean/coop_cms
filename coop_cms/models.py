@@ -1069,6 +1069,7 @@ class Image(Media):
     class Meta:
         verbose_name = _('image')
         verbose_name_plural = _('images')
+        ordering = ('ordering', )
 
 
 def get_doc_folder(document, filename):
@@ -1136,6 +1137,7 @@ class Document(Media):
     class Meta:
         verbose_name = _('document')
         verbose_name_plural = _('documents')
+        ordering = ('ordering',)
 
 
 class PieceOfHtml(models.Model):
