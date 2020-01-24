@@ -13,7 +13,7 @@ from coop_cms.forms.content import AliasAdminForm
 from coop_cms.forms.navigation import NavTypeForm, NavNodeAdminForm
 from coop_cms.forms.newsletters import NewsletterItemAdminForm, NewsletterAdminForm
 from coop_cms import models
-from coop_cms.settings import get_article_class, get_navtree_class, import_module
+from coop_cms.settings import get_article_class, import_module
 
 
 # The BASE_ADMIN_CLASS can be a Translation admin if needed or regular modelAdmin if not
@@ -27,9 +27,12 @@ def clear_thumbnails_action(model_admin, request, queryset):
     """This action is used by Image Admin and cause sorl-thumbnails to be reset"""
     for obj in queryset:
         obj.clear_thumbnails()
+
+
 clear_thumbnails_action.short_description = _("Clear thumbnails")
 
 
+@admin.register(models.NavNode)
 class NavNodeAdmin(admin.ModelAdmin):
     """Navigation node admin"""
     list_display = ["as_text", "label", 'parent', 'ordering', 'in_navigation', 'content_type', 'object_id']
@@ -39,16 +42,13 @@ class NavNodeAdmin(admin.ModelAdmin):
     form = NavNodeAdminForm
 
 
-admin.site.register(models.NavNode, NavNodeAdmin)
-
-
+@admin.register(models.NavType)
 class NavTypeAdmin(admin.ModelAdmin):
     """Navigation type admin"""
     form = NavTypeForm
 
-admin.site.register(models.NavType, NavTypeAdmin)
 
-
+@admin.register(models.NavTree)
 class NavTreeAdmin(admin.ModelAdmin):
     """Navigation tree admin"""
     list_display = ['as_text', 'name', 'navtypes_list', 'get_root_nodes_count']
@@ -84,10 +84,8 @@ class NavTreeAdmin(admin.ModelAdmin):
             request, str(object_id), extra_context=extra_context, *args, **kwargs
         )  # pylint: disable=E1002
 
-if get_navtree_class():
-    admin.site.register(get_navtree_class(), NavTreeAdmin)
 
-
+@admin.register(get_article_class())
 class ArticleAdmin(BASE_ADMIN_CLASS):
     """Article admin"""
     form = ArticleAdminForm
@@ -119,8 +117,6 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
         form.current_user = request.user
         return form
 
-admin.site.register(get_article_class(), ArticleAdmin)
-
 
 class MediaFilterFilter(admin.SimpleListFilter):
     """filter by media_filter"""
@@ -142,6 +138,7 @@ class MediaFilterFilter(admin.SimpleListFilter):
         return queryset.filter(filters__id=value)
 
 
+@admin.register(models.Image)
 class ImageAdmin(admin.ModelAdmin):
     """Image admin"""
     list_display = ['admin_image', 'name', 'file', 'size', 'ordering', 'copyright']
@@ -150,26 +147,23 @@ class ImageAdmin(admin.ModelAdmin):
     search_fields = ['name']
     actions = [clear_thumbnails_action]
 
-admin.site.register(models.Image, ImageAdmin)
 
-
+@admin.register(models.Fragment)
 class FragmentAdmin(BASE_ADMIN_CLASS):
     """Fragment admin"""
     list_display = ['name', 'position', 'type', 'filter', 'css_class']
     list_filter = ['type', 'filter', 'css_class']
 
-admin.site.register(models.Fragment, FragmentAdmin)
 
-
+@admin.register(models.ArticleCategory)
 class ArticleCategoryAdmin(admin.ModelAdmin):
     """Article category Admin"""
     list_display = ['name', 'slug', 'ordering', 'in_rss', 'pagination_size']
     list_editable = ['ordering', 'in_rss']
     readonly_fields = ['slug']
 
-admin.site.register(models.ArticleCategory, ArticleCategoryAdmin)
 
-
+@admin.register(models.NewsletterItem)
 class NewsletterItemAdmin(admin.ModelAdmin):
     """newsletter item Admin"""
     form = NewsletterItemAdminForm
@@ -179,9 +173,8 @@ class NewsletterItemAdmin(admin.ModelAdmin):
         (_('Article'), {'fields': ('object_id', 'content_type', 'ordering')}),
     )
 
-admin.site.register(models.NewsletterItem, NewsletterItemAdmin)
 
-
+@admin.register(models.Newsletter)
 class NewsletterAdmin(BASE_ADMIN_CLASS):
     """Newsletter Admin"""
 
@@ -194,8 +187,6 @@ class NewsletterAdmin(BASE_ADMIN_CLASS):
         form = super(NewsletterAdmin, self).get_form(request, obj, **kwargs)  # pylint: disable=E1002
         form.current_user = request.user
         return form
-
-admin.site.register(models.Newsletter, NewsletterAdmin)
 
 
 class IsDuplicatedFilter(admin.SimpleListFilter):
@@ -228,6 +219,7 @@ class IsDuplicatedFilter(admin.SimpleListFilter):
         return queryset
 
 
+@admin.register(models.Alias)
 class AliasAdmin(BASE_ADMIN_CLASS):
     """Alias admin"""
     list_display = ['path', 'redirect_url', 'redirect_code']
@@ -237,36 +229,52 @@ class AliasAdmin(BASE_ADMIN_CLASS):
     ordering = ['path', ]
     form = AliasAdminForm
 
-admin.site.register(models.Alias, AliasAdmin)
 
-admin.site.register(models.MediaFilter)
+@admin.register(models.MediaFilter)
+class MediaFilterAdmin(admin.ModelAdmin):
+    pass
 
 
+@admin.register(models.ImageSize)
 class ImageSizeAdmin(admin.ModelAdmin):
     """Image size admin"""
     list_display = ['name', 'size', 'crop']
 
-admin.site.register(models.ImageSize, ImageSizeAdmin)
 
-
+@admin.register(models.Link)
 class LinkAdmin(BASE_ADMIN_CLASS):
     list_display = ('title', 'url', )
     filter_vertical = ('sites', )
     list_filter = ('sites', )
     search_fields = ('title', )
 
-admin.site.register(models.Link, LinkAdmin)
 
-admin.site.register(models.PieceOfHtml)
-admin.site.register(models.NewsletterSending)
-admin.site.register(models.FragmentType)
-admin.site.register(models.FragmentFilter)
-
-admin.site.register(models.Document)
+@admin.register(models.PieceOfHtml)
+class PieceOfHtmlAdmin(admin.ModelAdmin):
+    pass
 
 
+@admin.register(models.NewsletterSending)
+class NewsletterSendingAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.FragmentType)
+class FragmentTypeAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.FragmentFilter)
+class FragmentFilterAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.Document)
+class DocumentAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.SiteSettings)
 class SiteSettingsAdmin(BASE_ADMIN_CLASS):
     list_display = ('site', 'homepage_url', 'homepage_article', 'sitemap_mode')
 
-
-admin.site.register(models.SiteSettings, SiteSettingsAdmin)

@@ -10,6 +10,7 @@ from coop_cms.apps.rss_sync import models, views
 from coop_cms.apps.rss_sync.forms import RssSourceAdminForm, RssItemAdminForm
 
 
+@admin.register(models.RssSource)
 class RssSourceAdmin(admin.ModelAdmin):
     """Rss source admin"""
 
@@ -30,9 +31,8 @@ class RssSourceAdmin(admin.ModelAdmin):
             })
         return super(RssSourceAdmin, self).get_form(request, obj, **defaults) # pylint: disable=E1002
 
-admin.site.register(models.RssSource, RssSourceAdmin)
 
-
+@admin.register(models.RssItem)
 class RssItemAdmin(admin.ModelAdmin):
     """Rss Item admin"""
     form = RssItemAdminForm
@@ -46,5 +46,3 @@ class RssItemAdmin(admin.ModelAdmin):
         (_('CMS'), {'fields': ('processed',)}),
     )
     actions = [views.create_cms_article_action]
-
-admin.site.register(models.RssItem, RssItemAdmin)
