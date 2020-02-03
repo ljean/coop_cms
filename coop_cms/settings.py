@@ -428,7 +428,7 @@ def change_site_id():
     """Change SITE ID"""
     if (
         django_settings.DEBUG and not getattr(django_settings, 'DISABLE_CHANGE_SITE', False) and
-        len(sys.argv) and sys.argv[1] == "runserver"
+        (len(sys.argv) > 1) and sys.argv[1] == "runserver"
     ):
         local_dev_address = "127.0.0.1:8000"
         current_site = Site.objects.get_current()
