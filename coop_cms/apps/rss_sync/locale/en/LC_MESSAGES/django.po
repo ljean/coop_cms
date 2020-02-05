@@ -3,41 +3,39 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: rss_sync\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-02-05 18:01+0100\n"
-"PO-Revision-Date: 2011-12-24 16:16+0100\n"
-"Last-Translator: Dominique Guardiola <dguardiola@quinode.fr>\n"
-"Language-Team: Quinode <contact@quinode.fr>\n"
+"POT-Creation-Date: 2020-02-05 18:04+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1)\n"
-"X-Poedit-Language: French\n"
-"X-Poedit-Country: FRANCE\n"
-
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 #: apps/rss_sync/admin.py:20
 msgid "Feed"
-msgstr "Flux"
+msgstr ""
 
 #: apps/rss_sync/admin.py:21
 msgid "Information"
-msgstr "Information"
+msgstr ""
 
 #: apps/rss_sync/admin.py:43
 msgid "Actions"
-msgstr "Actions"
+msgstr ""
 
 #: apps/rss_sync/admin.py:44
 msgid "Source"
-msgstr "Source"
+msgstr ""
 
 #: apps/rss_sync/admin.py:45
 msgid "Content"
-msgstr "Contenu"
+msgstr ""
 
 #: apps/rss_sync/admin.py:46
 msgid "CMS"
@@ -45,64 +43,64 @@ msgstr ""
 
 #: apps/rss_sync/models.py:13
 msgid "url"
-msgstr "url"
+msgstr ""
 
 #: apps/rss_sync/models.py:14 apps/rss_sync/models.py:34
 msgid "title"
-msgstr "titre"
+msgstr ""
 
 #: apps/rss_sync/models.py:15
 msgid "last collect"
-msgstr "dernière collecte"
+msgstr ""
 
 #: apps/rss_sync/models.py:25
 msgid "RSS source"
-msgstr "source RSS"
+msgstr ""
 
 #: apps/rss_sync/models.py:26
 msgid "RSS sources"
-msgstr "sources RSS"
+msgstr ""
 
 #: apps/rss_sync/models.py:33
 msgid "link"
-msgstr "lien"
+msgstr ""
 
 #: apps/rss_sync/models.py:35
 msgid "summary"
-msgstr "résumé"
+msgstr ""
 
 #: apps/rss_sync/models.py:36
 msgid "author"
-msgstr "auteur"
+msgstr ""
 
 #: apps/rss_sync/models.py:37
 msgid "updated"
-msgstr "mise à jour"
+msgstr ""
 
 #: apps/rss_sync/models.py:38
 msgid "processed"
-msgstr "traité"
+msgstr ""
 
 #: apps/rss_sync/models.py:44
 msgid "RSS item"
-msgstr "article externe (RSS)"
+msgstr ""
 
 #: apps/rss_sync/models.py:45
 msgid "RSS items"
-msgstr "articles externe (RSS)"
+msgstr ""
 
 #: apps/rss_sync/views.py:31
 msgid "Collect RSS items"
-msgstr "Collecter les articles via RSS"
+msgstr ""
 
 #: apps/rss_sync/views.py:50
 msgid "Create CMS Article"
-msgstr "Créer un article sur le site"
+msgstr ""
 
 #: apps/rss_sync/widgets.py:38
 msgid "Collect"
-msgstr "Collecter"
+msgstr ""
 
 #: apps/rss_sync/widgets.py:54
 msgid "Create CMS article"
-msgstr "Créer un article sur le site"
+msgstr ""

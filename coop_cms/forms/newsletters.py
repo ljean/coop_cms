@@ -7,11 +7,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now as dt_now
-from django.utils.translation import ugettext as _
+from django.utils.translation import ugettext as _, ugettext_lazy
 
 import floppyforms.__future__ as floppyforms
 
 from coop_cms.forms.base import InlineHtmlEditableModelForm
+from coop_cms.bs_forms import Form as BsForm
 from coop_cms.models import Newsletter, NewsletterSending, NewsletterItem
 from coop_cms.settings import get_article_class, get_newsletter_templates
 from coop_cms.widgets import ChosenSelectMultiple
@@ -163,22 +164,35 @@ class NewsletterAdminForm(forms.ModelForm):
         js = (
             'chosen/chosen.jquery.js',
         )
-        
-        
-class NewsletterHandleRecipients(forms.Form):
-    choix = forms.MultipleChoiceField(widget=forms.CheckboxSelectMultiple(), required=False)
-    email = forms.EmailField(required=False)
-    email2 = forms.EmailField(required=False)
-    
-    def __init__(self, *args, **kwargs):
-        super(NewsletterHandleRecipients, self).__init__(*args, **kwargs)
-        DESTS = settings.COOP_CMS_TEST_EMAILS
-        self.fields["choix"].choices = DESTS
-        self.fields["choix"].help_text = "Cochez les emails que vous souhaitez utiliser pour le test d'envoi."
-        self.fields["email"].help_text = "Ajoutez un email supplémentaire."
-        self.fields["email2"].help_text = "Ajoutez un email supplémentaire."
-        self.fields["email2"].label = "Email"
 
-    def clean_choices(self):
-        choix = self.cleaned_data['choix']
-        return choix
+        
+class NewsletterHandleRecipients(BsForm):
+    email_help_text = ugettext_lazy("Enter another address to send to someone who is not in the list")
+    email_label = ugettext_lazy("Email")
+
+    emails = forms.MultipleChoiceField(
+        widget=forms.CheckboxSelectMultiple(), required=False,
+        label=_(ugettext_lazy('Emails')), help_text=ugettext_lazy('Check the address if you want to send it the test'),
+        choices=[]
+    )
+    additional_email1 = forms.EmailField(required=False, label=email_label, help_text=email_help_text)
+    additional_email2 = forms.EmailField(required=False, label=email_label, help_text=email_help_text)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        choices = []
+        for elt in getattr(settings, 'COOP_CMS_TEST_EMAILS', []):
+            if isinstance(elt, str):
+                choices.append((elt, elt))
+            else:
+                # tuple or list
+                choices.append(elt)
+        self.fields['emails'].choices = choices
+
+    def clean(self):
+        super().clean()
+        emails = self.cleaned_data['emails']
+        additional_email1 = self.cleaned_data['additional_email1']
+        additional_email2 = self.cleaned_data['additional_email2']
+        if not emails and not additional_email1 and not additional_email2:
+            raise forms.ValidationError(_('Please select or enter at least one email'))

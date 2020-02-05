@@ -90,48 +90,27 @@ def test_newsletter(request, newsletter_id):
     if not request.user.has_perm('can_edit_newsletter', newsletter):
         raise PermissionDenied
 
-    form = NewsletterHandleRecipients(data=request.POST)
-    context["form"] = form
     if request.method == "POST":
+        form = NewsletterHandleRecipients(data=request.POST)
         if form.is_valid():
-            choix = form.cleaned_data["choix"]
-            email = form.cleaned_data["email"]
-            email2 = form.cleaned_data["email2"]
-            
-            if choix:
-                dests = choix
-                
-                if email:
-                    dests.append(email)
-
-                if email2:
-                    if email != email2:
-                        dests.append(email2)
-            else:
-                dests = []
-                if email:
-                    dests.append(email)
-                
-                if email2 and email != email2:
-                    dests.append(email2)
-                
-                if not email and not email2:
-                    messages.add_message(
-                        request, messages.ERROR,
-                        _("Cochez au moins une case ou remplissez un champ email.")
-                    )
-                    return HttpResponseRedirect(newsletter.get_absolute_url())
-            
+            emails = form.cleaned_data["emails"]
+            additional_email1 = form.cleaned_data["additional_email1"]
+            additional_email2 = form.cleaned_data["additional_email2"]
+            recipients = emails or []
+            if additional_email1:
+                recipients.append(additional_email1)
+            if additional_email2 and additional_email1 != additional_email2:
+                recipients.append(additional_email2)
             try:
-                nb_sent = send_newsletter(newsletter, dests)
+                nb_sent = send_newsletter(newsletter, recipients)
                 messages.add_message(
                     request, messages.SUCCESS,
-                    _("The test email has been sent to {0} addresses: {1}").format(nb_sent, dests)
+                    _("The test email has been sent to {0} addresses: {1}").format(nb_sent, recipients)
                 )
                 return HttpResponseRedirect(newsletter.get_absolute_url())
 
             except Exception:
-                messages.add_message(request, messages.ERROR, _("An error occured! Please contact your support."))
+                messages.add_message(request, messages.ERROR, _("An error occurred! Please contact your support."))
                 logger.error(
                     'Internal Server Error: {0}'.format(request.path),
                     exc_info=sys.exc_info,
@@ -141,7 +120,10 @@ def test_newsletter(request, newsletter_id):
                     }
                 )
                 return HttpResponseRedirect(newsletter.get_absolute_url())
-        
+    else:
+        form = NewsletterHandleRecipients()
+
+    context["form"] = form
     return render(request, 'coop_cms/popup_test_newsletter.html', context)
 
 @login_required
