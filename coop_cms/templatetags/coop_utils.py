@@ -22,6 +22,7 @@ from coop_cms.moves import make_context
 from coop_cms.settings import get_article_class, logger
 from coop_cms.shortcuts import get_article
 from coop_cms.utils import dehtml as do_dehtml, slugify
+from coop_cms.templatetags.coop_edition import _extract_if_node_args
 
 register = template.Library()
 
@@ -339,7 +340,7 @@ class ShowAcceptCookieMessageNode(template.Node):
     def render(self, context):
         """to html"""
         request = context.get('request', None)
-        if request and not request.session.get('hide_accept_cookie_message', False):
+        if request and request.session.get('accept_cookies', None) is None:
             template_ = get_template(self.template_name)
             return template_.render(make_context(request, {}))
         else:
@@ -355,6 +356,39 @@ def show_accept_cookie_message(parser, token):
     else:
         template_name = ""
     return ShowAcceptCookieMessageNode(template_name)
+
+
+class IfAcceptCookiesNode(template.Node):
+    """Do something if user accept cookies"""
+
+    def __init__(self, nodelist_true, nodelist_false):
+        self.nodelist_true = nodelist_true
+        self.nodelist_false = nodelist_false
+
+    def __iter__(self):
+        for node in self.nodelist_true:
+            yield node
+        for node in self.nodelist_false:
+            yield node
+
+    def _check_condition(self, request):
+        """True only if accept cookies is explicitly Yes"""
+        return request.session.get('accept_cookies', False)
+
+    def render(self, context):
+        """to html"""
+        request = context.get('request', None)
+        if request and self._check_condition(request):
+            return self.nodelist_true.render(context)
+        else:
+            return self.nodelist_false.render(context)
+
+
+@register.tag
+def if_accept_cookies(parser, token):
+    """Do something if edition mode"""
+    nodelist_true, nodelist_false = _extract_if_node_args(parser, token)
+    return IfAcceptCookiesNode(nodelist_true, nodelist_false)
 
 
 @register.filter

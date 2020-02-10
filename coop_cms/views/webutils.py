@@ -9,7 +9,7 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpRespons
 from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 from django.shortcuts import render
 from django.template.loader import get_template
-from django.utils.translation import check_for_language, activate, get_language
+from django.utils.translation import check_for_language, activate, get_language, ugettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
@@ -23,11 +23,18 @@ from coop_cms.utils import strip_locale_path, make_locale_path
 
 
 @csrf_exempt
-def hide_accept_cookies_message(request):
-    """force cookie warning message to be hidden"""
+def accept_cookies_message(request):
+    """store if the user accept or not the cookies"""
     if request.method == 'POST':
-        request.session['hide_accept_cookie_message'] = True
-        data = {"Ok": True}
+        try:
+            request.session['accept_cookies'] = int(request.POST.get('accept_cookies', 0)) == 1
+        except (ValueError, TypeError):
+            request.session['accept_cookies'] = False
+        if request.session['accept_cookies']:
+            message = _('Cookies and analytics are enabled')
+        else:
+            message = _('Cookies and analytics are disabled')
+        data = {"ok": True, "message": message}
         return HttpResponse(json.dumps(data), content_type="application/json")
     raise Http404
 

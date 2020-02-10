@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: coop_cms\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-02-05 18:01+0100\n"
+"POT-Creation-Date: 2020-02-10 13:12+0100\n"
 "PO-Revision-Date: 2013-06-28 15:16+0100\n"
 "Last-Translator: Luc Jean <ljean@apidev.fr>\n"
 "Language-Team: Apidev, Quinode <contact@quinode.fr>\n"
@@ -65,11 +65,13 @@ msgstr "est duppliqué"
 
 #: admin.py:199
 #: apps/newsletters/templates/newsletters/public/unregister_confirm.html:10
+#: templates/coop_cms/_accept_cookies_message.html:26
 msgid "Yes"
 msgstr "Oui"
 
 #: admin.py:200
 #: apps/newsletters/templates/newsletters/public/unregister_confirm.html:11
+#: templates/coop_cms/_accept_cookies_message.html:27
 msgid "No"
 msgstr "Non"
 
@@ -1118,18 +1120,11 @@ msgid_plural "Please correct the errors below."
 msgstr[0] "Veuillez corriger l'erreur ci-dessous"
 msgstr[1] "Veuillez corriger les erreurs ci-dessous"
 
-#: templates/coop_cms/_accept_cookies_message.html:10
-msgid "An error occured"
-msgstr "Une erreur est survenue"
-
-#: templates/coop_cms/_accept_cookies_message.html:18
-msgid "By accessing our website, you accept cookies"
-msgstr ""
-"En accédant à notre site Internet, vous reconnaissez accepter les cookies."
-
-#: templates/coop_cms/_accept_cookies_message.html:19
-msgid "Hide this message"
-msgstr "Ne plus afficher ce message"
+#: templates/coop_cms/_accept_cookies_message.html:25
+msgid ""
+"We are using cookies to analyze our traffic With Google analytics. Do you "
+"accept?"
+msgstr "Nous utilisons des cookies pour analyser le traffic avec Google analytics. Acceptez-vous leur utilisation?"
 
 #: templates/coop_cms/_coop_bar_js.html:43
 msgid "Your modifications are not saved and will be lost. Continue?"
@@ -1386,6 +1381,15 @@ msgstr "navigation_children requiert un objet en argument"
 msgid "navigation_siblings requires object as argument"
 msgstr "navigation_siblings requiert un objet en argument"
 
+#: tests/test_templatetags.py:281 views/webutils.py:34
+msgid "Cookies and analytics are enabled"
+msgstr "Les Cookies et analytcis sont actifs"
+
+#: tests/test_templatetags.py:290 tests/test_templatetags.py:299
+#: tests/test_templatetags.py:308 views/webutils.py:36
+msgid "Cookies and analytics are disabled"
+msgstr "Les Cookies et analytcis sont désactivés"
+
 #: views/articles.py:117
 msgid "Do you want to publish this article?"
 msgstr "Voulez-vous publier cet article ?"
@@ -1469,3 +1473,13 @@ msgstr "Une erreur est intervenue, contactez le support technique."
 #: widgets.py:154
 msgid "Lookup"
 msgstr "Recherche"
+
+#~ msgid "An error occured"
+#~ msgstr "Une erreur est survenue"
+
+#~ msgid "By accessing our website, you accept cookies"
+#~ msgstr ""
+#~ "En accédant à notre site Internet, vous reconnaissez accepter les cookies."
+
+#~ msgid "Hide this message"
+#~ msgstr "Ne plus afficher ce message"

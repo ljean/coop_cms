@@ -95,9 +95,9 @@ urlpatterns = [
     url(r'cms/swicth-language/$', webutils.switch_language_popup, name='coop_cms_switch_language_popup'),
 
     url(
-        r'^cms/hide-accept-cookies-message/',
-        webutils.hide_accept_cookies_message,
-        name='coop_cms_hide_accept_cookies_message'
+        r'^cms/accept-cookies-message/',
+        webutils.accept_cookies_message,
+        name='coop_cms_accept_cookies_message'
     ),
 ]
 

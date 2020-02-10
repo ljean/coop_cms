@@ -1,13 +1,18 @@
 {% load i18n %}
 <script>
     $(function() {
-        $(".accept-cookies-message a.hide-accept-cookies-message").click(function() {
-            $('.accept-cookies-message').hide();
+        $(".accept-cookies-message a.answer-cookies-message").click(function() {
             $.post(
-                '{% url "coop_cms_hide_accept_cookies_message" %}',
-                function() {}
+                '{% url "coop_cms_accept_cookies_message" %}',
+                {'accept_cookies': this.data('value')},
+                function(data) {
+                    $('.accept-cookies-question').hide();
+                    $('.accept-cookies-answer').text(data.message);
+                    setTimeout(function () {
+                        $('.accept-cookies-message').hide();
+                    }, 5000);
+                }
             ).fail(function() {
-                alert("{% trans "An error occured" %}");
                 $('.accept-cookies-message').show();
             });
             return false;
@@ -15,8 +20,10 @@
     })
 </script>
 <div class="accept-cookies-message">
-    {% trans "By accessing our website, you accept cookies" %}
-    <a href class="hide-accept-cookies-message">{% trans "Hide this message" %}</a>
-</div>    
-
-    
+    <div class="accept-cookies-answer"></div>
+    <div class="accept-cookies-question">
+        {% trans "We are using cookies to analyze our traffic With Google analytics. Do you accept?" %}
+        <a href class="answer-cookies-message" data-value="1">{% trans "Yes" %}</a>
+        <a href class="answer-cookies-message" data-value="0">{% trans "No" %}</a>
+    </div>
+</div>

@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
 """unitesting of templatetags"""
 
-import json
 from unittest import skipIf
 
 from django.conf import settings
 from django.contrib.auth.models import User, Permission, AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
 from django.template import Template, Context
 from django.test.client import RequestFactory
+from django.urls import reverse
+from django.utils.translation import ugettext as _
 
 from model_mommy import mommy
 
@@ -268,65 +265,120 @@ class PartitionTemplateFilterTest(BaseTestCase):
 class AcceptCookieMessageTest(BaseTestCase):
     """Test coop_cms_hide_accept_cookies_message template tag"""
 
-    def test_get_hide_accept_cookies(self):
+    def test_get_accept_cookies(self):
         """check that hide_accept_cookie requires a POST"""
-        url = reverse("coop_cms_hide_accept_cookies_message")
+        url = reverse("coop_cms_accept_cookies_message")
         response = self.client.get(url)
-
         self.assertEqual(404, response.status_code)
+        self.assertEqual(self.client.session.get('accept_cookies', None), None)
 
-        self.assertEqual(self.client.session.get('hide_accept_cookie_message', None), None)
-
-    def test_post_hide_accept_cookies(self):
+    def test_post_accept_cookies(self):
         """check hide message request"""
-
-        url = reverse("coop_cms_hide_accept_cookies_message")
-        response = self.client.post(url)
-
+        url = reverse("coop_cms_accept_cookies_message")
+        response = self.client.post(url, data={'accept_cookies': "1"})
         self.assertEqual(200, response.status_code)
-
         json_content = get_response_json(response)
-        self.assertEqual(json_content["Ok"], True)
+        self.assertEqual(json_content["message"], _('Cookies and analytics are enabled'))
+        self.assertEqual(self.client.session.get('accept_cookies'), True)
 
-        self.assertEqual(self.client.session.get('hide_accept_cookie_message'), True)
+    def test_post_refuse_cookies(self):
+        """check hide message request"""
+        url = reverse("coop_cms_accept_cookies_message")
+        response = self.client.post(url, data={'accept_cookies': '0'})
+        self.assertEqual(200, response.status_code)
+        json_content = get_response_json(response)
+        self.assertEqual(json_content["message"], _('Cookies and analytics are disabled'))
+        self.assertEqual(self.client.session.get('accept_cookies'), False)
+
+    def test_post_missing_cookies(self):
+        """check hide message request"""
+        url = reverse("coop_cms_accept_cookies_message")
+        response = self.client.post(url, data={})
+        self.assertEqual(200, response.status_code)
+        json_content = get_response_json(response)
+        self.assertEqual(json_content["message"], _('Cookies and analytics are disabled'))
+        self.assertEqual(self.client.session.get('accept_cookies'), False)
+
+    def test_post_junk_cookies(self):
+        """check hide message request"""
+        url = reverse("coop_cms_accept_cookies_message")
+        response = self.client.post(url, data={'accept_cookies': 'NON'})
+        self.assertEqual(200, response.status_code)
+        json_content = get_response_json(response)
+        self.assertEqual(json_content["message"], _('Cookies and analytics are disabled'))
+        self.assertEqual(self.client.session.get('accept_cookies'), False)
 
     def test_view_accept_cookies_message(self):
         """check accept_cookie is shown if not accepted"""
         tpl = Template('{% load coop_utils %}{% show_accept_cookie_message %}')
-
         factory = RequestFactory()
         request = factory.get('/')
         request.user = AnonymousUser()
         request.session = {}
-
         html = tpl.render(Context({'request': request}))
         self.assertTrue(len(html) > 0)
-        url = reverse("coop_cms_hide_accept_cookies_message")
+        url = reverse("coop_cms_accept_cookies_message")
         self.assertTrue(html.find(url) > 0)
 
-    def test_view_accept_cookies_messages_hidden(self):
+    def test_view_accept_cookies_messages_accepted(self):
         """check accept_cookie is hidden if accepted"""
         tpl = Template('{% load coop_utils %}{% show_accept_cookie_message %}')
-
         factory = RequestFactory()
         request = factory.get('/')
         request.user = AnonymousUser()
-        request.session = {'hide_accept_cookie_message': True}
+        request.session = {'accept_cookies': True}
+        html = tpl.render(Context({'request': request}))
+        self.assertTrue(len(html) == 0)
 
+    def test_view_accept_cookies_messages_refused(self):
+        """check accept_cookie is hidden if accepted"""
+        tpl = Template('{% load coop_utils %}{% show_accept_cookie_message %}')
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        request.session = {'accept_cookies': False}
         html = tpl.render(Context({'request': request}))
         self.assertTrue(len(html) == 0)
 
     def test_view_accept_cookies_custom_template(self):
         """check that it is possible to provide a custom template for the message"""
         tpl = Template('{% load coop_utils %}{% show_accept_cookie_message "test/_accept_cookies_message.html" %}')
-
         factory = RequestFactory()
         request = factory.get('/')
         request.user = AnonymousUser()
         request.session = {}
-
         html = tpl.render(Context({'request': request}))
         self.assertEqual(html, "Accept cookies")
+
+    def test_view_if_accept_cookies(self):
+        """check accept_cookie is hidden if accepted"""
+        tpl = Template('{% load coop_utils %}{% if_accept_cookies %}EVIL-ANALYTICS{% endif %}')
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        request.session = {'accept_cookies': True}
+        html = tpl.render(Context({'request': request}))
+        self.assertTrue(html.find('EVIL-ANALYTICS') >= 0)
+
+    def test_view_if_refuse_cookies(self):
+        """check accept_cookie is hidden if accepted"""
+        tpl = Template('{% load coop_utils %}{% if_accept_cookies %}EVIL-ANALYTICS{% endif %}')
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        request.session = {'accept_cookies': False}
+        html = tpl.render(Context({'request': request}))
+        self.assertFalse(html.find('EVIL-ANALYTICS') >= 0)
+
+    def test_view_if_accept_cookies(self):
+        """check accept_cookie is hidden if accepted"""
+        tpl = Template('{% load coop_utils %}{% if_accept_cookies %}EVIL-ANALYTICS{% endif %}')
+        factory = RequestFactory()
+        request = factory.get('/')
+        request.user = AnonymousUser()
+        request.session = {}
+        html = tpl.render(Context({'request': request}))
+        self.assertFalse(html.find('EVIL-ANALYTICS') >= 0)
 
 
 class GroupInSublistsTest(BaseTestCase):
