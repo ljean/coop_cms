@@ -4,7 +4,7 @@
         $(".accept-cookies-message a.answer-cookies-message").click(function() {
             $.post(
                 '{% url "coop_cms_accept_cookies_message" %}',
-                {'accept_cookies': this.data('value')},
+                {'accept_cookies': $(this).data('value')},
                 function(data) {
                     $('.accept-cookies-question').hide();
                     $('.accept-cookies-answer').text(data.message);

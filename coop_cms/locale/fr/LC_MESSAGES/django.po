@@ -1383,12 +1383,12 @@ msgstr "navigation_siblings requiert un objet en argument"
 
 #: tests/test_templatetags.py:281 views/webutils.py:34
 msgid "Cookies and analytics are enabled"
-msgstr "Les Cookies et analytcis sont actifs"
+msgstr "Les Cookies et analytics sont actifs"
 
 #: tests/test_templatetags.py:290 tests/test_templatetags.py:299
 #: tests/test_templatetags.py:308 views/webutils.py:36
 msgid "Cookies and analytics are disabled"
-msgstr "Les Cookies et analytcis sont désactivés"
+msgstr "Les Cookies et analytics sont désactivés"
 
 #: views/articles.py:117
 msgid "Do you want to publish this article?"
