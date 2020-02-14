@@ -146,6 +146,7 @@ class ImageAdmin(admin.ModelAdmin):
     list_editable = ('ordering', 'copyright')
     search_fields = ['name']
     actions = [clear_thumbnails_action]
+    readonly_fields = ['admin_image']
 
 
 @admin.register(models.Fragment)
