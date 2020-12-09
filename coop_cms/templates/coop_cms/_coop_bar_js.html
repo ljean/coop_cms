@@ -93,6 +93,8 @@ $(document).ready(function(){
       $(elt).removeClass("library-thumbnail");
       $(elt).removeAttr("data-class");
       $(elt).attr("src", $(this).attr("rel"));
+      $(elt).attr("title", $(this).attr("title"));
+      $(elt).attr("alt", $(this).attr("alt"));
       $(elt).removeAttr('rel');
     });
 

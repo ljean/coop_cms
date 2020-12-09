@@ -256,6 +256,8 @@ class ImageUploadTest(MediaBaseTestCase):
             'filters': '',
             'size': '',
             'copyright': '',
+            'alt_text': '',
+            'title': '',
         }
 
         response = self.client.post(url, data=data, follow=True)
@@ -266,6 +268,8 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEquals(1, images.count())
         self.assertEqual(images[0].name, 'unittest1')
         self.assertEqual(images[0].copyright, data['copyright'])
+        self.assertEqual(images[0].title, data['title'])
+        self.assertEqual(images[0].alt_text, data['alt_text'])
         self.assertEqual(images[0].filters.count(), 0)
         self.assertEqual(images[0].size, None)
         file_ = images[0].file
@@ -282,6 +286,8 @@ class ImageUploadTest(MediaBaseTestCase):
             'filters': '',
             'size': '',
             'copyright': 'copyright me',
+            'title': '',
+            'alt_text': '',
         }
 
         response = self.client.post(url, data=data, follow=True)
@@ -292,6 +298,36 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEquals(1, images.count())
         self.assertEqual(images[0].name, data['descr'])
         self.assertEqual(images[0].copyright, data['copyright'])
+        self.assertEqual(images[0].title, data['title'])
+        self.assertEqual(images[0].alt_text, data['alt_text'])
+        self.assertEqual(images[0].filters.count(), 0)
+        self.assertEqual(images[0].size, None)
+        file_ = images[0].file
+        file_.open('rb')
+        self.assertEqual(file_.read(), self._get_file("unittest1.png").read())
+
+    def test_post_form_title_and_alt(self):
+        """upload image with size"""
+        self._log_as_mediamgr(perm=self._permission("add", Image))
+        url = reverse('coop_cms_upload_image')
+        data = {
+            'image': self._get_file("unittest1.png"),
+            'descr': 'a test file',
+            'filters': '',
+            'size': '',
+            'copyright': '',
+            'title': 'Title',
+            'alt_text': 'Alt text',
+        }
+        response = self.client.post(url, data=data, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b'close_popup_and_media_slide')
+        images = Image.objects.all()
+        self.assertEquals(1, images.count())
+        self.assertEqual(images[0].name, data['descr'])
+        self.assertEqual(images[0].copyright, data['copyright'])
+        self.assertEqual(images[0].title, data['title'])
+        self.assertEqual(images[0].alt_text, data['alt_text'])
         self.assertEqual(images[0].filters.count(), 0)
         self.assertEqual(images[0].size, None)
         file_ = images[0].file

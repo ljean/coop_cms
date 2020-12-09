@@ -146,6 +146,8 @@ def upload_image(request):
                 image = models.Image(name=description, copyright=copyright)
                 image.size = form.cleaned_data["size"]
                 image.file.save(src.name, src)
+                image.alt_text = form.cleaned_data.get('alt_text', '')
+                image.title = form.cleaned_data.get('title' '')
                 image.save()
 
                 filters = form.cleaned_data['filters']

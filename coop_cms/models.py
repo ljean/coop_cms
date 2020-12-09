@@ -1023,6 +1023,8 @@ class Image(Media):
         on_delete=models.CASCADE
     )
     copyright = models.CharField(max_length=200, verbose_name=_('copyright'), blank=True, default='')
+    alt_text = models.CharField(max_length=200, verbose_name=_('alt'), blank=True, default='')
+    title = models.CharField(max_length=200, verbose_name=_('title'), blank=True, default='')
 
     def __str__(self):
         return self.name

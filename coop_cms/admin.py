@@ -141,9 +141,9 @@ class MediaFilterFilter(admin.SimpleListFilter):
 @admin.register(models.Image)
 class ImageAdmin(admin.ModelAdmin):
     """Image admin"""
-    list_display = ['admin_image', 'name', 'file', 'size', 'ordering', 'copyright']
+    list_display = ['admin_image', 'name', 'file', 'size', 'ordering', 'copyright', 'alt_text', 'title']
     list_filter = [MediaFilterFilter, 'size']
-    list_editable = ('ordering', 'copyright')
+    list_editable = ('ordering', 'copyright', 'alt_text', 'title')
     search_fields = ['name']
     actions = [clear_thumbnails_action]
     readonly_fields = ['admin_image']
