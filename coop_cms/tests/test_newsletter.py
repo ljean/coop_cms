@@ -700,6 +700,57 @@ class NewsletterTest(UserBaseTestCase):
     @override_settings(
         COOP_CMS_TEST_EMAILS=[
             ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
+            ('Test Two <test2@test2.fr>', 'Test Two <test2@test2>'),
+        ],
+        COOP_CMS_FROM_EMAIL='contact@toto.fr'
+    )
+    def test_send_test_newsletter_multi_lines(self, template='test/newsletter_blue.html', extra_checker=None):
+        settings.SITE_ID = 1
+        site = Site.objects.get(id=settings.SITE_ID)
+        site.domain = 'toto.fr'
+        site.save()
+
+        rel_content = '''
+                <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
+                <div><a href="http://www.google.fr">Google</a></div>
+            '''
+        original_data = {
+            'template': template,
+            'subject': 'test email\nmulti-lines',
+            'content': rel_content.format("")
+        }
+        newsletter = mommy.make(Newsletter, site=site, **original_data)
+
+        self._log_as_editor()
+        data = {
+            "emails": [email[0] for email in settings.COOP_CMS_TEST_EMAILS],
+            "email": "",
+            "email2": ""
+        }
+
+        url = reverse('coop_cms_test_newsletter', args=[newsletter.id])
+        response = self.client.post(url, data)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            [test_address[0] for test_address in settings.COOP_CMS_TEST_EMAILS],
+            [received_email.to[0] for received_email in mail.outbox]
+        )
+        for received_email in mail.outbox:
+            self.assertEqual(received_email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(received_email.subject, 'test email multi-lines')
+            self.assertTrue(received_email.body.find('Title') >= 0)
+            self.assertTrue(received_email.body.find('Google') >= 0)
+            self.assertTrue(received_email.alternatives[0][1], "text/html")
+            self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
+            self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
+            site_prefix = "http://" + site.domain
+            self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
+            if extra_checker:
+                extra_checker(received_email)
+
+    @override_settings(
+        COOP_CMS_TEST_EMAILS=[
+            ('Your name <coop_cms@mailinator.com>', 'Your name <coop_cms@mailinator.com>'),
             ('Test Two <test2@example.com>', 'Test Two <test2@example.com>'),
         ],
         COOP_CMS_FROM_EMAIL='contact@toto.fr'
