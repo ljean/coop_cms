@@ -716,7 +716,7 @@ class NewsletterTest(UserBaseTestCase):
             '''
         original_data = {
             'template': template,
-            'subject': 'test email\nmulti-lines',
+            'subject': 'test\remail\nmulti-lines',
             'content': rel_content.format("")
         }
         newsletter = mommy.make(Newsletter, site=site, **original_data)
