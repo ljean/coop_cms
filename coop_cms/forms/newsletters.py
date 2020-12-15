@@ -41,7 +41,7 @@ class NewsletterSettingsForm(forms.ModelForm):
 
     class Meta:
         model = Newsletter
-        fields = ('subject', 'template', 'newsletter_date', 'items', )
+        fields = ('subject', 'template', 'newsletter_date', 'items', 'site')
 
     class Media:
         css = {
@@ -154,7 +154,7 @@ class NewsletterAdminForm(forms.ModelForm):
 
     class Meta:
         model = Newsletter
-        fields = ('subject', 'content', 'template', 'source_url', 'items', 'newsletter_date', )
+        fields = ('subject', 'content', 'template', 'source_url', 'items', 'newsletter_date', 'site')
         widgets = {}
 
     class Media:

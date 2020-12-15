@@ -53,17 +53,40 @@ class NewsletterSettingsTest(UserBaseTestCase):
         data = {
             "subject": "test",
             "template": "test/newsletter_blue.html",
-            'items': []
+            'items': [],
+            'site': Site.objects.get_current().id,
         }
 
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, 200)
-
         self.assertEqual(Newsletter.objects.count(), 1)
         newsletter = Newsletter.objects.all()[0]
 
         self.assertEqual(newsletter.subject, data["subject"])
         self.assertEqual(newsletter.template, data["template"])
+        self.assertEqual(newsletter.site, Site.objects.get_current())
+
+    def test_create_newsletter_alt_site(self):
+        self._log_as_editor()
+        url = reverse("coop_cms_new_newsletter")
+
+        site1 = Site.objects.get_current()
+        site2 = mommy.make(Site)
+        data = {
+            "subject": "test",
+            "template": "test/newsletter_blue.html",
+            'items': [],
+            'site': site2.id,
+        }
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Newsletter.objects.count(), 1)
+        newsletter = Newsletter.objects.all()[0]
+
+        self.assertEqual(newsletter.subject, data["subject"])
+        self.assertEqual(newsletter.template, data["template"])
+        self.assertEqual(newsletter.site, site2)
 
     def test_view_edit_newsletter(self):
         self._log_as_editor()
@@ -71,6 +94,7 @@ class NewsletterSettingsTest(UserBaseTestCase):
             Newsletter,
             subject="a little intro for this newsletter",
             template="test/newsletter_blue.html",
+            site=Site.objects.get_current()
         )
 
         url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
@@ -84,13 +108,15 @@ class NewsletterSettingsTest(UserBaseTestCase):
             Newsletter,
             subject="a little intro for this newsletter",
             template="test/newsletter_red.html",
+            site=Site.objects.get_current()
         )
         url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
 
         data = {
             "subject": "test",
             "template": "test/newsletter_blue.html",
-            'items': []
+            'items': [],
+            'site': Site.objects.get_current().id,
         }
 
         response = self.client.post(url, data=data)
@@ -101,6 +127,36 @@ class NewsletterSettingsTest(UserBaseTestCase):
 
         self.assertEqual(newsletter.subject, data["subject"])
         self.assertEqual(newsletter.template, data["template"])
+        self.assertEqual(newsletter.site, Site.objects.get_current())
+
+    def test_edit_newsletter_other_site(self):
+        self._log_as_editor()
+        site1 = Site.objects.get_current()
+        site2 = mommy.make(Site)
+        newsletter = mommy.make(
+            Newsletter,
+            subject="a little intro for this newsletter",
+            template="test/newsletter_red.html",
+            site=Site.objects.get_current()
+        )
+        url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
+
+        data = {
+            "subject": "test",
+            "template": "test/newsletter_blue.html",
+            'items': [],
+            'site': site2.id,
+        }
+
+        response = self.client.post(url, data=data)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(Newsletter.objects.count(), 1)
+        newsletter = Newsletter.objects.all()[0]
+
+        self.assertEqual(newsletter.subject, data["subject"])
+        self.assertEqual(newsletter.template, data["template"])
+        self.assertEqual(newsletter.site, site2)
 
     def test_view_newsletter_items(self):
         self._log_as_editor()
@@ -173,13 +229,15 @@ class NewsletterSettingsTest(UserBaseTestCase):
             Newsletter,
             subject="a little intro for this newsletter",
             template="test/newsletter_red.html",
-            items=[item_1]
+            items=[item_1],
+            site=Site.objects.get_current(),
         )
 
         data = {
             "subject": "test",
             "template": "test/newsletter_blue.html",
-            'items': [item_2.id, item_3.id]
+            'items': [item_2.id, item_3.id],
+            'site': Site.objects.get_current().id,
         }
 
         url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
@@ -226,7 +284,8 @@ class NewsletterSettingsTest(UserBaseTestCase):
         data = {
             "subject": "test",
             "template": "test/newsletter_blue.html",
-            'items': [item_2.id, item_3.id]
+            'items': [item_2.id, item_3.id],
+            'site': Site.objects.get_current().id,
         }
 
         url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
@@ -275,7 +334,8 @@ class NewsletterSettingsTest(UserBaseTestCase):
         data = {
             "subject": "test",
             "template": "test/newsletter_blue.html",
-            'items': [item_2.id, item_3.id]
+            'items': [item_2.id, item_3.id],
+            'site': Site.objects.get_current().id,
         }
 
         url = reverse("coop_cms_newsletter_settings", args=[newsletter.id])
@@ -304,7 +364,8 @@ class NewsletterSettingsTest(UserBaseTestCase):
         data = {
             "subject": "test",
             "template": "test/newsletter_blue.html",
-            'items': []
+            'items': [],
+            'site': Site.objects.get_current().id,
         }
 
         response = self.client.post(url, data=data)

@@ -126,6 +126,7 @@ def test_newsletter(request, newsletter_id):
     context["form"] = form
     return render(request, 'coop_cms/popup_test_newsletter.html', context)
 
+
 @login_required
 @popup_redirect
 def schedule_newsletter_sending(request, newsletter_id):
@@ -168,7 +169,7 @@ class NewsletterView(EditableObjectView):
             'title': self.object.subject,
             'by_email': self.request.GET.get('by_email', False),
             'editable': self.editable,
-            'current_site': Site.objects.get_current(),
+            'current_site': self.object.site or Site.objects.get_current(),
             'COOP_CMS_SITE_PREFIX': settings.COOP_CMS_SITE_PREFIX,
         })
         return context_data
