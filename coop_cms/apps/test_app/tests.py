@@ -546,7 +546,7 @@ class ArticleFormTest(BaseTestCase):
         self._settings_backup = {}
         for s in self._settings_fields_to_backup():
             v = getattr(settings, s, None)
-            if v != None:
+            if v is None:
                 self._settings_backup[s] = v
         
         self.LOGIN_URL = settings.LOGIN_URL
@@ -601,7 +601,7 @@ class ArticleFormTest(BaseTestCase):
             'template': settings.COOP_CMS_ARTICLE_TEMPLATES[0][0],
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID]
         }
         response = self.client.post(url, data=data)
@@ -611,6 +611,8 @@ class ArticleFormTest(BaseTestCase):
         for field in data:
             if field == "sites":
                 self.assertEqual([x.id for x in getattr(article, field).all()], data[field])
+            elif field == "navigation_parent":
+                self.assertEqual(getattr(article, field), None)
             else:
                 self.assertEqual(getattr(article, field), data[field])
 
@@ -622,7 +624,7 @@ class ArticleFormTest(BaseTestCase):
             'template': settings.COOP_CMS_ARTICLE_TEMPLATES[0][0],
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
@@ -641,7 +643,7 @@ class ArticleFormTest(BaseTestCase):
             'template': settings.COOP_CMS_ARTICLE_TEMPLATES[0][0],
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
@@ -691,7 +693,7 @@ class ArticleFormTest(BaseTestCase):
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
             'summary': 'Summary',
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
@@ -701,6 +703,8 @@ class ArticleFormTest(BaseTestCase):
         for field in data:
             if field == "sites":
                 self.assertEqual([x.id for x in getattr(article, field).all()], data[field])
+            elif field == "navigation_parent":
+                self.assertEqual(article.navigation_parent, None)
             else:
                 self.assertEqual(getattr(article, field), data[field])
         
@@ -715,7 +719,7 @@ class ArticleFormTest(BaseTestCase):
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
             'summary': 'Summary',
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
@@ -739,7 +743,7 @@ class ArticleFormTest(BaseTestCase):
             'publication': BaseArticle.PUBLISHED,
             'in_newsletter': False,
             'summary': 'Summary',
-            'navigation_parent': None,
+            'navigation_parent': '',
             'sites': [settings.SITE_ID],
         }
         response = self.client.post(url, data=data)
