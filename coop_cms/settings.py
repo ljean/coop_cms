@@ -453,3 +453,7 @@ def change_site_id():
 
 def is_xsendfile_disabled():
     return getattr(django_settings, 'COOP_CMS_DISABLE_XSENDFILE', False)
+
+
+def xsendfile_no_file_size():
+    return getattr(django_settings, 'COOP_CMS_XSENDFILE_NO_FILESIZE', True)

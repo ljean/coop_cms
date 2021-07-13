@@ -9,7 +9,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.utils.encoding import smart_str
 
-from ..settings import is_xsendfile_disabled
+from ..settings import is_xsendfile_disabled, xsendfile_no_file_size
 
 
 class ChunkedFile(object):
@@ -58,4 +58,7 @@ def serve_file(request, file, backend=None, save_as=False, content_type=None):
     if is_xsendfile_disabled():
         return chunk_serve_file(request, file, save_as=save_as, content_type=content_type)
     else:
-        return xsendfile_serve_file(request, file, save_as=save_as, content_type=content_type)
+        no_file_size = xsendfile_no_file_size()
+        return xsendfile_serve_file(
+            request, file, save_as=save_as, content_type=content_type, no_file_size=no_file_size
+        )
