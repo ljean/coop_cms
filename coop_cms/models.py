@@ -46,6 +46,17 @@ class InvalidArticleError(Exception):
     pass
 
 
+class FileUrlWrapper:
+
+    def __init__(self, file):
+        self.filename = file.name
+
+    @property
+    def url(self):
+        relative_name = self.filename.replace(settings.MEDIA_ROOT, settings.MEDIA_URL)
+        return relative_name
+
+
 def validate_slug(value):
     """check a slug only contains letters, numbers or hyphens (undercores are allowed)"""
     if not re.match(r"^[-\w]+$", value):
@@ -691,12 +702,12 @@ class BaseArticle(BaseNavigable):
         if not logo_file:
             logo_file = self._get_default_logo()
         crop = logo_crop or get_article_logo_crop(self)
+
         try:
             return sorl_thumbnail.backend.get_thumbnail(logo_file, size, crop=crop)
         except IOError:
             # TODO : In case of error (Pillow 4.2.1 cause "cannot write mode RGBA as JPEG")
-            # TODO : Fix "AttributeError: 'File' object has no attribute 'url'"
-            return logo_file
+            return FileUrlWrapper(logo_file.file)
         
     def get_headline_image(self):
         """headline image"""
