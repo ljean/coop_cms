@@ -439,6 +439,9 @@ def cms_edit_fragments(request, context):
         perm = '{0}.change_{1}'.format(content_type.app_label, content_type.model)
         if request.user.has_perm(perm):
             url = reverse("coop_cms_edit_fragments")
+            variable = context.get('article', None) or context.get('object', None) or context.get('newsletter', None)
+            if variable:
+                url += '?filter={0}'.format(variable.id)
             return make_link(
                 url, _('Edit fragments'), 'shapes',
                 classes=['alert_on_click', 'colorbox-form', 'icon', 'if-fragments']

@@ -23,6 +23,7 @@
                     if (extra_id && extra_id != '0') {
                         if ($(elt).find("input").val() == type_id && (extra_id == ff_id)) {
                             $(elt).closest("tr").show();
+                            console.log('>', ff_id, extra_id)
                         }
                     } else {
                         if ($(elt).find("input").val() == type_id) {
@@ -34,7 +35,7 @@
             });
             $("select#fragment-types").change();
 
-            $("select").chosen();
+            $("select[multiple]").chosen();
             $(".chosen-container").css({width: '140px'});
             //$(".chosen-container input").css({width: '140px'});
         });

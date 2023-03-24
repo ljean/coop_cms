@@ -56,14 +56,22 @@ def edit_fragments(request):
 
     edit_fragment_formset = modelformset_factory(models.Fragment, EditFragmentForm, extra=0)
 
+    fragments = models.Fragment.objects.all()
+    try:
+        filter_id = int(request.GET.get('filter', 0))
+    except ValueError:
+        filter_id = 0
+    if filter_id:
+        fragments = fragments.filter(filter__extra_id=filter_id)
+
     if request.method == "POST":
-        formset = edit_fragment_formset(request.POST, queryset=models.Fragment.objects.all())
+        formset = edit_fragment_formset(request.POST, queryset=fragments)
         if formset.is_valid():
             formset.save()
             # popup_close decorator will close and refresh
             return None
     else:
-        formset = edit_fragment_formset(queryset=models.Fragment.objects.all())
+        formset = edit_fragment_formset(queryset=fragments)
 
     context_dict = {
         'form': formset,
