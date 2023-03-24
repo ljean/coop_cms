@@ -4,6 +4,26 @@
     <script>
     {% include "coop_cms/_pagination_js.html" %}
     $(function() {
+
+     $(document).on('change', "li.paginate-form input", function() {
+        try {
+          var media_url = $("#media_url").text();
+          var href = media_url + '?page=' + $(this).val()
+
+          $.ajax({
+            url: href,
+            success: function(data) {
+              $("#media_slide_content").html(data["html"]);
+              $("#media_url").text(data["media_url"]);
+            }
+          });
+        } catch(err) {
+          if (!console) console = {log:function(){}}; //no error but no log in IE
+          console.log(err)
+        }
+        return false;
+      });
+
       $(document).on('click', '.pagination a', function(e) {
         try {
           var media_url = $("#media_url").text();
