@@ -15,6 +15,10 @@ from ..settings import has_localized_urls, get_article_class, get_article_templa
 from . import BaseArticleTest, BeautifulSoup, make_dt
 
 
+@override_settings(
+    COOP_CMS_ARTICLE_SETTINGS_FORM='',
+    COOP_CMS_NEW_ARTICLE_FORM=''
+)
 class ArticleTest(BaseArticleTest):
     
     def setUp(self):
@@ -143,55 +147,6 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(response.status_code, 200)
         self._check_article(response, data)
 
-    @override_settings(COOP_HTML_EDITOR='aloha')
-    def test_edit_article_html_with_br(self):
-        """It should save article correctly"""
-        article = get_article_class().objects.create(
-            title="test", publication=BaseArticle.PUBLISHED, template="test/standard.html"
-        )
-
-        data = {"title": 'salut', 'content': '<h2>Hello</h2><p>Hello<br>Cool<br /></p>'}
-
-        self._log_as_editor()
-        response = self.client.post(article.get_edit_url(), data=data, follow=True)
-
-        self.assertEqual(response.status_code, 200)
-        expected_content = '<h2>Hello</h2><p>Hello<br />Cool<br /></p>'
-        data['content'] = expected_content
-        self._check_article(response, data)
-
-    @override_settings(COOP_HTML_EDITOR='aloha')
-    def test_edit_article_html_with_img_wrapper(self):
-        """It should save article correctly"""
-        article = get_article_class().objects.create(
-            title="test", publication=BaseArticle.PUBLISHED, template="test/standard.html"
-        )
-
-        content = """
-            <p><div
-            contenteditable="false"
-            style="overflow: hidden; position: relative; display: inline-block; float: none;"
-            class="ui-wrapper aloha-image-box-active Aloha_Image_Resize aloha"
-            >
-                <img src="moby-dick.jpg" style="height: 207px; width: 269px;" class="ui-resizable" />
-                <div class="ui-resizable-handle ui-resizable-ne" style="z-index: 1000;"></div>
-                <div class="ui-resizable-handle ui-resizable-se ui-icon" style="z-index: 1000;"></div>
-                <div class="ui-resizable-handle ui-resizable-sw" style="z-index: 1000;"></div>
-                <div class="ui-resizable-handle ui-resizable-nw" style="z-index: 1000;"></div>
-            </div></p>
-        """
-
-        data = {"title": 'salut', 'content': content}
-
-        self._log_as_editor()
-        response = self.client.post(article.get_edit_url(), data=data, follow=True)
-
-        self.assertEqual(response.status_code, 200)
-
-        expected_content = '<p><img class="" src="moby-dick.jpg" style="height: 207px; width: 269px;"/></p>'
-        data['content'] = expected_content
-        self._check_article(response, data)
-
     def test_edit_article_draft(self):
         article = get_article_class().objects.create(
             title="test", publication=BaseArticle.DRAFT, template="test/standard.html"
@@ -253,7 +208,6 @@ class ArticleTest(BaseArticleTest):
     def check_inline_html_editor(self, response, is_loaded):
         self.assertEqual(200, response.status_code)
         inline_editor_init_url = reverse('html_editor_init')
-
         if is_loaded:
             self.assertContains(response, inline_editor_init_url)
         else:
@@ -313,7 +267,6 @@ class ArticleTest(BaseArticleTest):
         html = '<h1>paul</h1><a href="/" target="_blank">georges</a><p><b>ringo</b></p>'
         html += '<h6>john</h6><img src="/img.jpg"><br><table><tr><th>A</th><td>B</td></tr>'
         data = {'content': html, 'title': 'ok'}
-        
         self._log_as_editor()
         response = self.client.post(article.get_edit_url(), data=data, follow=False)
         self.assertEqual(response.status_code, 302)

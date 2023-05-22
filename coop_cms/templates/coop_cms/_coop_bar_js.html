@@ -50,12 +50,7 @@ $(document).ready(function(){
 		{% endif %}
 	};
 	$(".show-dirty").hide();
-  {% if html_editor == 'aloha' %}
-  Aloha.bind('aloha-editable-deactivated', function(event, eventProperties){
-        toggle_save();
-	});
-  {% endif %}
-	$(".inline-editable").keypress(function() {
+  	$(".inline-editable").keypress(function() {
 		toggle_save();
 	});
 
@@ -113,19 +108,6 @@ $(document).ready(function(){
     //this will cause the deactivated event to be triggered, and the content to be saved
     the_obj.focus();
   };
-
-	{% if html_editor == 'aloha' %}
-  //resize image when dropped in the editor
-  //GENTICS.Aloha.EventRegistry.subscribe(GENTICS.Aloha, 'editableCreated', function(event, editable) {
-  Aloha.bind('aloha-editable-created', function(event, editable){
-      var the_obj = editable.obj;
-      jQuery(editable.obj).bind('drop', function(event){
-        setTimeout(function() {
-          resize_thumbnail(the_obj);
-        }, 100);
-      });
-  });
-  {% endif %}
 {% endif %}
 });
 </script>

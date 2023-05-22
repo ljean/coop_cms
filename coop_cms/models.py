@@ -625,7 +625,7 @@ class BaseArticle(BaseNavigable):
         _("Headline"), default=False,
         help_text=_('Make this article appear on the home page')
     )
-    publication_date = models.DateTimeField(_("Publication date"), default=datetime.now)
+    publication_date = models.DateTimeField(_("Publication date"), default=datetime.now, blank=True)
     sites = models.ManyToManyField(Site, verbose_name=_('site'), default=[])
     login_required = models.BooleanField(
         default=False,

@@ -35,8 +35,12 @@ class BeautifulSoup(BaseBeautifulSoup):
         super(BeautifulSoup, self).__init__(content, parser)
 
 
-@override_settings(MEDIA_ROOT=get_unit_test_media_root())
+@override_settings(
+    MEDIA_ROOT=get_unit_test_media_root(),
+    USER_SIGNAL_DISABLED=True
+)
 class BaseTestCase(TestCase):
+
     def _clean_files(self):
         if DEFAULT_MEDIA_ROOT != settings.MEDIA_ROOT:
             try:
@@ -102,15 +106,17 @@ class UserBaseTestCase(BaseTestCase):
         return Permission.objects.get(content_type__app_label='coop_cms', codename='change_newsletter')
 
     def _log_as_editor(self, can_add=False):
-        if not self.editor:
+        if True:  # not self.editor:
             self.editor = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
             self.editor.is_staff = True
             self.editor.is_active = True
+            self.editor.save()
 
             self.editor.user_permissions.add(self.can_edit_newsletter_permission())
 
             ct = ContentType.objects.get_for_model(get_article_class())
             codename = 'change_{0}'.format(ct.model)
+            print('#', ct, codename)
             can_edit_article = Permission.objects.get(content_type__app_label=ct.app_label, codename=codename)
             self.editor.user_permissions.add(can_edit_article)
 

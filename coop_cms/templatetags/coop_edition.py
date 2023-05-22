@@ -225,8 +225,7 @@ class CmsFormMediaNode(template.Node):
         if form or formset:
             template_ = template.Template("{{form.media}}")
             html = template_.render(template.Context({'form': form or formset}))
-            # django 1.5 fix : " are escaped as &quot; and cause script tag
-            # for aloha to be broken
+            # django 1.5 fix : " are escaped as &quot; and cause script tag for aloha to be broken
             return html.replace("&quot;", '"') 
         else:
             return ""
