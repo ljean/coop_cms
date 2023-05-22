@@ -11,10 +11,10 @@ from django.urls import reverse
 from model_mommy import mommy
 from colorbox.utils import assert_popup_refresh
 
-from coop_cms.forms import ArticleForm
-from coop_cms.models import BaseArticle, Fragment, FragmentType, FragmentFilter
-from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseTestCase, BeautifulSoup
+from ..forms import ArticleForm
+from ..models import BaseArticle, Fragment, FragmentType, FragmentFilter
+from ..settings import get_article_class
+from . import BaseTestCase, BeautifulSoup
 
 
 class BaseFragmentTest(BaseTestCase):

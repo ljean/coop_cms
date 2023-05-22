@@ -5,7 +5,7 @@ from django import template
 
 register = template.Library()
 
-from coop_cms.settings import get_article_class
+from ..settings import get_article_class
 
 
 @register.tag

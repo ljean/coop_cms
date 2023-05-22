@@ -3,7 +3,7 @@
 
 from django.contrib import admin
 
-import floppyforms.__future__ as forms
+import floppyforms as forms
 
 from . import models
 from . import settings

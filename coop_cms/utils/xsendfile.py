@@ -4,8 +4,6 @@
 
 import mimetypes
 
-from django.conf import settings
-
 from django.http import HttpResponse
 from django.utils.encoding import smart_str
 

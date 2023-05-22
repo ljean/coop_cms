@@ -8,9 +8,9 @@ from django.test.utils import override_settings
 
 from model_mommy import mommy
 
-from coop_cms.models import BaseArticle, ArticleCategory
-from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseTestCase
+from ..models import BaseArticle, ArticleCategory
+from ..settings import get_article_class
+from . import BaseTestCase
 
 
 @override_settings(COOP_CMS_ARTICLES_CATEGORY_PAGINATION=10)

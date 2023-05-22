@@ -9,17 +9,18 @@ from django.core.exceptions import PermissionDenied
 from django.forms.models import modelformset_factory
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.utils.translation import ugettext as _, get_language
+from django.urls import reverse
+from django.utils.translation import gettext as _, get_language
 from django.views.generic import TemplateView
 from django.views.generic.base import View
 from django.views.generic.list import ListView as DjangoListView
 
 from coop_html_editor import utils as html_editor_utils
 
-from coop_cms.exceptions import ArticleNotAllowed
-from coop_cms.logger import logger
-from coop_cms.moves import reverse, is_authenticated
-from coop_cms.settings import is_cache_enabled
+from .exceptions import ArticleNotAllowed
+from .logger import logger
+from .moves import is_authenticated
+from .settings import is_cache_enabled
 
 
 class ListView(DjangoListView):

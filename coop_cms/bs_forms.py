@@ -3,9 +3,9 @@
 
 import types
 
-import floppyforms.__future__ as forms
+import floppyforms as forms
 
-from coop_cms.templatetags.coop_utils import is_checkbox
+from .templatetags.coop_utils import is_checkbox
 
 
 def _build_attrs(widget, base_attrs, extra_attrs=None, **kwargs):

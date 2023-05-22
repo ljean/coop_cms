@@ -14,8 +14,8 @@ VERSION = __import__('coop_cms').__version__
 import os
 
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+def read(file_name):
+    return open(os.path.join(os.path.dirname(__file__), file_name)).read()
 
 
 setup(
@@ -29,12 +29,12 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        'django >= 2.2.13, <3.0',
+        'django >= 2.2.13',
         'django-extensions',
         'sorl-thumbnail',
-        'apidev-coop_colorbox >= 1.5.1',
-        'apidev-coop_bar >= 1.5.2',
-        'coop_html_editor >= 1.3.1',
+        'apidev-coop_colorbox >= 1.6.0',
+        'apidev-coop_bar >= 1.6.0',
+        'coop_html_editor >= 1.4.0',
         'feedparser',
         'beautifulsoup4',
         'model_mommy',

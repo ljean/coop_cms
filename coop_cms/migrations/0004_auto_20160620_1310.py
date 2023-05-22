@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 
-from coop_cms.moves import reverse
+from django.urls import reverse
 
 
 def set_homepage(apps, schema_editor):

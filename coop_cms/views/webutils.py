@@ -9,17 +9,17 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect, HttpRespons
 from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 from django.shortcuts import render
 from django.template.loader import get_template
-from django.utils.translation import check_for_language, activate, get_language, ugettext as _
+from django.utils.translation import check_for_language, activate, get_language, gettext as _
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 
 from colorbox.decorators import popup_redirect
 
-from coop_cms.forms.webutils import LanguageSelectionForm
-from coop_cms.logger import logger
-from coop_cms.moves import make_context
-from coop_cms.settings import get_article_class, is_localized
-from coop_cms.utils import strip_locale_path, make_locale_path
+from ..forms.webutils import LanguageSelectionForm
+from ..logger import logger
+from ..moves import make_context
+from ..settings import get_article_class, is_localized
+from ..utils import strip_locale_path, make_locale_path
 
 
 @csrf_exempt

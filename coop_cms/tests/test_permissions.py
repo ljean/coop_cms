@@ -2,10 +2,10 @@
 
 from django.conf import settings
 
-from coop_cms.models import BaseArticle
-from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseArticleTest
-from coop_cms.utils import get_login_url
+from ..models import BaseArticle
+from ..settings import get_article_class
+from ..utils import get_login_url
+from . import BaseArticleTest
 
 
 class PermissionMiddlewareTest(BaseArticleTest):

@@ -16,10 +16,10 @@ from django.utils.translation import get_language
 
 from model_mommy import mommy
 
-from coop_cms.models import Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending
-from coop_cms.settings import has_localized_urls, get_article_class
-from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
-from coop_cms.utils import make_links_absolute, strip_a_tags, avoid_line_too_long, send_email
+from ..models import Newsletter, NewsletterItem, PieceOfHtml, NewsletterSending
+from ..settings import has_localized_urls, get_article_class
+from ..utils import make_links_absolute, strip_a_tags, avoid_line_too_long, send_email
+from . import BaseTestCase, UserBaseTestCase, BeautifulSoup
 
 
 @override_settings(COOP_CMS_NEWSLETTER_SETTINGS_FORM='')

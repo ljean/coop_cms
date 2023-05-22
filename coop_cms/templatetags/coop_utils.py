@@ -15,14 +15,15 @@ from django.template.base import TemplateSyntaxError
 from django.template.loader import get_template
 from django.utils.safestring import mark_safe
 
-import floppyforms.__future__ as floppyforms
+import floppyforms as floppyforms
 
-from coop_cms.models import ArticleCategory, Image, Document
-from coop_cms.moves import make_context
-from coop_cms.settings import get_article_class, logger
-from coop_cms.shortcuts import get_article
-from coop_cms.utils import dehtml as do_dehtml, slugify
-from coop_cms.templatetags.coop_edition import _extract_if_node_args
+from ..models import ArticleCategory, Image, Document
+from ..moves import make_context
+from ..settings import get_article_class, logger
+from ..shortcuts import get_article
+from ..utils import dehtml as do_dehtml, slugify
+from ..templatetags.coop_edition import _extract_if_node_args
+
 
 register = template.Library()
 

@@ -5,8 +5,8 @@ from django.urls import reverse
 
 from model_mommy import mommy
 
-from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseArticleTest
+from ..settings import get_article_class
+from . import BaseArticleTest
 
 
 class TemplateTest(BaseArticleTest):

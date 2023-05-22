@@ -4,8 +4,9 @@
 from django.contrib.sites.models import Site
 from django.urls import reverse
 
-from coop_cms.tests import BaseTestCase
 from model_mommy import mommy
+
+from ....tests import BaseTestCase
 
 from .. import models
 

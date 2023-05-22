@@ -6,7 +6,7 @@ models for demo application : how to customize an article
 from django.contrib.auth.models import User
 from django.db import models
 
-from coop_cms.models import BaseArticle
+from ...models import BaseArticle
 
 
 class Article(BaseArticle):

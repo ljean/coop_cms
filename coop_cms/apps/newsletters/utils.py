@@ -6,21 +6,18 @@ import re
 import sys
 
 from django.conf import settings
-from django.contrib import messages
-from django.contrib.sites.models import Site
-from django.core.mail import get_connection, EmailMessage, EmailMultiAlternatives
+from django.core.mail import get_connection, EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import translation
-from django.utils.safestring import mark_safe
-from django.utils.translation import get_language as django_get_language, ugettext as _
+from django.utils.translation import get_language as django_get_language
 from django.urls import reverse
 
-from coop_cms.logger import logger
-from coop_cms.models import Newsletter
-from coop_cms.settings import get_newsletter_context_callbacks
-from coop_cms.utils import dehtml, make_links_absolute
+from ...logger import logger
+from ...models import Newsletter
+from ...settings import get_newsletter_context_callbacks
+from ...utils import dehtml, make_links_absolute
 
-from .models import Emailing, MagicLink, Contact, Subscription, SubscriptionType
+from .models import Emailing, MagicLink, Contact
 
 
 class EmailSendError(Exception):

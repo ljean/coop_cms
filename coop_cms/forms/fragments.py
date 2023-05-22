@@ -5,11 +5,11 @@ from six import string_types
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
-import floppyforms.__future__ as floppyforms
+import floppyforms as floppyforms
 
-from coop_cms.models import Fragment, FragmentType
+from ..models import Fragment, FragmentType
 
 
 class BaseFragmentForm(floppyforms.ModelForm):

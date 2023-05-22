@@ -5,9 +5,9 @@ from django.test.utils import override_settings
 
 from model_mommy import mommy
 
-from coop_cms.models import PieceOfHtml
-from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseTestCase, BeautifulSoup, BaseArticleTest
+from ..models import PieceOfHtml
+from ..settings import get_article_class
+from . import BaseTestCase, BeautifulSoup, BaseArticleTest
 
 
 class PieceOfHtmlTagsTest(BaseTestCase):

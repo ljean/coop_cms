@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from coop_cms.utils import RequestManager, RequestMiddleware, RequestNotFound
-from coop_cms.tests import BaseTestCase
+from ..utils import RequestManager, RequestMiddleware, RequestNotFound
+from . import BaseTestCase
 
 
 class RequestManagerTest(BaseTestCase):

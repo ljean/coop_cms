@@ -11,14 +11,14 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import get_template
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 
-from coop_cms.forms.content import AddDocForm, AddImageForm
-from coop_cms.logger import logger
-from coop_cms import models
-from coop_cms.moves import make_context, reverse
-from coop_cms.utils import paginate
-from coop_cms.utils.xsendfile import serve_file
+from ..forms.content import AddDocForm, AddImageForm
+from ..logger import logger
+from .. import models
+from ..moves import make_context
+from ..utils import paginate
+from ..utils.xsendfile import serve_file
 
 
 def _get_photologue_media(request):

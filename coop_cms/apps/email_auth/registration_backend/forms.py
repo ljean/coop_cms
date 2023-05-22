@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from django_registration.forms import RegistrationFormUniqueEmail
 
-from coop_cms.bs_forms import BootstrapableMixin
+from ....bs_forms import BootstrapableMixin
 
 
 class RegistrationFormUniqueEmailAndTermsOfService(BootstrapableMixin, RegistrationFormUniqueEmail):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """forms"""
 
-import floppyforms.__future__ as floppyforms
+import floppyforms as floppyforms
 
 from coop_html_editor.widgets import get_inline_html_widget
 

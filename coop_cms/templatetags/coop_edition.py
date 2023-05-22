@@ -13,15 +13,16 @@ from django.template.base import TextNode, VariableNode, FilterExpression
 from django.template.context_processors import csrf
 from django.template.loader import get_template, TemplateDoesNotExist
 from django.template.loader_tags import IncludeNode
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.safestring import mark_safe
 
 from coop_html_editor.templatetags.html_editor_utils import InlineHtmlEditNode, InlineHtmlMultipleEditNode
 
-from coop_cms.models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
-from coop_cms.moves import make_context
-from coop_cms.settings import get_article_class
-from coop_cms.utils import get_text_from_template, slugify
+from ..models import PieceOfHtml, BaseArticle, Fragment, FragmentType, FragmentFilter
+from ..moves import make_context
+from ..settings import get_article_class
+from ..utils import get_text_from_template, slugify
+
 
 register = template.Library()
 

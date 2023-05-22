@@ -7,10 +7,12 @@ from django.conf import settings
 from django.test.utils import override_settings
 from django.urls import reverse
 
-from coop_cms.models import Newsletter
-from coop_cms.settings import is_localized, is_multilang
-from coop_cms.tests import BaseTestCase
 from model_mommy import mommy
+
+from ....models import Newsletter
+from ....settings import is_localized, is_multilang
+from ....tests import BaseTestCase
+
 
 from .. import models
 

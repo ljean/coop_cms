@@ -10,26 +10,27 @@ from django.contrib.messages.api import success as success_message
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.template import TemplateDoesNotExist
+from django.template.exceptions import TemplateDoesNotExist
 from django.template.loader import get_template
+from django.urls import reverse
 from django.views.generic.base import TemplateView
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.views.generic import View
 
 from colorbox.decorators import popup_redirect
 
-from coop_cms.exceptions import ArticleNotAllowed
-from coop_cms.forms.articles import ArticleLogoForm, ArticleTemplateForm, PublishArticleForm
-from coop_cms import models
-from coop_cms.generic_views import EditableObjectView
-from coop_cms.logger import logger
-from coop_cms.moves import reverse, is_authenticated
-from coop_cms.settings import (
+from ..exceptions import ArticleNotAllowed
+from ..forms.articles import ArticleLogoForm, ArticleTemplateForm, PublishArticleForm
+from .. import models
+from ..generic_views import EditableObjectView
+from ..logger import logger
+from ..moves import is_authenticated
+from ..settings import (
     get_article_class, get_article_form, get_article_settings_form, get_new_article_form,
     get_articles_category_page_size, homepage_no_redirection
 )
-from coop_cms.shortcuts import get_article_or_404, get_headlines, redirect_if_alias
-from coop_cms.utils import get_model_name, get_model_app, paginate
+from ..shortcuts import get_article_or_404, get_headlines, redirect_if_alias
+from ..utils import get_model_name, get_model_app, paginate
 
 
 def get_article_template(article):

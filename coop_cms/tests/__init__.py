@@ -14,7 +14,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from coop_cms.settings import get_article_class, get_unit_test_media_root, DEFAULT_MEDIA_ROOT
+from ..settings import get_article_class, get_unit_test_media_root, DEFAULT_MEDIA_ROOT
 
 
 def make_dt(dt):
@@ -24,7 +24,7 @@ def make_dt(dt):
         return dt
 
 
-#Used by a test below
+# Used by a test below
 def dummy_image_width(img):
     return 20
 

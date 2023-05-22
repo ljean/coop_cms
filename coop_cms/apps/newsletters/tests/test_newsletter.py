@@ -4,7 +4,7 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
 
-from coop_cms.tests.test_newsletter import NewsletterTest as BaseNewsletterTest
+from ....tests.test_newsletter import NewsletterTest as BaseNewsletterTest
 
 
 class NewsletterTest(BaseNewsletterTest):

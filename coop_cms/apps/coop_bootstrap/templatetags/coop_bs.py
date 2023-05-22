@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Some tools for templates
+Some tools for templates # Just for compatibility
 """
 
 from django import template
 
-from coop_cms.templatetags.coop_utils import is_checkbox as _is_checkbox
-from coop_cms.templatetags.coop_navigation import NavigationAsNestedUlNode, extract_kwargs
+from ....templatetags.coop_utils import is_checkbox as _is_checkbox
+from ....templatetags.coop_navigation import NavigationAsNestedUlNode, extract_kwargs
 
 register = template.Library()
 
-# Just for compatibility
 
 @register.filter(name='is_checkbox')
 def is_checkbox(field):

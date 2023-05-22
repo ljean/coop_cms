@@ -8,9 +8,10 @@ from django.contrib.sites.models import Site
 from django.core import management
 from django.core import mail
 
-from coop_cms.models import Newsletter
-from coop_cms.tests import BaseTestCase
 from model_mommy import mommy
+
+from ....models import Newsletter
+from ....tests import BaseTestCase
 
 from .. import models
 

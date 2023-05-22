@@ -12,10 +12,10 @@ from django.conf import settings as django_settings
 from django.conf.urls.i18n import i18n_patterns
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from importlib import import_module
 
-from coop_cms.logger import logger
+from .logger import logger
 
 
 DEFAULT_NAVTREE_CLASS = COOP_CMS_NAVTREE_CLASS = 'coop_cms.NavTree'

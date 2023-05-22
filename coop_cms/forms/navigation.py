@@ -3,11 +3,11 @@
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
-from coop_cms.models import NavType, NavNode, get_navigable_type_choices
-from coop_cms.settings import get_navigable_content_types, get_article_class, get_navtree_class
-from coop_cms.widgets import GenericFieldRawIdWidget
+from ..models import NavType, NavNode, get_navigable_type_choices
+from ..settings import get_navigable_content_types, get_article_class, get_navtree_class
+from ..widgets import GenericFieldRawIdWidget
 
 
 class NavTypeForm(forms.ModelForm):

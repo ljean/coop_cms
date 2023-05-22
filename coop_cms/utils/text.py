@@ -8,8 +8,8 @@ from traceback import print_exc
 from django.utils.text import slugify as ascii_slugify
 from slugify import slugify as unicode_slugify
 
-from coop_cms.moves import HTMLParser
-from coop_cms.settings import get_eastern_languages
+from ..moves import HTMLParser
+from ..settings import get_eastern_languages
 
 from .i18n import get_language
 

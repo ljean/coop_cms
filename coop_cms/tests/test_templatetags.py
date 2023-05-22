@@ -10,15 +10,15 @@ from django.contrib.sites.models import Site
 from django.template import Template, Context
 from django.test.client import RequestFactory
 from django.urls import reverse
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from model_mommy import mommy
 
-from coop_cms.models import Link, NavNode, BaseArticle, MediaFilter, Image
-from coop_cms.moves import get_response_json
-from coop_cms.settings import is_localized, is_multilang, get_article_class, get_navtree_class
-from coop_cms.templatetags.coop_utils import get_part, get_parts, group_in_sublists, find_css, reduced_page_range
-from coop_cms.tests import BaseTestCase, BeautifulSoup
+from ..models import Link, NavNode, BaseArticle, MediaFilter, Image
+from ..moves import get_response_json
+from ..settings import is_localized, is_multilang, get_article_class, get_navtree_class
+from ..templatetags.coop_utils import get_part, get_parts, group_in_sublists, find_css, reduced_page_range
+from . import BaseTestCase, BeautifulSoup
 
 
 class CmsEditTagTest(BaseTestCase):

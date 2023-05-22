@@ -2,17 +2,14 @@
 
 from django.conf import settings
 
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 from model_mommy import mommy
 
-from coop_cms.models import BaseArticle
-from coop_cms.settings import is_localized, get_article_class
-from coop_cms.tests import BaseArticleTest, BeautifulSoup
-from coop_cms.utils import get_model_app, get_model_name
+from ..models import BaseArticle
+from ..settings import is_localized, get_article_class
+from ..utils import get_model_app, get_model_name
+from . import BaseArticleTest, BeautifulSoup
 
 
 class ArticleAdminTest(BaseArticleTest):

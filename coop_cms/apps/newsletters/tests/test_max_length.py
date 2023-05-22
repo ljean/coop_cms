@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """test email sending"""
 
-from coop_cms.tests import BaseTestCase
+from ....tests import BaseTestCase
 
 from ..utils import force_line_max_length
 

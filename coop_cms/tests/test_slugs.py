@@ -7,9 +7,9 @@ from django.contrib.sites.models import Site
 from django.test.utils import override_settings
 from django.utils.translation import get_language
 
-from coop_cms.settings import is_localized, is_multilang, get_article_class
-from coop_cms.tests import BaseTestCase
-from coop_cms.utils import make_locale_path, slugify
+from ..settings import is_localized, is_multilang, get_article_class
+from ..utils import make_locale_path
+from . import BaseTestCase
 
 
 class ArticleSlugTestCase(BaseTestCase):

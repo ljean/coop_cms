@@ -7,9 +7,9 @@ from django.http import Http404, HttpResponsePermanentRedirect, HttpResponseRedi
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
-from coop_cms.models import BaseArticle, Alias
-from coop_cms.settings import get_article_class, is_localized
-from coop_cms.utils import strip_locale_path
+from .models import BaseArticle, Alias
+from .settings import get_article_class, is_localized
+from .utils import strip_locale_path
 
 
 def get_article_slug(*args, **kwargs):

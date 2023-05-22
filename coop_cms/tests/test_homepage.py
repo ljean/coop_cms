@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-
 from django.contrib.sites.models import Site
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.test import RequestFactory
 from django.test.utils import override_settings
 
@@ -14,11 +10,11 @@ from model_mommy import mommy
 
 from colorbox.utils import assert_popup_redirects
 
-from coop_cms.context_processors import homepage_url
-from coop_cms.models import BaseArticle, SiteSettings
-from coop_cms.settings import get_article_class
-from coop_cms.shortcuts import get_headlines
-from coop_cms.tests import BaseTestCase, UserBaseTestCase, BeautifulSoup
+from ..context_processors import homepage_url
+from ..models import BaseArticle, SiteSettings
+from ..settings import get_article_class
+from ..shortcuts import get_headlines
+from . import BaseTestCase, UserBaseTestCase, BeautifulSoup
 
 
 @override_settings(COOP_CMS_NO_HOMEPAGE=False)

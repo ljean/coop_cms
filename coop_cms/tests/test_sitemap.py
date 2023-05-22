@@ -11,11 +11,12 @@ from django.utils.translation import activate
 
 from model_mommy import mommy
 
-from coop_cms.models import BaseArticle, SiteSettings
-from coop_cms.settings import get_article_class, has_localized_urls, is_multilang
-from coop_cms.sitemap import get_sitemaps
-from coop_cms.tests import BaseTestCase
-from coop_cms.utils import get_url_in_language, slugify
+from ..models import BaseArticle, SiteSettings
+from ..settings import get_article_class, has_localized_urls, is_multilang
+from ..sitemap import get_sitemaps
+from ..utils import get_url_in_language, slugify
+
+from . import BaseTestCase
 
 
 class SitemapTest(BaseTestCase):

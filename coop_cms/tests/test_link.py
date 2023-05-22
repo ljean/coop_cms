@@ -4,19 +4,15 @@ from django.conf import settings
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
-from django.utils.http import urlencode
+from django.urls import reverse
 
 from model_mommy import mommy
 
 from colorbox.utils import assert_popup_redirects
 
-from coop_cms.models import Link
-from coop_cms.tests import BaseArticleTest, BeautifulSoup
-from coop_cms.utils import get_login_url
+from ..models import Link
+from ..utils import get_login_url
+from . import BaseArticleTest, BeautifulSoup
 
 
 class AddLinkTest(BaseArticleTest):

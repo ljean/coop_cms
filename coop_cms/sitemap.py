@@ -2,15 +2,14 @@
 """sitemaps"""
 
 from django.conf import settings
-from django.conf.urls import url
 from django.contrib.sitemaps import Sitemap
 from django.contrib.sitemaps.views import sitemap as django_sitemap
 from django.contrib.sites.models import Site
+from django.urls import reverse, re_path
 from django.utils.translation import activate
 
-from coop_cms.models import BaseArticle, SiteSettings
-from coop_cms.moves import reverse
-from coop_cms.settings import get_article_class, has_localized_urls
+from .models import BaseArticle, SiteSettings
+from .settings import get_article_class, has_localized_urls
 
 
 class LocaleSitemap(Sitemap):
@@ -113,7 +112,7 @@ def get_sitemaps(langs=None):
 
 
 urlpatterns = [
-    url(
+    re_path(
         r'^sitemap\.xml$',
         django_sitemap,
         {'sitemaps': get_sitemaps()},

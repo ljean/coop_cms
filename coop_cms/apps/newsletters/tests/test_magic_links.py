@@ -3,8 +3,9 @@
 
 from django.urls import reverse
 
-from coop_cms.tests.test_newsletter import BaseTestCase
 from model_mommy import mommy
+
+from ....tests import BaseTestCase
 
 from .. import models
 

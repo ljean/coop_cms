@@ -1,30 +1,30 @@
 # -*- coding: utf-8 -*-
 """media library unit testing"""
 
-from django.conf import settings
-
 from datetime import datetime
 from unittest import skipIf
-
+from io import BytesIO
 from PIL import Image as PilImage
 
+from django.conf import settings
 from django.core.files import File
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.template import Template, Context
 from django.template.base import TemplateSyntaxError
 from django.test.utils import override_settings
 
 from model_mommy import mommy
-if 'photologue' in settings.INSTALLED_APPS:
-    from photologue.models import Photo, Gallery
 
-from coop_cms.models import ArticleCategory, Document, Image, ImageSize, MediaFilter
-from coop_cms.moves import BytesIO, get_response_json
-from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseArticleTest, BaseTestCase, BeautifulSoup, MediaBaseTestCase
+if 'photologue' in settings.INSTALLED_APPS:
+    try:
+        from photologue.models import Photo, Gallery
+    except ImportError:
+        pass
+
+from ..models import ArticleCategory, Document, Image, ImageSize, MediaFilter
+from ..moves import get_response_json
+from ..settings import get_article_class
+from . import BaseArticleTest, BaseTestCase, BeautifulSoup, MediaBaseTestCase
 
 
 class ImageUploadTest(MediaBaseTestCase):

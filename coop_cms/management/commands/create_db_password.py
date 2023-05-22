@@ -5,7 +5,7 @@ from getpass import getpass
 from django.core.management.base import BaseCommand
 from django.conf import settings
 
-from coop_cms.secrets import set_db_password
+from ...secrets import set_db_password
 
 
 class Command(BaseCommand):

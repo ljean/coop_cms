@@ -3,7 +3,7 @@
 
 from django.test.runner import DiscoverRunner
 
-from coop_cms.settings import get_unit_test_media_root
+from .settings import get_unit_test_media_root
 
 
 class SafeMediaDiscoverRunner(DiscoverRunner):

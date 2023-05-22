@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-import floppyforms.__future__ as floppyforms
+import floppyforms as floppyforms
 
 
 class LanguageSelectionForm(floppyforms.Form):

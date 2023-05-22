@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """permission backend"""
 
+
 class ArticlePermissionBackend(object):
     """Permission backend : check if a user is allowed to view/edit an editable object"""
     supports_object_permissions = True

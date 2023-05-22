@@ -6,15 +6,13 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.urls import reverse_lazy
-from django.utils.translation import ugettext as _
+from django.urls import reverse_lazy, reverse
+from django.utils.translation import gettext as _
 
 from colorbox.decorators import popup_redirect
 
-from coop_cms import models
-from coop_cms.moves import reverse
-from coop_cms.settings import cms_no_homepage, get_article_class, homepage_no_redirection, get_article_views
-from coop_cms.models import get_homepage_url, get_homepage_article
+from .. import models
+from ..settings import cms_no_homepage, get_article_class, homepage_no_redirection, get_article_views
 
 
 def homepage(request):
@@ -23,7 +21,7 @@ def homepage(request):
         raise Http404
 
     if homepage_no_redirection():
-        article_slug = get_homepage_article()
+        article_slug = models.get_homepage_article()
 
         if article_slug:
             article_views = get_article_views()
@@ -31,7 +29,7 @@ def homepage(request):
             return article_view.as_view(as_homepage=True)(request, slug=article_slug)
 
     else:
-        homepage_url = get_homepage_url()
+        homepage_url = models.get_homepage_url()
         if homepage_url:
             return HttpResponseRedirect(homepage_url)
 

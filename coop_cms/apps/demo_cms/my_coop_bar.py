@@ -3,7 +3,7 @@
 Example of a custom coop_bar configuration
 """
 
-from coop_cms import coop_bar_cfg
+from ... import coop_bar_cfg
 
 
 def load_commands(coop_bar):
@@ -34,4 +34,3 @@ def load_commands(coop_bar):
             coop_bar_cfg.log_out,
         ],
     ])
-

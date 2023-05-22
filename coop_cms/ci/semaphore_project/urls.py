@@ -9,7 +9,8 @@ from django.contrib import admin
 from django.contrib.staticfiles.views import serve as serve_static
 from django.views.static import serve as serve_media
 
-from coop_cms.settings import get_url_patterns, get_media_root
+from ...settings import get_url_patterns, get_media_root
+
 
 localized_patterns = get_url_patterns()
 

@@ -8,9 +8,9 @@ from django.urls import reverse
 
 from model_mommy import mommy
 
-from coop_cms.models import BaseArticle, ArticleCategory
-from coop_cms.settings import get_article_class
-from coop_cms.tests import BaseArticleTest, BaseTestCase, BeautifulSoup
+from ..models import BaseArticle, ArticleCategory
+from ..settings import get_article_class
+from . import BaseArticleTest, BaseTestCase, BeautifulSoup
 
         
 class MultiSiteTest(BaseTestCase):

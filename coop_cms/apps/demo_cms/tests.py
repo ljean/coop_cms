@@ -11,7 +11,7 @@ from django.test import TestCase
 
 from model_mommy import mommy
 
-from coop_cms.settings import get_article_class
+from ...settings import get_article_class
 
 
 @skipUnless('coop_cms.apps.demo_cms' in settings.INSTALLED_APPS, "demo_cms not installed installed")

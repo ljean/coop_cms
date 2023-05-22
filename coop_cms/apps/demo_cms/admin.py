@@ -5,8 +5,8 @@ Admin site
 
 from django.contrib import admin
 
-from coop_cms.admin import ArticleAdmin as CmsArticleAdmin
-from coop_cms.settings import get_article_class
+from ...admin import ArticleAdmin as CmsArticleAdmin
+from ...settings import get_article_class
 
 
 article_class = get_article_class()

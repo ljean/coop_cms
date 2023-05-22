@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """models"""
 
-from coop_cms.models import BaseArticle, BaseNavTree
+from ...models import BaseArticle, BaseNavTree
 
 
 class Article(BaseArticle): # pylint: disable=W5101

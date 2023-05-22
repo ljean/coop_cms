@@ -6,12 +6,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 from django.forms.models import modelformset_factory
 from django.shortcuts import render
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from colorbox.decorators import popup_close
 
-from coop_cms.forms.fragments import AddFragmentForm, EditFragmentForm
-from coop_cms import models
+from ..forms.fragments import AddFragmentForm, EditFragmentForm
+from .. import models
 
 
 @login_required

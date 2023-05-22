@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """utils"""
 
-from coop_cms.moves import reverse, NoReverseMatch
+from django.urls import reverse, NoReverseMatch
 
 
 def get_login_url():
@@ -10,4 +10,3 @@ def get_login_url():
         return reverse("auth_login")
     except NoReverseMatch:
         return reverse("login")
-

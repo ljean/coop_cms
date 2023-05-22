@@ -3,8 +3,8 @@
 
 from django.core.management.base import BaseCommand
 
-from coop_cms.models import create_newsletter_item
-from coop_cms.settings import get_newsletter_item_classes
+from ...models import create_newsletter_item
+from ...settings import get_newsletter_item_classes
 
 
 class Command(BaseCommand):

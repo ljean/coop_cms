@@ -3,10 +3,11 @@
 
 import sys
 
+from io import StringIO
+
 from django.conf import settings
 from django.core.management import call_command
 from django.core.management.commands import migrate
-from django.utils.six import StringIO
 
 
 class Command(migrate.Command):

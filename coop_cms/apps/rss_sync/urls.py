@@ -3,11 +3,11 @@
 urls
 """
 
-from django.conf.urls import url
+from django.urls import path
 
-from coop_cms.apps.rss_sync import views
+from . import views
 
 urlpatterns = [
-    url(r'^collect-rss-items/(?P<source_id>\d+)$', views.collect_rss_items_view, name='rss_sync_collect_rss_items'),
-    url(r'^create-cms-article/(?P<item_id>\d+)$', views.create_cms_article_view, name='rss_sync_create_cms_article'),
+    path('collect-rss-items/<int:source_id>/', views.collect_rss_items_view, name='rss_sync_collect_rss_items'),
+    path('create-cms-article/<int:item_id>/', views.create_cms_article_view, name='rss_sync_create_cms_article'),
 ]

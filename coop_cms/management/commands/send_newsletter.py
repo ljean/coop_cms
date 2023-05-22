@@ -5,8 +5,8 @@ from datetime import datetime
 
 from django.core.management.base import BaseCommand
 
-from coop_cms.utils import send_newsletter
-from coop_cms.models import NewsletterSending
+from ...utils import send_newsletter
+from ...models import NewsletterSending
 
 
 class Command(BaseCommand):

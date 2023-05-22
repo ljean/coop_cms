@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """for unit-testing"""
 
-from coop_cms.apps.test_app.models import TestClass
-from coop_cms.apps.test_app.forms import TestClassForm
+from ...generic_views import EditableObjectView, ListView, EditableFormsetView
 
-from coop_cms.generic_views import EditableObjectView, ListView, EditableFormsetView
+
+from .models import TestClass
+from .forms import TestClassForm
 
 
 class TestClassListView(ListView):

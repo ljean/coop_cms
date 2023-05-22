@@ -40,4 +40,3 @@ class EmailAuthBackend(ModelBackend):
 
         # No valid user found : refuse login
         return None
-

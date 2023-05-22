@@ -2,8 +2,9 @@
 """models"""
 
 from django.db import models
+from django.urls import reverse
 
-from coop_cms.moves import reverse, is_authenticated
+from ...moves import is_authenticated
 
 
 class TestTag(models.Model):

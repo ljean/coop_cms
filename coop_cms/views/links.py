@@ -7,14 +7,13 @@ from django.contrib.messages.api import success as success_message
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-from django.urls import reverse_lazy
-from django.utils.translation import ugettext as _
+from django.urls import reverse_lazy, reverse
+from django.utils.translation import gettext as _
 
 from colorbox.decorators import popup_redirect
 
-from coop_cms.forms.content import NewLinkForm
-from coop_cms import models
-from coop_cms.moves import reverse
+from ..forms.content import NewLinkForm
+from .. import models
 
 
 @login_required(login_url=reverse_lazy('login'))

@@ -5,17 +5,17 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse, NoReverseMatch
 from django.template.loader import get_template
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from coop_bar.utils import make_link
 from coop_html_editor.settings import get_html_editor
 
-from coop_cms.models import Link, Fragment
-from coop_cms.moves import is_authenticated
-from coop_cms.settings import (
+from .models import Link, Fragment
+from .moves import is_authenticated
+from .settings import (
     get_article_class, get_navtree_class, cms_no_homepage, hide_media_library_menu, is_localized
 )
-from coop_cms.utils import get_model_name, get_model_app, get_model_label
+from .utils import get_model_name, get_model_app, get_model_label
 
 
 def can_do(perm, object_names):
@@ -42,6 +42,7 @@ def can_do(perm, object_names):
             return
         return wrapper
     return inner_decorator
+
 
 can_edit_article = can_do('can_edit', ['article'])
 can_edit_object = can_do('can_edit', ['article', 'object', 'objects', 'newsletter'])
@@ -334,9 +335,11 @@ def cms_extra_js(request, context):
 def log_out(request, context):
     """show menu"""
     if request and is_authenticated(request.user) and request.user.is_staff:
-        return make_link(
-            reverse("logout"), _('Log out'), 'power-off', classes=['alert_on_click', 'icon']
-        )
+        pass
+        # TODO
+        # return make_link(
+        #     reverse("logout"), _('Log out'), 'power-off', classes=['alert_on_click', 'icon']
+        # )
 
 
 @can_add_article

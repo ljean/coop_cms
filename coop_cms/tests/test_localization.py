@@ -7,17 +7,14 @@ from django.conf import settings
 from django.contrib.auth.models import User, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ImproperlyConfigured
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.utils.translation import activate, get_language
 from django.test.utils import override_settings
 
-from coop_cms.models import BaseArticle, InvalidArticleError
-from coop_cms.settings import has_localized_urls, is_localized, is_multilang, multilang_mode, get_article_class
-from coop_cms.tests import BaseTestCase, BeautifulSoup
-from coop_cms.utils import redirect_to_language, strip_locale_path, get_url_in_language, make_locale_path
+from ..models import BaseArticle, InvalidArticleError
+from ..settings import has_localized_urls, is_localized, is_multilang, multilang_mode, get_article_class
+from ..utils import redirect_to_language, strip_locale_path, get_url_in_language, make_locale_path
+from . import BaseTestCase, BeautifulSoup
 
 
 def language_fallbacks():

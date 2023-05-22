@@ -10,11 +10,12 @@ from django.urls import reverse
 
 from model_mommy import mommy
 
-from coop_cms.models import Link, NavNode, NavType, BaseArticle
-from coop_cms.moves import get_response_json
-from coop_cms.settings import get_article_class, get_navtree_class
-from coop_cms.tests import BaseTestCase, BeautifulSoup
-from coop_cms.utils import get_model_app, get_model_name
+from ..models import Link, NavNode, NavType, BaseArticle
+from ..moves import get_response_json
+from ..settings import get_article_class, get_navtree_class
+from ..utils import get_model_app, get_model_name
+
+from . import BaseTestCase, BeautifulSoup
 
 
 def _create_link(url, title=""):

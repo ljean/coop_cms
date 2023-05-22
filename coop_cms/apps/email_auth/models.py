@@ -11,5 +11,5 @@ class InvalidatedUser(models.Model):
     password_changed = models.BooleanField(default=False)
     invalidation_datetime = models.DateTimeField()
 
-    def __unicode__(self):
-        return u'{0}'.format(self.user.email)
+    def __str__(self):
+        return '{0}'.format(self.user.email)

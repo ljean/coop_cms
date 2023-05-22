@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from django.test import TestCase
-from django.contrib.auth.models import User, Permission
-try:
-    from django.urls import reverse
-except:
-    from django.core.urlresolvers import reverse
-from coop_cms.settings import get_article_class
-from coop_cms.apps.rss_sync.models import RssItem, RssSource
-from coop_cms.models import BaseArticle
-from django.contrib.contenttypes.models import ContentType
-from django.conf import settings
 from unittest import skipUnless
+
+from django.conf import settings
+from django.contrib.auth.models import User, Permission
+from django.contrib.contenttypes.models import ContentType
+from django.test import TestCase
+from django.urls import reverse
+
+from ...settings import get_article_class
+from ...models import BaseArticle
+
+from .models import RssItem, RssSource
+
 
 class BaseTestCase(TestCase):
     def setUp(self):

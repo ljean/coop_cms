@@ -4,9 +4,9 @@
 from django import forms
 from django.contrib.auth import authenticate, REDIRECT_FIELD_NAME
 from django.contrib.auth.forms import PasswordChangeForm, PasswordResetForm, SetPasswordForm
-from django.utils.translation import ugettext as _, ugettext_lazy as __
+from django.utils.translation import gettext as _, gettext_lazy as __
 
-from coop_cms.bs_forms import Form, BootstrapableMixin
+from ...bs_forms import Form, BootstrapableMixin
 
 from .models import InvalidatedUser
 

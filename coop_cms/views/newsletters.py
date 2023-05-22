@@ -9,22 +9,22 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.sites.models import Site
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext as _
+from django.utils.encoding import smart_str
+from django.utils.translation import gettext as _
 from django.views.generic import View
 
 from colorbox.decorators import popup_redirect
 
-from coop_cms.forms.newsletters import NewsletterSchedulingForm, NewsletterTemplateForm, NewsletterHandleRecipients
-from coop_cms import models
-from coop_cms.generic_views import EditableObjectView
-from coop_cms.logger import logger
-from coop_cms.optionals import convert_to_pdf, make_absolute_paths, PDFResponse
-from coop_cms.settings import get_newsletter_form, get_newsletter_settings_form
-from coop_cms.utils import send_newsletter, slugify
+from ..forms.newsletters import NewsletterSchedulingForm, NewsletterTemplateForm, NewsletterHandleRecipients
+from .. import models
+from ..generic_views import EditableObjectView
+from ..logger import logger
+from ..optionals import convert_to_pdf, make_absolute_paths, PDFResponse
+from ..settings import get_newsletter_form, get_newsletter_settings_form
+from ..utils import send_newsletter, slugify
 
 
 @login_required
@@ -219,7 +219,7 @@ class NewsletterPdfView(View):
         """
 
         # Turn path to absolute
-        content = smart_text(content)
+        content = smart_str(content)
         content = make_absolute_paths(content)
 
         try:

@@ -2,7 +2,8 @@
 """admin"""
 
 from django.contrib import admin
-from coop_cms.apps.test_app import models
+
+from . import models
 
 
 @admin.register(models.TestClass)

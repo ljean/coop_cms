@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from coop_cms.tests import BaseArticleTest
-from coop_cms.utils import dehtml
+from ..utils import dehtml
+from . import BaseArticleTest
 
 
 class DehtmlTest(BaseArticleTest):

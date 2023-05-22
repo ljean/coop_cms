@@ -2,12 +2,12 @@
 
 from django.conf import settings
 
-from coop_cms.moves import SkipTest
+from unittest import SkipTest
 
 if 'coop_cms.apps.test_app' in settings.INSTALLED_APPS:
-    from coop_cms.apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
+    from ..apps.test_app.tests import GenericViewTestCase as BaseGenericViewTestCase
 else:
-    from coop_cms.tests import BaseTestCase as BaseGenericViewTestCase
+    from . import BaseTestCase as BaseGenericViewTestCase
 
 
 class GenericViewTestCase(BaseGenericViewTestCase):

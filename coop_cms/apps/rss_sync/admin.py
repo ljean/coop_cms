@@ -4,10 +4,10 @@ Admin
 """
 
 from django.contrib import admin
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-from coop_cms.apps.rss_sync import models, views
-from coop_cms.apps.rss_sync.forms import RssSourceAdminForm, RssItemAdminForm
+from . import models, views
+from .forms import RssSourceAdminForm, RssItemAdminForm
 
 
 @admin.register(models.RssSource)

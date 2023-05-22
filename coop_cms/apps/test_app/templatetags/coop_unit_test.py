@@ -2,11 +2,10 @@
 """
 misc. templatetags
 """
-
-
 from django import template
 
 register = template.Library()
+
 
 class CustomNode(template.Node):
 

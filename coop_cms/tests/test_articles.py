@@ -10,9 +10,9 @@ from django.urls import reverse
 
 from model_mommy import mommy
 
-from coop_cms.models import NavNode, BaseArticle, ArticleCategory
-from coop_cms.settings import has_localized_urls, get_article_class, get_article_templates, get_navtree_class
-from coop_cms.tests import BaseArticleTest, BeautifulSoup, make_dt
+from ..models import NavNode, BaseArticle, ArticleCategory
+from ..settings import has_localized_urls, get_article_class, get_article_templates, get_navtree_class
+from . import BaseArticleTest, BeautifulSoup, make_dt
 
 
 class ArticleTest(BaseArticleTest):

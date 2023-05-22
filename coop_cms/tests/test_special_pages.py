@@ -9,9 +9,9 @@ from django.middleware.csrf import REASON_NO_REFERER, REASON_NO_CSRF_COOKIE
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
 
-from coop_cms.tests import BaseTestCase, BeautifulSoup
-from coop_cms.settings import install_csrf_failure_view
-from coop_cms.views.webutils import csrf_failure
+from ..settings import install_csrf_failure_view
+from ..views.webutils import csrf_failure
+from . import BaseTestCase, BeautifulSoup
 
 
 @skipIf(getattr(settings, 'COOP_CMS_DO_NOT_INSTALL_CSRF_FAILURE_VIEW', False), "coop_cms csrf failure disabled")

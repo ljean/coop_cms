@@ -11,11 +11,11 @@ DJALOHA_LINK_MODELS = ('demo_cms.Article',)
 COOP_CMS_ARTICLE_LOGO_SIZE = "128x128"
 
 COOP_CMS_ARTICLE_TEMPLATES = 'coop_cms.apps.demo_cms.get_article_templates'
-#COOP_CMS_ARTICLE_TEMPLATES = (
-#    ('standard.html', 'Standard'),
-#    ('homepage.html', 'Homepage'),
-#    ('blog.html', 'Blog'),
-#)
+# COOP_CMS_ARTICLE_TEMPLATES = (
+#     ('standard.html', 'Standard'),
+#     ('homepage.html', 'Homepage'),
+#     ('blog.html', 'Blog'),
+# )
 
 COOP_CMS_SITE_PREFIX = 'http://127.0.0.1:8000'
 COOP_CMS_FROM_EMAIL = '"Your name" <your@email.com>'

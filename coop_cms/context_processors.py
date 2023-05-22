@@ -4,8 +4,8 @@
 from django.conf import settings
 from django.urls import reverse
 
-from coop_cms.models import get_homepage_url
-from coop_cms.settings import homepage_no_redirection
+from .models import get_homepage_url
+from .settings import homepage_no_redirection
 
 
 def cms_settings(request):

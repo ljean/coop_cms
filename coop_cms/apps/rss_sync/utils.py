@@ -4,16 +4,18 @@ utils
 """
 
 from datetime import datetime
-import feedparser
 from time import mktime
+
+import feedparser
 
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import PermissionDenied
 
-from coop_cms.apps.rss_sync.models import RssSource, RssItem
-from coop_cms.models import BaseArticle
-from coop_cms.settings import get_article_class
+from ...models import BaseArticle
+from ...settings import get_article_class
+
+from .models import RssSource, RssItem
 
 
 def collect_rss_items(user, source, check_user_rights=True):

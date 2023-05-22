@@ -3,7 +3,7 @@
 
 from threading import current_thread
 
-from coop_cms.moves import MiddlewareMixin
+from ..moves import MiddlewareMixin
 
 
 class RequestNotFound(Exception):

@@ -10,8 +10,9 @@ from django.core import mail
 from django.urls import reverse
 
 from model_mommy import mommy
-from coop_cms.models import Newsletter
-from coop_cms.tests import BaseTestCase
+
+from ....models import Newsletter
+from ....tests import BaseTestCase
 
 from .. import models
 

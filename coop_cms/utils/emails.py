@@ -9,7 +9,7 @@ from django.core.mail import get_connection, EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import translation
 
-from coop_cms.settings import get_newsletter_context_callbacks, get_eastern_languages
+from ..settings import get_newsletter_context_callbacks, get_eastern_languages
 
 from .text import dehtml
 from .i18n import activate_lang, get_language

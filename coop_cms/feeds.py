@@ -3,8 +3,8 @@
 
 from django.contrib.syndication.views import Feed
 
-from coop_cms.settings import get_article_class
-from coop_cms.utils import dehtml
+from .settings import get_article_class
+from .utils import dehtml
 
 
 class ArticleFeed(Feed):

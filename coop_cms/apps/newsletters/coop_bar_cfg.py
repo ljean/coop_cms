@@ -2,11 +2,12 @@
 """coop_bar configuration: add links to balafon"""
 
 from django.urls import reverse
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
 from coop_bar.utils import make_link
 
-from coop_cms.utils import get_model_name, get_model_app, get_model_label
+from ...utils import get_model_name, get_model_app
+
 from .models import Emailing
 
 

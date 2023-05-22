@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Example of CMS app"""
 
+
 def get_article_templates(article, user):
     """
     example of functions to get custom templates
@@ -12,5 +13,6 @@ def get_article_templates(article, user):
         ('blog.html', 'Blog'),
         ('standard_en.html', 'English'),
     )
+
 
 default_app_config = 'coop_cms.apps.demo_cms.apps.DemoCmsAppConfig'

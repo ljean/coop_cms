@@ -4,7 +4,7 @@
 from django import forms
 from django.conf import settings
 
-from coop_cms.apps.rss_sync import models, widgets
+from . import models, widgets
 
 # These 2 admin forms makes possible to add custom widgets for the id field
 

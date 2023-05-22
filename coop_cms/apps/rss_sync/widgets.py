@@ -4,9 +4,9 @@
 from django.forms import HiddenInput
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-from coop_cms.apps.rss_sync.models import RssSource
+from .models import RssSource
 
 
 def get_button_code(label, url, is_default=False):

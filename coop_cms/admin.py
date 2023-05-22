@@ -6,14 +6,14 @@ Admin pages for coop_cms
 from django.conf import settings
 from django.contrib import admin
 from django.http import Http404
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
-from coop_cms.forms.articles import ArticleAdminForm
-from coop_cms.forms.content import AliasAdminForm
-from coop_cms.forms.navigation import NavTypeForm, NavNodeAdminForm
-from coop_cms.forms.newsletters import NewsletterItemAdminForm, NewsletterAdminForm
-from coop_cms import models
-from coop_cms.settings import get_article_class, import_module
+from .forms.articles import ArticleAdminForm
+from .forms.content import AliasAdminForm
+from .forms.navigation import NavTypeForm, NavNodeAdminForm
+from .forms.newsletters import NewsletterItemAdminForm, NewsletterAdminForm
+from . import models
+from .settings import get_article_class, import_module
 
 
 # The BASE_ADMIN_CLASS can be a Translation admin if needed or regular modelAdmin if not
@@ -75,7 +75,7 @@ class NavTreeAdmin(admin.ModelAdmin):
         try:
             object_id = int(object_id)
         except ValueError:
-            #if the object_id is not a valid number, returns 404
+            # if the object_id is not a valid number, returns 404
             raise Http404
         tree = models.get_navtree_class().objects.get(id=object_id)
         extra_context['navtree'] = tree
@@ -278,4 +278,3 @@ class DocumentAdmin(admin.ModelAdmin):
 @admin.register(models.SiteSettings)
 class SiteSettingsAdmin(BASE_ADMIN_CLASS):
     list_display = ('site', 'homepage_url', 'homepage_article', 'sitemap_mode')
-

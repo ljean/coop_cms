@@ -14,8 +14,8 @@ from django.urls import reverse
 
 from model_mommy import mommy
 
-from coop_cms.moves import is_anonymous
-from coop_cms.tests import BeautifulSoup
+from ...moves import is_anonymous
+from ...tests import BeautifulSoup
 
 from .models import InvalidatedUser
 

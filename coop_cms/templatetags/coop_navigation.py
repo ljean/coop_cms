@@ -3,12 +3,13 @@
 
 from django import template
 from django.contrib.contenttypes.models import ContentType
-from django.template import VariableDoesNotExist
+from django.template.base import VariableDoesNotExist
 from django.template.loader import get_template
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
-from coop_cms.models import NavNode
-from coop_cms.settings import get_navtree_class
+from ..models import NavNode
+from ..settings import get_navtree_class
+
 
 register = template.Library()
 

@@ -3,13 +3,14 @@
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.forms import TextInput as DjangoTextInput
-from django.utils.translation import ugettext as _
+from django.urls import reverse
+from django.utils.translation import gettext as _
 from django.utils.safestring import mark_safe
 
-import floppyforms.__future__ as floppyforms
+import floppyforms as floppyforms
 
-from coop_cms.models import NavType
-from coop_cms.utils import get_text_from_template
+from .models import NavType
+from .utils import get_text_from_template
 
 
 class ReadOnlyInput(floppyforms.widgets.Input):

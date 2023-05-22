@@ -10,13 +10,14 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404
 from django.template.loader import select_template
-from django.utils.translation import ugettext as _
+from django.urls import reverse
+from django.utils.translation import gettext as _
 
-from coop_cms import models
-from coop_cms.moves import make_context, reverse
-from coop_cms.settings import get_navtree_class
-from coop_cms.logger import logger
-from coop_cms.utils import get_model_app, get_model_label, get_model_name
+from .. import models
+from ..moves import make_context
+from ..settings import get_navtree_class
+from ..logger import logger
+from ..utils import get_model_app, get_model_label, get_model_name
 
 
 def view_navnode(request, tree):

@@ -7,15 +7,16 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
 from django.utils.timezone import now as dt_now
-from django.utils.translation import ugettext as _, ugettext_lazy
+from django.utils.translation import gettext as _, gettext_lazy
 
-import floppyforms.__future__ as floppyforms
+import floppyforms as floppyforms
 
-from coop_cms.forms.base import InlineHtmlEditableModelForm
-from coop_cms.bs_forms import Form as BsForm
-from coop_cms.models import Newsletter, NewsletterSending, NewsletterItem
-from coop_cms.settings import get_article_class, get_newsletter_templates
-from coop_cms.widgets import ChosenSelectMultiple
+from ..bs_forms import Form as BsForm
+from ..models import Newsletter, NewsletterSending, NewsletterItem
+from ..settings import get_article_class, get_newsletter_templates
+from ..widgets import ChosenSelectMultiple
+
+from .base import InlineHtmlEditableModelForm
 
 
 class NewsletterItemAdminForm(forms.ModelForm):
@@ -167,12 +168,12 @@ class NewsletterAdminForm(forms.ModelForm):
 
         
 class NewsletterHandleRecipients(BsForm):
-    email_help_text = ugettext_lazy("Enter another address to send to someone who is not in the list")
-    email_label = ugettext_lazy("Email")
+    email_help_text = gettext_lazy("Enter another address to send to someone who is not in the list")
+    email_label = gettext_lazy("Email")
 
     emails = forms.MultipleChoiceField(
         widget=forms.CheckboxSelectMultiple(), required=False,
-        label=_(ugettext_lazy('Emails')), help_text=ugettext_lazy('Check the address if you want to send it the test'),
+        label=_(gettext_lazy('Emails')), help_text=gettext_lazy('Check the address if you want to send it the test'),
         choices=[]
     )
     additional_email1 = forms.EmailField(required=False, label=email_label, help_text=email_help_text)

@@ -5,8 +5,8 @@ from django.core.exceptions import PermissionDenied
 from django.contrib.auth.views import redirect_to_login
 from django.urls import NoReverseMatch
 
-from coop_cms.moves import MiddlewareMixin, is_authenticated
-from coop_cms.utils import get_login_url
+from .moves import MiddlewareMixin, is_authenticated
+from .utils import get_login_url
 
 
 class PermissionsMiddleware(MiddlewareMixin):

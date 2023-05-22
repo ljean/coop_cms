@@ -5,14 +5,15 @@ from django import forms
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 
-import floppyforms.__future__ as floppyforms
+import floppyforms as floppyforms
 
-from coop_cms.forms.fields import HidableMultipleChoiceField
-from coop_cms.forms.navigation import WithNavigationModelForm
-from coop_cms.models import Alias, Link, Document, MediaFilter, ImageSize
-from coop_cms.widgets import ChosenSelectMultiple
+from ..models import Alias, Link, Document, MediaFilter, ImageSize
+from ..widgets import ChosenSelectMultiple
+
+from .fields import HidableMultipleChoiceField
+from .navigation import WithNavigationModelForm
 
 
 class MediaBaseAddMixin(object):

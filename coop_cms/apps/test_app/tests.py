@@ -13,12 +13,13 @@ from django.test.utils import override_settings
 
 from model_mommy import mommy
 
-from coop_cms.apps.test_app.models import TestClass, TestTag
-from coop_cms import settings as coop_settings
-from coop_cms.models import BaseArticle, Newsletter
-from coop_cms.tests import BeautifulSoup, BaseArticleTest
-from coop_cms.tests.test_newsletter import NewsletterSettingsTest
-from coop_cms.utils import get_login_url
+from ... import settings as coop_settings
+from ...models import BaseArticle, Newsletter
+from ...tests import BeautifulSoup, BaseArticleTest
+from ...tests.test_newsletter import NewsletterSettingsTest
+from ...utils import get_login_url
+
+from .models import TestClass, TestTag
 
 
 class BaseTestCase(TestCase):

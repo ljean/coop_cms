@@ -5,8 +5,8 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import connection
 
-from coop_cms.models import Alias
-from coop_cms.settings import is_localized
+from ...models import Alias
+from ...settings import is_localized
 
 
 class Command(BaseCommand):

@@ -3,12 +3,12 @@
 Example of custom forms
 """
 
-import floppyforms.__future__ as forms
+import floppyforms as forms
 
-from coop_cms.forms.articles import ArticleForm as CmsArticleForm
-from coop_cms.forms.newsletters import NewsletterForm
-from coop_cms.settings import get_article_class
-from coop_cms.models import ArticleCategory
+from ...forms.articles import ArticleForm as CmsArticleForm
+from ...forms.newsletters import NewsletterForm
+from ...settings import get_article_class
+from ...models import ArticleCategory
 
 
 class ArticleForm(CmsArticleForm):
@@ -16,7 +16,7 @@ class ArticleForm(CmsArticleForm):
 
     class Meta(CmsArticleForm.Meta):
         model = get_article_class()
-        fields = CmsArticleForm.Meta.fields + ('author',)
+        fields = CmsArticleForm.Meta.fields + ('author', )
 
 
 class SortableNewsletterForm(NewsletterForm):
@@ -26,7 +26,7 @@ class SortableNewsletterForm(NewsletterForm):
     sortable = forms.CharField(required=False, widget=forms.HiddenInput())
 
     class Media(NewsletterForm.Media):
-        js = NewsletterForm.Media.js + ('js/jquery.sortElements.js',)
+        js = NewsletterForm.Media.js + ('js/jquery.sortElements.js', )
 
     def save(self, *args, **kwargs):
         """override save"""

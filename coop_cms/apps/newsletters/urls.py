@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from django.conf.urls import re_path
+from django.urls import path
 
 from . import views
 
@@ -8,28 +8,28 @@ app_name = "newsletters"
 
 
 urlpatterns = [
-    re_path(
-        r'^unregister/(?P<emailing_id>\d+)/(?P<contact_uuid>[\w\d-]+)/$',
+    path(
+        'unregister/<int:emailing_id>/<uuid:contact_uuid>/',
         views.unregister_contact,
         name='unregister'
     ),
-    re_path(
-        r'^view-online/(?P<emailing_id>\d+)/(?P<contact_uuid>[\w\d-]+)/$',
+    path(
+        'view-online/<int:emailing_id>/<uuid:contact_uuid>/',
         views.view_emailing_online,
         name='view_online'
     ),
-    re_path(
-        r'^view-online-lang/(?P<emailing_id>\d+)/(?P<contact_uuid>[\w\d-]+)/(?P<lang>\w+)/$',
+    path(
+        'view-online-lang/<int:emailing_id>/<uuid:contact_uuid>/<str:lang>/',
         views.view_emailing_online_lang,
         name='view_online_lang'
     ),
-    re_path(
-        r'^link/(?P<link_uuid>[\w\d-]+)/(?P<contact_uuid>[\w\d-]+)/$',
+    path(
+        'link/<uuid:link_uuid>/<uuid:contact_uuid>/',
         views.view_link,
         name='view_link'
     ),
-    re_path(
-        r'^email-img/(?P<emailing_id>\d+)/(?P<contact_uuid>[\w\d-]+)/$',
+    path(
+        'email-img/<int:emailing_id>/<uuid:contact_uuid>/',
         views.email_tracking,
         name='email_tracking'
     ),

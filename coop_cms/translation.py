@@ -3,58 +3,50 @@
 
 from modeltranslation.translator import translator, TranslationOptions  # pylint: disable=F0401
 
-from coop_cms.models import (
+from .models import (
     Alias, ArticleCategory, Fragment, NavNode, Newsletter, PieceOfHtml, SiteSettings, validate_slug, Link
 )
-from coop_cms.settings import get_eastern_languages
+from .settings import get_eastern_languages
 
 
 class PieceOfHtmlTranslationOptions(TranslationOptions):
     """translation"""
-    fields = ('content',)
-translator.register(PieceOfHtml, PieceOfHtmlTranslationOptions)
+    fields = ('content', )
 
 
 class FragmentTranslationOptions(TranslationOptions):
     """translation"""
-    fields = ('content',)
-translator.register(Fragment, FragmentTranslationOptions)
+    fields = ('content', )
 
 
 class NavNodeTranslationOptions(TranslationOptions):
     """translation"""
-    fields = ('label',)
-translator.register(NavNode, NavNodeTranslationOptions)
+    fields = ('label', )
 
 
 class ArticleCategoryTranslationOptions(TranslationOptions):
     """translation"""
-    fields = ('name',)
-translator.register(ArticleCategory, ArticleCategoryTranslationOptions)
+    fields = ('name', )
 
 
 class SiteSettingsTranslationOptions(TranslationOptions):
     """translation"""
-    fields = ('homepage_url', 'homepage_article',)
-translator.register(SiteSettings, SiteSettingsTranslationOptions)
+    fields = ('homepage_url', 'homepage_article', )
 
 
 class AliasTranslationOptions(TranslationOptions):
     """translation"""
-    fields = ('path', 'redirect_url',)
-translator.register(Alias, AliasTranslationOptions)
+    fields = ('path', 'redirect_url', )
 
 
 class NewsletterTranslationOptions(TranslationOptions):
     """translation"""
     fields = ('subject', 'content',)
-translator.register(Newsletter, NewsletterTranslationOptions)
 
 
 class LinkTranslationOptions(TranslationOptions):
     """translation"""
     fields = ('url',)
-translator.register(Link, LinkTranslationOptions)
 
 
 class BaseArticleTranslationOptions(TranslationOptions):
@@ -85,3 +77,12 @@ class BaseArticleTranslationOptions(TranslationOptions):
             ] + translation_field.validators
         super(BaseArticleTranslationOptions, self).add_translation_field(field, translation_field)
 
+
+translator.register(PieceOfHtml, PieceOfHtmlTranslationOptions)
+translator.register(Fragment, FragmentTranslationOptions)
+translator.register(NavNode, NavNodeTranslationOptions)
+translator.register(ArticleCategory, ArticleCategoryTranslationOptions)
+translator.register(SiteSettings, SiteSettingsTranslationOptions)
+translator.register(Alias, AliasTranslationOptions)
+translator.register(Newsletter, NewsletterTranslationOptions)
+translator.register(Link, LinkTranslationOptions)

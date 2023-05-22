@@ -20,23 +20,25 @@ from django.db.models import Q
 from django.db.models.aggregates import Max
 from django.db.models.signals import pre_delete, post_save
 from django.template.loader import get_template
+from django.urls import reverse, NoReverseMatch
 from django.utils.html import escape
-from django.utils.translation import get_language, ugettext, ugettext_lazy as _
+from django.utils.translation import get_language, gettext, gettext_lazy as _
 from django.utils.safestring import mark_safe
 
 from django_extensions.db.models import TimeStampedModel, AutoSlugField
 from sorl.thumbnail import default as sorl_thumbnail, delete as sorl_delete
 from sorl.thumbnail.parsers import ThumbnailParseError
 
-from coop_cms.moves import make_context, reverse, NoReverseMatch, is_authenticated
-from coop_cms.optionals import build_localized_fieldname
-from coop_cms.settings import (
+from .moves import make_context, is_authenticated
+from .optionals import build_localized_fieldname
+from .settings import (
     get_article_class, get_article_logo_size, get_article_logo_crop, get_article_templates, get_default_logo,
     get_headline_image_size, get_headline_image_crop, get_img_folder, get_newsletter_item_classes,
     get_navtree_class, get_max_image_width, is_localized, is_requestprovider_installed, COOP_CMS_NAVTREE_CLASS,
     cms_no_homepage, homepage_no_redirection, has_localized_urls
 )
-from coop_cms.utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path, slugify
+from .utils import dehtml, RequestManager, RequestNotFound, get_model_label, make_locale_path, slugify
+
 
 ADMIN_THUMBS_SIZE = '60x60'
 
@@ -68,7 +70,7 @@ def get_object_label(content_type, obj):
     returns the label used in navigation according to the configured rule
     """
     if not obj:
-        return ugettext("Node")
+        return gettext("Node")
     try:
         nav_type = NavType.objects.get(content_type=content_type)
         if nav_type.label_rule == NavType.LABEL_USE_SEARCH_FIELD:

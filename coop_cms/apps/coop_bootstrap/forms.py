@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Default CMS application : It define a simple Article
+Default CMS application : It define a simple Article  # Just for compatibility
 """
 
-from coop_cms.bs_forms import Form, ModelForm
+from ...bs_forms import Form, ModelForm
 
-# Just for compatibility
 
 class BootstrapForm(Form):  # pylint: disable=R0901
     """Deprecated: Just for compatibility"""
