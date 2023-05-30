@@ -6,7 +6,7 @@ from django.urls import include, path, re_path
 
 from . import sitemap
 from .settings import (
-    get_article_views, install_csrf_failure_view, change_site_id
+    get_article_views, install_csrf_failure_view, change_site_domain
 )
 from .views.newsletters import NewsletterView, NewsletterPdfView
 from .views import articles, fragments, homepage, links, navigation, newsletters, medialib, webutils
@@ -17,7 +17,7 @@ article_view = article_views['article_view']
 edit_article_view = article_views['edit_article_view']
 
 install_csrf_failure_view()
-change_site_id()
+change_site_domain()
 
 
 urlpatterns = [

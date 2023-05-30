@@ -424,16 +424,17 @@ def is_cache_enabled():
     return getattr(django_settings, 'COOP_CMS_CACHE', False)
 
 
-def change_site_id():
-    """Change SITE ID"""
+def change_site_domain():
     if (
         django_settings.DEBUG and not getattr(django_settings, 'DISABLE_CHANGE_SITE', False) and
         (len(sys.argv) > 1) and sys.argv[1] == "runserver"
     ):
-        local_dev_address = "127.0.0.1:8000"
+        local_dev_addresses = ('localhost', '127.0.0.1', )
         current_site = Site.objects.get_current()
-        if current_site.domain != local_dev_address:
+        plain_domain = current_site.domain.split(':')[0]
+        if plain_domain not in local_dev_addresses:
             print(_("The current site is NOT localhost (127.0.0.1:8000)"))
+            local_dev_address = local_dev_addresses[0]
             if Site.objects.filter(domain=local_dev_address).exclude(id=current_site.id).exists():
                 print(_("Another site is already set as localhost"))
             else:
@@ -445,7 +446,7 @@ def change_site_id():
                     print(_("You can disable this by adding in your settings DISABLE_CHANGE_SITE=True"))
 
                 elif choice == "1":
-                    current_site.domain = "127.0.0.1:8000"
+                    current_site.domain = f"{local_dev_address}:8000"
                     current_site.name = "localhost"
                     current_site.save()
                     print(_("Your domain site is now: "), current_site.domain)
