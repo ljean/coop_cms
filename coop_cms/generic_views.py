@@ -158,7 +158,7 @@ class EditableObjectView(View):
             raise Http404
         
         if not self.can_view_object():
-            logger.warning("PermissionDenied")
+            # logger.warning("PermissionDenied")
             raise PermissionDenied
 
         if self.can_cache():
