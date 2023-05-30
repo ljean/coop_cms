@@ -56,6 +56,8 @@ class FileUrlWrapper:
     @property
     def url(self):
         relative_name = self.filename.replace(settings.MEDIA_ROOT, settings.MEDIA_URL)
+        if relative_name.find(settings.MEDIA_URL) < 0:
+            relative_name = settings.MEDIA_URL + '/' + relative_name
         return relative_name
 
 
