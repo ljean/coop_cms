@@ -335,11 +335,12 @@ def cms_extra_js(request, context):
 def log_out(request, context):
     """show menu"""
     if request and is_authenticated(request.user) and request.user.is_staff:
-        pass
-        # TODO
-        # return make_link(
-        #     reverse("logout"), _('Log out'), 'power-off', classes=['alert_on_click', 'icon']
-        # )
+        try:
+            return make_link(
+                reverse("logout"), _('Log out'), 'power-off', classes=['alert_on_click', 'icon']
+            )
+        except NoReverseMatch:
+            pass
 
 
 @can_add_article
