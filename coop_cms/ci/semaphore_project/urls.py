@@ -9,7 +9,7 @@ from django.contrib import admin
 from django.contrib.staticfiles.views import serve as serve_static
 from django.views.static import serve as serve_media
 
-from ...settings import get_url_patterns, get_media_root
+from coop_cms.settings import get_url_patterns, get_media_root
 
 
 localized_patterns = get_url_patterns()
@@ -38,7 +38,7 @@ urlpatterns += localized_patterns(
     path('admin/', admin.site.urls),
     path('accounts/', include('coop_cms.apps.email_auth.urls')),
     path('accounts/', include('coop_cms.apps.email_auth.registration_backend.urls')),
-    path('accounts/', include('django_registration.backends.activation.urls')),
+    # path('accounts/', include('django_registration.backends.activation.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('newsletters/', include('coop_cms.apps.newsletters.urls', namespace='newsletters')),
     path('', include('coop_cms.urls')),

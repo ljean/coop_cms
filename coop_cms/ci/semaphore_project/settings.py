@@ -20,12 +20,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'test_db',
-        'USER': 'runner',
-        'PASSWORD': 'semaphoredb',
-        'HOST': '127.0.0.1',
-        'PORT': 5432,
+        'USER': 'apidev',
+        'PASSWORD': 'apidev',
+        'HOST': 'localhost',
+        # 'PORT': 5432,
         'ATOMIC_REQUESTS': True,
     }
 }
@@ -223,8 +223,8 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
 )
 
-if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration', 'makemigrations')):
-    INSTALLED_APPS = ('modeltranslation', ) + INSTALLED_APPS
+# if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration', 'makemigrations')):
+#     INSTALLED_APPS = ('modeltranslation', ) + INSTALLED_APPS
 
 if len(sys.argv) > 1 and 'test' == sys.argv[1]:
     INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app', )

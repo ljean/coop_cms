@@ -116,7 +116,6 @@ class UserBaseTestCase(BaseTestCase):
 
             ct = ContentType.objects.get_for_model(get_article_class())
             codename = 'change_{0}'.format(ct.model)
-            print('#', ct, codename)
             can_edit_article = Permission.objects.get(content_type__app_label=ct.app_label, codename=codename)
             self.editor.user_permissions.add(can_edit_article)
 
