@@ -11,3 +11,12 @@ blocks:
         - name: 'Job #1'
           commands:
             - checkout
+            - pip install Pillow
+            - python setup.py develop
+            - cd coop_cms.ci/semaphore_project
+            - pip install -r requirements.txt
+            - createdb test_db -U $DATABASE_POSTGRESQL_USERNAME
+            - python manage.py test coop_cms.tests
+            - python manage.py test coop_cms.apps.email_auth.tests
+            - python manage.py test coop_cms.apps.test_app.tests
+            - python manage.py test coop_cms.apps.newsletters.tests
