@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """utils"""
 
+import html
 from re import sub
 from sys import stderr
 from traceback import print_exc
@@ -34,7 +35,7 @@ class _DeHTMLParser(HTMLParser):
         if self._allow_html_chars:
             value = html_char
         else:
-            value = self.unescape(html_char).replace('\xa0', ' ')
+            value = html.unescape(html_char).replace('\xa0', ' ')
         self._text.append(value)
 
     def handle_charref(self, name):
