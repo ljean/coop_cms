@@ -306,7 +306,7 @@ def navnode_in_navigation(request, tree):
 @login_required
 def process_nav_edition(request, tree_id):
     """This handle ajax request sent by the tree component"""
-    if request.method == 'POST' and request.is_ajax() and 'msg_id' in request.POST:
+    if request.method == 'POST' and 'msg_id' in request.POST:
         try:
             # Get the current tree
             tree_class = get_navtree_class()

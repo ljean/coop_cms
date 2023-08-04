@@ -712,7 +712,7 @@ class BaseArticle(BaseNavigable):
         except IOError:
             # TODO : In case of error (Pillow 4.2.1 cause "cannot write mode RGBA as JPEG")
             return FileUrlWrapper(logo_file.file)
-        
+
     def get_headline_image(self):
         """headline image"""
         img_size = get_headline_image_size(self)
