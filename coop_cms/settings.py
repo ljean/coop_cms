@@ -179,10 +179,10 @@ def _get_article_setting(article, setting_name, default_value):
             module = import_module(module_name)
             get_setting = getattr(module, fct_name)
             if callable(get_setting):
-                #If the setting is a function get the value as return value of the function call
+                # If the setting is a function get the value as return value of the function call
                 value = get_setting(article)
             else:
-                #else Take the value as it is
+                # else Take the value as it is
                 value = get_setting
         except ValueError:
             value = get_setting_name
@@ -324,10 +324,11 @@ def get_article_views():
         article_views = getattr(django_settings, 'COOP_CMS_ARTICLE_VIEWS')
         return article_views
     except AttributeError:
-        from coop_cms.views.articles import ArticleView
+        default_class = 'coop_cms.views.articles.ArticleView'
+        article_view = load_class("COOP_CMS_ARTICLE_VIEW", default_class)
         return {
-            'article_view': ArticleView,
-            'edit_article_view': ArticleView,
+            'article_view': article_view,
+            'edit_article_view': article_view,
         }
 
 
