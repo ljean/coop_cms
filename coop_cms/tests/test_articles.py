@@ -25,8 +25,8 @@ class ArticleTest(BaseArticleTest):
         super(ArticleTest, self).setUp()
         self._default_article_templates = settings.COOP_CMS_ARTICLE_TEMPLATES
         settings.COOP_CMS_ARTICLE_TEMPLATES = (
-            ('test/newsletter_red.html', 'Red'),
-            ('test/newsletter_blue.html', 'Blue'),
+            ('test/standard.html', 'standard'),
+            ('test/article.html', 'article'),
         )
         self._HTML_EDITOR_LINK_MODELS = getattr(settings, 'HTML_EDITOR_LINK_MODELS', [])
         article_class = get_article_class()
@@ -228,8 +228,14 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(200, response.status_code)
         
     def test_inline_html_editor_loaded(self):
-        initial_data = {'title': "ceci est un test", 'content': "this is my article content"}
-        article = get_article_class().objects.create(publication=BaseArticle.PUBLISHED, **initial_data)
+        initial_data = {
+            'title': "ceci est un test",
+            'content': "this is my article content"
+        }
+        template = get_article_templates(None, None)[0][0]
+        article = get_article_class().objects.create(
+            publication=BaseArticle.PUBLISHED, template=template, **initial_data
+        )
         response = self.client.get(article.get_absolute_url())
         self.check_inline_html_editor(response, False)
         

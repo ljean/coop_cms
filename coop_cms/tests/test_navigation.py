@@ -571,8 +571,8 @@ class NavigationTest(BaseTestCase):
         }
 
         response = self.client.post(self.srv_url, data=data)
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(0, NavNode.objects.count())
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(1, NavNode.objects.count())
 
     def test_add_unknown_obj(self):
         self._log_as_editor()

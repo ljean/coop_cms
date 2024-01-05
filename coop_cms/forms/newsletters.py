@@ -65,7 +65,7 @@ class NewsletterSettingsForm(forms.ModelForm):
         sites_choices = []
         current_site = Site.objects.get_current()
         for choice in choices:
-            obj_id = choice[0]
+            obj_id = choice[0].value
             obj = NewsletterItem.objects.get(id=obj_id)
             try:
                 has_sites = getattr(obj.content_object, 'sites', None)

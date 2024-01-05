@@ -81,7 +81,7 @@ class Migration(migrations.Migration):
                 ('from_email', models.CharField(blank=True, default='', max_length=100, verbose_name='From email')),
                 ('lang', models.CharField(blank=True, default='', max_length=5, verbose_name='language')),
                 ('allowed_on_sites', models.ManyToManyField(blank=True, related_name='_subscriptiontype_allowed_on_sites_+', to='sites.Site')),
-                ('site', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sites.Site')),
+                ('site', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sites.Site', related_name='+')),
             ],
             options={
                 'verbose_name': 'Subscription type',

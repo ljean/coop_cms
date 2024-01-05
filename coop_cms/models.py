@@ -1316,7 +1316,7 @@ class Newsletter(TimeStampedModel):
 class NewsletterSending(models.Model):
     """Schedule newsletter sending"""
 
-    newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE)
+    newsletter = models.ForeignKey(Newsletter, on_delete=models.CASCADE, related_name='+')
     scheduling_dt = models.DateTimeField(_("scheduling date"), blank=True, default=None, null=True)
     sending_dt = models.DateTimeField(_("sending date"), blank=True, default=None, null=True)
 

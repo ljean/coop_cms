@@ -48,7 +48,7 @@ class Contact(models.Model):
 class SubscriptionType(models.Model):
     """Subscription type: a mailing list for example"""
     name = models.CharField(max_length=100, verbose_name=_("name"))
-    site = models.ForeignKey(Site, blank=True, null=True, on_delete=models.CASCADE)
+    site = models.ForeignKey(Site, blank=True, null=True, on_delete=models.CASCADE, related_name='+')
     order_index = models.IntegerField(default=0, verbose_name=_("order index"))
     allowed_on_sites = models.ManyToManyField(Site, blank=True, related_name='+')
     from_email = models.CharField(max_length=100, blank=True, default="", verbose_name=_("From email"))

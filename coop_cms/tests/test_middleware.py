@@ -10,10 +10,11 @@ class RequestManagerTest(BaseTestCase):
     def test_get_request(self):
         """retrieve request"""
         request1 = {'user': "joe"}
-        RequestMiddleware().process_request(request1)
-        request2 = RequestManager().get_request()
-        self.assertEqual(request1, request2)
-        
+        def fake_view(*args, **kwargs):
+            request2 = RequestManager().get_request()
+            self.assertEqual(request1, request2)
+        RequestMiddleware(fake_view)(request1)
+
     def test_get_request_no_middleware(self):
         """if no request"""
         RequestManager().clean()

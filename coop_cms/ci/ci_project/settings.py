@@ -194,6 +194,8 @@ LOGIN_URL = reverse_lazy('login')
 
 ACCOUNT_ACTIVATION_DAYS = 7
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 INSTALLED_APPS = (
     # contribs
     'django.contrib.auth',
