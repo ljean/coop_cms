@@ -29,7 +29,7 @@ setup(
     license='BSD',
     zip_safe=False,
     install_requires=[
-        'django>=4.2<5.0',
+        'django>=4.2,<5.0',
         'django-extensions',
         'sorl-thumbnail',
         'apidev-coop_colorbox >= 1.6.0',
