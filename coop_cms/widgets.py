@@ -143,7 +143,7 @@ class GenericFieldRawIdWidget(DjangoTextInput):
         )
         return html
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, *args ,**kwargs):
         if attrs is None:
             attrs = {}
         extra = []
