@@ -124,9 +124,15 @@
           {% url "coop_cms_media_images" as images_url %}
           {% url "coop_cms_media_documents" as docs_url %}
           {% url "coop_cms_media_photologue" as photologue_url %}
+          {% if can_view_image %}
           <a class="image-sel" href="{{images_url}}?page=1">{% trans "Images" %}</a>
-          <a class="document-sel" href="{{photologue_url}}?page=1">{% trans "Galleries" %}</a>
-          <a class="document-sel" href="{{docs_url}}?page=1">{% trans "Documents" %}</a>
+          {% endif %}
+          {% if allow_photologue %}
+              <a class="document-sel" href="{{photologue_url}}?page=1">{% trans "Galleries" %}</a>
+          {% endif %}
+          {% if can_view_document %}
+            <a class="document-sel" href="{{docs_url}}?page=1">{% trans "Documents" %}</a>
+          {% endif %}
         </div>
         <div id="media_slide_content">
         {% include media_slide_template %}

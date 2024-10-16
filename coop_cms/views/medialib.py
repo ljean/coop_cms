@@ -48,7 +48,10 @@ def _get_photologue_media(request):
 def show_media(request, media_type):
     """show media library"""
     try:
-        if not request.user.is_staff:
+        can_view_image = request.user.has_perm("coop_cms.view_image")
+        can_view_document = request.user.has_perm("coop_cms.view_document")
+
+        if not (can_view_image or can_view_document):
             raise PermissionDenied
 
         try:
@@ -60,11 +63,15 @@ def show_media(request, media_type):
         skip_media_filter = False
 
         if request.session.get("coop_cms_media_doc", False):
+            if not can_view_document:
+                raise PermissionDenied
             # force the doc
             media_type = 'document'
             del request.session["coop_cms_media_doc"]
 
         if media_type == 'image':
+            if not can_view_image:
+                raise PermissionDenied
             queryset = models.Image.objects.all().order_by("ordering", "-created")
             context = {
                 'media_url': reverse('coop_cms_media_images'),
@@ -85,6 +92,9 @@ def show_media(request, media_type):
 
         context['is_ajax'] = is_ajax
         context['media_type'] = media_type
+        context['can_view_image'] = can_view_image
+        context['can_view_document'] = can_view_document
+        context['can_view_image'] = can_view_image
 
         if not skip_media_filter:
             # list of lists of media_filters

@@ -14,6 +14,7 @@ from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils import timezone
 
+from ..models import Image, Document
 from ..settings import get_article_class, get_unit_test_media_root, DEFAULT_MEDIA_ROOT
 
 
@@ -82,6 +83,11 @@ class MediaBaseTestCase(BaseTestCase):
 
     def _log_as_mediamgr(self, is_staff=True, perm=None):
         u = User.objects.create(username='toto', is_staff=is_staff)
+        if is_staff:
+            img_perm = self._permission('view', Image)
+            u.user_permissions.add(img_perm)
+            doc_perm = self._permission('view', Document)
+            u.user_permissions.add(doc_perm)
         u.set_password('toto')
         if perm:
             u.user_permissions.add(perm)
