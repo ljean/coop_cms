@@ -102,6 +102,7 @@ class SendEmailingTest(BaseTestCase):
             # Check magic links
             self.assertTrue(models.MagicLink.objects.count() > 0)
 
+    @skipIf('modeltranslation' not in settings.INSTALLED_APPS, "modeltranslation non actif")
     @skipIf(len(settings.LANGUAGES) < 2, "LANGUAGES less than 2")
     @override_settings(COOP_CMS_REPLY_TO="")
     def test_send_newsletter_language(self):
@@ -182,6 +183,7 @@ class SendEmailingTest(BaseTestCase):
             # Check magic links
             self.assertTrue(models.MagicLink.objects.count() > 0)
 
+    @skipIf('modeltranslation' not in settings.INSTALLED_APPS, "modeltranslation non actif")
     @skipIf(len(settings.LANGUAGES) < 2, "LANGUAGES less than 2")
     @override_settings(COOP_CMS_REPLY_TO="")
     def test_send_newsletter_contact_language(self):

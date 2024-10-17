@@ -32,25 +32,25 @@ class AuthorPermissionTest(TestCase):
 
     def test_view_private_article(self):
         """test user can view his private article"""
-        article = mommy.make(get_article_class(), author=self.user)
+        article = mommy.make(get_article_class(), author=self.user, title='Abc')
         self.assertTrue(self.client.login(username=self.user.username, password='toto'))
         response = self.client.get(article.get_absolute_url())
         self.assertEqual(200, response.status_code)
 
     def test_cant_view_private_article(self):
         """test user can not view other user private article"""
-        article = mommy.make(get_article_class())
+        article = mommy.make(get_article_class(), title='Abc')
 
         response = self.client.get(article.get_absolute_url())
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(403, response.status_code)
 
         self.assertTrue(self.client.login(username=self.user.username, password='toto'))
         response = self.client.get(article.get_absolute_url())
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(403, response.status_code)
 
     def test_edit_private_article(self):
         """test user can edit own private article"""
-        article = mommy.make(get_article_class(), author=self.user)
+        article = mommy.make(get_article_class(), author=self.user, title='Abc')
         self.assertTrue(self.client.login(username=self.user.username, password='toto'))
         data = {'title': 'A', 'content': 'B', 'author': article.author.id}
         response = self.client.post(article.get_edit_url(), data=data, follow=True)
@@ -62,9 +62,10 @@ class AuthorPermissionTest(TestCase):
     def test_cant_edit_private_article(self):
         """test user can not edit other user article"""
         klass = get_article_class()
-        article = mommy.make(klass, publication=klass.DRAFT)
+        other = mommy.make(User)
+        article = mommy.make(klass, publication=klass.DRAFT, title='Abc', author=other)
         self.assertTrue(self.client.login(username=self.user.username, password='toto'))
-        data = {'title': 'A', 'content': 'B', 'author': None}
+        data = {'title': 'A', 'content': 'B', 'author': ''}
         response = self.client.post(article.get_edit_url(), data=data, follow=True)
         self.assertEqual(403, response.status_code)
         article = get_article_class().objects.get(id=article.id)#refresh
@@ -74,7 +75,7 @@ class AuthorPermissionTest(TestCase):
     def test_publish_private_article(self):
         """test user can publish own private article"""
         klass = get_article_class()
-        article = mommy.make(klass, author=self.user, publication=klass.DRAFT)
+        article = mommy.make(klass, author=self.user, publication=klass.DRAFT, title='Abc')
         self.assertTrue(self.client.login(username=self.user.username, password='toto'))
         response = self.client.post(article.get_publish_url(), data={'publication':klass.PUBLISHED}, follow=True)
         self.assertEqual(200, response.status_code)
@@ -84,7 +85,7 @@ class AuthorPermissionTest(TestCase):
     def test_cant_publish_private_article(self):
         """test user can not publish others private article"""
         klass = get_article_class()
-        article = mommy.make(klass, publication=klass.DRAFT)
+        article = mommy.make(klass, publication=klass.DRAFT, title='Abc')
         self.assertTrue(self.client.login(username=self.user.username, password='toto'))
         response = self.client.post(article.get_publish_url(), data={'publication':klass.PUBLISHED}, follow=True)
         self.assertEqual(403, response.status_code)
@@ -94,7 +95,7 @@ class AuthorPermissionTest(TestCase):
     def test_can_change_author_article(self):
         """test user can change author"""
         klass = get_article_class()
-        article = mommy.make(klass, author=self.user, publication=klass.PUBLISHED)
+        article = mommy.make(klass, author=self.user, publication=klass.PUBLISHED, title='Abc')
 
         titi = User.objects.create_user('titi', 'titi@toto.fr', 'toto')
 

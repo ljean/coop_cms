@@ -11,10 +11,10 @@ from ...models import BaseArticle
 
 class Article(BaseArticle):
     """Example of custom article: add an author field"""
-    author = models.ForeignKey(User, blank=True, default=None, null=True)
+    author = models.ForeignKey(User, blank=True, default=None, null=True, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return "{0} - {1}".format(self.author, super(Article, self).__str__())
+    # def __str__(self):
+    #     return "{0} - {1}".format(self.author, super(Article, self).__str__())
 
 
 class ModeratedArticle(Article):

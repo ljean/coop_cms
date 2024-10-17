@@ -29,7 +29,7 @@ class RssSource(models.Model):
 class RssItem(models.Model):
     """a Rss item that can be used to create a CMS article"""
 
-    source = models.ForeignKey(RssSource)
+    source = models.ForeignKey(RssSource, on_delete=models.CASCADE)
     link = models.URLField(_('link'))
     title = models.CharField(_("title"), max_length=200, blank=True)
     summary = models.TextField(_("summary"), blank=True)

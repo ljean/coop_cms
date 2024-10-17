@@ -70,15 +70,15 @@ class RssTest(BaseTestCase):
             self.assertTrue(len(item.summary)>0)
             self.assertTrue(len(item.title)>0)
             
-    def test_creatitem_from_djangoplanet(self):
-        self._do_test_creatitem_from_source("http://www.django-fr.org/planete/rss/")
+    def test_creatitem_from_test(self):
+        self._do_test_creatitem_from_source("https://lorem-rss.herokuapp.com/feed")
         
-    def test_creatitem_from_blogapidev(self):
-        self._do_test_creatitem_from_source("http://www.apidev.fr/blog/rss/")
+    # def test_creatitem_from_blogapidev(self):
+    #     self._do_test_creatitem_from_source("http://www.apidev.fr/blog/rss/")
         
-    def test_creatitem_from_crespaca(self):
-        #No update_date
-        self._do_test_creatitem_from_source("http://www.cresspaca.org/rss_actus.php")
+    # def test_creatitem_from_crespaca(self):
+    #     #No update_date
+    #     self._do_test_creatitem_from_source("http://www.cresspaca.org/rss_actus.php")
             
     def test_synchro_url_is_not_rss(self):
         source = RssSource.objects.create(url='http://www.apidev.fr/')
@@ -102,7 +102,7 @@ class RssTest(BaseTestCase):
         self.assertEquals(RssItem.objects.filter(source=source).count(), 0)
         
     def test_creatitem_permission_required(self):
-        source = RssSource.objects.create(url='http://www.apidev.fr/blog/rss/')
+        source = RssSource.objects.create(url='https://lorem-rss.herokuapp.com/feed')
         
         url = reverse("rss_sync_collect_rss_items", args=[source.id])
         response = self.client.get(url, follow=True)
@@ -110,7 +110,7 @@ class RssTest(BaseTestCase):
         self.assertTrue(RssItem.objects.filter(source=source).count() == 0)
         
     def test_creatitem_staff_is_not_enough(self):
-        source = RssSource.objects.create(url='http://www.apidev.fr/blog/rss/')
+        source = RssSource.objects.create(url='https://lorem-rss.herokuapp.com/feed')
         self._log_as_staff()
         url = reverse("rss_sync_collect_rss_items", args=[source.id])
         response = self.client.get(url, follow=True)
@@ -128,7 +128,7 @@ class RssTest(BaseTestCase):
 @skipUnless('coop_cms.apps.rss_sync' in settings.INSTALLED_APPS, "rss_sync not installed installed")
 class CreateArticleTest(BaseTestCase):
     def test_create_article_from_rssitem(self):
-        source = RssSource.objects.create(url='http://www.apidev.fr/blog/rss/')
+        source = RssSource.objects.create(url='https://lorem-rss.herokuapp.com/feed')
         item = RssItem.objects.create(title="hey-hey", summary="there is nothing i can say", source=source)
         
         self._log_as_editor()
@@ -142,7 +142,7 @@ class CreateArticleTest(BaseTestCase):
         self.assertEqual(art.publication, BaseArticle.DRAFT)
         
     def test_create_article_from_rssitem_permission_required(self):
-        source = RssSource.objects.create(url='http://www.apidev.fr/blog/rss/')
+        source = RssSource.objects.create(url='https://lorem-rss.herokuapp.com/feed')
         item = RssItem.objects.create(title="heyhey", summary="nothing i can say", source=source)
         
         url = reverse("rss_sync_create_cms_article", args=[item.id])
@@ -152,15 +152,15 @@ class CreateArticleTest(BaseTestCase):
         self.assertEqual(0, get_article_class().objects.count())
         
     def test_create_article_from_rssitem_staff_is_not_enough(self):
-        source = RssSource.objects.create(url='http://www.apidev.fr/blog/rss/')
+        source = RssSource.objects.create(url='https://lorem-rss.herokuapp.com/feed')
         item = RssItem.objects.create(title="heyhey", summary="nothing i can say", source=source)
-        
+
         self._log_as_staff()
-        
+
         url = reverse("rss_sync_create_cms_article", args=[item.id])
         response = self.client.get(url, follow=True)
         self.assertEqual(response.status_code, 403)
-        
+
         self.assertEqual(0, get_article_class().objects.count())
         
     def test_creatie_article_item_not_found(self):

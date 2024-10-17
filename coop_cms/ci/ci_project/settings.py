@@ -175,20 +175,6 @@ LOCALE_PATHS = (
 
 TEST_RUNNER = 'coop_cms.test_runners.SafeMediaDiscoverRunner'
 
-COOP_HTML_EDITOR_LINK_MODELS = ('basic_cms.Article',)
-COOP_CMS_ARTICLE_LOGO_SIZE = "950x250"
-COOP_CMS_NEWSLETTER_TEMPLATES = (
-    ('basic_newsletter.html', 'Basic'),
-)
-COOP_CMS_ARTICLE_TEMPLATES = (
-    ('standard.html', 'Standard'),
-)
-COOP_CMS_FROM_EMAIL = ''
-COOP_CMS_TEST_EMAILS = ('"Luc JEAN - Apidev" <ljean@apidev.fr>', )
-COOP_CMS_SITE_PREFIX = ''
-COOP_CMS_REPLY_TO = 'ljean@apidev.fr'
-COOP_CMS_TITLE_OPTIONAL = True
-
 LOGIN_REDIRECT_URL = "/"
 LOGIN_URL = reverse_lazy('login')
 
@@ -217,9 +203,12 @@ INSTALLED_APPS = (
     'colorbox',
     'coop_cms',
     'coop_bar',
+    # choose one between in basic_cms and demo_cms
     'coop_cms.apps.basic_cms',
+    # 'coop_cms.apps.demo_cms',
     'coop_cms.apps.email_auth',
     'coop_cms.apps.newsletters',
+    'coop_cms.apps.rss_sync',
 
     'django.contrib.admin',
     'django.contrib.admindocs',
@@ -227,6 +216,27 @@ INSTALLED_APPS = (
 
 # if (len(sys.argv) > 1) and (not sys.argv[1] in ('schemamigration', 'datamigration', 'makemigrations')):
 #     INSTALLED_APPS = ('modeltranslation', ) + INSTALLED_APPS
+
+if 'coop_cms.apps.basic_cms' in INSTALLED_APPS:
+    COOP_HTML_EDITOR_LINK_MODELS = ('basic_cms.Article',)
+elif 'coop_cms.apps.demo_cms' in INSTALLED_APPS:
+    COOP_HTML_EDITOR_LINK_MODELS = ('demo_cms.Article',)
+    COOP_CMS_ARTICLE_CLASS = 'coop_cms.apps.demo_cms.models.Article'
+    COOP_CMS_ARTICLE_FORM = 'coop_cms.apps.demo_cms.forms.ArticleForm'
+
+COOP_CMS_ARTICLE_LOGO_SIZE = "950x250"
+COOP_CMS_NEWSLETTER_TEMPLATES = (
+    ('basic_newsletter.html', 'Basic'),
+)
+COOP_CMS_ARTICLE_TEMPLATES = (
+    ('standard.html', 'Standard'),
+)
+COOP_CMS_FROM_EMAIL = ''
+COOP_CMS_TEST_EMAILS = ('"Luc JEAN - Apidev" <ljean@apidev.fr>', )
+COOP_CMS_SITE_PREFIX = ''
+COOP_CMS_REPLY_TO = 'ljean@apidev.fr'
+COOP_CMS_TITLE_OPTIONAL = True
+
 
 if len(sys.argv) > 1 and 'test' == sys.argv[1]:
     INSTALLED_APPS = INSTALLED_APPS + ('coop_cms.apps.test_app', )

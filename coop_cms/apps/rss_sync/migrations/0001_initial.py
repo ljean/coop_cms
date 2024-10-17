@@ -41,6 +41,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='rssitem',
             name='source',
-            field=models.ForeignKey(to='rss_sync.RssSource'),
+            field=models.ForeignKey(to='rss_sync.RssSource', on_delete=models.CASCADE),
         ),
     ]
