@@ -124,6 +124,8 @@ class UserBaseTestCase(BaseTestCase):
             codename = 'change_{0}'.format(ct.model)
             can_edit_article = Permission.objects.get(content_type__app_label=ct.app_label, codename=codename)
             self.editor.user_permissions.add(can_edit_article)
+            can_view_article = Permission.objects.get(content_type=ct, codename='view_{0}'.format(ct.model))
+            self.editor.user_permissions.add(can_view_article)
 
             if can_add:
                 codename = 'add_{0}'.format(ct.model)

@@ -45,35 +45,30 @@ def get_article_template(article):
 def view_all_articles(request):
     """all article"""
 
-    articles_admin_url = newsletters_admin_url = add_article_url = add_newsletter_url = None
-
-    if request.user.is_staff:
-        article_class = get_article_class()
-
-        view_name = 'admin:{0}_{1}_changelist'.format(get_model_app(article_class), get_model_name(article_class))
-        articles_admin_url = reverse(view_name)
-
-        newsletters_admin_url = reverse('admin:coop_cms_newsletter_changelist')
-
-        add_newsletter_url = reverse('admin:coop_cms_newsletter_add')
-
+    add_article_url = articles_admin_url = None
     article_class = get_article_class()
     content_type = ContentType.objects.get_for_model(article_class)
-    perm = '{0}.add_{1}'.format(content_type.app_label, content_type.model)
-    if request.user.has_perm(perm):
+    articles = []
+    if request.user.is_authenticated:
+        view_perm = '{0}.view_{1}'.format(content_type.app_label, content_type.model)
+        if request.user.has_perm(view_perm):
+            articles = article_class.objects.filter(sites__id=settings.SITE_ID).order_by('-id')[:20]
+        if request.user.is_staff:
+            view_name = 'admin:{0}_{1}_changelist'.format(get_model_app(article_class), get_model_name(article_class))
+            articles_admin_url = reverse(view_name)
+
+    add_perm = '{0}.add_{1}'.format(content_type.app_label, content_type.model)
+    if request.user.has_perm(add_perm):
         add_article_url = reverse('coop_cms_new_article')
 
     return render(
         request,
         'coop_cms/view_all_articles.html',
         {
-            'articles': article_class.objects.filter(sites__id=settings.SITE_ID).order_by('-id')[:10],
-            'newsletters': models.Newsletter.objects.all().order_by('-id')[:10],
+            'articles': articles,
             'editable': True,
             'articles_list_url': articles_admin_url,
-            'newsletters_list_url': newsletters_admin_url,
             'add_article_url': add_article_url,
-            'add_newsletter_url': add_newsletter_url,
         }
     )
 

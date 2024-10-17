@@ -11,6 +11,7 @@ from model_mommy import mommy
 from colorbox.utils import assert_popup_redirects
 
 from ..models import Link
+from ..settings import get_article_class
 from ..utils import get_login_url
 from . import BaseArticleTest, BeautifulSoup
 
@@ -20,10 +21,9 @@ class AddLinkTest(BaseArticleTest):
     def _log_as_editor(self):
         self.user = user = User.objects.create_user('toto', 'toto@toto.fr', 'toto')
 
-        ct = ContentType.objects.get_for_model(Link)
-
-        perm = 'add_{0}'.format(ct.model)
-        can_add_link = Permission.objects.get(content_type=ct, codename=perm)
+        link_ct = ContentType.objects.get_for_model(Link)
+        perm = 'add_{0}'.format(link_ct.model)
+        can_add_link = Permission.objects.get(content_type=link_ct, codename=perm)
         user.user_permissions.add(can_add_link)
 
         user.is_active = True
