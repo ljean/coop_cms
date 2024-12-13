@@ -41,6 +41,7 @@ class SitemapTest(BaseTestCase):
         article2 = mommy.make(article_class, slug="test2", publication=BaseArticle.PUBLISHED)
         article3 = mommy.make(article_class, slug="test3", publication=BaseArticle.PUBLISHED)
         article4 = mommy.make(article_class, slug="test4", publication=BaseArticle.DRAFT)
+        article5 = mommy.make(article_class, slug="test5", publication=BaseArticle.PUBLISHED, login_required=True)
         
         article2.sites.add(site2)
         article2.save()
@@ -59,6 +60,7 @@ class SitemapTest(BaseTestCase):
         self.assertContains(response, site.domain+article2.get_absolute_url())
         self.assertNotContains(response, article3.get_absolute_url())
         self.assertNotContains(response, article4.get_absolute_url())
+        self.assertNotContains(response, article5.get_absolute_url())
 
     def test_sitemap_only_site(self):
         site = Site.objects.get_current()

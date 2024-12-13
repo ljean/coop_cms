@@ -87,7 +87,9 @@ class ArticleSitemap(BaseSitemap):
     def items(self):
         """items"""
         article_class = get_article_class()
-        queryset = article_class.objects.filter(publication=BaseArticle.PUBLISHED)
+        queryset = article_class.objects.filter(publication=BaseArticle.PUBLISHED).filter(
+            login_required=False
+        )
         items = []
         for site in self.sites():
             items.extend(queryset.filter(sites=site))

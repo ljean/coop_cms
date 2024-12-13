@@ -93,7 +93,7 @@ class ArticleAdmin(BASE_ADMIN_CLASS):
         'slug', 'title', 'category', 'template_name', 'publication', 'headline', 'in_newsletter', 'modified',
         'login_required', 'is_homepage'
     ]
-    list_editable = ['publication', 'headline', 'in_newsletter', 'category']
+    list_editable = ['publication', 'headline', 'in_newsletter', 'category', 'login_required']
     readonly_fields = ['created', 'modified', 'is_homepage']
     list_filter = [
         'publication', 'login_required', 'headline', 'in_newsletter', 'sites',
