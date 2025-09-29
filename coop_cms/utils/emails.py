@@ -9,7 +9,7 @@ from django.core.mail import get_connection, EmailMultiAlternatives
 from django.template.loader import get_template
 from django.utils import translation
 
-from ..settings import get_newsletter_context_callbacks, get_eastern_languages
+from ..settings import get_newsletter_context_callbacks
 
 from .text import dehtml
 from .i18n import activate_lang, get_language
@@ -70,7 +70,7 @@ def avoid_line_too_long(pretty_html_text):
 
 def make_links_absolute(html_content, newsletter=None, site_prefix=""):
     """replace all local url with site_prefixed url"""
-    
+
     def make_abs(url):
         """make absolute url"""
         if url.startswith('..'):
@@ -92,7 +92,7 @@ def make_links_absolute(html_content, newsletter=None, site_prefix=""):
     for a_tag in soup.find_all("a"):
         if a_tag.get("href", None):
             a_tag["href"] = make_abs(a_tag["href"])
-    
+
     for img_tag in soup.find_all("img"):
         if img_tag.get("src", None):
             img_tag["src"] = make_abs(img_tag["src"])

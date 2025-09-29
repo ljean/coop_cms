@@ -17,6 +17,7 @@ from ...models import Newsletter
 from ...settings import get_newsletter_context_callbacks
 from ...utils import dehtml, make_links_absolute
 
+from .settings import get_ignored_magic_links
 from .models import Emailing, MagicLink, Contact
 
 
@@ -51,7 +52,9 @@ def get_emailing_context(emailing, contact):
 
     html_content = format_context(newsletter.content, data)
 
-    unregister_url = newsletter.get_site_prefix() + reverse('newsletters:unregister', args=[emailing.id, contact.uuid])
+    unregister_url = newsletter.get_site_prefix() + reverse(
+        'newsletters:unregister', args=[emailing.id, contact.uuid]
+    )
     
     newsletter.content = html_content
 
@@ -72,7 +75,7 @@ def get_emailing_context(emailing, contact):
         dictionary = callback(newsletter)
         if dictionary:
             context_dict.update(dictionary)
-    
+
     return context_dict
 
 
@@ -90,6 +93,12 @@ def patch_emailing_html(html_text, emailing, contact):
         ignore_links.append(
             reverse("newsletters:view_online_lang", args=[emailing.id, contact.uuid, lang])
         )
+
+    ignore_links += get_ignored_magic_links()
+
+    html_text = html_text.replace(
+        'href="mailto:', 'href="mailto:{0}'.format(settings.COOP_CMS_REPLY_TO)
+    )
 
     for link in links:
         if (not link.lower().startswith('mailto:')) and (link[0] != "#") and link not in ignore_links:

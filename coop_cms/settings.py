@@ -123,7 +123,7 @@ def get_new_article_form():
     return load_class('COOP_CMS_NEW_ARTICLE_FORM', 'coop_cms.forms.NewArticleForm')
 
 
-def get_newsletter_templates(newsletter, user):
+def get_newsletter_templates():
     """returns the list of newsletter templates"""
     try:
         return getattr(django_settings, 'COOP_CMS_NEWSLETTER_TEMPLATES')

@@ -82,6 +82,7 @@ class Subscription(models.Model):
 
     subscription_date = models.DateTimeField(blank=True, default=None, null=True)
     unsubscription_date = models.DateTimeField(blank=True, default=None, null=True)
+    unsubscription_reason = models.TextField(blank=True, default="", verbose_name=_("unsubscription reason"))
 
     def __str__(self):
         return "{0} {1}".format(self.subscription_type, self.contact)
@@ -145,7 +146,7 @@ class Emailing(models.Model):
     def get_absolute_url(self):
         if self.newsletter:
             return reverse('coop_cms_view_newsletter', args=[self.newsletter.id])
-
+        return None
 
 
 class MagicLink(models.Model):

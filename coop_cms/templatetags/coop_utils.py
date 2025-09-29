@@ -50,13 +50,11 @@ class ArticleLinkNode(template.Node):
     def render(self, context):
         """to html"""
         article_class = get_article_class()
-        
         try:
             variable = template.Variable(self.title)
             title = variable.resolve(context)
         except template.VariableDoesNotExist:
             title = self.title.strip("'").strip('"')
-        
         slug = slugify(title)
         try:
             if self.lang:
@@ -99,6 +97,7 @@ def detagiffy(value):
     """
     return mark_safe(do_dehtml(value, allow_html_chars=True))
 
+
 @register.filter
 def sp_rt_lb(value):
     """clean"""
@@ -107,9 +106,8 @@ def sp_rt_lb(value):
 
 class NewsletterFriendlyCssNode(template.Node):
     """css in tags attributes"""
-    def __init__(self, nodelist_content, css, css_order):
-        self.css = css
-        self.css_order = css_order
+    def __init__(self, nodelist_content, css_def):
+        self.css_def = css_def
         self.nodelist_content = nodelist_content
 
     def _style_to_dict(self, style):
@@ -120,7 +118,8 @@ class NewsletterFriendlyCssNode(template.Node):
         css_values = [elt.split(":") for elt in css_values]
         return dict([(key.strip(), value.strip()) for (key, value) in css_values])
 
-    def _style_to_list(self, style):
+    @staticmethod
+    def _style_to_list(style):
         """
         convert a style string ('color: #fff; background: #000') into a list ['color', 'background']
         """
@@ -128,7 +127,8 @@ class NewsletterFriendlyCssNode(template.Node):
         css_values = [elt.split(":") for elt in css_values]
         return [key_and_value[0].strip() for key_and_value in css_values]
 
-    def _dict_to_style(self, style_dict, order_of_items):
+    @staticmethod
+    def _dict_to_style(style_dict, order_of_items):
         """
         convert a dict {'color': ''#fff', 'background': '#000'} into a style string ('color: #fff; background: #000')
         """
@@ -145,6 +145,24 @@ class NewsletterFriendlyCssNode(template.Node):
     def render(self, context):
         """to html"""
         content = self.nodelist_content.render(context)
+
+        if len(self.css_def) == 1:
+            try:
+                variable = template.Variable(self.css_def[0])
+                css_def = variable.resolve(context).split("\n")
+            except template.VariableDoesNotExist:
+                css_def = self.css_def
+        else:
+            css_def = self.css_def
+
+        css_map = {}
+        css_order = []
+        for item in css_def:
+            tag, value = item.split("=")
+            tag, value = tag.strip('"'), value.strip('"')
+            css_map[tag] = value
+            css_order.append(tag)
+
         if context.get('by_email', False):
             # avoid string.format issues with curly brackets
             try:
@@ -154,8 +172,8 @@ class NewsletterFriendlyCssNode(template.Node):
                 logger.error(content)
                 raise
 
-            for tag in self.css_order:
-                css = self.css[tag]
+            for tag in css_order:
+                css = css_map[tag]
                 key_and_values = self._style_to_dict(css)
                 key_order = self._style_to_list(css)
                 for html_tag in soup.select(tag):
@@ -179,8 +197,8 @@ class NewsletterFriendlyCssNode(template.Node):
 
         else:
             style = ""
-            for tag in reversed(list(self.css.keys())):
-                value = self.css[tag]
+            for tag in reversed(list(css_map.keys())):
+                value = css_map[tag]
                 style += "{0} {{ {1} }}\n".format(tag, value)
             content = "<style>\n{0}</style>\n".format(style) + content
         return content
@@ -190,16 +208,10 @@ class NewsletterFriendlyCssNode(template.Node):
 def nlf_css(parser, token):
     """Newsletter friendly CSS"""
     args = token.split_contents()
-    css = {}
-    css_order = []
-    for item in args[1:]:
-        tag, value = item.split("=")
-        tag, value = tag.strip('"'), value.strip('"')
-        css[tag] = value
-        css_order.append(tag)
+    css_def = args[1:]
     nodelist = parser.parse(('end_nlf_css',))
     token = parser.next_token()
-    return NewsletterFriendlyCssNode(nodelist, css, css_order)
+    return NewsletterFriendlyCssNode(nodelist, css_def)
 
 
 @register.filter
@@ -209,12 +221,12 @@ def normalize_utf8_to_ascii(ustr):
         return unicodedata.normalize('NFKD', ustr).encode('ascii', 'ignore')
     except TypeError:
         return ustr
-    
+
 
 @register.filter(name='is_checkbox')
 def is_checkbox(field):
     """is checkbox"""
-    field = getattr(field, 'field', field) # get the field attribute of the field or the field itself
+    field = getattr(field, 'field', field)  # get the field attribute of the field or the field itself
     if hasattr(field, 'widget'):
         return field.widget.__class__.__name__ == floppyforms.CheckboxInput().__class__.__name__
     return False

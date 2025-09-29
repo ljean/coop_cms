@@ -43,7 +43,7 @@ class NavigationTemplateNode(template.Node):
             except VariableDoesNotExist:
                 kwargs[key] = value.var  # if the variable can not be resolved, take the value as is
 
-        if not 'tree' in kwargs:
+        if 'tree' not in kwargs:
             kwargs['tree'] = 'default'
 
         tree = get_navtree_class().objects.get_or_create(name=kwargs['tree'])[0]
@@ -72,7 +72,7 @@ class NavigationAsNestedUlNode(NavigationTemplateNode):
         else:
             root_nodes = root_nodes.filter(parent__isnull=True)
         root_nodes = root_nodes.order_by("ordering")
-        total_nodes = root_nodes.count()    
+        total_nodes = root_nodes.count()
         return ''.join([
             node.as_navigation(node_pos=i + 1, total_nodes=total_nodes, **kwargs)
             for (i, node) in enumerate(root_nodes)

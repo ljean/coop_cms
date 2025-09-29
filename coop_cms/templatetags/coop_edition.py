@@ -226,7 +226,7 @@ class CmsFormMediaNode(template.Node):
             template_ = template.Template("{{form.media}}")
             html = template_.render(template.Context({'form': form or formset}))
             # django 1.5 fix : " are escaped as &quot; and cause script tag for aloha to be broken
-            return html.replace("&quot;", '"') 
+            return html.replace("&quot;", '"')
         else:
             return ""
 
@@ -444,7 +444,7 @@ class CmsEditNode(template.Node):
                 safe_context_var = Context(safe_context)
                 safe_context_var.render_context['block_context'] = context.render_context.get('block_context', None)
                 safe_context_var.template = getattr(node, 'template', None) or template.Template("")
-                #safe_context_var.template.engine = DummyEngine()
+                # safe_context_var.template.engine = DummyEngine()
                 content = node.render(safe_context_var)
 
             elif isinstance(node, VariableNode):
@@ -453,13 +453,13 @@ class CmsEditNode(template.Node):
                 else:
                     the_context = Context(safe_context)
                     the_context.template = getattr(node, 'template', None) or template.Template("")
-                    #the_context.template.engine = DummyEngine()
+                    # the_context.template.engine = DummyEngine()
                     content = node.render(the_context)
             else:
                 # monkey patching for django 1.8+
                 the_context = Context(inner_context)
                 the_context.template = getattr(node, 'template', None) or template.Template("")
-                #the_context.template.engine = DummyEngine()
+                # the_context.template.engine = DummyEngine()
                 content = node.render(the_context)
 
             nodes_content += content

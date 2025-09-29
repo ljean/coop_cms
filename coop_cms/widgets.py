@@ -21,7 +21,7 @@ class ReadOnlyInput(floppyforms.widgets.Input):
 class ImageEdit(floppyforms.widgets.ClearableFileInput):
     """image edit"""
     template_name = 'coop_cms/widgets/imageedit.html'
-    
+
     def __init__(self, update_url, thumbnail_src, *args, **kwargs):
         super(ImageEdit, self).__init__(*args, **kwargs)
         self._extra_context = {
@@ -29,7 +29,7 @@ class ImageEdit(floppyforms.widgets.ClearableFileInput):
             'thumbnail_src': thumbnail_src,
             'extra_classes': get_text_from_template("coop_cms/widgets/_imageedit_cssclass.html"),
         }
-        
+
     def get_context(self, *args, **kwargs):
         """get context"""
         context = super(ImageEdit, self).get_context(*args, **kwargs)
@@ -143,7 +143,7 @@ class GenericFieldRawIdWidget(DjangoTextInput):
         )
         return html
 
-    def render(self, name, value, attrs=None, *args ,**kwargs):
+    def render(self, name, value, attrs=None, *args, **kwargs):
         if attrs is None:
             attrs = {}
         extra = []

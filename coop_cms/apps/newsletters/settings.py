@@ -15,3 +15,8 @@ def get_language_choices(default_label=None):
 def has_language_choices():
     """returns true if we should propose language choices"""
     return len(project_settings.LANGUAGES) >= 2
+
+
+def get_ignored_magic_links():
+    """returns true if we should propose language choices"""
+    return getattr(project_settings, 'COOP_CMS_NEWSLETTER_IGNORED_MAGIC_LINKS', [])

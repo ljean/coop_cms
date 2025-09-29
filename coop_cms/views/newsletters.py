@@ -23,7 +23,7 @@ from .. import models
 from ..generic_views import EditableObjectView
 from ..logger import logger
 from ..optionals import convert_to_pdf, make_absolute_paths, PDFResponse
-from ..settings import get_newsletter_form, get_newsletter_settings_form
+from ..settings import get_newsletter_form, get_newsletter_settings_form, get_newsletter_context_callbacks
 from ..utils import send_newsletter, slugify
 
 
@@ -172,6 +172,10 @@ class NewsletterView(EditableObjectView):
             'current_site': self.object.site or Site.objects.get_current(),
             'COOP_CMS_SITE_PREFIX': settings.COOP_CMS_SITE_PREFIX,
         })
+        for callback in get_newsletter_context_callbacks():
+            data = callback(self.object)
+            if data:
+                context_data.update(data)
         return context_data
 
     def after_save(self, article):
@@ -235,7 +239,7 @@ class NewsletterPdfView(View):
             temp_file.write(content.encode('utf-8'))
             temp_file.flush()
             return temp_file
-        except:
+        except Exception:
             # Clean-up tempfile if an Exception is raised.
             temp_file.close()
             raise

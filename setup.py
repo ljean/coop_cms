@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """package the lib"""
 
+import os.path
+
 try:
     from setuptools import setup, find_packages
 except ImportError:
@@ -10,8 +12,6 @@ except ImportError:
     from setuptools import setup, find_packages
 
 VERSION = __import__('coop_cms').__version__
-
-import os
 
 
 def read(file_name):

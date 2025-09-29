@@ -54,7 +54,7 @@ class NewsletterSettingsForm(forms.ModelForm):
 
     def __init__(self, user, *args, **kwargs):
         super(NewsletterSettingsForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
-        tpl_choices = get_newsletter_templates(None, user)
+        tpl_choices = get_newsletter_templates()
         if tpl_choices:
             self.fields["template"] = forms.ChoiceField(choices=tpl_choices)
         else:
@@ -133,7 +133,7 @@ class NewsletterTemplateForm(forms.Form):
 
     def __init__(self, newsletter, user, *args, **kwargs):
         super(NewsletterTemplateForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
-        choices = get_newsletter_templates(newsletter, user)
+        choices = get_newsletter_templates()
         if choices:
             self.fields["template"] = forms.ChoiceField(choices=choices)
         else:
@@ -146,7 +146,7 @@ class NewsletterAdminForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(NewsletterAdminForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
         self.newsletter = kwargs.get('instance', None)
-        choices = get_newsletter_templates(self.newsletter, getattr(self, "current_user", None))
+        choices = get_newsletter_templates()
         if choices:
             self.fields["template"] = forms.ChoiceField(choices=choices)
         else:

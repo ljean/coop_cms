@@ -35,7 +35,6 @@ class Git(CommandWrapper):
             raise Exception("Git.get_root failed: Error {0}".format(error_code))
         return output.strip()
 
-
     def get_all_files(self):
         """
         returns a list of modified files by running a git status command
@@ -43,7 +42,7 @@ class Git(CommandWrapper):
         output, error_code = self._run_command('git ls-tree -r master --name-only')
         if error_code:
             raise Exception("Git.get_all_files failed: Error {0}".format(error_code))
-        lines = [l.strip() for l in output.split("\n")]
+        lines = [line.strip() for line in output.split("\n")]
         return [os.path.join(self._root, f) for f in sorted(lines)]
 
     def get_changes(self):
@@ -54,7 +53,7 @@ class Git(CommandWrapper):
         if error_code:
             raise Exception("Git.get_changes failed: Error {0}".format(error_code))
 
-        lines = [l.strip() for l in output.split("\n")]
+        lines = [line.strip() for line in output.split("\n")]
 
         files = set()
 
@@ -143,10 +142,8 @@ class Pylint(CommandWrapper):
                 return False
         return True
 
-
     def analyze_file(self, filename):
         """run pylint analyses"""
-
         if self.is_file_to_analyze(filename):
 
             command_line = "pylint {0}".format(filename)

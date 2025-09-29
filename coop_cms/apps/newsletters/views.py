@@ -30,7 +30,6 @@ def view_link(request, link_uuid, contact_uuid):
 
 def unregister_contact(request, emailing_id, contact_uuid):
     """contact unregister from emailing list"""
-
     contact = get_object_or_404(models.Contact, uuid=contact_uuid)
     try:
         emailing = models.Emailing.objects.get(id=emailing_id)
@@ -42,12 +41,23 @@ def unregister_contact(request, emailing_id, contact_uuid):
             form = forms.UnregisterForm(request.POST)
             if form.is_valid():
                 if emailing and emailing.subscription_type:
-                    subscription = models.Subscription.objects.get_or_create(
-                        contact=contact, subscription_type=emailing.subscription_type
-                    )[0]
-                    subscription.accept_subscription = False
-                    subscription.unsubscription_date = datetime.datetime.now()
-                    subscription.save()
+                    active_subscriptions = models.Subscription.objects.filter(
+                        contact=contact,
+                        subscription_type=emailing.subscription_type,
+                        accept_subscription=True
+                    )
+                    if active_subscriptions.count() == 0:
+                        subscription = models.Subscription.objects.create(
+                            contact=contact,
+                            subscription_type=emailing.subscription_type,
+                            subscription_date=datetime.datetime.now()
+                        )
+                        active_subscriptions = [subscription]
+                    for subscription in active_subscriptions:
+                        subscription.accept_subscription = False
+                        subscription.unsubscription_date = datetime.datetime.now()
+                        subscription.unsubscription_reason = form.cleaned_data.get('reason', '')
+                        subscription.save()
                     emailing.unsub.add(contact)
                     emailing.save()
                 return render(

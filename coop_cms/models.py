@@ -1254,6 +1254,7 @@ class Newsletter(TimeStampedModel):
     source_url = models.URLField(verbose_name=_('source url'), default="", blank=True)
     is_public = models.BooleanField(default=False, verbose_name=_('is_public'))
     newsletter_date = models.DateField(blank=True, null=True, default=None, verbose_name=_('newsletter date'))
+    is_visible = models.BooleanField(default=True, verbose_name=_('visible'))
 
     def save(self, *args, **kwargs):
         if not self.id:

@@ -14,14 +14,14 @@ from sorl.thumbnail.helpers import tokey, serialize
 
 class KeepNameThumbnailBackend(ThumbnailBackend):
     """This backend keep the filename when generating a thumbnail image"""
-    
+
     def _get_thumbnail_filename(self, source, geometry_string, options):
         """Computes the destination filename."""
 
         key = tokey(source.key, geometry_string, serialize(options))
-        
+
         filename, _ext = os.path.splitext(os.path.basename(source.name))
-        
+
         path = '{0}/{1}'.format(key, filename)
         image_format = options['format']
 
