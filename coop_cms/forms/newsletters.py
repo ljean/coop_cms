@@ -189,6 +189,8 @@ class NewsletterHandleRecipients(BsForm):
                 # tuple or list
                 choices.append(elt)
         self.fields['emails'].choices = choices
+        if not choices:
+            self.fields['emails'].widget = forms.HiddenInput()
 
     def clean(self):
         super().clean()
