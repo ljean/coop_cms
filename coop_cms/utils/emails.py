@@ -162,8 +162,9 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
         translation.activate(lang)
 
     the_template = get_template(newsletter.get_template_name())
+    subject = dehtml(newsletter.subject).replace('\n', '')
     context_dict = {
-        'title': newsletter.subject,
+        'title': subject,
         'newsletter': newsletter,
         'by_email': True,
         'SITE_PREFIX': settings.COOP_CMS_SITE_PREFIX,
@@ -184,7 +185,7 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
         raise
 
     html_text = make_links_absolute(html_text, newsletter)
-    subject = ' '.join(newsletter.subject.split('\n'))
+    subject = ' '.join(subject.split('\n'))
     subject = ' '.join(subject.split('\r'))
 
     return _send_email(subject, html_text, dests, list_unsubscribe)
