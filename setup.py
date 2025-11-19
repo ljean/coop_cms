@@ -19,7 +19,7 @@ def read(file_name):
 
 
 setup(
-    name='apidev-coop_cms',
+    name='apidev_coop_cms',
     version=VERSION,
     description='Small CMS built around a tree navigation open to any django models',
     packages=find_packages(),
