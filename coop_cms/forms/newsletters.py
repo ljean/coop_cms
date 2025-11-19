@@ -103,6 +103,7 @@ class PublishArticleForm(forms.ModelForm):
 
 class NewsletterForm(InlineHtmlEditableModelForm):
     """form for newsletter edition"""
+    kind = 'newsletter'
 
     class Meta:
         model = Newsletter

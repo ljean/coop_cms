@@ -21,10 +21,10 @@ from .navigation import WithNavigationModelForm
 
 class ArticleForm(InlineHtmlEditableModelForm):
     """frontend edition of an article"""
+    kind = 'article'
 
     def __init__(self, *args, **kwargs):
         super(ArticleForm, self).__init__(*args, **kwargs)  # pylint: disable=E1002
-
         self.article = kwargs.get('instance', None)
         self.set_logo_size()
         if getattr(settings, 'COOP_CMS_TITLE_OPTIONAL', False):
