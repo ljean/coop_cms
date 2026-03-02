@@ -11,7 +11,7 @@ from django.utils import translation
 
 from ..settings import get_newsletter_context_callbacks
 
-from .text import dehtml
+from .text import dehtml, dehtml_no_uri_count_odd
 from .i18n import activate_lang, get_language
 
 
@@ -117,7 +117,7 @@ def _send_email(subject, html_text, dests, list_unsubscribe):
         headers['List-Unsubscribe'] = ", ".join(["<{0}>".format(url) for url in list_unsubscribe])
 
     for address in dests:
-        text = dehtml(html_text)
+        text = dehtml_no_uri_count_odd(html_text)
         email = EmailMultiAlternatives(subject, text, from_email, [address], headers=headers)
         email.attach_alternative(html_text, "text/html")
         emails.append(email)

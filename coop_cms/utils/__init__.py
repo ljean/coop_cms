@@ -10,4 +10,4 @@ from .loaders import get_model_app, get_model_label, get_model_name, get_text_fr
 from .pagination import paginate  # noqa 401
 from .requests import RequestManager, RequestMiddleware, RequestNotFound  # noqa 401
 from .settings import get_login_url  # noqa 401
-from .text import slugify, dehtml  # noqa 401
+from .text import slugify, dehtml, dehtml_no_uri_count_odd  # noqa 401

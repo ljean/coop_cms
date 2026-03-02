@@ -73,6 +73,40 @@ def dehtml(text, allow_spaces=False, allow_html_chars=False):
         return text
 
 
+class _UriParser(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.uris = []
+
+    def handle_starttag(self, tag, attrs):
+        dict_attrs = dict(attrs)
+        uri = ''
+        if tag == 'a':
+            uri = dict_attrs.get('href', '')
+        elif tag == 'img':
+            uri = dict_attrs.get('src', '')
+        if uri:
+            self.uris.append(uri)
+
+    def text(self):
+        return '\n'.join(self.uris).strip()
+
+
+def get_uris(text):
+    parser = _UriParser()
+    parser.feed(text)
+    parser.close()
+    return parser.uris
+
+
+def dehtml_no_uri_count_odd(text):
+    raw_text = dehtml(text)
+    uris = get_uris(text)
+    if uris:
+        raw_text += '\n' + '\n'.join(uris)
+    return raw_text
+
+
 def slugify(text, lang=None):
     """
     slugify a text. Use different method according to language

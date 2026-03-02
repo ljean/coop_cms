@@ -15,7 +15,7 @@ from django.urls import reverse
 from ...logger import logger
 from ...models import Newsletter
 from ...settings import get_newsletter_context_callbacks
-from ...utils import dehtml, make_links_absolute
+from ...utils import dehtml, make_links_absolute, dehtml_no_uri_count_odd
 
 from .settings import get_ignored_magic_links
 from .models import Emailing, MagicLink, Contact
@@ -154,7 +154,7 @@ def send_newsletter(emailing, max_nb):
                 html_text, emailing.newsletter, site_prefix=emailing.get_domain_url_prefix()
             )
             
-            text = dehtml(html_text)
+            text = dehtml_no_uri_count_odd(html_text)
             list_unsubscribe_url = emailing.get_domain_url_prefix() + reverse(
                 "newsletters:unregister", args=[emailing.id, contact.uuid]
             )
