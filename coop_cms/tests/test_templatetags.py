@@ -29,7 +29,7 @@ class CmsEditTagTest(BaseTestCase):
         self.user = None
         current_site = Site.objects.get_current()
 
-        self.link1 = Link.objects.create(url='http://www.google.fr')
+        self.link1 = Link.objects.create(url='https://www.google.fr')
         self.link1.sites.add(current_site)
         self.link1.save()
 

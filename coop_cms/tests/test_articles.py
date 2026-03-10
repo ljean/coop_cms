@@ -50,7 +50,7 @@ class ArticleTest(BaseArticleTest):
             self.assertNotEquals(getattr(article, key), value)
             
         for (key, value) in initial_data.items():
-            self.assertEquals(getattr(article, key), value)
+            self.assertEqual(getattr(article, key), value)
 
     def test_view_article(self):
         article = get_article_class().objects.create(title="test", publication=BaseArticle.PUBLISHED)
@@ -190,8 +190,8 @@ class ArticleTest(BaseArticleTest):
         self.assertEqual(response.status_code, 404)
         
         article = get_article_class().objects.get(id=article.id)
-        self.assertEquals(article.title, initial_data['title'])
-        self.assertEquals(article.content, initial_data['content'])
+        self.assertEqual(article.title, initial_data['title'])
+        self.assertEqual(article.content, initial_data['content'])
         
     def test_article_edition_permission(self):
         initial_data = {'title': "test", 'content': "this is my article content"}
@@ -202,8 +202,8 @@ class ArticleTest(BaseArticleTest):
         self.assertNotAllowed(response)
         
         article = get_article_class().objects.get(id=article.id)
-        self.assertEquals(article.title, initial_data['title'])
-        self.assertEquals(article.content, initial_data['content'])
+        self.assertEqual(article.title, initial_data['title'])
+        self.assertEqual(article.content, initial_data['content'])
         
     def check_inline_html_editor(self, response, is_loaded):
         self.assertEqual(200, response.status_code)

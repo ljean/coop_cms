@@ -86,7 +86,8 @@ def make_links_absolute(html_content, newsletter=None, site_prefix=""):
             site_prefix = newsletter.get_site_prefix()
         else:
             site = Site.objects.get_current()
-            site_prefix = "http://{0}".format(site.domain)
+            protocol = 'http' if settings.DEBUG else 'https'
+            site_prefix = f"{protocol}://{site.domain}"
 
     soup = BeautifulSoup(html_content, 'html.parser')
     for a_tag in soup.find_all("a"):
@@ -102,12 +103,17 @@ def make_links_absolute(html_content, newsletter=None, site_prefix=""):
     return avoid_line_too_long(fixed_html)
 
 
-def _send_email(subject, html_text, dests, list_unsubscribe):
+def _send_email(subject, html_text, dests, list_unsubscribe, subject_prefix=''):
     """send an email"""
     emails = []
     connection = get_connection()
     from_email = getattr(settings, 'COOP_CMS_FROM_EMAIL', settings.DEFAULT_FROM_EMAIL)
     reply_to = getattr(settings, 'COOP_CMS_REPLY_TO', None)
+    subject = dehtml(subject)
+    if subject.isupper():
+        subject = subject.capitalize()
+    if subject_prefix:
+        subject = "{0} {1}".format(subject_prefix, subject)
 
     # make header
     headers = {}
@@ -117,14 +123,17 @@ def _send_email(subject, html_text, dests, list_unsubscribe):
         headers['List-Unsubscribe'] = ", ".join(["<{0}>".format(url) for url in list_unsubscribe])
 
     for address in dests:
-        text = dehtml_no_uri_count_odd(html_text)
+        text = force_line_max_length(dehtml_no_uri_count_odd(html_text))
+        html_text = force_line_max_length(html_text, max_length_per_line=400, dont_cut_in_quotes=True)
         email = EmailMultiAlternatives(subject, text, from_email, [address], headers=headers)
         email.attach_alternative(html_text, "text/html")
         emails.append(email)
     return connection.send_messages(emails)
 
 
-def send_email(subject, template_name, context, site_prefix, dests, lang=None, list_unsubscribe=None):
+def send_email(
+    subject, template_name, context, site_prefix, dests, lang=None, list_unsubscribe=None, subject_prefix=''
+):
     """Send an HTML email"""
     activate_lang(lang)
 
@@ -139,10 +148,10 @@ def send_email(subject, template_name, context, site_prefix, dests, lang=None, l
 
     html_text = make_links_absolute(html_text, site_prefix=site_prefix)
 
-    return _send_email(subject, html_text, dests, list_unsubscribe=list_unsubscribe)
+    return _send_email(subject, html_text, dests, list_unsubscribe=list_unsubscribe, subject_prefix=subject_prefix)
 
 
-def send_newsletter(newsletter, dests, list_unsubscribe=None):
+def send_newsletter(newsletter, dests, list_unsubscribe=None, subject_prefix=''):
     """
     send newsletter
     newsletter : a newsletter object
@@ -188,4 +197,35 @@ def send_newsletter(newsletter, dests, list_unsubscribe=None):
     subject = ' '.join(subject.split('\n'))
     subject = ' '.join(subject.split('\r'))
 
-    return _send_email(subject, html_text, dests, list_unsubscribe)
+    return _send_email(subject, html_text, dests, list_unsubscribe, subject_prefix=subject_prefix)
+
+
+def force_line_max_length(text, max_length_per_line=400, dont_cut_in_quotes=True):
+    """returns same text with end of lines inserted if lien length is greater than 400 chars"""
+    out_text = ""
+    for line in text.split("\n"):
+
+        if len(line) < max_length_per_line:
+            out_text += line + "\n"
+        else:
+            words = []
+            line_length = 0
+            quotes_count = 0
+            for word in line.split(" "):
+                if word:
+                    words.append(word)
+                    quotes_count += word.count('"')
+                    line_length += len(word) + 1
+                    in_quotes = (quotes_count % 2) == 1  # If there are not an even number we may be inside a ""
+                    if line_length > max_length_per_line:
+                        if not (not dont_cut_in_quotes and in_quotes):
+                            # Line is more than allowed length for a line. Enter a end line character
+                            out_line = " ".join(words)
+                            out_text += out_line + "\n"
+                            words = []
+                            line_length = 0
+            if words:
+                out_line = " ".join(words)
+                out_text += out_line + "\n"
+
+    return out_text[:-1]  # Remove the last "\n"

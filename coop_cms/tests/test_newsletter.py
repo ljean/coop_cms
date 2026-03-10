@@ -685,7 +685,7 @@ class NewsletterTest(UserBaseTestCase):
 
         rel_content = '''
                 <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
-                <div><a href="http://www.google.fr">Google</a></div>
+                <div><a href="https://www.google.fr">Google</a></div>
             '''
         original_data = {
             'template': template,
@@ -722,7 +722,7 @@ class NewsletterTest(UserBaseTestCase):
         
         rel_content = '''
             <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
-            <div><a href="http://www.google.fr">Google</a></div>
+            <div><a href="https://www.google.fr">Google</a></div>
         '''
         original_data = {
             'template': template,
@@ -753,7 +753,7 @@ class NewsletterTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
-            site_prefix = "http://" + site.domain
+            site_prefix = "https://" + site.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
             if extra_checker:
                 extra_checker(received_email)
@@ -773,7 +773,7 @@ class NewsletterTest(UserBaseTestCase):
 
         rel_content = '''
                 <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
-                <div><a href="http://www.google.fr">Google</a></div>
+                <div><a href="https://www.google.fr">Google</a></div>
             '''
         original_data = {
             'template': template,
@@ -804,7 +804,7 @@ class NewsletterTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
-            site_prefix = "http://" + site.domain
+            site_prefix = "https://" + site.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
             if extra_checker:
                 extra_checker(received_email)
@@ -824,7 +824,7 @@ class NewsletterTest(UserBaseTestCase):
     
         rel_content = '''
                 <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
-                <div><a href="http://www.google.fr">Google</a></div>
+                <div><a href="https://www.google.fr">Google</a></div>
             '''
         original_data = {
             'template': template,
@@ -856,7 +856,7 @@ class NewsletterTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
-            site_prefix = "http://" + site.domain
+            site_prefix = "https://" + site.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
             if extra_checker:
                 extra_checker(received_email)
@@ -876,7 +876,7 @@ class NewsletterTest(UserBaseTestCase):
     
         rel_content = '''
                     <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
-                    <div><a href="http://www.google.fr">Google</a></div>
+                    <div><a href="https://www.google.fr">Google</a></div>
                 '''
         original_data = {
             'template': template,
@@ -910,7 +910,7 @@ class NewsletterTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
-            site_prefix = "http://" + site.domain
+            site_prefix = "https://" + site.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
             if extra_checker:
                 extra_checker(received_email)
@@ -930,7 +930,7 @@ class NewsletterTest(UserBaseTestCase):
     
         rel_content = '''
                         <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
-                        <div><a href="http://www.google.fr">Google</a></div>
+                        <div><a href="https://www.google.fr">Google</a></div>
                     '''
         original_data = {
             'template': template,
@@ -963,7 +963,7 @@ class NewsletterTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
-            site_prefix = "http://" + site.domain
+            site_prefix = "https://" + site.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
             if extra_checker:
                 extra_checker(received_email)
@@ -983,7 +983,7 @@ class NewsletterTest(UserBaseTestCase):
 
         rel_content = '''
             <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
-            <div><a href="http://www.google.fr">Google</a></div>
+            <div><a href="https://www.google.fr">Google</a></div>
         '''
         original_data = {
             'template': template,
@@ -1016,7 +1016,7 @@ class NewsletterTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
-            site_prefix = "http://" + site.domain
+            site_prefix = "https://" + site.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
             if extra_checker:
                 extra_checker(received_email)
@@ -1036,7 +1036,7 @@ class NewsletterTest(UserBaseTestCase):
     
         rel_content = '''
             <h1>Title</h1><a href="{0}/toto/"><img src="{0}/toto.jpg"></a><br /><img src="{0}/toto.jpg">
-            <div><a href="http://www.google.fr">Google</a></div>
+            <div><a href="https://www.google.fr">Google</a></div>
         '''
         original_data = {
             'template': template,
@@ -1068,7 +1068,7 @@ class NewsletterTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('Title') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find('Google') >= 0)
-            site_prefix = "http://" + site.domain
+            site_prefix = "https://" + site.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
             if extra_checker:
                 extra_checker(received_email)
@@ -1137,7 +1137,7 @@ class NewsletterTest(UserBaseTestCase):
         
         newsletter_data = {
             'subject': 'This is the subject',
-            'content': '<h2>Hello guys!</h2><p>Visit <a href="http://toto.fr">us</a></p>',
+            'content': '<h2>Hello guys!</h2><p>Visit <a href="https://toto.fr">us</a></p>',
             'template': 'test/newsletter_blue.html',
         }
         newsletter = mommy.make(Newsletter, **newsletter_data)
@@ -1171,7 +1171,7 @@ class NewsletterTest(UserBaseTestCase):
 
         newsletter_data = {
             'subject': 'This is the subject',
-            'content': '<h2>Hello guys!</h2><p>Visit <a href="http://toto.fr">us</a></p>',
+            'content': '<h2>Hello guys!</h2><p>Visit <a href="https://toto.fr">us</a></p>',
             'template': 'test/newsletter_blue.html',
         }
         newsletter = mommy.make(Newsletter, **newsletter_data)
@@ -1202,7 +1202,7 @@ class NewsletterTest(UserBaseTestCase):
         
         newsletter_data = {
             'subject': 'This is the subject',
-            'content': '<h2>Hello guys!</h2><p>Visit <a href="http://toto.fr">us</a></p>',
+            'content': '<h2>Hello guys!</h2><p>Visit <a href="https://toto.fr">us</a></p>',
             'template': 'test/newsletter_blue.html',
         }
         newsletter = mommy.make(Newsletter, **newsletter_data)
@@ -1235,7 +1235,7 @@ class SendEmailTest(UserBaseTestCase):
         subject = "Hello"
         dests = ['toto@toto.fr']
 
-        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "http://" + site2.domain, dests)
+        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "https://" + site2.domain, dests)
 
         self.assertEqual(
             [[test_address] for test_address in dests],
@@ -1247,7 +1247,7 @@ class SendEmailTest(UserBaseTestCase):
             self.assertTrue(received_email.body.find('ABCD') >= 0)
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('ABCD') >= 0)
-            site_prefix = "http://" + site2.domain
+            site_prefix = "https://" + site2.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
 
     @skipIf('en' not in [lang_code for (lang_code, lang_name) in settings.LANGUAGES], 'English required for this test')
@@ -1264,7 +1264,7 @@ class SendEmailTest(UserBaseTestCase):
         subject = "Hello"
         dests = ['toto@toto.fr']
 
-        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "http://" + site2.domain, dests, 'en')
+        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "https://" + site2.domain, dests, 'en')
 
         self.assertEqual(
             [[test_address] for test_address in dests],
@@ -1281,7 +1281,7 @@ class SendEmailTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('ABCD') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find(translated) >= 0)
-            site_prefix = "http://" + site2.domain
+            site_prefix = "https://" + site2.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
 
     @skipIf('fr' not in [lang_code for (lang_code, lang_name) in settings.LANGUAGES], 'French required for this test')
@@ -1298,7 +1298,7 @@ class SendEmailTest(UserBaseTestCase):
         subject = "Hello"
         dests = ['toto@toto.fr']
 
-        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "http://" + site2.domain, dests, 'fr')
+        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "https://" + site2.domain, dests, 'fr')
 
         self.assertEqual(
             [[test_address] for test_address in dests],
@@ -1314,7 +1314,7 @@ class SendEmailTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('ABCD') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find(translated) >= 0)
-            site_prefix = "http://" + site2.domain
+            site_prefix = "https://" + site2.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
 
     @skipIf('sn' in [lang_code for (lang_code, lang_name) in settings.LANGUAGES], 'No Chinese for this test')
@@ -1331,7 +1331,7 @@ class SendEmailTest(UserBaseTestCase):
         subject = "Hello"
         dests = ['toto@toto.fr']
 
-        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "http://" + site2.domain, dests, 'sn')
+        send_email(subject, "test/test_send_email.html", {'value': 'ABCD'}, "https://" + site2.domain, dests, 'sn')
 
         self.assertEqual(
             [[test_address] for test_address in dests],
@@ -1351,7 +1351,7 @@ class SendEmailTest(UserBaseTestCase):
             self.assertTrue(received_email.alternatives[0][1], "text/html")
             self.assertTrue(received_email.alternatives[0][0].find('ABCD') >= 0)
             self.assertTrue(received_email.alternatives[0][0].find(translated) >= 0)
-            site_prefix = "http://" + site2.domain
+            site_prefix = "https://" + site2.domain
             self.assertTrue(received_email.alternatives[0][0].find(site_prefix) >= 0)
 
 
@@ -1363,7 +1363,7 @@ class AbsUrlTest(UserBaseTestCase):
         self.site = Site.objects.get(id=settings.SITE_ID)
         self.site.domain = "toto.fr"
         self.site.save()
-        self.site_prefix = "http://"+self.site.domain
+        self.site_prefix = "https://"+self.site.domain
         self.newsletter = mommy.make(Newsletter, site=self.site)
         #settings.COOP_CMS_SITE_PREFIX = self.site_prefix
 
@@ -1399,7 +1399,7 @@ class AbsUrlTest(UserBaseTestCase):
         self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))
         
     def test_href_rel_and_abs(self):
-        test_html = '<a href="%s/toto">This is a link</a><a href="http://www.apidev.fr">another</a>'
+        test_html = '<a href="%s/toto">This is a link</a><a href="https://www.apidev.fr">another</a>'
         rel_html = test_html % ""
         abs_html = self._to_text(BeautifulSoup(test_html % self.site_prefix))
         self.assertEqual(abs_html, strip_a_tags(make_links_absolute(rel_html, self.newsletter)))

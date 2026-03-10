@@ -99,7 +99,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
-        self.assertEquals(1, images.count())
+        self.assertEqual(1, images.count())
         self.assertEqual(images[0].name, data['descr'])
         self.assertEqual(images[0].filters.count(), 0)
         self.assertEqual(images[0].size, None)
@@ -124,7 +124,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
-        self.assertEquals(1, images.count())
+        self.assertEqual(1, images.count())
         self.assertEqual(images[0].name, data['descr'])
         self.assertEqual(images[0].filters.count(), 0)
         self.assertEqual(images[0].size, img_size)
@@ -148,7 +148,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertTrue(response['Location'].find(next_url) >= 0)
         
         images = Image.objects.all()
-        self.assertEquals(0, images.count())
+        self.assertEqual(0, images.count())
         
     def test_post_form_not_allowed(self):
         """upload image when user is not allowed"""
@@ -165,7 +165,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 403)
         
         images = Image.objects.all()
-        self.assertEquals(0, images.count())
+        self.assertEqual(0, images.count())
         
     def test_post_form_with_filters(self):
         """upload image with filters"""
@@ -188,7 +188,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
-        self.assertEquals(1, images.count())
+        self.assertEqual(1, images.count())
         self.assertEqual(images[0].name, data['descr'])
         self.assertEqual(images[0].filters.count(), 2)
         self.assertEqual(list(images[0].filters.all().order_by('id')), [filter1, filter3])
@@ -218,7 +218,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
-        self.assertEquals(1, images.count())
+        self.assertEqual(1, images.count())
         self.assertEqual(images[0].name, data['descr'])
         self.assertEqual(images[0].filters.count(), 0)
         
@@ -244,7 +244,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertNotEqual(response.content, b'close_popup_and_media_slide')
         
         images = Image.objects.all()
-        self.assertEquals(0, images.count())
+        self.assertEqual(0, images.count())
 
     def test_post_form(self):
         """upload image with size"""
@@ -265,7 +265,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEqual(response.content, b'close_popup_and_media_slide')
 
         images = Image.objects.all()
-        self.assertEquals(1, images.count())
+        self.assertEqual(1, images.count())
         self.assertEqual(images[0].name, 'unittest1')
         self.assertEqual(images[0].copyright, data['copyright'])
         self.assertEqual(images[0].title, data['title'])
@@ -295,7 +295,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEqual(response.content, b'close_popup_and_media_slide')
 
         images = Image.objects.all()
-        self.assertEquals(1, images.count())
+        self.assertEqual(1, images.count())
         self.assertEqual(images[0].name, data['descr'])
         self.assertEqual(images[0].copyright, data['copyright'])
         self.assertEqual(images[0].title, data['title'])
@@ -323,7 +323,7 @@ class ImageUploadTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'close_popup_and_media_slide')
         images = Image.objects.all()
-        self.assertEquals(1, images.count())
+        self.assertEqual(1, images.count())
         self.assertEqual(images[0].name, data['descr'])
         self.assertEqual(images[0].copyright, data['copyright'])
         self.assertEqual(images[0].title, data['title'])
@@ -547,7 +547,7 @@ class UploadDocTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'close_popup_and_media_slide')
         public_docs = Document.objects.filter(is_private=False)
-        self.assertEquals(1, public_docs.count())
+        self.assertEqual(1, public_docs.count())
         self.assertEqual(public_docs[0].name, data['name'])
         self.assertEqual(public_docs[0].category, None)
         file_ = public_docs[0].file
@@ -568,7 +568,7 @@ class UploadDocTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'close_popup_and_media_slide')
         public_docs = Document.objects.filter(is_private=False)
-        self.assertEquals(1, public_docs.count())
+        self.assertEqual(1, public_docs.count())
         self.assertEqual(public_docs[0].name, data['name'])
         self.assertEqual(public_docs[0].category, cat)
         file_ = public_docs[0].file
@@ -584,7 +584,7 @@ class UploadDocTest(MediaBaseTestCase):
         response = self.client.post(reverse('coop_cms_upload_doc'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.content, b'close_popup_and_media_slide')
-        self.assertEquals(0, Document.objects.all().count())
+        self.assertEqual(0, Document.objects.all().count())
 
     def test_upload_doc_anonymous_user(self):
         """upload: anonymous user"""
@@ -618,7 +618,7 @@ class UploadDocTest(MediaBaseTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, b'close_popup_and_media_slide')
         private_docs = Document.objects.filter(is_private=True)
-        self.assertEquals(1, private_docs.count())
+        self.assertEqual(1, private_docs.count())
         #TODO : on drone.io filename is unittest1_SomeRandom. Why?
         #self.assertNotEqual(private_docs[0].name, 'unittest1')
         self.assertNotEqual(private_docs[0].name, '')
@@ -832,8 +832,8 @@ class DownloadDocTest(MediaBaseTestCase):
         self._log_as_mediamgr()
         response = self.client.get(doc.get_download_url())
         self.assertEqual(response.status_code, 200)
-        self.assertEquals(response['Content-Disposition'], "attachment; filename=unittest1.txt")
-        self.assertEquals(response['Content-Type'], "text/plain")
+        self.assertEqual(response['Content-Disposition'], "attachment; filename=unittest1.txt")
+        self.assertEqual(response['Content-Type'], "text/plain")
         # TODO: This change I/O Exception in UnitTest
         # self.assertEqual(response.content, self._get_file().read())
         

@@ -80,7 +80,7 @@ class AddLinkTest(BaseArticleTest):
 
     def test_add_link(self):
         self._log_as_editor()
-        data = {'title': "test", 'url': "http://www.google.fr", 'sites': [settings.SITE_ID]}
+        data = {'title': "test", 'url': "https://www.google.fr", 'sites': [settings.SITE_ID]}
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
@@ -113,7 +113,7 @@ class AddLinkTest(BaseArticleTest):
         mommy.make(Site)
 
         self._log_as_editor()
-        data = {'title': "test", 'url': "http://www.google.fr", 'sites': [settings.SITE_ID, site2.id]}
+        data = {'title': "test", 'url': "https://www.google.fr", 'sites': [settings.SITE_ID, site2.id]}
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
@@ -130,7 +130,7 @@ class AddLinkTest(BaseArticleTest):
         site2 = mommy.make(Site)
 
         self._log_as_editor()
-        data = {'title': "test", 'url': "http://www.google.fr", 'sites': [site2.id]}
+        data = {'title': "test", 'url': "https://www.google.fr", 'sites': [site2.id]}
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
@@ -147,7 +147,7 @@ class AddLinkTest(BaseArticleTest):
         site2 = mommy.make(Site)
 
         self._log_as_editor()
-        data = {'title': "test", 'url': "http://www.google.fr", 'sites': []}
+        data = {'title': "test", 'url': "https://www.google.fr", 'sites': []}
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
@@ -162,7 +162,7 @@ class AddLinkTest(BaseArticleTest):
 
     def test_add_link_not_allowed(self):
         self._log_as_non_editor()
-        data = {'title': "test", 'url': "http://www.google.fr", 'sites': [settings.SITE_ID]}
+        data = {'title': "test", 'url': "https://www.google.fr", 'sites': [settings.SITE_ID]}
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data)
 
@@ -171,7 +171,7 @@ class AddLinkTest(BaseArticleTest):
         self.assertEqual(Link.objects.count(), 0)
 
     def test_add_link_anonymous(self):
-        data = {'title': "test", 'url': "http://www.google.fr", 'sites': [settings.SITE_ID]}
+        data = {'title': "test", 'url': "https://www.google.fr", 'sites': [settings.SITE_ID]}
         url = reverse('coop_cms_new_link')
         response = self.client.post(url, data=data)
         self.assertNotAllowed(response)
@@ -192,7 +192,7 @@ class AddLinkTest(BaseArticleTest):
 
     def test_add_link_no_title(self):
         self._log_as_editor()
-        data = {'title': "", 'url': "http://www.google.fr", 'sites': [settings.SITE_ID]}
+        data = {'title': "", 'url': "https://www.google.fr", 'sites': [settings.SITE_ID]}
 
         response = self.client.post(reverse('coop_cms_new_link'), data=data, follow=True)
         self.assertEqual(response.status_code, 200)

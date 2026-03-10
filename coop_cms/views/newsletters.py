@@ -102,7 +102,12 @@ def test_newsletter(request, newsletter_id):
             if additional_email2 and additional_email1 != additional_email2:
                 recipients.append(additional_email2)
             try:
-                nb_sent = send_newsletter(newsletter, recipients)
+                default_subject_prefix = models.DefaultNewsletterSubjectPrefix.objects.all().first()
+                if default_subject_prefix:
+                    subject_prefix = default_subject_prefix.subject_prefix
+                else:
+                    subject_prefix = ''
+                nb_sent = send_newsletter(newsletter, recipients, subject_prefix=subject_prefix)
                 messages.add_message(
                     request, messages.SUCCESS,
                     _("The test email has been sent to {0} addresses: {1}").format(nb_sent, recipients)

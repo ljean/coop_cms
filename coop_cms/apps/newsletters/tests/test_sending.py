@@ -340,6 +340,144 @@ class SendEmailingTest(BaseTestCase):
             # Check magic links
             self.assertTrue(models.MagicLink.objects.count() > 0)
 
+    def test_send_newsletter_subject_prefix(self):
+        names = ['alpha', 'beta', 'gamma']
+        contacts = [
+            mommy.make(models.Contact, email=name+'@toto.fr', last_name=name.capitalize())
+            for name in names
+        ]
+        content = '<h2>Hello #!-fullname-!#!</h2><p>Visit <a href="http://toto.fr">us</a>'
+        content += '<a href="mailto:me@me.fr">mailme</a><a href="#art1">internal link</a></p>'
+        newsletter_data = {
+            'subject': 'This is the subject',
+            'content': content,
+            'template': 'test/newsletter_contact.html'
+        }
+        newsletter = mommy.make(Newsletter, **newsletter_data)
+        site = Site.objects.get_current()
+        site.domain = "toto.fr"
+        site.save()
+        emailing = mommy.make(
+            models.Emailing,
+            newsletter=newsletter,
+            status=models.Emailing.STATUS_SCHEDULED,
+            scheduling_dt=datetime.now(),
+            sending_dt=None,
+            subscription_type=mommy.make(models.SubscriptionType, site=site, subject_prefix="Ma super newsletter")
+        )
+        for contact in contacts:
+            emailing.send_to.add(contact)
+        emailing.save()
+        management.call_command('send_newsletters', verbosity=0)
+        emailing = models.Emailing.objects.get(id=emailing.id)
+        # Check emailing status
+        self.assertEqual(emailing.status, models.Emailing.STATUS_SENT)
+        self.assertNotEqual(emailing.sending_dt, None)
+        self.assertEqual(emailing.send_to.count(), 0)
+        self.assertEqual(emailing.sent_to.count(), len(contacts))
+        self.assertEqual(len(mail.outbox), len(contacts))
+        outbox = list(mail.outbox)
+        outbox.sort(key=lambda _elt: _elt.to)
+        contacts.sort(key=lambda _contact: _contact.email)
+        for email, contact in zip(outbox, contacts):
+            viewonline_url = reverse(
+                'newsletters:view_online', args=[emailing.id, contact.uuid]
+            )
+            unsubscribe_url = reverse(
+                'newsletters:unregister', args=[emailing.id, contact.uuid]
+            )
+            viewonline_url = emailing.get_domain_url_prefix() + viewonline_url
+            unsubscribe_url = emailing.get_domain_url_prefix() + unsubscribe_url
+
+            self.assertEqual(email.to, [contact.email])
+            self.assertEqual(email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(email.subject, 'Ma super newsletter - ' + newsletter_data['subject'])
+            self.assertEqual(email.extra_headers['Reply-To'], settings.COOP_CMS_REPLY_TO)
+            self.assertEqual(
+                email.extra_headers['List-Unsubscribe'],
+                '<{0}>, <mailto:{1}?subject=unsubscribe>'.format(unsubscribe_url, settings.COOP_CMS_REPLY_TO)
+            )
+            self.assertTrue(email.body.find(contact.fullname) >= 0)
+            self.assertTrue(email.alternatives[0][1], "text/html")
+            self.assertTrue(email.alternatives[0][0].find(contact.fullname) >= 0)
+            self.assertTrue(email.alternatives[0][0].find(viewonline_url) >= 0)
+            self.assertTrue(email.alternatives[0][0].find(unsubscribe_url) >= 0)
+            # Check mailto links are not magic
+            self.assertTrue(email.alternatives[0][0].find("mailto:me@me.fr") > 0)
+            # Check mailto links are not magic
+            self.assertTrue(email.alternatives[0][0].find("#art1") > 0)
+            # Check magic links
+            self.assertTrue(models.MagicLink.objects.count() > 0)
+
+    def test_send_newsletter_subject_no_uppercase(self):
+        names = ['alpha', 'beta', 'gamma']
+        contacts = [
+            mommy.make(models.Contact, email=name+'@toto.fr', last_name=name.capitalize())
+            for name in names
+        ]
+        content = '<h2>Hello #!-fullname-!#!</h2><p>Visit <a href="http://toto.fr">us</a>'
+        content += '<a href="mailto:me@me.fr">mailme</a><a href="#art1">internal link</a></p>'
+        newsletter_data = {
+            'subject': 'THIS IS THE SUBJECT',
+            'content': content,
+            'template': 'test/newsletter_contact.html'
+        }
+        newsletter = mommy.make(Newsletter, **newsletter_data)
+        site = Site.objects.get_current()
+        site.domain = "toto.fr"
+        site.save()
+        emailing = mommy.make(
+            models.Emailing,
+            newsletter=newsletter,
+            status=models.Emailing.STATUS_SCHEDULED,
+            scheduling_dt=datetime.now(),
+            sending_dt=None,
+            subscription_type=mommy.make(models.SubscriptionType, site=site)
+        )
+        for contact in contacts:
+            emailing.send_to.add(contact)
+        emailing.save()
+        management.call_command('send_newsletters', verbosity=0)
+        emailing = models.Emailing.objects.get(id=emailing.id)
+        # Check emailing status
+        self.assertEqual(emailing.status, models.Emailing.STATUS_SENT)
+        self.assertNotEqual(emailing.sending_dt, None)
+        self.assertEqual(emailing.send_to.count(), 0)
+        self.assertEqual(emailing.sent_to.count(), len(contacts))
+        self.assertEqual(len(mail.outbox), len(contacts))
+        outbox = list(mail.outbox)
+        outbox.sort(key=lambda _elt: _elt.to)
+        contacts.sort(key=lambda _contact: _contact.email)
+        for email, contact in zip(outbox, contacts):
+            viewonline_url = reverse(
+                'newsletters:view_online', args=[emailing.id, contact.uuid]
+            )
+            unsubscribe_url = reverse(
+                'newsletters:unregister', args=[emailing.id, contact.uuid]
+            )
+            viewonline_url = emailing.get_domain_url_prefix() + viewonline_url
+            unsubscribe_url = emailing.get_domain_url_prefix() + unsubscribe_url
+
+            self.assertEqual(email.to, [contact.email])
+            self.assertEqual(email.from_email, settings.COOP_CMS_FROM_EMAIL)
+            self.assertEqual(email.subject, 'This is the subject')
+            self.assertEqual(email.extra_headers['Reply-To'], settings.COOP_CMS_REPLY_TO)
+            self.assertEqual(
+                email.extra_headers['List-Unsubscribe'],
+                '<{0}>, <mailto:{1}?subject=unsubscribe>'.format(unsubscribe_url, settings.COOP_CMS_REPLY_TO)
+            )
+            self.assertTrue(email.body.find(contact.fullname) >= 0)
+            self.assertTrue(email.alternatives[0][1], "text/html")
+            self.assertTrue(email.alternatives[0][0].find(contact.fullname) >= 0)
+            self.assertTrue(email.alternatives[0][0].find(viewonline_url) >= 0)
+            self.assertTrue(email.alternatives[0][0].find(unsubscribe_url) >= 0)
+            # Check mailto links are not magic
+            self.assertTrue(email.alternatives[0][0].find("mailto:me@me.fr") > 0)
+            # Check mailto links are not magic
+            self.assertTrue(email.alternatives[0][0].find("#art1") > 0)
+            # Check magic links
+            self.assertTrue(models.MagicLink.objects.count() > 0)
+
     @override_settings(COOP_CMS_REPLY_TO="")
     def test_send_newsletter_from_email(self):
         names = ['alpha', 'beta', 'gamma']

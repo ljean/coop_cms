@@ -96,7 +96,7 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_add_node(self):
-        link = _create_link(url="http://www.google.fr")
+        link = _create_link(url="https://www.google.fr")
         self._log_as_editor()
 
         data = {
@@ -108,31 +108,31 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
-        self.assertEqual(result['label'], 'http://www.google.fr')
+        self.assertEqual(result['label'], 'https://www.google.fr')
 
         nav_node = NavNode.objects.get(object_id=link.id, content_type=self.url_ct)
-        self.assertEqual(nav_node.label, 'http://www.google.fr')
+        self.assertEqual(nav_node.label, 'https://www.google.fr')
         self.assertEqual(nav_node.content_object, link)
         self.assertEqual(nav_node.parent, None)
         self.assertEqual(nav_node.ordering, 1)
 
         # Add a second node as child
-        link2 = _create_link(url="http://www.python.org")
+        link2 = _create_link(url="https://www.python.org")
         data['object_id'] = link2.id
         data['parent_id'] = nav_node.id
         response = self.client.post(self.srv_url, data=data, HTTP_X_REQUESTED_WITH='XMLHttpRequest')
         self.assertEqual(response.status_code, 200)
         result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
-        self.assertEqual(result['label'], 'http://www.python.org')
+        self.assertEqual(result['label'], 'https://www.python.org')
         nav_node2 = NavNode.objects.get(object_id=link2.id, content_type=self.url_ct)
-        self.assertEqual(nav_node2.label, 'http://www.python.org')
+        self.assertEqual(nav_node2.label, 'https://www.python.org')
         self.assertEqual(nav_node2.content_object, link2)
         self.assertEqual(nav_node2.parent, nav_node)
         self.assertEqual(nav_node.ordering, 1)
 
     def test_add_node_twice(self):
-        link = _create_link(url="http://www.google.fr")
+        link = _create_link(url="https://www.google.fr")
         self._log_as_editor()
 
         data = {
@@ -144,10 +144,10 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
         result = get_response_json(response)
         self.assertEqual(result['status'], 'success')
-        self.assertEqual(result['label'], 'http://www.google.fr')
+        self.assertEqual(result['label'], 'https://www.google.fr')
 
         nav_node = NavNode.objects.get(object_id=link.id, content_type=self.url_ct)
-        self.assertEqual(nav_node.label, 'http://www.google.fr')
+        self.assertEqual(nav_node.label, 'https://www.google.fr')
         self.assertEqual(nav_node.content_object, link)
         self.assertEqual(nav_node.parent, None)
         self.assertEqual(nav_node.ordering, 1)
@@ -160,13 +160,13 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(result['status'], 'error')
 
         nav_node = NavNode.objects.get(object_id=link.id, content_type=self.url_ct)
-        self.assertEqual(nav_node.label, 'http://www.google.fr')
+        self.assertEqual(nav_node.label, 'https://www.google.fr')
         self.assertEqual(nav_node.content_object, link)
         self.assertEqual(nav_node.parent, None)
         self.assertEqual(nav_node.ordering, 1)
 
     def test_move_node_to_parent(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url) for url in urls]
 
         nodes = []
@@ -197,7 +197,7 @@ class NavigationTest(BaseTestCase):
         self.assertEqual([1, 2, 3], [n.ordering for n in root_nodes])
 
     def test_move_node_to_root(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.toto.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.toto.fr")
         links = [_create_link(url=url) for url in urls]
 
         nodes = []
@@ -251,7 +251,7 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(NavNode.objects.get(id=nodes[1].id).ordering, 3)
 
     def test_move_same_level(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url) for url in urls]
 
         nodes = []
@@ -295,7 +295,7 @@ class NavigationTest(BaseTestCase):
         self.assertEqual([3, 2, 1, 4], [n.ordering for n in nodes])
 
     def test_delete_node(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url) for url in urls]
 
         nodes = []
@@ -324,7 +324,7 @@ class NavigationTest(BaseTestCase):
             self.assertTrue(i+1, node.ordering)
 
     def test_delete_node_and_children(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url) for url in urls]
 
         nodes = []
@@ -358,7 +358,7 @@ class NavigationTest(BaseTestCase):
             self.assertTrue(i + 1, node.ordering)
 
     def test_rename_node(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url) for url in urls]
 
         nodes = []
@@ -389,7 +389,7 @@ class NavigationTest(BaseTestCase):
             self.assertEqual(n.label, node.label)
 
     def test_view_node(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url) for url in urls]
 
         nodes = []
@@ -414,7 +414,7 @@ class NavigationTest(BaseTestCase):
         self.assertTemplateUsed(response, 'coop_cms/navtree_content/default.html')
 
     def _do_test_get_suggest_list(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url, title=url) for url in urls]
 
         self._log_as_editor()
@@ -449,7 +449,7 @@ class NavigationTest(BaseTestCase):
         self._do_test_get_suggest_list()
 
     def test_get_suggest_list_only_not_in_navigation(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url, title=url) for url in urls]
 
         link = links[0]
@@ -493,7 +493,7 @@ class NavigationTest(BaseTestCase):
 
         self.assertEqual(self.tree.types.count(), 0)
 
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url, title=url) for url in urls]
 
         article = get_article_class().objects.create(title="python", content='nice snake')
@@ -522,7 +522,7 @@ class NavigationTest(BaseTestCase):
         self.tree.types.add(nt_art)
         self.tree.save()
 
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url, title=url) for url in urls]
 
         article = get_article_class().objects.create(title="python", content='nice snake')
@@ -561,7 +561,7 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_not_ajax(self):
-        link = _create_link(url="http://www.google.fr")
+        link = _create_link(url="https://www.google.fr")
         self._log_as_editor()
 
         data = {
@@ -617,7 +617,7 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(result['status'], 'error')
 
     def test_check_auth(self):
-        link = _create_link(url='http://www.google.fr')
+        link = _create_link(url='https://www.google.fr')
 
         msg_ids = (
             'add_navnode', 'move_navnode', 'rename_navnode', 'get_suggest_list', 'view_navnode', 'remove_navnode',
@@ -654,7 +654,7 @@ class NavigationTest(BaseTestCase):
     def test_set_out_of_nav(self):
         self._log_as_editor()
 
-        link = _create_link(url='http://www.google.fr')
+        link = _create_link(url='https://www.google.fr')
         node = NavNode.objects.create(
             tree=self.tree, label=link.url, content_object=link, ordering=1, parent=None, in_navigation=True
         )
@@ -676,7 +676,7 @@ class NavigationTest(BaseTestCase):
     def test_set_in_nav(self):
         self._log_as_editor()
 
-        link = _create_link(url='http://www.google.fr')
+        link = _create_link(url='https://www.google.fr')
         node = NavNode.objects.create(
             tree=self.tree, label=link.url, content_object=link, ordering=1, parent=None, in_navigation=False
         )
@@ -696,7 +696,7 @@ class NavigationTest(BaseTestCase):
         self.assertTrue(node.in_navigation)
 
     def test_delete_object(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url) for url in urls]
 
         parent = None
@@ -717,7 +717,7 @@ class NavigationTest(BaseTestCase):
         self.assertEqual(urls[0], node.content_object.url)
 
     def test_delete_object_in_two_different_navigation(self):
-        urls = ("http://www.google.fr", "http://www.python.org", "http://www.quinode.fr", "http://www.apidev.fr")
+        urls = ("https://www.google.fr", "https://www.python.org", "https://www.quinode.fr", "https://www.apidev.fr")
         links = [_create_link(url=url) for url in urls]
 
         parent = None
@@ -819,12 +819,12 @@ class TemplateTagsTest(BaseTestCase):
 
     def setUp(self):
         super(TemplateTagsTest, self).setUp()
-        link1 = _create_link(url='http://www.google.fr')
-        link2 = _create_link(url='http://www.python.org')
-        link3 = _create_link(url='http://www.quinode.fr')
-        link4 = _create_link(url='http://www.apidev.fr')
-        link5 = _create_link(url='http://www.toto.fr')
-        link6 = _create_link(url='http://www.titi.fr')
+        link1 = _create_link(url='https://www.google.fr')
+        link2 = _create_link(url='https://www.python.org')
+        link3 = _create_link(url='https://www.quinode.fr')
+        link4 = _create_link(url='https://www.apidev.fr')
+        link5 = _create_link(url='https://www.toto.fr')
+        link6 = _create_link(url='https://www.titi.fr')
 
         self.nodes = []
 
@@ -861,7 +861,7 @@ class TemplateTagsTest(BaseTestCase):
         self.assertEqual(positions, sorted_positions)
 
     def _insert_new_node(self):
-        link7 = _create_link(url='http://www.tutu.fr')
+        link7 = _create_link(url='https://www.tutu.fr')
         self.nodes.insert(
             -1,
             NavNode.objects.create(
@@ -908,9 +908,9 @@ class TemplateTagsTest(BaseTestCase):
             self.assertFalse(html.find('<a href="{0}">{1}</a>'.format(node.content_object.url, node.label)) >= 0)
 
     def test_navigation_other_tree(self):
-        link1 = _create_link(url='http://www.my-tree.com')
-        link2 = _create_link(url='http://www.mon-arbre.fr')
-        link3 = _create_link(url='http://www.mon-arbre.eu')
+        link1 = _create_link(url='https://www.my-tree.com')
+        link2 = _create_link(url='https://www.mon-arbre.fr')
+        link3 = _create_link(url='https://www.mon-arbre.eu')
 
         tree = get_navtree_class().objects.create(name="mon_arbre")
 
@@ -1120,21 +1120,21 @@ class TemplateTagsTest(BaseTestCase):
 
     def test_breadcrumb_no_nodes(self):
         NavNode.objects.all().delete()
-        link = Link.objects.get(url='http://www.python.org')
+        link = Link.objects.get(url='https://www.python.org')
         tpl = Template('{% load coop_navigation %}{% navigation_breadcrumb obj %}')
         html = tpl.render(Context({'obj': link})).replace(' ', '')
         self.assertEqual(html, '')
 
     def test_children_no_nodes(self):
         NavNode.objects.all().delete()
-        link = Link.objects.get(url='http://www.python.org')
+        link = Link.objects.get(url='https://www.python.org')
         tpl = Template('{% load coop_navigation %}{%navigation_children obj %}')
         html = tpl.render(Context({'obj': link})).replace(' ', '')
         self.assertEqual(html, '')
 
     def test_siblings_no_nodes(self):
         NavNode.objects.all().delete()
-        link = Link.objects.get(url='http://www.python.org')
+        link = Link.objects.get(url='https://www.python.org')
         tpl = Template('{% load coop_navigation %}{% navigation_siblings obj %}')
         html = tpl.render(Context({'obj': link})).replace(' ', '')
         self.assertEqual(html, '')
@@ -1202,9 +1202,9 @@ class TemplateTagsTest(BaseTestCase):
         self.assertTrue(html.find(self.nodes[5].get_absolute_url()) > 0)
 
     def test_navigation_root_nodes_other_tree(self):
-        link1 = _create_link(url='http://www.my-tree.com')
-        link2 = _create_link(url='http://www.mon-arbre.fr')
-        link3 = _create_link(url='http://www.mon-arbre.eu')
+        link1 = _create_link(url='https://www.my-tree.com')
+        link2 = _create_link(url='https://www.mon-arbre.fr')
+        link3 = _create_link(url='https://www.mon-arbre.eu')
 
         tree = get_navtree_class().objects.create(name="mon_arbre")
 
@@ -1265,8 +1265,8 @@ class NavigationTreeTest(NavigationTreeBaseTest):
     def test_view_default_navigation(self):
         tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul %}')
 
-        link1 = _create_link(url='http://www.google.fr', title="http://www.google.fr")
-        link2 = _create_link(url='http://www.apidev.fr', title="http://www.apidev.fr")
+        link1 = _create_link(url='https://www.google.fr', title="https://www.google.fr")
+        link2 = _create_link(url='https://www.apidev.fr', title="https://www.apidev.fr")
         art1 = get_article_class().objects.create(title='Article Number One', content='oups')
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
@@ -1297,8 +1297,8 @@ class NavigationTreeTest(NavigationTreeBaseTest):
     def test_view_alternative_navigation(self):
         tpl = Template('{% load coop_navigation %}{% navigation_as_nested_ul tree=tree1 %}')
 
-        link1 = _create_link(url='http://www.google.fr', title="http://www.google.fr")
-        link2 = _create_link(url='http://www.apidev.fr', title="http://www.apidev.fr")
+        link1 = _create_link(url='https://www.google.fr', title="https://www.google.fr")
+        link2 = _create_link(url='https://www.apidev.fr', title="https://www.apidev.fr")
         art1 = get_article_class().objects.create(title='Article Number One', content='oups')
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
@@ -1336,8 +1336,8 @@ class NavigationTreeTest(NavigationTreeBaseTest):
             '''
         )
 
-        link1 = _create_link(url='http://www.google.fr', title="http://www.google.fr")
-        link2 = _create_link(url='http://www.apidev.fr', title="http://www.apidev.fr")
+        link1 = _create_link(url='https://www.google.fr', title="https://www.google.fr")
+        link2 = _create_link(url='https://www.apidev.fr', title="https://www.apidev.fr")
         art1 = get_article_class().objects.create(title='Article Number One', content='oups')
         art2 = get_article_class().objects.create(title='Article Number Two', content='hello')
         art3 = get_article_class().objects.create(title='Article Number Three', content='bye-bye')
@@ -1373,7 +1373,7 @@ class NavigationLiNodeTest(NavigationTreeBaseTest):
 
         article = mommy.make(get_article_class(), slug="test", template='test/article_li_node.html')
 
-        link1 = _create_link(url='http://www.google.fr', title="http://www.google.fr")
+        link1 = _create_link(url='https://www.google.fr', title="https://www.google.fr")
         node1 = NavNode.objects.create(
             tree=li_nav_node_menu, label=link1.url, content_object=link1, ordering=1, parent=None
         )
@@ -1388,7 +1388,7 @@ class NavigationLiNodeTest(NavigationTreeBaseTest):
 
         li_node = li_nodes[0]
         # image name is the slug of the label
-        self.assertEqual(li_node.img['src'], '{0}httpwwwgooglefr.png'.format(settings.MEDIA_URL))
+        self.assertEqual(li_node.img['src'], '{0}httpswwwgooglefr.png'.format(settings.MEDIA_URL))
 
     def test_li_node_user(self):
         """check that request context is use for rendering li_node arg template : user should be in"""
@@ -1399,7 +1399,7 @@ class NavigationLiNodeTest(NavigationTreeBaseTest):
 
         article = mommy.make(get_article_class(), slug="test", template='test/article_li_node.html')
 
-        link1 = _create_link(url='http://www.google.fr', title="http://www.google.fr")
+        link1 = _create_link(url='https://www.google.fr', title="https://www.google.fr")
         node1 = NavNode.objects.create(
             tree=li_nav_node_menu, label=link1.url, content_object=link1, ordering=1, parent=None
         )
@@ -1414,7 +1414,7 @@ class NavigationLiNodeTest(NavigationTreeBaseTest):
 
         li_node = li_nodes[0]
         # image name is the slug of the label
-        self.assertEqual(li_node.img['src'], '{0}httpwwwgooglefr.png'.format(settings.MEDIA_URL))
+        self.assertEqual(li_node.img['src'], '{0}httpswwwgooglefr.png'.format(settings.MEDIA_URL))
         self.assertTrue(li_node.text.find(self.user.username) >= 0)
 
     def test_article_accessible(self):

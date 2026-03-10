@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """utils"""
 
-from .emails import send_email, send_newsletter, strip_a_tags, avoid_line_too_long, make_links_absolute  # noqa 401
+from .emails import (
+    send_email, send_newsletter, strip_a_tags, avoid_line_too_long, make_links_absolute,
+    force_line_max_length  # noqa 401
+)
 from .i18n import (
     activate_lang, get_language, get_url_in_language, redirect_to_language, make_locale_path,
     strip_locale_path  # noqa 401

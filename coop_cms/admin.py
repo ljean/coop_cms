@@ -278,3 +278,8 @@ class DocumentAdmin(admin.ModelAdmin):
 @admin.register(models.SiteSettings)
 class SiteSettingsAdmin(BASE_ADMIN_CLASS):
     list_display = ('site', 'homepage_url', 'homepage_article', 'sitemap_mode')
+
+
+@admin.register(models.DefaultNewsletterSubjectPrefix)
+class DefaultNewsletterSubjectPrefixAdmin(admin.ModelAdmin):
+    list_display = ('subject_prefix', )

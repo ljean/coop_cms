@@ -1244,6 +1244,16 @@ def on_create_newsletterable_instance(sender, instance, created, raw, **kwargs):
 post_save.connect(on_create_newsletterable_instance)
 
 
+class DefaultNewsletterSubjectPrefix(models.Model):
+    """Default subject prefix for newsletter"""
+    subject_prefix = models.CharField(max_length=100)
+
+    class Meta:
+        verbose_name = _('Préfixe sujet newsletter par défaut')
+        verbose_name_plural = _('Préfixes sujet newsletter par défaut')
+
+
+
 class Newsletter(TimeStampedModel):
     """Newsletter"""
     subject = models.CharField(max_length=200, verbose_name=_('subject'), blank=True, default="")
@@ -1255,6 +1265,7 @@ class Newsletter(TimeStampedModel):
     is_public = models.BooleanField(default=False, verbose_name=_('is_public'))
     newsletter_date = models.DateField(blank=True, null=True, default=None, verbose_name=_('newsletter date'))
     is_visible = models.BooleanField(default=True, verbose_name=_('visible'))
+
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -1288,7 +1299,8 @@ class Newsletter(TimeStampedModel):
         
     def get_site_prefix(self):
         """site prefix"""
-        return "http://{0}".format(self.site.domain)
+        protocol = 'http' if settings.DEBUG else 'https'
+        return f"{protocol}://{self.site.domain}"
 
     def get_absolute_url(self):
         """url for viewing"""

@@ -15,7 +15,7 @@ from django.urls import reverse
 from ...logger import logger
 from ...models import Newsletter
 from ...settings import get_newsletter_context_callbacks
-from ...utils import dehtml, make_links_absolute, dehtml_no_uri_count_odd
+from ...utils import dehtml, make_links_absolute, dehtml_no_uri_count_odd, force_line_max_length
 
 from .settings import get_ignored_magic_links
 from .models import Emailing, MagicLink, Contact
@@ -55,11 +55,16 @@ def get_emailing_context(emailing, contact):
     unregister_url = newsletter.get_site_prefix() + reverse(
         'newsletters:unregister', args=[emailing.id, contact.uuid]
     )
-    
+
     newsletter.content = html_content
+    subject = dehtml(newsletter.subject).replace('\n', '').replace('\r', '')
+    if subject.isupper():
+        subject = subject.capitalize()
+    if emailing.subscription_type.subject_prefix:
+        subject = "{0} - {1}".format(emailing.subscription_type.subject_prefix, subject)
 
     context_dict = {
-        'title': dehtml(newsletter.subject).replace('\n', ''),
+        'title': subject,
         'newsletter': newsletter,
         'by_email': True,
         'MEDIA_URL': settings.MEDIA_URL,
@@ -96,9 +101,9 @@ def patch_emailing_html(html_text, emailing, contact):
 
     ignore_links += get_ignored_magic_links()
 
-    html_text = html_text.replace(
-        'href="mailto:', 'href="mailto:{0}'.format(settings.COOP_CMS_REPLY_TO)
-    )
+    # html_text = html_text.replace(
+    #     'href="mailto:', 'href="mailto:{0}'.format(settings.COOP_CMS_REPLY_TO)
+    # )
 
     for link in links:
         if (not link.lower().startswith('mailto:')) and (link[0] != "#") and link not in ignore_links:
@@ -223,34 +228,3 @@ def get_language():
     """wrap the django get_language and make sure: we return 2 chars"""
     lang = django_get_language()
     return lang[:2]
-
-
-def force_line_max_length(text, max_length_per_line=400, dont_cut_in_quotes=True):
-    """returns same text with end of lines inserted if lien length is greater than 400 chars"""
-    out_text = ""
-    for line in text.split("\n"):
-
-        if len(line) < max_length_per_line:
-            out_text += line + "\n"
-        else:
-            words = []
-            line_length = 0
-            quotes_count = 0
-            for word in line.split(" "):
-                if word:
-                    words.append(word)
-                    quotes_count += word.count('"')
-                    line_length += len(word) + 1
-                    in_quotes = (quotes_count % 2) == 1  # If there are not an even number we may be inside a ""
-                    if line_length > max_length_per_line:
-                        if not (not dont_cut_in_quotes and in_quotes):
-                            # Line is more than allowed length for a line. Enter a end line character
-                            out_line = " ".join(words)
-                            out_text += out_line + "\n"
-                            words = []
-                            line_length = 0
-            if words:
-                out_line = " ".join(words)
-                out_text += out_line + "\n"
-
-    return out_text[:-1]  # Remove the last "\n"

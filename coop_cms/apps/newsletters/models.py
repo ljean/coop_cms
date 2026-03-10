@@ -53,6 +53,10 @@ class SubscriptionType(models.Model):
     allowed_on_sites = models.ManyToManyField(Site, blank=True, related_name='+')
     from_email = models.CharField(max_length=100, blank=True, default="", verbose_name=_("From email"))
     lang = models.CharField(_("language"), max_length=5, default="", blank=True)
+    subject_prefix = models.CharField(
+        max_length=100, blank=True, default="", verbose_name=_("préfixe du sujet"),
+        help_text=_('Éviter de mettre tout en majuscule -> SPAM')
+    )
 
     def __str__(self):
         return self.name
