@@ -213,7 +213,8 @@ class EditableObjectView(View):
 
             success_message(request, _('The object has been saved properly'))
 
-            return HttpResponseRedirect(self.object.get_absolute_url())
+            next_url = request.POST.get('_next', '').strip()
+            return HttpResponseRedirect(next_url or self.object.get_absolute_url())
         else:
 
             error_text = '<br />'.join(
